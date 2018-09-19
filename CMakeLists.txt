@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 
 project(libsonata VERSION 0.0.0)
 
+add_subdirectory(extlib)
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(LIBSONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
@@ -12,10 +15,15 @@ set(LIBSONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 # =============================================================================
 
 set(LIBSONATA_SRC
-  src/edges.cpp
+    src/common.cpp
+    src/edges.cpp
 )
 
 add_library(sonata SHARED ${LIBSONATA_SRC})
+target_link_libraries(sonata
+    PRIVATE
+    HighFive
+)
 
 target_include_directories(sonata PUBLIC ${LIBSONATA_INCLUDE_DIR})
 

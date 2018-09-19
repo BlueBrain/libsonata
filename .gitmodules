@@ -1,0 +1,3 @@
+[submodule "extlib/HighFive"]
+    path = extlib/HighFive
+    url = https://github.com/BlueBrain/HighFive.git

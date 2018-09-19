@@ -1,12 +1,13 @@
 #pragma once
 
-#include "types.h"
+#include "common.h"
 
 #include <cstdint>
 #include <memory>
+#include <set>
 #include <string>
-#include <unordered_map>
 #include <vector>
+
 
 namespace bbp {
 namespace sonata {
@@ -16,9 +17,16 @@ struct EdgeSelection
     std::vector<std::pair<uint64_t, uint64_t>> ranges;
 };
 
+
 class EdgePopulation
 {
 public:
+    EdgePopulation(const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name);
+
+    EdgePopulation(const EdgePopulation&) = delete;
+
+    ~EdgePopulation();
+
     std::string name() const;
 
     /**
@@ -86,30 +94,35 @@ public:
     EdgeSelection connectingEdges(const std::vector<NodeID>& source, const std::vector<NodeID>& target) const;
 
 private:
-    class Impl;
-    std::unique_ptr<Impl> impl_;
+    struct Impl;
+    const std::unique_ptr<Impl> impl_;
 };
+
 
 class EdgeStorage
 {
 public:
     EdgeStorage(const std::string& h5FilePath, const std::string& csvFilePath = "");
 
+    EdgeStorage(const EdgeStorage&) = delete;
+
+    ~EdgeStorage();
+
     /**
-     * List all populations in the given file(s)
+     * List all populations.
      *
      */
-    std::vector<std::string> populationNames() const;
+    std::set<std::string> populationNames() const;
 
     /**
-     * Open specific population in the given file(s).
+     * Open specific population.
      * @throw if no population with such a name exists
      */
-    EdgePopulation openPopulation(const std::string& name) const;
+    std::shared_ptr<EdgePopulation> openPopulation(const std::string& name) const;
 
 private:
-    class Impl;
-    std::unique_ptr<Impl> impl_;
+    struct Impl;
+    const std::unique_ptr<Impl> impl_;
 };
 }
 } // namespace bbp::sonata

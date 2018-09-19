@@ -6,4 +6,4 @@ set(TESTS_SRC
 add_executable(test_all ${TESTS_SRC})
 target_link_libraries(test_all sonata)
 
-add_test(NAME test_all COMMAND test_all)
+add_test(NAME test_all COMMAND test_all WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
