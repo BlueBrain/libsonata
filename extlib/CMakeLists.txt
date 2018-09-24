@@ -5,3 +5,5 @@ target_include_directories(HighFive INTERFACE
     ${HDF5_INCLUDE_DIRS})
 target_link_libraries(HighFive INTERFACE
     ${HDF5_C_LIBRARIES})
+
+add_subdirectory(fmt)

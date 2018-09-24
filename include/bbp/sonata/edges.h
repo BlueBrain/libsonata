@@ -12,9 +12,26 @@
 namespace bbp {
 namespace sonata {
 
-struct EdgeSelection
+class EdgeSelection
 {
-    std::vector<std::pair<uint64_t, uint64_t>> ranges;
+public:
+    using Range = std::pair<EdgeID, EdgeID>;
+    using Ranges = std::vector<Range>;
+    using Values = std::vector<EdgeID>;
+
+    explicit EdgeSelection(Ranges&& ranges);
+    explicit EdgeSelection(const Ranges& ranges);
+
+    const Ranges& ranges() const;
+
+    Values flatten() const;
+
+    size_t flatSize() const;
+
+    bool empty() const;
+
+private:
+    const Ranges ranges_;
 };
 
 
@@ -55,12 +72,7 @@ public:
     /**
      * All attribute names (CSV columns + required attributes + union of attributes in groups)
      */
-    const std::vector<std::string>& attributeNames() const;
-
-    /**
-     * If getAttribute() will work for a given edgeID.
-     */
-    std::vector<bool> hasAttribute(const std::string& name, const EdgeSelection& selection) const;
+    std::set<std::string> attributeNames() const;
 
     /**
      * Get attribute values for given EdgeSelection
@@ -72,6 +84,23 @@ public:
     template <typename T>
     std::vector<T> getAttribute(const std::string& name, const EdgeSelection& selection) const;
 
+    /**
+     * Get attribute values for given EdgeSelection
+     *
+     * @param name is a string to allow attributes not defined in spec
+     * @param default is a value to use for edge groups w/o given attribute
+     * @throw if there is no such attribute for the population
+     */
+    template <typename T>
+    std::vector<T> getAttribute(const std::string& name, const EdgeSelection& selection, const T& defaultValue) const;
+
+    /**
+     * Get attribute data type
+
+     * It is a helper method for dynamic languages bindings;
+     * and is not intended for use in the ordinary client C++ code.
+     */
+    std::string _attributeDataType(const std::string& name);
     // ...
     // Access to dynamics params analogous to attributes
 
