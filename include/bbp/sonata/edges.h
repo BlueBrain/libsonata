@@ -22,6 +22,8 @@ public:
     explicit EdgeSelection(Ranges&& ranges);
     explicit EdgeSelection(const Ranges& ranges);
 
+    static EdgeSelection fromValues(const Values& values);
+
     const Ranges& ranges() const;
 
     Values flatten() const;

@@ -71,6 +71,10 @@ TEST_CASE("EdgeSelection", "[edges]")
             SonataError
         );
     }
+    SECTION("fromValues") {
+        const auto selection = EdgeSelection::fromValues({1, 3, 4, 1});
+        CHECK(selection.ranges() == EdgeSelection::Ranges{{1, 2}, {3, 5}, {1, 2}});
+    }
     SECTION("empty") {
         const auto selection = EdgeSelection({});
         CHECK(selection.ranges().empty());

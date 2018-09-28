@@ -21,6 +21,31 @@ void _checkRanges(const EdgeSelection::Ranges& ranges)
     }
 }
 
+template<typename Iterator>
+EdgeSelection _selectionFromValues(Iterator first, Iterator last)
+{
+    EdgeSelection::Ranges ranges;
+
+    EdgeSelection::Range range{ 0, 0 };
+    for (Iterator it = first; it != last; ++it) {
+        if (*it == range.second) {
+            ++range.second;
+        } else {
+            if (range.first < range.second) {
+                ranges.push_back(range);
+            }
+            range.first = *it;
+            range.second = *it + 1;
+        }
+    }
+
+    if (range.first < range.second) {
+        ranges.push_back(range);
+    }
+
+    return EdgeSelection(std::move(ranges));
+}
+
 } // unnamed namespace
 
 
@@ -35,6 +60,12 @@ EdgeSelection::EdgeSelection(const EdgeSelection::Ranges& ranges)
     : ranges_(ranges)
 {
     _checkRanges(ranges_);
+}
+
+
+EdgeSelection EdgeSelection::fromValues(const EdgeSelection::Values& values)
+{
+    return _selectionFromValues(values.begin(), values.end());
 }
 
 
@@ -322,32 +353,6 @@ std::string EdgePopulation::_attributeDataType(const std::string& name)
 
 namespace {
 
-template<typename Iterator>
-EdgeSelection _selectionFromValues(Iterator first, Iterator last)
-{
-    EdgeSelection::Ranges ranges;
-
-    EdgeSelection::Range range{ 0, 0 };
-    for (Iterator it = first; it != last; ++it) {
-        if (*it == range.second) {
-            ++range.second;
-        } else {
-            if (range.first < range.second) {
-                ranges.push_back(range);
-            }
-            range.first = *it;
-            range.second = *it + 1;
-        }
-    }
-
-    if (range.first < range.second) {
-        ranges.push_back(range);
-    }
-
-    return EdgeSelection(std::move(ranges));
-}
-
-
 EdgeSelection _resolveIndex(const HighFive::Group& indexGroup, const NodeID nodeID)
 {
     typedef std::vector<std::vector<uint64_t>> RawIndex;
@@ -440,12 +445,14 @@ EdgeSelection EdgePopulation::connectingEdges(const std::vector<NodeID>& source,
 INSTANTIATE_TEMPLATE_METHODS(float)
 INSTANTIATE_TEMPLATE_METHODS(double)
 
-INSTANTIATE_TEMPLATE_METHODS(uint64_t)
-INSTANTIATE_TEMPLATE_METHODS(int64_t)
-INSTANTIATE_TEMPLATE_METHODS(uint32_t)
-INSTANTIATE_TEMPLATE_METHODS(int32_t)
-INSTANTIATE_TEMPLATE_METHODS(uint8_t)
 INSTANTIATE_TEMPLATE_METHODS(int8_t)
+INSTANTIATE_TEMPLATE_METHODS(uint8_t)
+INSTANTIATE_TEMPLATE_METHODS(int16_t)
+INSTANTIATE_TEMPLATE_METHODS(uint16_t)
+INSTANTIATE_TEMPLATE_METHODS(int32_t)
+INSTANTIATE_TEMPLATE_METHODS(uint32_t)
+INSTANTIATE_TEMPLATE_METHODS(int64_t)
+INSTANTIATE_TEMPLATE_METHODS(uint64_t)
 
 INSTANTIATE_TEMPLATE_METHODS(std::string)
 

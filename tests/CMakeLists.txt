@@ -3,7 +3,10 @@ set(TESTS_SRC
   test_edges.cpp
 )
 
-add_executable(test_all ${TESTS_SRC})
-target_link_libraries(test_all sonata)
+add_executable(unittests ${TESTS_SRC})
+target_link_libraries(unittests
+    PRIVATE sonata_static
+    PRIVATE HighFive
+)
 
-add_test(NAME test_all COMMAND test_all WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})

@@ -25,17 +25,32 @@ set(LIBSONATA_SRC
     src/edges.cpp
 )
 
-add_library(sonata SHARED ${LIBSONATA_SRC})
-
-target_compile_options(sonata
+add_library(sonata_obj OBJECT ${LIBSONATA_SRC})
+set_property(TARGET sonata_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+target_compile_definitions(sonata_obj
+    PUBLIC FMT_HEADER_ONLY=1
+)
+target_compile_options(sonata_obj
     PUBLIC ${LIBSONATA_COMPILE_OPTIONS}
 )
+target_include_directories(sonata_obj
+    PRIVATE ${LIBSONATA_INCLUDE_DIR}
+    PRIVATE $<TARGET_PROPERTY:fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
-target_link_libraries(sonata
-    PRIVATE fmt-header-only
+add_library(sonata_shared SHARED $<TARGET_OBJECTS:sonata_obj>)
+set_target_properties(sonata_shared PROPERTIES OUTPUT_NAME "sonata")
+target_include_directories(sonata_shared
+    PUBLIC ${LIBSONATA_INCLUDE_DIR}
+)
+target_link_libraries(sonata_shared
     PRIVATE HighFive
 )
-target_include_directories(sonata
+
+add_library(sonata_static STATIC $<TARGET_OBJECTS:sonata_obj>)
+set_target_properties(sonata_static PROPERTIES OUTPUT_NAME "sonata")
+target_include_directories(sonata_static
     PUBLIC ${LIBSONATA_INCLUDE_DIR}
 )
 
@@ -43,7 +58,8 @@ target_include_directories(sonata
 # Install
 # =============================================================================
 
-install(TARGETS sonata DESTINATION lib)
+install(TARGETS sonata_shared DESTINATION lib)
+install(TARGETS sonata_static DESTINATION lib)
 install(DIRECTORY ${LIBSONATA_INCLUDE_DIR}/bbp DESTINATION include)
 
 # =============================================================================
@@ -62,3 +78,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         EXECUTABLE ctest
     )
 endif()
+
+# =============================================================================
+# Python bindings
+# =============================================================================
+
+add_subdirectory(python)
