@@ -3,6 +3,7 @@
 #include <pybind11/stl.h>
 
 #include <bbp/sonata/edges.h>
+#include <bbp/sonata/nodes.h>
 
 #include <cstdint>
 #include <memory>
@@ -52,14 +53,14 @@ py::array asArray(std::vector<std::string>&& values)
 
 
 template<typename T>
-py::object getAttribute(const EdgePopulation& obj, const std::string& name, const EdgeSelection& selection)
+py::object getAttribute(const Population& obj, const std::string& name, const Selection& selection)
 {
     return py::cast(obj.getAttribute<T>(name, selection)[0]);
 }
 
 
 template<typename T>
-py::object getAttributeVector(const EdgePopulation& obj, const std::string& name, const EdgeSelection& selection)
+py::object getAttributeVector(const Population& obj, const std::string& name, const Selection& selection)
 {
     return asArray(obj.getAttribute<T>(name, selection));
 }
@@ -67,8 +68,8 @@ py::object getAttributeVector(const EdgePopulation& obj, const std::string& name
 
 template<typename T>
 py::object getAttributeVectorWithDefault(
-    const EdgePopulation& obj, const std::string& name,
-    const EdgeSelection& selection, const py::object& defaultValue
+    const Population& obj, const std::string& name,
+    const Selection& selection, const py::object& defaultValue
 )
 {
     return asArray(obj.getAttribute<T>(name, selection, defaultValue.cast<T>()));
@@ -108,40 +109,117 @@ py::object getAttributeVectorWithDefault(
 
 PYBIND11_MODULE(_sonata, m)
 {
-    py::class_<EdgeSelection>(
-        m, "EdgeSelection", "Set of edge IDs in the form convenient for querying attributes"
+    py::class_<Selection>(
+        m, "Selection", "ID sequence in the form convenient for querying attributes"
     )
         .def(
-            py::init<const EdgeSelection::Ranges&>(),
+            py::init<const Selection::Ranges&>(),
             "ranges"_a,
-            "EdgeSelection from list of intervals"
+            "Selection from list of intervals"
         )
         .def(
-            py::init(&EdgeSelection::fromValues),
+            py::init(&Selection::fromValues),
             "values"_a,
-            "EdgeSelection from list of edge IDs"
+            "Selection from list of IDs"
         )
         .def_property_readonly(
             "ranges",
-            &EdgeSelection::ranges,
-            "Get a list of ranges constituting EdgeSelection"
+            &Selection::ranges,
+            "Get a list of ranges constituting Selection"
         )
         .def(
             "flatten",
-            &EdgeSelection::flatten,
-            "List of edge IDs constituting EdgeSelection"
+            &Selection::flatten,
+            "List of IDs constituting Selection"
         )
         .def_property_readonly(
             "flat_size",
-            &EdgeSelection::flatSize,
-            "Total number of edges constituting EdgeSelection"
+            &Selection::flatSize,
+            "Total number of elements constituting Selection"
         )
         .def(
             "__bool__",
-            [](const EdgeSelection& obj) {
+            [](const Selection& obj) {
                 return !obj.empty();
             },
             "If EdgeSelection is not empty"
+        )
+        ;
+
+    py::class_<NodePopulation, std::shared_ptr<NodePopulation>>(
+        m, "NodePopulation", "Collection of nodes with attributes"
+    )
+        .def(py::init<const std::string&, const std::string&, const std::string&>())
+        .def_property_readonly(
+            "name",
+            &NodePopulation::name,
+            "Population name"
+        )
+        .def_property_readonly(
+            "size", &NodePopulation::size,
+            "Total number of nodes in the population"
+        )
+        .def_property_readonly(
+            "attribute_names",
+            &NodePopulation::attributeNames,
+            "Set of attribute names"
+        )
+        .def(
+            "get_attribute",
+            [](NodePopulation& obj, const std::string& name, NodeID nodeID) {
+                const auto selection = Selection::fromValues({nodeID});
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
+            },
+            "name"_a,
+            "node_id"_a,
+            "Get attribute value for a given node.\n"
+            "Raises an exception if attribute is not defined for this node."
+        )
+        .def(
+            "get_attribute",
+            [](NodePopulation& obj, const std::string& name, const Selection& selection) {
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getAttributeVector, obj, name, selection);
+            },
+            "name"_a,
+            "selection"_a,
+            "Get attribute values for a given node selection.\n"
+            "Raises an exception if attribute is not defined for some nodes."
+        )
+        .def(
+            "get_attribute",
+            [](NodePopulation& obj, const std::string& name, const Selection& selection, const py::object& defaultValue) {
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getAttributeVectorWithDefault, obj, name, selection, defaultValue);
+            },
+            "name"_a,
+            "selection"_a,
+            "default_value"_a,
+            "Get attribute values for a given node selection.\n"
+            "Use default value for nodes where attribute is not defined\n"
+            "(it should still be one of population attributes)."
+        )
+        ;
+
+    py::class_<NodeStorage>(
+        m, "NodeStorage", "Collection of `NodePopulation`s stored in H5 file (+ optional CSV)"
+    )
+        .def(
+            py::init<const std::string&, const std::string&>(),
+            "h5_filepath"_a,
+            "csv_filepath"_a = ""
+        )
+        .def_property_readonly(
+            "population_names",
+            &NodeStorage::populationNames,
+            "Set of population names"
+        )
+        .def(
+            "open_population",
+            &NodeStorage::openPopulation,
+            "name"_a,
+            "Get NodePopulation for a given population name"
         )
         ;
 
@@ -158,37 +236,45 @@ PYBIND11_MODULE(_sonata, m)
             "size", &EdgePopulation::size,
             "Total number of edges in the population"
         )
+        .def_property_readonly(
+            "source", &EdgePopulation::source,
+            "Source node population"
+        )
+        .def_property_readonly(
+            "target", &EdgePopulation::target,
+            "Target node population"
+        )
         .def(
             "source_node",
             [](EdgePopulation& obj, EdgeID edgeID) {
-                return obj.sourceNodeIDs(EdgeSelection::fromValues({edgeID}))[0];
+                return obj.sourceNodeIDs(Selection::fromValues({edgeID}))[0];
             },
             "edge_id"_a,
             "Source node ID for given edge"
         )
         .def(
             "source_nodes",
-            [](EdgePopulation& obj, const EdgeSelection& selection) {
+            [](EdgePopulation& obj, const Selection& selection) {
                 return asArray(obj.sourceNodeIDs(selection));
             },
             "selection"_a,
-            "Source node IDs for given EdgeSelection"
+            "Source node IDs for given Selection"
         )
         .def(
             "target_node",
             [](EdgePopulation& obj, EdgeID edgeID) {
-                return obj.targetNodeIDs(EdgeSelection::fromValues({edgeID}))[0];
+                return obj.targetNodeIDs(Selection::fromValues({edgeID}))[0];
             },
             "edge_id"_a,
             "Target node ID for given edge"
         )
         .def(
             "target_nodes",
-            [](EdgePopulation& obj, const EdgeSelection& selection) {
+            [](EdgePopulation& obj, const Selection& selection) {
                 return asArray(obj.targetNodeIDs(selection));
             },
             "selection"_a,
-            "Source node IDs for given EdgeSelection"
+            "Source node IDs for given Selection"
         )
         .def_property_readonly(
             "attribute_names",
@@ -198,7 +284,7 @@ PYBIND11_MODULE(_sonata, m)
         .def(
             "get_attribute",
             [](EdgePopulation& obj, const std::string& name, EdgeID edgeID) {
-                const auto selection = EdgeSelection::fromValues({edgeID});
+                const auto selection = Selection::fromValues({edgeID});
                 const auto dtype = obj._attributeDataType(name);
                 DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
             },
@@ -209,7 +295,7 @@ PYBIND11_MODULE(_sonata, m)
         )
         .def(
             "get_attribute",
-            [](EdgePopulation& obj, const std::string& name, const EdgeSelection& selection) {
+            [](EdgePopulation& obj, const std::string& name, const Selection& selection) {
                 const auto dtype = obj._attributeDataType(name);
                 DISPATCH_TYPE(dtype, getAttributeVector, obj, name, selection);
             },
@@ -220,7 +306,7 @@ PYBIND11_MODULE(_sonata, m)
         )
         .def(
             "get_attribute",
-            [](EdgePopulation& obj, const std::string& name, const EdgeSelection& selection, const py::object& defaultValue) {
+            [](EdgePopulation& obj, const std::string& name, const Selection& selection, const py::object& defaultValue) {
                 const auto dtype = obj._attributeDataType(name);
                 DISPATCH_TYPE(dtype, getAttributeVectorWithDefault, obj, name, selection, defaultValue);
             },

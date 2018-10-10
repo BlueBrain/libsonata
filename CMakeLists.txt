@@ -27,6 +27,8 @@ add_subdirectory(extlib EXCLUDE_FROM_ALL)
 set(LIBSONATA_SRC
     src/common.cpp
     src/edges.cpp
+    src/nodes.cpp
+    src/population.cpp
 )
 
 add_library(sonata_obj OBJECT ${LIBSONATA_SRC})
