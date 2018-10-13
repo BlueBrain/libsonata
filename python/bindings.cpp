@@ -50,6 +50,59 @@ py::array asArray(std::vector<std::string>&& values)
     return py::array(py::dtype("object"), ptr->size(), ptr->data(), freeWhenDone(ptr));
 }
 
+
+template<typename T>
+py::object getAttribute(const EdgePopulation& obj, const std::string& name, const EdgeSelection& selection)
+{
+    return py::cast(obj.getAttribute<T>(name, selection)[0]);
+}
+
+
+template<typename T>
+py::object getAttributeVector(const EdgePopulation& obj, const std::string& name, const EdgeSelection& selection)
+{
+    return asArray(obj.getAttribute<T>(name, selection));
+}
+
+
+template<typename T>
+py::object getAttributeVectorWithDefault(
+    const EdgePopulation& obj, const std::string& name,
+    const EdgeSelection& selection, const py::object& defaultValue
+)
+{
+    return asArray(obj.getAttribute<T>(name, selection, defaultValue.cast<T>()));
+}
+
+
+// Emulating generic lambdas in pre-C++14
+#define DISPATCH_TYPE(dtype, func, ...) \
+    if (dtype == "int8_t") { \
+        return func<int8_t>(__VA_ARGS__); \
+    } else if (dtype == "uint8_t") { \
+        return func<uint8_t>(__VA_ARGS__); \
+    } else if (dtype == "int16_t") { \
+        return func<int16_t>(__VA_ARGS__); \
+    } else if (dtype == "uint16_t") { \
+        return func<uint16_t>(__VA_ARGS__); \
+    } else if (dtype == "int32_t") { \
+        return func<int32_t>(__VA_ARGS__); \
+    } else if (dtype == "uint32_t") { \
+        return func<uint32_t>(__VA_ARGS__); \
+    } else if (dtype == "int64_t") { \
+        return func<int64_t>(__VA_ARGS__); \
+    } else if (dtype == "uint64_t") { \
+        return func<uint64_t>(__VA_ARGS__); \
+    } else if (dtype == "float") { \
+        return func<float>(__VA_ARGS__); \
+    } else if (dtype == "double") { \
+        return func<double>(__VA_ARGS__); \
+    } else if (dtype == "string") { \
+        return func<std::string>(__VA_ARGS__); \
+    } else { \
+        throw SonataError(std::string("Unexpected dtype: ") + dtype); \
+    } \
+
 } // unnamed namespace
 
 
@@ -68,7 +121,7 @@ PYBIND11_MODULE(_sonata, m)
             "values"_a,
             "EdgeSelection from list of edge IDs"
         )
-        .def(
+        .def_property_readonly(
             "ranges",
             &EdgeSelection::ranges,
             "Get a list of ranges constituting EdgeSelection"
@@ -78,10 +131,17 @@ PYBIND11_MODULE(_sonata, m)
             &EdgeSelection::flatten,
             "List of edge IDs constituting EdgeSelection"
         )
-        .def(
+        .def_property_readonly(
             "flat_size",
             &EdgeSelection::flatSize,
             "Total number of edges constituting EdgeSelection"
+        )
+        .def(
+            "__bool__",
+            [](const EdgeSelection& obj) {
+                return !obj.empty();
+            },
+            "If EdgeSelection is not empty"
         )
         ;
 
@@ -89,12 +149,12 @@ PYBIND11_MODULE(_sonata, m)
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index"
     )
         .def(py::init<const std::string&, const std::string&, const std::string&>())
-        .def(
+        .def_property_readonly(
             "name",
             &EdgePopulation::name,
             "Population name"
         )
-        .def(
+        .def_property_readonly(
             "size", &EdgePopulation::size,
             "Total number of edges in the population"
         )
@@ -130,7 +190,7 @@ PYBIND11_MODULE(_sonata, m)
             "selection"_a,
             "Source node IDs for given EdgeSelection"
         )
-        .def(
+        .def_property_readonly(
             "attribute_names",
             &EdgePopulation::attributeNames,
             "Set of edge attribute names"
@@ -140,40 +200,7 @@ PYBIND11_MODULE(_sonata, m)
             [](EdgePopulation& obj, const std::string& name, EdgeID edgeID) {
                 const auto selection = EdgeSelection::fromValues({edgeID});
                 const auto dtype = obj._attributeDataType(name);
-                if (dtype == "int8_t") {
-                    return py::cast(obj.getAttribute<int8_t>(name, selection)[0]);
-                } else
-                if (dtype == "uint8_t") {
-                    return py::cast(obj.getAttribute<uint8_t>(name, selection)[0]);
-                }  else
-                if (dtype == "int16_t") {
-                    return py::cast(obj.getAttribute<int16_t>(name, selection)[0]);
-                } else
-                if (dtype == "uint16_t") {
-                    return py::cast(obj.getAttribute<uint16_t>(name, selection)[0]);
-                } else
-                if (dtype == "int32_t") {
-                    return py::cast(obj.getAttribute<int32_t>(name, selection)[0]);
-                } else
-                if (dtype == "uint32_t") {
-                    return py::cast(obj.getAttribute<uint32_t>(name, selection)[0]);
-                } else
-                if (dtype == "int64_t") {
-                    return py::cast(obj.getAttribute<int64_t>(name, selection)[0]);
-                } else
-                if (dtype == "uint64_t") {
-                    return py::cast(obj.getAttribute<uint64_t>(name, selection)[0]);
-                } else
-                if (dtype == "float") {
-                    return py::cast(obj.getAttribute<float>(name, selection)[0]);
-                } else
-                if (dtype == "double") {
-                    return py::cast(obj.getAttribute<double>(name, selection)[0]);
-                } else if (dtype == "string") {
-                    return py::cast(obj.getAttribute<std::string>(name, selection)[0]);
-                } else {
-                    throw SonataError(std::string("Unexpected dtype: ") + dtype);
-                }
+                DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
             },
             "name"_a,
             "edge_id"_a,
@@ -184,40 +211,7 @@ PYBIND11_MODULE(_sonata, m)
             "get_attribute",
             [](EdgePopulation& obj, const std::string& name, const EdgeSelection& selection) {
                 const auto dtype = obj._attributeDataType(name);
-                if (dtype == "int8_t") {
-                    return asArray(obj.getAttribute<int8_t>(name, selection));
-                } else
-                if (dtype == "uint8_t") {
-                    return asArray(obj.getAttribute<uint8_t>(name, selection));
-                }  else
-                if (dtype == "int16_t") {
-                    return asArray(obj.getAttribute<int16_t>(name, selection));
-                } else
-                if (dtype == "uint16_t") {
-                    return asArray(obj.getAttribute<uint16_t>(name, selection));
-                } else
-                if (dtype == "int32_t") {
-                    return asArray(obj.getAttribute<int32_t>(name, selection));
-                } else
-                if (dtype == "uint32_t") {
-                    return asArray(obj.getAttribute<uint32_t>(name, selection));
-                } else
-                if (dtype == "int64_t") {
-                    return asArray(obj.getAttribute<int64_t>(name, selection));
-                } else
-                if (dtype == "uint64_t") {
-                    return asArray(obj.getAttribute<uint64_t>(name, selection));
-                } else
-                if (dtype == "float") {
-                    return asArray(obj.getAttribute<float>(name, selection));
-                } else
-                if (dtype == "double") {
-                    return asArray(obj.getAttribute<double>(name, selection));
-                } else if (dtype == "string") {
-                    return asArray(obj.getAttribute<std::string>(name, selection));
-                } else {
-                    throw SonataError(std::string("Unexpected dtype: ") + dtype);
-                }
+                DISPATCH_TYPE(dtype, getAttributeVector, obj, name, selection);
             },
             "name"_a,
             "selection"_a,
@@ -228,40 +222,7 @@ PYBIND11_MODULE(_sonata, m)
             "get_attribute",
             [](EdgePopulation& obj, const std::string& name, const EdgeSelection& selection, const py::object& defaultValue) {
                 const auto dtype = obj._attributeDataType(name);
-                if (dtype == "int8_t") {
-                    return asArray(obj.getAttribute<int8_t>(name, selection, defaultValue.cast<int8_t>()));
-                } else
-                if (dtype == "uint8_t") {
-                    return asArray(obj.getAttribute<uint8_t>(name, selection, defaultValue.cast<uint8_t>()));
-                }  else
-                if (dtype == "int16_t") {
-                    return asArray(obj.getAttribute<int16_t>(name, selection, defaultValue.cast<int16_t>()));
-                } else
-                if (dtype == "uint16_t") {
-                    return asArray(obj.getAttribute<uint16_t>(name, selection, defaultValue.cast<uint16_t>()));
-                } else
-                if (dtype == "int32_t") {
-                    return asArray(obj.getAttribute<int32_t>(name, selection, defaultValue.cast<int32_t>()));
-                } else
-                if (dtype == "uint32_t") {
-                    return asArray(obj.getAttribute<uint32_t>(name, selection, defaultValue.cast<uint32_t>()));
-                } else
-                if (dtype == "int64_t") {
-                    return asArray(obj.getAttribute<int64_t>(name, selection, defaultValue.cast<int64_t>()));
-                } else
-                if (dtype == "uint64_t") {
-                    return asArray(obj.getAttribute<uint64_t>(name, selection, defaultValue.cast<uint64_t>()));
-                } else
-                if (dtype == "float") {
-                    return asArray(obj.getAttribute<float>(name, selection, defaultValue.cast<float>()));
-                } else
-                if (dtype == "double") {
-                    return asArray(obj.getAttribute<double>(name, selection, defaultValue.cast<double>()));
-                } else if (dtype == "string") {
-                    return asArray(obj.getAttribute<std::string>(name, selection, defaultValue.cast<std::string>()));
-                } else {
-                    throw SonataError(std::string("Unexpected dtype: ") + dtype);
-                }
+                DISPATCH_TYPE(dtype, getAttributeVectorWithDefault, obj, name, selection, defaultValue);
             },
             "name"_a,
             "selection"_a,
@@ -330,7 +291,7 @@ PYBIND11_MODULE(_sonata, m)
             "h5_filepath"_a,
             "csv_filepath"_a = ""
         )
-        .def(
+        .def_property_readonly(
             "population_names",
             &EdgeStorage::populationNames,
             "Set of population names"

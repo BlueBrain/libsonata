@@ -12,6 +12,16 @@ namespace sonata {
 
 namespace {
 
+std::set<std::string> _listChildren(const HighFive::Group& group)
+{
+    std::set<std::string> result;
+    for (const auto& name : group.listObjectNames()) {
+        result.insert(name);
+    }
+    return result;
+}
+
+
 void _checkRanges(const EdgeSelection::Ranges& ranges)
 {
     for (const auto& range : ranges) {
@@ -20,6 +30,7 @@ void _checkRanges(const EdgeSelection::Ranges& ranges)
         }
     }
 }
+
 
 template<typename Iterator>
 EdgeSelection _selectionFromValues(Iterator first, Iterator last)
@@ -158,6 +169,7 @@ struct EdgePopulation::Impl
         : name(_name)
         , h5File(h5FilePath)
         , h5Root(h5File.getGroup("/edges").getGroup(name))
+        , attributeNames(_listChildren(h5Root.getGroup("0")))
     {
         size_t groupID = 0;
         while (h5Root.exist(std::to_string(groupID))) {
@@ -171,6 +183,7 @@ struct EdgePopulation::Impl
     const std::string name;
     const HighFive::File h5File;
     const HighFive::Group h5Root;
+    const std::set<std::string> attributeNames;
 };
 
 
@@ -278,13 +291,9 @@ std::vector<NodeID> EdgePopulation::targetNodeIDs(const EdgeSelection& selection
 }
 
 
-std::set<std::string> EdgePopulation::attributeNames() const
+const std::set<std::string>& EdgePopulation::attributeNames() const
 {
-    std::set<std::string> result;
-    for (const auto& name : impl_->h5Root.getGroup("0").listObjectNames()) {
-        result.insert(name);
-    }
-    return result;
+    return impl_->attributeNames;
 }
 
 

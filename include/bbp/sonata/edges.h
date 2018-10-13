@@ -74,7 +74,7 @@ public:
     /**
      * All attribute names (CSV columns + required attributes + union of attributes in groups)
      */
-    std::set<std::string> attributeNames() const;
+    const std::set<std::string>& attributeNames() const;
 
     /**
      * Get attribute values for given EdgeSelection
