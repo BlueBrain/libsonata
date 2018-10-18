@@ -1,0 +1,3 @@
+from ._sonata import *
+
+__version__ = "${LIBSONATA_VERSION}"

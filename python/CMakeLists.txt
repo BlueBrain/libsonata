@@ -3,25 +3,33 @@ if (NOT SONATA_PYTHON)
     return()
 endif()
 
+set(LIBSONATA_PYTHON_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sonata)
+
 add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
 
 add_library(sonata_python MODULE bindings.cpp)
-set_target_properties(sonata_python PROPERTIES PREFIX "")
-set_target_properties(sonata_python PROPERTIES OUTPUT_NAME "_sonata")
+set_target_properties(sonata_python PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME "_sonata"
+    LIBRARY_OUTPUT_DIRECTORY ${LIBSONATA_PYTHON_BUILD}
+)
 
 target_link_libraries(sonata_python
-    PRIVATE sonata_shared
+    PRIVATE sonata_static
+    PRIVATE hdf5
     PRIVATE pybind11::module
+)
+
+configure_file(
+    sonata/__init__.py.in
+    ${LIBSONATA_PYTHON_BUILD}/__init__.py
 )
 
 if (PYTHON_INSTALL_SUFFIX)
     install(
-        TARGETS sonata_python LIBRARY
-        DESTINATION ${PYTHON_INSTALL_SUFFIX}/libsonata
-    )
-    install(
-        FILES __init__.py
-        DESTINATION ${PYTHON_INSTALL_SUFFIX}/libsonata
+        DIRECTORY ${LIBSONATA_PYTHON_BUILD}
+        DESTINATION ${PYTHON_INSTALL_SUFFIX}
+        OPTIONAL
     )
 else()
     message(WARNING "PYTHON_INSTALL_SUFFIX not set, Python bindings won't be installed")

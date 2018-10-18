@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(libsonata VERSION 0.0.0)
+set(LIBSONATA_VERSION 0.0.0)
+
+project(libsonata VERSION ${LIBSONATA_VERSION})
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -58,9 +62,9 @@ target_include_directories(sonata_static
 # Install
 # =============================================================================
 
-install(TARGETS sonata_shared DESTINATION lib)
-install(TARGETS sonata_static DESTINATION lib)
-install(DIRECTORY ${LIBSONATA_INCLUDE_DIR}/bbp DESTINATION include)
+install(TARGETS sonata_shared DESTINATION lib OPTIONAL)
+install(TARGETS sonata_static DESTINATION lib OPTIONAL)
+install(DIRECTORY ${LIBSONATA_INCLUDE_DIR}/bbp DESTINATION include OPTIONAL)
 
 # =============================================================================
 # Testing
