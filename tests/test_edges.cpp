@@ -38,7 +38,7 @@ TEST_CASE("EdgePopulation", "[edges]")
     CHECK(population.source() == "nodes-A");
     CHECK(population.target() == "nodes-B");
 
-    REQUIRE(population.size() == 5);
+    REQUIRE(population.size() == 6);
 
     CHECK(
         population.sourceNodeIDs(Selection({{0, 3}, {4, 5}})) == std::vector<NodeID>{1, 1, 2, 3}

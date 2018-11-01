@@ -87,8 +87,40 @@ public:
      * and is not intended for use in the ordinary client C++ code.
      */
     std::string _attributeDataType(const std::string& name) const;
-    // ...
-    // Access to dynamics params analogous to attributes
+
+    /**
+     * All dynamics attribute names (JSON keys + union of attributes in groups)
+     */
+    const std::set<std::string>& dynamicsAttributeNames() const;
+
+    /**
+     * Get dynamics attribute values for given Selection
+     *
+     * @param name is a string to allow attributes not defined in spec
+     * @throw if there is no such attribute for the population
+     * @throw if the attribute is not defined for _any_ edge from the edge selection
+     */
+    template <typename T>
+    std::vector<T> getDynamicsAttribute(const std::string& name, const Selection& selection) const;
+
+    /**
+     * Get dynamics attribute values for given Selection
+     *
+     * @param name is a string to allow attributes not defined in spec
+     * @param default is a value to use for edge groups w/o given attribute
+     * @throw if there is no such attribute for the population
+     */
+    template <typename T>
+    std::vector<T> getDynamicsAttribute(const std::string& name, const Selection& selection, const T& defaultValue) const;
+
+    /**
+     * Get dynamics attribute data type
+
+     * @internal
+     * It is a helper method for dynamic languages bindings;
+     * and is not intended for use in the ordinary client C++ code.
+     */
+    std::string _dynamicsAttributeDataType(const std::string& name) const;
 
 protected:
     struct Impl;

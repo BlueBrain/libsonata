@@ -18,7 +18,7 @@ EdgePopulation::EdgePopulation(
     const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name
 )
     : Population(std::unique_ptr<Population::Impl>(
-        new Population::Impl(h5FilePath, csvFilePath, name, H5_PREFIX)
+        new Population::Impl(h5FilePath, csvFilePath, name, ELEMENT)
     ))
 {
 }
@@ -139,7 +139,7 @@ Selection EdgePopulation::connectingEdges(const std::vector<NodeID>& source, con
 
 //--------------------------------------------------------------------------------------------------
 
-constexpr const char* EdgePopulation::H5_PREFIX;
+constexpr const char* EdgePopulation::ELEMENT;
 
 template class PopulationStorage<EdgePopulation>;
 

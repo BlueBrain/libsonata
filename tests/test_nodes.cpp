@@ -16,7 +16,7 @@ TEST_CASE("NodePopulation", "[base]")
 
     CHECK(population.name() == "nodes-A");
 
-    REQUIRE(population.size() == 5);
+    REQUIRE(population.size() == 6);
 
     REQUIRE(population.attributeNames() == std::set<std::string>{"attr-X", "attr-Y", "attr-Z"});
 
@@ -71,4 +71,54 @@ TEST_CASE("NodePopulation", "[base]")
        population._attributeDataType("no-such-attribute"),
        SonataError
     );
+
+    REQUIRE(population.dynamicsAttributeNames() == std::set<std::string>{"dparam-X", "dparam-Y", "dparam-Z"});
+
+    CHECK(
+       population.getDynamicsAttribute<double>("dparam-X", Selection({{0, 1}, {5, 6}})) == std::vector<double>{1011.0, 1016.0}
+    );
+    CHECK(
+       population.getDynamicsAttribute<float>("dparam-X", Selection({{0, 1}})) == std::vector<float>{1011.0f}
+    );
+    CHECK(
+       population.getDynamicsAttribute<uint64_t>("dparam-Y", Selection({{0, 1}, {5, 6}})) == std::vector<uint64_t>{1021, 1026}
+    );
+    CHECK(
+       population.getDynamicsAttribute<int64_t>("dparam-Y", Selection({{0, 1}})) == std::vector<int64_t>{1021}
+    );
+    CHECK(
+       population.getDynamicsAttribute<uint32_t>("dparam-Y", Selection({{0, 1}})) == std::vector<uint32_t>{1021}
+    );
+    CHECK(
+       population.getDynamicsAttribute<int32_t>("dparam-Y", Selection({{0, 1}})) == std::vector<int32_t>{1021}
+    );
+    CHECK(
+       population.getDynamicsAttribute<uint16_t>("dparam-Y", Selection({{0, 1}})) == std::vector<uint16_t>{1021}
+    );
+    CHECK(
+       population.getDynamicsAttribute<int16_t>("dparam-Y", Selection({{0, 1}})) == std::vector<int16_t>{1021}
+    );
+    CHECK(
+       population.getDynamicsAttribute<std::string>("dparam-Z", Selection({{0, 2}})) == std::vector<std::string>{"d-aa", "d-bb"}
+    );
+    CHECK(
+       population.getDynamicsAttribute<std::string>("dparam-Z", Selection({{0, 1}, {5, 6}})) == std::vector<std::string>{"d-aa", "d-ff"}
+    );
+    CHECK_THROWS_AS(
+       population.getDynamicsAttribute<double>("no-such-attribute", Selection({{0, 1}})),
+       SonataError
+    );
+
+    // getDynamicsAttribute with default value
+    CHECK(
+       population.getDynamicsAttribute<double>("dparam-X", Selection({{0, 1}, {5, 6}}), 42.0) == std::vector<double>{1011.0, 1016.0}
+    );
+    CHECK_THROWS_AS(
+       population.getDynamicsAttribute<double>("no-such-attribute", Selection({{0, 1}}), 42.0),
+       SonataError
+    );
+
+    CHECK(population._dynamicsAttributeDataType("dparam-X") == "double");
+    CHECK(population._dynamicsAttributeDataType("dparam-Y") == "int64_t");
+    CHECK(population._dynamicsAttributeDataType("dparam-Z") == "string");
 }

@@ -15,7 +15,7 @@ namespace sonata {
 class NodePopulation : public Population
 {
 public:
-    constexpr static const char* H5_PREFIX = "node";
+    constexpr static const char* ELEMENT = "node";
 
     NodePopulation(
         const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name

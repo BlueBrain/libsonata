@@ -12,10 +12,16 @@ namespace sonata {
 
 namespace {
 
-std::set<std::string> _listChildren(const HighFive::Group& group)
+const char* H5_DYNAMICS_PARAMS = "dynamics_params";
+
+
+std::set<std::string> _listChildren(const HighFive::Group& group, const std::set<std::string>& ignoreNames = {})
 {
     std::set<std::string> result;
     for (const auto& name : group.listObjectNames()) {
+        if (ignoreNames.count(name)) {
+            continue;
+        }
         result.insert(name);
     }
     return result;
@@ -105,7 +111,12 @@ struct Population::Impl
         , prefix(_prefix)
         , h5File(h5FilePath)
         , h5Root(h5File.getGroup(fmt::format("/{}s", prefix)).getGroup(name))
-        , attributeNames(_listChildren(h5Root.getGroup("0")))
+        , attributeNames(_listChildren(h5Root.getGroup("0"), {H5_DYNAMICS_PARAMS}))
+        , dynamicsAttributeNames(
+            h5Root.getGroup("0").exist(H5_DYNAMICS_PARAMS)
+                ? _listChildren(h5Root.getGroup("0").getGroup(H5_DYNAMICS_PARAMS))
+                : std::set<std::string>{}
+        )
     {
         size_t groupID = 0;
         while (h5Root.exist(std::to_string(groupID))) {
@@ -116,11 +127,22 @@ struct Population::Impl
         }
     }
 
+    HighFive::DataSet getAttributeDataSet(const std::string& name) const
+    {
+        return h5Root.getGroup("0").getDataSet(name);
+    }
+
+    HighFive::DataSet getDynamicsAttributeDataSet(const std::string& name) const
+    {
+        return h5Root.getGroup("0").getGroup(H5_DYNAMICS_PARAMS).getDataSet(name);
+    }
+
     const std::string name;
     const std::string prefix;
     const HighFive::File h5File;
     const HighFive::Group h5Root;
     const std::set<std::string> attributeNames;
+    const std::set<std::string> dynamicsAttributeNames;
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -132,7 +154,7 @@ struct PopulationStorage<Population>::Impl
         : h5FilePath(_h5FilePath)
         , csvFilePath(_csvFilePath)
         , h5File(h5FilePath)
-        , h5Root(h5File.getGroup(fmt::format("/{}s", Population::H5_PREFIX)))
+        , h5Root(h5File.getGroup(fmt::format("/{}s", Population::ELEMENT)))
     {
         if (!csvFilePath.empty()) {
             throw SonataError("CSV not supported at the moment");

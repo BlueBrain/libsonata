@@ -25,7 +25,7 @@ class TestNodePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj.name, "nodes-A")
 
     def test_size(self):
-        self.assertEqual(self.test_obj.size, 5)
+        self.assertEqual(self.test_obj.size, 6)
 
     def test_attribute_names(self):
         self.assertEqual(self.test_obj.attribute_names, {"attr-X", "attr-Y", "attr-Z"})
@@ -42,6 +42,19 @@ class TestNodePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj.get_attribute('attr-X', Selection([0, 5]), 42.).tolist(), [11., 16.])
 
         self.assertRaises(SonataError, self.test_obj.get_attribute, 'no-such-attribute', 0)
+
+    def test_get_dynamics_attribute(self):
+        self.assertEqual(self.test_obj.get_dynamics_attribute('dparam-X', 0), 1011.)
+        self.assertEqual(self.test_obj.get_dynamics_attribute('dparam-X', Selection([0, 5])).tolist(), [1011., 1016.])
+
+        # different dtypes
+        self.assertEqual(self.test_obj.get_dynamics_attribute('dparam-Y', 0), 1021)
+        self.assertEqual(self.test_obj.get_dynamics_attribute('dparam-Z', 0), 'd-aa')
+
+        # default value
+        self.assertEqual(self.test_obj.get_dynamics_attribute('dparam-X', Selection([0, 5]), 42.).tolist(), [1011., 1016.])
+
+        self.assertRaises(SonataError, self.test_obj.get_dynamics_attribute, 'no-such-attribute', 0)
 
 
 class TestEdgePopulation(unittest.TestCase):

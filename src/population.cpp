@@ -79,6 +79,51 @@ bool Selection::empty() const
 
 //--------------------------------------------------------------------------------------------------
 
+namespace {
+
+std::string _getDataType(const HighFive::DataSet& dset, const std::string& name)
+{
+    const auto dtype = dset.getDataType();
+    if (dtype == HighFive::AtomicType<int8_t>()) {
+        return "int8_t";
+    } else
+    if (dtype == HighFive::AtomicType<uint8_t>()) {
+        return "uint8_t";
+    } else
+    if (dtype == HighFive::AtomicType<int16_t>()) {
+        return "int16_t";
+    } else
+    if (dtype == HighFive::AtomicType<uint16_t>()) {
+        return "uint16_t";
+    } else
+    if (dtype == HighFive::AtomicType<int32_t>()) {
+        return "int32_t";
+    } else
+    if (dtype == HighFive::AtomicType<uint32_t>()) {
+        return "uint32_t";
+    } else
+    if (dtype == HighFive::AtomicType<int64_t>()) {
+        return "int64_t";
+    } else
+    if (dtype == HighFive::AtomicType<uint64_t>()) {
+        return "uint64_t";
+    } else
+    if (dtype == HighFive::AtomicType<float>()) {
+        return "float";
+    } else
+    if (dtype == HighFive::AtomicType<double>()) {
+        return "double";
+    } else
+    if (dtype == HighFive::AtomicType<std::string>()) {
+        return "string";
+    } else {
+        throw SonataError(fmt::format("Unexpected datatype for dataset '{}'", name));
+    }
+}
+
+} // unnamed namespace
+
+
 Population::Population(std::unique_ptr<Population::Impl>&& impl)
     : impl_(std::move(impl))
 {
@@ -113,8 +158,7 @@ std::vector<T> Population::getAttribute(const std::string& name, const Selection
     if (attributeNames().count(name) == 0) {
         throw SonataError(fmt::format("No such attribute: '{}'", name));
     }
-    const auto dset = impl_->h5Root.getGroup("0").getDataSet(name);
-    return _readSelection<T>(dset, selection);
+    return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
 }
 
 
@@ -131,42 +175,40 @@ std::string Population::_attributeDataType(const std::string& name) const
     if (attributeNames().count(name) == 0) {
         throw SonataError(fmt::format("No such attribute: '{}'", name));
     }
-    const auto dtype = impl_->h5Root.getGroup("0").getDataSet(name).getDataType();
-    if (dtype == HighFive::AtomicType<int8_t>()) {
-        return "int8_t";
-    } else
-    if (dtype == HighFive::AtomicType<uint8_t>()) {
-        return "uint8_t";
-    } else
-    if (dtype == HighFive::AtomicType<int16_t>()) {
-        return "int16_t";
-    } else
-    if (dtype == HighFive::AtomicType<uint16_t>()) {
-        return "uint16_t";
-    } else
-    if (dtype == HighFive::AtomicType<int32_t>()) {
-        return "int32_t";
-    } else
-    if (dtype == HighFive::AtomicType<uint32_t>()) {
-        return "uint32_t";
-    } else
-    if (dtype == HighFive::AtomicType<int64_t>()) {
-        return "int64_t";
-    } else
-    if (dtype == HighFive::AtomicType<uint64_t>()) {
-        return "uint64_t";
-    } else
-    if (dtype == HighFive::AtomicType<float>()) {
-        return "float";
-    } else
-    if (dtype == HighFive::AtomicType<double>()) {
-        return "double";
-    } else
-    if (dtype == HighFive::AtomicType<std::string>()) {
-        return "string";
-    } else {
-        throw SonataError("Unexpected datatype");
-    }
+    return _getDataType(impl_->getAttributeDataSet(name), name);
+}
+
+
+const std::set<std::string>& Population::dynamicsAttributeNames() const
+{
+    return impl_->dynamicsAttributeNames;
+}
+
+
+template <typename T>
+std::vector<T> Population::getDynamicsAttribute(const std::string& name, const Selection& selection) const
+{
+    if (dynamicsAttributeNames().count(name) == 0) {
+        throw SonataError(fmt::format("No such dynamics attribute: '{}'", name));
+    };
+    return _readSelection<T>(impl_->getDynamicsAttributeDataSet(name), selection);
+}
+
+
+template <typename T>
+std::vector<T> Population::getDynamicsAttribute(const std::string& name, const Selection& selection, const T&) const
+{
+    // with single-group populations default value is not actually used
+    return getDynamicsAttribute<T>(name, selection);
+}
+
+
+std::string Population::_dynamicsAttributeDataType(const std::string& name) const
+{
+    if (dynamicsAttributeNames().count(name) == 0) {
+        throw SonataError(fmt::format("No such dynamics attribute: '{}'", name));
+    };
+    return _getDataType(impl_->getDynamicsAttributeDataSet(name), name);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -176,6 +218,10 @@ std::string Population::_attributeDataType(const std::string& name) const
         const std::string&, const Selection&) const; \
     template std::vector<T> Population::getAttribute<T>( \
         const std::string&, const Selection&, const T&) const; \
+    template std::vector<T> Population::getDynamicsAttribute<T>( \
+        const std::string&, const Selection&) const; \
+    template std::vector<T> Population::getDynamicsAttribute<T>( \
+        const std::string&, const Selection&, const T&) const;
 
 
 INSTANTIATE_TEMPLATE_METHODS(float)

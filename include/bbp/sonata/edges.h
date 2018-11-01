@@ -15,7 +15,7 @@ namespace sonata {
 class EdgePopulation : public Population
 {
 public:
-    constexpr static const char* H5_PREFIX = "edge";
+    constexpr static const char* ELEMENT = "edge";
 
     EdgePopulation(
         const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name

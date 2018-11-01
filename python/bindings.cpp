@@ -5,6 +5,8 @@
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
 
+#include <fmt/format.h>
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -76,6 +78,30 @@ py::object getAttributeVectorWithDefault(
 }
 
 
+template<typename T>
+py::object getDynamicsAttribute(const Population& obj, const std::string& name, const Selection& selection)
+{
+    return py::cast(obj.getDynamicsAttribute<T>(name, selection)[0]);
+}
+
+
+template<typename T>
+py::object getDynamicsAttributeVector(const Population& obj, const std::string& name, const Selection& selection)
+{
+    return asArray(obj.getDynamicsAttribute<T>(name, selection));
+}
+
+
+template<typename T>
+py::object getDynamicsAttributeVectorWithDefault(
+    const Population& obj, const std::string& name,
+    const Selection& selection, const py::object& defaultValue
+)
+{
+    return asArray(obj.getDynamicsAttribute<T>(name, selection, defaultValue.cast<T>()));
+}
+
+
 // Emulating generic lambdas in pre-C++14
 #define DISPATCH_TYPE(dtype, func, ...) \
     if (dtype == "int8_t") { \
@@ -102,7 +128,158 @@ py::object getAttributeVectorWithDefault(
         return func<std::string>(__VA_ARGS__); \
     } else { \
         throw SonataError(std::string("Unexpected dtype: ") + dtype); \
-    } \
+    }
+
+
+template<typename Population>
+py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
+    py::module& m,
+    const char* clsName,
+    const char* docString
+)
+{
+    const auto imbueElementName = [](const char* msg) {
+        return fmt::format(msg, fmt::arg("elem", Population::ELEMENT));
+    };
+    return py::class_<Population, std::shared_ptr<Population>>(m, clsName, docString)
+        .def(py::init<const std::string&, const std::string&, const std::string&>())
+        .def_property_readonly(
+            "name",
+            &Population::name,
+            "Population name"
+        )
+        .def_property_readonly(
+            "size", &Population::size,
+            imbueElementName("Total number of {elem}s in the population").c_str()
+        )
+        .def_property_readonly(
+            "attribute_names",
+            &Population::attributeNames,
+            "Set of attribute names"
+        )
+        .def(
+            "get_attribute",
+            [](Population& obj, const std::string& name, Selection::Value elemID) {
+                const auto selection = Selection::fromValues({elemID});
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
+            },
+            py::arg("name"),
+            py::arg(imbueElementName("{elem}_id").c_str()),
+            imbueElementName(
+                "Get attribute value for a given {elem}.\n"
+                "Raises an exception if attribute is not defined for this {elem}."
+            ).c_str()
+        )
+        .def(
+            "get_attribute",
+            [](Population& obj, const std::string& name, const Selection& selection) {
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getAttributeVector, obj, name, selection);
+            },
+            "name"_a,
+            "selection"_a,
+            imbueElementName(
+                "Get attribute values for a given {elem} selection.\n"
+                "Raises an exception if attribute is not defined for some {elem}s."
+            ).c_str()
+        )
+        .def(
+            "get_attribute",
+            [](Population& obj, const std::string& name, const Selection& selection, const py::object& defaultValue) {
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getAttributeVectorWithDefault, obj, name, selection, defaultValue);
+            },
+            "name"_a,
+            "selection"_a,
+            "default_value"_a,
+            imbueElementName(
+                "Get attribute values for a given {elem} selection.\n"
+                "Use default value for {elem}s where attribute is not defined\n"
+                "(it should still be one of population attributes)."
+            ).c_str()
+        )
+        .def_property_readonly(
+            "dynamics_attribute_names",
+            &Population::dynamicsAttributeNames,
+            "Set of dynamics attribute names"
+        )
+        .def(
+            "get_dynamics_attribute",
+            [](Population& obj, const std::string& name, Selection::Value elemID) {
+                const auto selection = Selection::fromValues({elemID});
+                const auto dtype = obj._dynamicsAttributeDataType(name);
+                DISPATCH_TYPE(dtype, getDynamicsAttribute, obj, name, selection);
+            },
+            py::arg("name"),
+            py::arg(imbueElementName("{elem}_id").c_str()),
+            imbueElementName(
+                "Get dynamics attribute value for a given {elem}.\n"
+                "Raises an exception if attribute is not defined for this {elem}."
+            ).c_str()
+        )
+        .def(
+            "get_dynamics_attribute",
+            [](Population& obj, const std::string& name, const Selection& selection) {
+                const auto dtype = obj._dynamicsAttributeDataType(name);
+                DISPATCH_TYPE(dtype, getDynamicsAttributeVector, obj, name, selection);
+            },
+            "name"_a,
+            "selection"_a,
+            imbueElementName(
+                "Get dynamics attribute values for a given {elem} selection.\n"
+                "Raises an exception if attribute is not defined for some {elem}s."
+            ).c_str()
+        )
+        .def(
+            "get_dynamics_attribute",
+            [](Population& obj, const std::string& name, const Selection& selection, const py::object& defaultValue) {
+                const auto dtype = obj._dynamicsAttributeDataType(name);
+                DISPATCH_TYPE(dtype, getDynamicsAttributeVectorWithDefault, obj, name, selection, defaultValue);
+            },
+            "name"_a,
+            "selection"_a,
+            "default_value"_a,
+            imbueElementName(
+                "Get dynamics attribute values for a given {elem} selection.\n"
+                "Use default value for {elem}s where attribute is not defined\n"
+                "(it should still be one of population attributes)."
+            ).c_str()
+        )
+    ;
+}
+
+
+template<typename Storage>
+py::class_<Storage> bindStorageClass(
+    py::module& m,
+    const char* clsName,
+    const char* popClsName
+)
+{
+    return py::class_<Storage>(
+        m,
+        clsName,
+        fmt::format("Collection of {}`s stored in H5 file (+ optional CSV)", popClsName).c_str()
+    )
+        .def(
+            py::init<const std::string&, const std::string&>(),
+            "h5_filepath"_a,
+            "csv_filepath"_a = ""
+        )
+        .def_property_readonly(
+            "population_names",
+            &Storage::populationNames,
+            "Set of population names"
+        )
+        .def(
+            "open_population",
+            &Storage::openPopulation,
+            "name"_a,
+            fmt::format("Get {} for a given population name", popClsName).c_str()
+        )
+    ;
+}
 
 } // unnamed namespace
 
@@ -146,96 +323,22 @@ PYBIND11_MODULE(_sonata, m)
         )
         ;
 
-    py::class_<NodePopulation, std::shared_ptr<NodePopulation>>(
-        m, "NodePopulation", "Collection of nodes with attributes"
-    )
-        .def(py::init<const std::string&, const std::string&, const std::string&>())
-        .def_property_readonly(
-            "name",
-            &NodePopulation::name,
-            "Population name"
-        )
-        .def_property_readonly(
-            "size", &NodePopulation::size,
-            "Total number of nodes in the population"
-        )
-        .def_property_readonly(
-            "attribute_names",
-            &NodePopulation::attributeNames,
-            "Set of attribute names"
-        )
-        .def(
-            "get_attribute",
-            [](NodePopulation& obj, const std::string& name, NodeID nodeID) {
-                const auto selection = Selection::fromValues({nodeID});
-                const auto dtype = obj._attributeDataType(name);
-                DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
-            },
-            "name"_a,
-            "node_id"_a,
-            "Get attribute value for a given node.\n"
-            "Raises an exception if attribute is not defined for this node."
-        )
-        .def(
-            "get_attribute",
-            [](NodePopulation& obj, const std::string& name, const Selection& selection) {
-                const auto dtype = obj._attributeDataType(name);
-                DISPATCH_TYPE(dtype, getAttributeVector, obj, name, selection);
-            },
-            "name"_a,
-            "selection"_a,
-            "Get attribute values for a given node selection.\n"
-            "Raises an exception if attribute is not defined for some nodes."
-        )
-        .def(
-            "get_attribute",
-            [](NodePopulation& obj, const std::string& name, const Selection& selection, const py::object& defaultValue) {
-                const auto dtype = obj._attributeDataType(name);
-                DISPATCH_TYPE(dtype, getAttributeVectorWithDefault, obj, name, selection, defaultValue);
-            },
-            "name"_a,
-            "selection"_a,
-            "default_value"_a,
-            "Get attribute values for a given node selection.\n"
-            "Use default value for nodes where attribute is not defined\n"
-            "(it should still be one of population attributes)."
-        )
-        ;
+    bindPopulationClass<NodePopulation>(
+        m,
+        "NodePopulation",
+        "Collection of nodes with attributes"
+    );
 
-    py::class_<NodeStorage>(
-        m, "NodeStorage", "Collection of `NodePopulation`s stored in H5 file (+ optional CSV)"
-    )
-        .def(
-            py::init<const std::string&, const std::string&>(),
-            "h5_filepath"_a,
-            "csv_filepath"_a = ""
-        )
-        .def_property_readonly(
-            "population_names",
-            &NodeStorage::populationNames,
-            "Set of population names"
-        )
-        .def(
-            "open_population",
-            &NodeStorage::openPopulation,
-            "name"_a,
-            "Get NodePopulation for a given population name"
-        )
-        ;
+    bindStorageClass<NodeStorage>(
+        m,
+        "NodeStorage", "NodePopulation"
+    );
 
-    py::class_<EdgePopulation, std::shared_ptr<EdgePopulation>>(
-        m, "EdgePopulation", "Collection of edges with attributes and connectivity index"
+    bindPopulationClass<EdgePopulation>(
+        m,
+        "EdgePopulation",
+        "Collection of edges with attributes and connectivity index"
     )
-        .def(py::init<const std::string&, const std::string&, const std::string&>())
-        .def_property_readonly(
-            "name",
-            &EdgePopulation::name,
-            "Population name"
-        )
-        .def_property_readonly(
-            "size", &EdgePopulation::size,
-            "Total number of edges in the population"
-        )
         .def_property_readonly(
             "source", &EdgePopulation::source,
             "Source node population"
@@ -275,47 +378,6 @@ PYBIND11_MODULE(_sonata, m)
             },
             "selection"_a,
             "Source node IDs for given Selection"
-        )
-        .def_property_readonly(
-            "attribute_names",
-            &EdgePopulation::attributeNames,
-            "Set of edge attribute names"
-        )
-        .def(
-            "get_attribute",
-            [](EdgePopulation& obj, const std::string& name, EdgeID edgeID) {
-                const auto selection = Selection::fromValues({edgeID});
-                const auto dtype = obj._attributeDataType(name);
-                DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
-            },
-            "name"_a,
-            "edge_id"_a,
-            "Get attribute value for a given edge.\n"
-            "Raises an exception if attribute is not defined for this edge."
-        )
-        .def(
-            "get_attribute",
-            [](EdgePopulation& obj, const std::string& name, const Selection& selection) {
-                const auto dtype = obj._attributeDataType(name);
-                DISPATCH_TYPE(dtype, getAttributeVector, obj, name, selection);
-            },
-            "name"_a,
-            "selection"_a,
-            "Get attribute values for a given edge selection.\n"
-            "Raises an exception if attribute is not defined for some edges."
-        )
-        .def(
-            "get_attribute",
-            [](EdgePopulation& obj, const std::string& name, const Selection& selection, const py::object& defaultValue) {
-                const auto dtype = obj._attributeDataType(name);
-                DISPATCH_TYPE(dtype, getAttributeVectorWithDefault, obj, name, selection, defaultValue);
-            },
-            "name"_a,
-            "selection"_a,
-            "default_value"_a,
-            "Get attribute values for a given edge selection.\n"
-            "Use default value for edges where attribute is not defined\n"
-            "(it should still be one of population attributes)."
         )
         .def(
             "afferent_edges",
@@ -369,26 +431,10 @@ PYBIND11_MODULE(_sonata, m)
         )
         ;
 
-    py::class_<EdgeStorage>(
-        m, "EdgeStorage", "Collection of `EdgePopulation`s stored in H5 file (+ optional CSV)"
-    )
-        .def(
-            py::init<const std::string&, const std::string&>(),
-            "h5_filepath"_a,
-            "csv_filepath"_a = ""
-        )
-        .def_property_readonly(
-            "population_names",
-            &EdgeStorage::populationNames,
-            "Set of population names"
-        )
-        .def(
-            "open_population",
-            &EdgeStorage::openPopulation,
-            "name"_a,
-            "Get EdgePopulation for a given population name"
-        )
-        ;
+    bindStorageClass<EdgeStorage>(
+        m,
+        "EdgeStorage", "EdgePopulation"
+    );
 
     py::register_exception<SonataError>(m, "SonataError");
 }
