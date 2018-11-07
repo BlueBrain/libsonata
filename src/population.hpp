@@ -1,5 +1,7 @@
 #pragma once
 
+#include "hdf5_mutex.hpp"
+
 #include <bbp/sonata/population.h>
 
 #include <fmt/format.h>
@@ -129,11 +131,17 @@ struct Population::Impl
 
     HighFive::DataSet getAttributeDataSet(const std::string& name) const
     {
+        if (!attributeNames.count(name)) {
+            throw SonataError(fmt::format("No such attribute: '{}'", name));
+        }
         return h5Root.getGroup("0").getDataSet(name);
     }
 
     HighFive::DataSet getDynamicsAttributeDataSet(const std::string& name) const
     {
+        if (!dynamicsAttributeNames.count(name)) {
+            throw SonataError(fmt::format("No such dynamics attribute: '{}'", name));
+        }
         return h5Root.getGroup("0").getGroup(H5_DYNAMICS_PARAMS).getDataSet(name);
     }
 
@@ -170,7 +178,10 @@ struct PopulationStorage<Population>::Impl
 
 template<typename Population>
 PopulationStorage<Population>::PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath)
-    : impl_(new PopulationStorage::Impl(h5FilePath, csvFilePath))
+    : impl_([h5FilePath, csvFilePath] {
+        HDF5_LOCK_GUARD
+        return new PopulationStorage::Impl(h5FilePath, csvFilePath);
+    }())
 {
 }
 
@@ -182,19 +193,19 @@ PopulationStorage<Population>::~PopulationStorage() = default;
 template<typename Population>
 std::set<std::string> PopulationStorage<Population>::populationNames() const
 {
-    std::set<std::string> result;
-    for (const auto& name : impl_->h5Root.listObjectNames()) {
-        result.insert(name);
-    }
-    return result;
+    HDF5_LOCK_GUARD
+    return _listChildren(impl_->h5Root);
 }
 
 
 template<typename Population>
 std::shared_ptr<Population> PopulationStorage<Population>::openPopulation(const std::string& name) const
 {
-    if (!impl_->h5Root.exist(name)) {
-        throw SonataError(fmt::format("No such population: '{}'", name));
+    {
+        HDF5_LOCK_GUARD
+        if (!impl_->h5Root.exist(name)) {
+            throw SonataError(fmt::format("No such population: '{}'", name));
+        }
     }
     return std::make_shared<Population>(impl_->h5FilePath, impl_->csvFilePath, name);
 }

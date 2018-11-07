@@ -123,15 +123,15 @@ public:
     std::string _dynamicsAttributeDataType(const std::string& name) const;
 
 protected:
-    struct Impl;
-
-    Population(std::unique_ptr<Impl>&&);
+    Population(
+        const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name, const std::string& prefix
+    );
 
     Population(const Population&) = delete;
 
-    ~Population();
+    virtual ~Population();
 
-
+    struct Impl;
     const std::unique_ptr<Impl> impl_;
 };
 

@@ -27,6 +27,7 @@ add_subdirectory(extlib EXCLUDE_FROM_ALL)
 set(LIBSONATA_SRC
     src/common.cpp
     src/edges.cpp
+    src/hdf5_mutex.cpp
     src/nodes.cpp
     src/population.cpp
 )

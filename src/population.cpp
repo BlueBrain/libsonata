@@ -1,4 +1,5 @@
 #include "population.hpp"
+#include "hdf5_mutex.hpp"
 
 #include <fmt/format.h>
 #include <highfive/H5File.hpp>
@@ -124,8 +125,13 @@ std::string _getDataType(const HighFive::DataSet& dset, const std::string& name)
 } // unnamed namespace
 
 
-Population::Population(std::unique_ptr<Population::Impl>&& impl)
-    : impl_(std::move(impl))
+Population::Population(
+    const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name, const std::string& prefix
+)
+    : impl_([h5FilePath, csvFilePath, name, prefix] {
+        HDF5_LOCK_GUARD
+        return new Population::Impl(h5FilePath, csvFilePath, name, prefix);
+    }())
 {
 }
 
@@ -141,6 +147,7 @@ std::string Population::name() const
 
 uint64_t Population::size() const
 {
+    HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet(fmt::format("{}_type_id", impl_->prefix));
     return dset.getSpace().getDimensions()[0];
 }
@@ -155,9 +162,7 @@ const std::set<std::string>& Population::attributeNames() const
 template<typename T>
 std::vector<T> Population::getAttribute(const std::string& name, const Selection& selection) const
 {
-    if (attributeNames().count(name) == 0) {
-        throw SonataError(fmt::format("No such attribute: '{}'", name));
-    }
+    HDF5_LOCK_GUARD
     return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
 }
 
@@ -172,9 +177,7 @@ std::vector<T> Population::getAttribute(const std::string& name, const Selection
 
 std::string Population::_attributeDataType(const std::string& name) const
 {
-    if (attributeNames().count(name) == 0) {
-        throw SonataError(fmt::format("No such attribute: '{}'", name));
-    }
+    HDF5_LOCK_GUARD
     return _getDataType(impl_->getAttributeDataSet(name), name);
 }
 
@@ -188,9 +191,7 @@ const std::set<std::string>& Population::dynamicsAttributeNames() const
 template <typename T>
 std::vector<T> Population::getDynamicsAttribute(const std::string& name, const Selection& selection) const
 {
-    if (dynamicsAttributeNames().count(name) == 0) {
-        throw SonataError(fmt::format("No such dynamics attribute: '{}'", name));
-    };
+    HDF5_LOCK_GUARD
     return _readSelection<T>(impl_->getDynamicsAttributeDataSet(name), selection);
 }
 
@@ -205,9 +206,7 @@ std::vector<T> Population::getDynamicsAttribute(const std::string& name, const S
 
 std::string Population::_dynamicsAttributeDataType(const std::string& name) const
 {
-    if (dynamicsAttributeNames().count(name) == 0) {
-        throw SonataError(fmt::format("No such dynamics attribute: '{}'", name));
-    };
+    HDF5_LOCK_GUARD
     return _getDataType(impl_->getDynamicsAttributeDataSet(name), name);
 }
 

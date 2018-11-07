@@ -1,4 +1,5 @@
 #include "population.hpp"
+#include "hdf5_mutex.hpp"
 
 #include <bbp/sonata/common.h>
 #include <bbp/sonata/edges.h>
@@ -17,15 +18,14 @@ namespace sonata {
 EdgePopulation::EdgePopulation(
     const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name
 )
-    : Population(std::unique_ptr<Population::Impl>(
-        new Population::Impl(h5FilePath, csvFilePath, name, ELEMENT)
-    ))
+    : Population(h5FilePath, csvFilePath, name, ELEMENT)
 {
 }
 
 
 std::string EdgePopulation::source() const
 {
+    HDF5_LOCK_GUARD
     std::string result;
     impl_->h5Root.getDataSet("source_node_id").getAttribute("node_population").read(result);
     return result;
@@ -34,6 +34,7 @@ std::string EdgePopulation::source() const
 
 std::string EdgePopulation::target() const
 {
+    HDF5_LOCK_GUARD
     std::string result;
     impl_->h5Root.getDataSet("target_node_id").getAttribute("node_population").read(result);
     return result;
@@ -42,6 +43,7 @@ std::string EdgePopulation::target() const
 
 std::vector<NodeID> EdgePopulation::sourceNodeIDs(const Selection& selection) const
 {
+    HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet("source_node_id");
     return _readSelection<NodeID>(dset, selection);
 }
@@ -49,6 +51,7 @@ std::vector<NodeID> EdgePopulation::sourceNodeIDs(const Selection& selection) co
 
 std::vector<NodeID> EdgePopulation::targetNodeIDs(const Selection& selection) const
 {
+    HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet("target_node_id");
     return _readSelection<NodeID>(dset, selection);
 }
@@ -110,6 +113,7 @@ Selection _resolveIndex(const HighFive::Group& indexGroup, const std::vector<Nod
 
 Selection EdgePopulation::afferentEdges(const std::vector<NodeID>& target) const
 {
+    HDF5_LOCK_GUARD
     const auto& indexGroup = impl_->h5Root.getGroup("indices/target_to_source");
     return _resolveIndex(indexGroup, target);
 }
@@ -117,6 +121,7 @@ Selection EdgePopulation::afferentEdges(const std::vector<NodeID>& target) const
 
 Selection EdgePopulation::efferentEdges(const std::vector<NodeID>& source) const
 {
+    HDF5_LOCK_GUARD
     const auto& indexGroup = impl_->h5Root.getGroup("indices/source_to_target");
     return _resolveIndex(indexGroup, source);
 }

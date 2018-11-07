@@ -12,9 +12,7 @@ namespace sonata {
 NodePopulation::NodePopulation(
     const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name
 )
-    : Population(std::unique_ptr<Population::Impl>(
-        new Population::Impl(h5FilePath, csvFilePath, name, ELEMENT)
-    ))
+    : Population(h5FilePath, csvFilePath, name, ELEMENT)
 {
 }
 
