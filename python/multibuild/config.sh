@@ -21,6 +21,6 @@ function pre_build
 
 function run_tests
 {
-    python --version
-    python -c 'from sonata import *'
+    cd /io
+    python python/test.py
 }

@@ -16,7 +16,7 @@ set_target_properties(sonata_python PROPERTIES
 
 target_link_libraries(sonata_python
     PRIVATE sonata_static
-    PRIVATE hdf5
+    PRIVATE HighFive
     PRIVATE pybind11::module
 )
 
