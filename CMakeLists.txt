@@ -4,6 +4,9 @@ set(LIBSONATA_VERSION 0.0.0)
 
 project(libsonata VERSION ${LIBSONATA_VERSION})
 
+option(EXTLIB_FROM_SUBMODULES "Use Git submodules for header-only dependencies" OFF)
+option(SONATA_PYTHON "Build Python extensions" OFF)
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
@@ -18,7 +21,12 @@ set(LIBSONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
 # Dependencies
 # =============================================================================
 
-add_subdirectory(extlib EXCLUDE_FROM_ALL)
+if (EXTLIB_FROM_SUBMODULES)
+    add_subdirectory(extlib EXCLUDE_FROM_ALL)
+else()
+    find_package(fmt REQUIRED)
+    find_package(HighFive REQUIRED)
+endif()
 
 # =============================================================================
 # Targets
@@ -42,7 +50,7 @@ target_compile_options(sonata_obj
 )
 target_include_directories(sonata_obj
     PRIVATE ${LIBSONATA_INCLUDE_DIR}
-    PRIVATE $<TARGET_PROPERTY:fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
@@ -90,4 +98,8 @@ endif()
 # Python bindings
 # =============================================================================
 
-add_subdirectory(python)
+if (SONATA_PYTHON)
+    add_subdirectory(python)
+else()
+    message(WARNING "SONATA_PYTHON not set, Python bindings won't be built")
+endif()

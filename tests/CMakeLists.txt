@@ -7,8 +7,7 @@ set(TESTS_SRC
 
 add_executable(unittests ${TESTS_SRC})
 target_link_libraries(unittests
-    PRIVATE sonata_static
-    PRIVATE HighFive
+    PRIVATE sonata_shared
 )
 
 add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})

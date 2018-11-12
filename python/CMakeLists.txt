@@ -1,11 +1,10 @@
-if (NOT SONATA_PYTHON)
-    message(WARNING "SONATA_PYTHON not set, Python bindings won't be built")
-    return()
-endif()
-
 set(LIBSONATA_PYTHON_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sonata)
 
-add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
+if (EXTLIB_FROM_SUBMODULES)
+    add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
+else()
+    find_package(pybind11)
+endif()
 
 add_library(sonata_python MODULE bindings.cpp)
 set_target_properties(sonata_python PROPERTIES
@@ -17,7 +16,7 @@ set_target_properties(sonata_python PROPERTIES
 target_link_libraries(sonata_python
     PRIVATE sonata_static
     PRIVATE HighFive
-    PRIVATE fmt-header-only
+    PRIVATE fmt::fmt-header-only
     PRIVATE pybind11::module
 )
 
