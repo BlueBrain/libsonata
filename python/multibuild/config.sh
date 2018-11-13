@@ -7,6 +7,7 @@ function pre_build
 
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
+        -DEXTLIB_FROM_SUBMODULES=ON \
         -DSONATA_PYTHON=ON \
         -DPYBIND11_PYTHON_VERSION=${MB_PYTHON_VERSION} \
        ..
