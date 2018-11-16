@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(LIBSONATA_VERSION 0.0.0)
+set(SONATA_VERSION_MAJOR "0")
+set(SONATA_VERSION_MINOR "0")
+set(SONATA_VERSION_PATCH "0")
 
-project(libsonata VERSION ${LIBSONATA_VERSION})
+set(SONATA_VERSION "${SONATA_VERSION_MAJOR}.${SONATA_VERSION_MINOR}.${SONATA_VERSION_PATCH}")
+set(SONATA_VERSION_ABI "${SONATA_VERSION_MAJOR}.${SONATA_VERSION_MINOR}")
+
+project(sonata VERSION ${SONATA_VERSION})
 
 option(EXTLIB_FROM_SUBMODULES "Use Git submodules for header-only dependencies" OFF)
 option(SONATA_PYTHON "Build Python extensions" OFF)
@@ -13,9 +18,9 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(LIBSONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+set(SONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
-set(LIBSONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
+set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
 
 # =============================================================================
 # Dependencies
@@ -32,7 +37,7 @@ endif()
 # Targets
 # =============================================================================
 
-set(LIBSONATA_SRC
+set(SONATA_SRC
     src/common.cpp
     src/edges.cpp
     src/hdf5_mutex.cpp
@@ -40,25 +45,33 @@ set(LIBSONATA_SRC
     src/population.cpp
 )
 
-add_library(sonata_obj OBJECT ${LIBSONATA_SRC})
+add_library(sonata_obj OBJECT ${SONATA_SRC})
 set_property(TARGET sonata_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_compile_definitions(sonata_obj
-    PUBLIC FMT_HEADER_ONLY=1
+    PRIVATE FMT_HEADER_ONLY=1
 )
 target_compile_options(sonata_obj
-    PUBLIC ${LIBSONATA_COMPILE_OPTIONS}
+    PRIVATE ${SONATA_COMPILE_OPTIONS}
 )
 target_include_directories(sonata_obj
-    PRIVATE ${LIBSONATA_INCLUDE_DIR}
+    PRIVATE ${SONATA_INCLUDE_DIR}
     PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 add_library(sonata_shared SHARED $<TARGET_OBJECTS:sonata_obj>)
-set_target_properties(sonata_shared PROPERTIES OUTPUT_NAME "sonata")
-target_include_directories(sonata_shared
-    PUBLIC ${LIBSONATA_INCLUDE_DIR}
+set_target_properties(sonata_shared
+    PROPERTIES
+        OUTPUT_NAME "sonata"
+        VERSION ${SONATA_VERSION}
+        SOVERSION ${SONATA_VERSION_ABI}
 )
+target_include_directories(sonata_shared
+    INTERFACE
+        $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
+        $<INSTALL_INTERFACE:include>
+)
+
 target_link_libraries(sonata_shared
     PRIVATE HighFive
 )
@@ -66,16 +79,35 @@ target_link_libraries(sonata_shared
 add_library(sonata_static STATIC $<TARGET_OBJECTS:sonata_obj>)
 set_target_properties(sonata_static PROPERTIES OUTPUT_NAME "sonata")
 target_include_directories(sonata_static
-    PUBLIC ${LIBSONATA_INCLUDE_DIR}
+    INTERFACE
+        $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
+        $<INSTALL_INTERFACE:include>
 )
 
 # =============================================================================
 # Install
 # =============================================================================
 
-install(TARGETS sonata_shared DESTINATION lib OPTIONAL)
-install(TARGETS sonata_static DESTINATION lib OPTIONAL)
-install(DIRECTORY ${LIBSONATA_INCLUDE_DIR}/bbp DESTINATION include OPTIONAL)
+install(TARGETS sonata_shared sonata_static
+    EXPORT sonata-targets
+    LIBRARY
+        DESTINATION lib
+    ARCHIVE
+        DESTINATION lib
+)
+
+install(DIRECTORY ${SONATA_INCLUDE_DIR}/bbp
+    DESTINATION include
+)
+
+install(FILES CMake/sonata-config.cmake
+    DESTINATION share/sonata/CMake
+)
+
+install(EXPORT sonata-targets
+    DESTINATION share/sonata/CMake
+    NAMESPACE sonata::
+)
 
 # =============================================================================
 # Testing
@@ -100,6 +132,4 @@ endif()
 
 if (SONATA_PYTHON)
     add_subdirectory(python)
-else()
-    message(WARNING "SONATA_PYTHON not set, Python bindings won't be built")
 endif()
