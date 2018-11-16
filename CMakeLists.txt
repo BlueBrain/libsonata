@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3)
+cmake_policy(VERSION 3.3)
 
 set(SONATA_VERSION_MAJOR "0")
 set(SONATA_VERSION_MINOR "0")
@@ -45,43 +46,46 @@ set(SONATA_SRC
     src/population.cpp
 )
 
-add_library(sonata_obj OBJECT ${SONATA_SRC})
-set_property(TARGET sonata_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
-target_compile_definitions(sonata_obj
-    PRIVATE FMT_HEADER_ONLY=1
-)
-target_compile_options(sonata_obj
-    PRIVATE ${SONATA_COMPILE_OPTIONS}
-)
-target_include_directories(sonata_obj
-    PRIVATE ${SONATA_INCLUDE_DIR}
-    PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
-    PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
-)
+add_library(sonata_shared SHARED ${SONATA_SRC})
+add_library(sonata_static STATIC ${SONATA_SRC})
 
-add_library(sonata_shared SHARED $<TARGET_OBJECTS:sonata_obj>)
+foreach(TARGET sonata_shared sonata_static)
+    set_target_properties(${TARGET}
+        PROPERTIES
+            POSITION_INDEPENDENT_CODE ON
+            CXX_VISIBILITY_PRESET hidden
+            OUTPUT_NAME "sonata"
+    )
+    target_include_directories(${TARGET}
+        PUBLIC
+            $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_compile_options(${TARGET}
+        PRIVATE ${SONATA_COMPILE_OPTIONS}
+    )
+endforeach(TARGET)
+
 set_target_properties(sonata_shared
     PROPERTIES
-        OUTPUT_NAME "sonata"
         VERSION ${SONATA_VERSION}
         SOVERSION ${SONATA_VERSION_ABI}
 )
-target_include_directories(sonata_shared
-    INTERFACE
-        $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
-        $<INSTALL_INTERFACE:include>
+target_compile_definitions(sonata_shared
+    PUBLIC SONATA_DLL
+    PRIVATE SONATA_DLL_EXPORTS
 )
-
 target_link_libraries(sonata_shared
+    PRIVATE fmt::fmt-header-only
     PRIVATE HighFive
 )
 
-add_library(sonata_static STATIC $<TARGET_OBJECTS:sonata_obj>)
-set_target_properties(sonata_static PROPERTIES OUTPUT_NAME "sonata")
+target_compile_definitions(sonata_static
+    PRIVATE FMT_HEADER_ONLY=1
+)
 target_include_directories(sonata_static
-    INTERFACE
-        $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
-        $<INSTALL_INTERFACE:include>
+    PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 # =============================================================================

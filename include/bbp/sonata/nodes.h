@@ -12,7 +12,7 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
-class NodePopulation : public Population
+class SONATA_API NodePopulation : public Population
 {
 public:
     constexpr static const char* ELEMENT = "node";

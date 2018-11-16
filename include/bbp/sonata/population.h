@@ -14,7 +14,7 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
-class Selection
+class SONATA_API Selection
 {
 public:
     using Value = uint64_t;
@@ -41,7 +41,7 @@ private:
 
 //--------------------------------------------------------------------------------------------------
 
-class Population
+class SONATA_API Population
 {
 public:
     /**
@@ -138,7 +138,7 @@ protected:
 //--------------------------------------------------------------------------------------------------
 
 template<typename Population>
-class PopulationStorage
+class SONATA_API PopulationStorage
 {
 public:
     PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath = "");

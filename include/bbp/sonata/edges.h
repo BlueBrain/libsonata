@@ -12,7 +12,7 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
-class EdgePopulation : public Population
+class SONATA_API EdgePopulation : public Population
 {
 public:
     constexpr static const char* ELEMENT = "edge";
