@@ -22,12 +22,18 @@ std::ostream& operator<<(std::ostream& oss, const Selection& selection)
     return oss;
 }
 
-}  // unnamed namespace
+}
 
+
+namespace bbp {
+namespace sonata {
 
 bool operator==(const Selection& lhs, const Selection& rhs)
 {
     return lhs.ranges() == rhs.ranges();
+}
+
+}
 }
 
 
