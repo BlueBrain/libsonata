@@ -6,13 +6,33 @@ import h5py
 
 def write_population_one_group(pop, prefix):
     string_dtype = h5py.special_dtype(vlen=unicode)
+
     pop.create_dataset('%s_group_id' % prefix, data=np.zeros(6), dtype=np.uint8)
     pop.create_dataset('%s_group_index' % prefix, data=np.arange(6), dtype=np.uint16)
     pop.create_dataset('%s_type_id' % prefix, data=np.full(6, -1), dtype=np.int32)
+
     attrs = pop.create_group('0')
     attrs.create_dataset('attr-X', data=np.arange(11., 17.), dtype=np.float64)
     attrs.create_dataset('attr-Y', data=np.arange(21., 27.), dtype=np.int64)
     attrs.create_dataset('attr-Z', data=[(2 * x) for x in 'abcdef'], dtype=string_dtype)
+
+    # All supported dtypes
+    attrs.create_dataset('A-double', dtype=np.float64)
+    attrs.create_dataset('A-float', dtype=np.float32)
+    attrs.create_dataset('A-int64', dtype=np.int64)
+    attrs.create_dataset('A-int32', dtype=np.int32)
+    attrs.create_dataset('A-int16', dtype=np.int16)
+    attrs.create_dataset('A-int8', dtype=np.int8)
+    attrs.create_dataset('A-uint64', dtype=np.uint64)
+    attrs.create_dataset('A-uint32', dtype=np.uint32)
+    attrs.create_dataset('A-uint16', dtype=np.uint16)
+    attrs.create_dataset('A-uint8', dtype=np.uint8)
+    attrs.create_dataset('A-string', dtype=string_dtype)
+
+    # Unsupported dtype
+    enum_dtype = h5py.special_dtype(enum=('i', {"RED": 0, "GREEN": 1}))
+    attrs.create_dataset('A-enum', data=[0, 1], dtype=enum_dtype)
+
     dparams = attrs.create_group('dynamics_params')
     dparams.create_dataset('dparam-X', data=np.arange(1011., 1017.), dtype=np.float64)
     dparams.create_dataset('dparam-Y', data=np.arange(1021., 1027.), dtype=np.int64)

@@ -23,6 +23,12 @@ set(SONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
 set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(ENABLE_COVERAGE ON)
+else()
+    set(ENABLE_COVERAGE OFF)
+endif()
+
 # =============================================================================
 # Dependencies
 # =============================================================================
@@ -64,6 +70,14 @@ foreach(TARGET sonata_shared sonata_static)
     target_compile_options(${TARGET}
         PRIVATE ${SONATA_COMPILE_OPTIONS}
     )
+    if (ENABLE_COVERAGE)
+        target_compile_options(${TARGET}
+            PRIVATE -g -O0 --coverage -fprofile-arcs -ftest-coverage
+        )
+        target_link_libraries(${TARGET}
+            PRIVATE gcov
+        )
+    endif()
 endforeach(TARGET)
 
 set_target_properties(sonata_shared
@@ -120,10 +134,9 @@ install(EXPORT sonata-targets
 enable_testing()
 add_subdirectory(tests)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (ENABLE_COVERAGE)
     include(CodeCoverage)
-    append_coverage_compiler_flags()
-    set(COVERAGE_GCOVR_EXCLUDES ${PROJECT_SOURCE_DIR}/extlib)
+    set(COVERAGE_GCOVR_EXCLUDES ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/extlib)
     setup_target_for_coverage_gcovr_xml(
         NAME coverage
         EXECUTABLE ctest

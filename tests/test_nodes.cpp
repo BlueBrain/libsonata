@@ -18,7 +18,10 @@ TEST_CASE("NodePopulation", "[base]")
 
     REQUIRE(population.size() == 6);
 
-    REQUIRE(population.attributeNames() == std::set<std::string>{"attr-X", "attr-Y", "attr-Z"});
+    REQUIRE(population.attributeNames() == std::set<std::string>{
+      "attr-X", "attr-Y", "attr-Z",
+      "A-double", "A-float", "A-int64", "A-int32", "A-int16", "A-int8", "A-uint64", "A-uint32", "A-uint16", "A-uint8", "A-string", "A-enum"
+    });
 
     CHECK(
        population.getAttribute<double>("attr-X", Selection({{0, 1}, {5, 6}})) == std::vector<double>{11.0, 16.0}
@@ -64,9 +67,21 @@ TEST_CASE("NodePopulation", "[base]")
        SonataError
     );
 
-    CHECK(population._attributeDataType("attr-X") == "double");
-    CHECK(population._attributeDataType("attr-Y") == "int64_t");
-    CHECK(population._attributeDataType("attr-Z") == "string");
+    CHECK(population._attributeDataType("A-double") == "double");
+    CHECK(population._attributeDataType("A-float") == "float");
+    CHECK(population._attributeDataType("A-int64") == "int64_t");
+    CHECK(population._attributeDataType("A-int32") == "int32_t");
+    CHECK(population._attributeDataType("A-int16") == "int16_t");
+    CHECK(population._attributeDataType("A-int8") == "int8_t");
+    CHECK(population._attributeDataType("A-uint64") == "uint64_t");
+    CHECK(population._attributeDataType("A-uint32") == "uint32_t");
+    CHECK(population._attributeDataType("A-uint16") == "uint16_t");
+    CHECK(population._attributeDataType("A-uint8") == "uint8_t");
+    CHECK(population._attributeDataType("A-string") == "string");
+    CHECK_THROWS_AS(
+      population._attributeDataType("A-enum"),
+      SonataError
+    );
     CHECK_THROWS_AS(
        population._attributeDataType("no-such-attribute"),
        SonataError
