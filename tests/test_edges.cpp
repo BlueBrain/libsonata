@@ -65,6 +65,9 @@ TEST_CASE("EdgePopulation", "[edges]")
     CHECK(
         population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}})
     );
+    CHECK(
+        population.afferentEdges({999}).empty()
+    );
 
     CHECK(
         population.efferentEdges({}).empty()
@@ -80,6 +83,9 @@ TEST_CASE("EdgePopulation", "[edges]")
     );
     CHECK(
         population.efferentEdges({1, 2}) == Selection({{0, 4}})
+    );
+    CHECK(
+        population.efferentEdges({999}).empty()
     );
 
     CHECK(
@@ -99,6 +105,9 @@ TEST_CASE("EdgePopulation", "[edges]")
     );
     CHECK(
         population.connectingEdges({0, 1, 2, 3}, {2}) == Selection({{1, 2}, {5, 6}})
+    );
+    CHECK(
+        population.connectingEdges({999}, {999}).empty()
     );
     // duplicate node IDs are ignored; order of node IDs is not relevant
     CHECK(
