@@ -28,7 +28,17 @@ class TestNodePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj.size, 6)
 
     def test_attribute_names(self):
-        self.assertEqual(self.test_obj.attribute_names, {"attr-X", "attr-Y", "attr-Z"})
+        self.assertEqual(
+            self.test_obj.attribute_names,
+            {
+                'attr-X', 'attr-Y', 'attr-Z',
+                'A-int8', 'A-int16', 'A-int32', 'A-int64',
+                'A-uint8', 'A-uint16', 'A-uint32', 'A-uint64',
+                'A-float', 'A-double',
+                'A-string',
+                'A-enum',
+            }
+        )
 
     def test_get_attribute(self):
         self.assertEqual(self.test_obj.get_attribute('attr-X', 0), 11.)
