@@ -63,6 +63,12 @@ Selection _resolveIndex(const HighFive::Group& indexGroup, const NodeID nodeID)
 {
     typedef std::vector<std::vector<uint64_t>> RawIndex;
 
+    if (nodeID >= indexGroup.getDataSet("node_id_to_ranges").getSpace().getDimensions()[0]) {
+        // Returning empty set for out-of-range node IDs, to be aligned with SYN2 reader implementation
+        // TODO: throw a SonataError instead
+        return Selection({});
+    }
+
     RawIndex primaryRange;
     indexGroup
         .getDataSet("node_id_to_ranges")
