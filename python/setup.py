@@ -3,7 +3,7 @@
 from setuptools import setup, Distribution
 from setuptools.command.install import install
 
-from sonata import __version__
+from libsonata import __version__
 
 
 class BinaryDistribution(Distribution):
@@ -24,10 +24,10 @@ class InstallPlatlib(install):
 
 
 setup(
-    name='sonata',
+    name='libsonata',
     version=__version__,
     packages=[
-        'sonata',
+        'libsonata',
     ],
     package_data={
         '': [

@@ -284,7 +284,7 @@ py::class_<Storage> bindStorageClass(
 } // unnamed namespace
 
 
-PYBIND11_MODULE(_sonata, m)
+PYBIND11_MODULE(_libsonata_python, m)
 {
     py::class_<Selection>(
         m, "Selection", "ID sequence in the form convenient for querying attributes"

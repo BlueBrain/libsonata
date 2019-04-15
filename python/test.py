@@ -1,6 +1,6 @@
 import unittest
 
-from sonata import *
+from libsonata import *
 
 
 class TestSelection(unittest.TestCase):
