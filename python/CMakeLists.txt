@@ -21,7 +21,7 @@ target_link_libraries(sonata_python
 )
 
 configure_file(
-    sonata/__init__.py.in
+    libsonata/__init__.py.in
     ${SONATA_PYTHON_BUILD}/__init__.py
 )
 
