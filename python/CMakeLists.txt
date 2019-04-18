@@ -1,4 +1,4 @@
-set(SONATA_PYTHON_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sonata)
+set(SONATA_PYTHON_BUILD ${CMAKE_CURRENT_BINARY_DIR}/libsonata)
 
 if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
@@ -9,7 +9,7 @@ endif()
 add_library(sonata_python MODULE bindings.cpp)
 set_target_properties(sonata_python PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "_sonata"
+    OUTPUT_NAME "_libsonata_python"
     LIBRARY_OUTPUT_DIRECTORY ${SONATA_PYTHON_BUILD}
 )
 
@@ -21,7 +21,7 @@ target_link_libraries(sonata_python
 )
 
 configure_file(
-    sonata/__init__.py.in
+    libsonata/__init__.py.in
     ${SONATA_PYTHON_BUILD}/__init__.py
 )
 

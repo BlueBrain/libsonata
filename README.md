@@ -9,7 +9,7 @@ https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE
 ### NodeStorage
 
 ```
->> from sonata import NodeStorage
+>> from libsonata import NodeStorage
 
 >> nodes = NodeStorage(<path to H5 file>)
 
@@ -49,7 +49,7 @@ For instance, `{1, 2, 3, 5}` sequence becomes `{[1, 4), [5, 6)}`.
 
 ```
 >> import numpy as np
->> from sonata import Selection
+>> from libsonata import Selection
 
 >> selection = Selection(np.asarray([1, 2, 3, 5]))
 >> selection.ranges
@@ -86,7 +86,7 @@ False
 Analogous to `NodeStorage`.
 
 ```
->> from sonata import EdgeStorage
+>> from libsonata import EdgeStorage
 
 >> edges = EdgeStorage(<path to H5 file>)
 
