@@ -4,6 +4,7 @@ import unittest
 from libsonata import *
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+PATH = os.path.join(PATH, '../tests/data')
 
 class TestSelection(unittest.TestCase):
     def test_basic(self):
@@ -21,7 +22,7 @@ class TestSelection(unittest.TestCase):
 
 class TestNodePopulation(unittest.TestCase):
     def setUp(self):
-        path = os.path.join(PATH, '../tests/data/nodes1.h5')
+        path = os.path.join(PATH, 'nodes1.h5')
         self.test_obj = NodeStorage(path).open_population('nodes-A')
 
     def test_name(self):
@@ -72,7 +73,7 @@ class TestNodePopulation(unittest.TestCase):
 
 class TestEdgePopulation(unittest.TestCase):
     def setUp(self):
-        path = os.path.join(PATH, '../tests/data/edges1.h5')
+        path = os.path.join(PATH, 'edges1.h5')
         self.test_obj = EdgeStorage(path).open_population('edges-AB')
 
     def test_source(self):
