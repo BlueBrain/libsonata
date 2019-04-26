@@ -55,7 +55,7 @@ set(SONATA_SRC
 
 configure_file (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
   )
 
 add_library(sonata_shared SHARED ${SONATA_SRC})
