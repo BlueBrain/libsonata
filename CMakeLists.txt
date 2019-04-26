@@ -50,7 +50,7 @@ set(SONATA_SRC
     src/hdf5_mutex.cpp
     src/nodes.cpp
     src/population.cpp
-    src/version.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
     )
 
 configure_file (

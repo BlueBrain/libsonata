@@ -1,5 +1,5 @@
 build
 .eggs/
 .tox/
-libsonata.cpython-36m-x86_64-linux-gnu.so
+libsonata.cpython-*.so
 python/__pycache__/

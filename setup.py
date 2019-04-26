@@ -117,7 +117,7 @@ class PkgTest(test):
     sub_commands = test.sub_commands + new_commands
 
     def run(self):
-        super().run()
+        super(PkgTest, self).run()
         self.run_command('test_ext')
         self.run_command('test_doc')
 
