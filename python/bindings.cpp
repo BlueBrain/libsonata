@@ -140,7 +140,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
     const char* docString
 )
 {
-    m.attr("version") = VERSION;
+    m.attr("version") = version();
 
     const auto imbueElementName = [](const char* msg) {
         return fmt::format(msg, fmt::arg("elem", Population::ELEMENT));

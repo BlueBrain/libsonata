@@ -4,6 +4,8 @@
 
 namespace bbp {
 namespace sonata {
-const std::string VERSION("@SONATA_VERSION@");
+const std::string version() {
+    return "@SONATA_VERSION@";
+}
 }
 }
