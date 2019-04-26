@@ -1,1 +1,6 @@
 build
+src/version.cpp
+.eggs/
+.tox/
+libsonata.cpython-36m-x86_64-linux-gnu.so
+python/__pycache__/
