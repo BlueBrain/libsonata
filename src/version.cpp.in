@@ -1,0 +1,11 @@
+#include <string>
+
+#include <bbp/sonata/common.h>
+
+namespace bbp {
+namespace sonata {
+const std::string version() {
+    return "@SONATA_VERSION@";
+}
+}
+}

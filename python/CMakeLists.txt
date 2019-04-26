@@ -6,11 +6,10 @@ else()
     find_package(pybind11)
 endif()
 
-add_library(sonata_python MODULE bindings.cpp)
+pybind11_add_module(sonata_python SYSTEM bindings.cpp)
+
 set_target_properties(sonata_python PROPERTIES
-    PREFIX ""
-    OUTPUT_NAME "_libsonata_python"
-    LIBRARY_OUTPUT_DIRECTORY ${SONATA_PYTHON_BUILD}
+    OUTPUT_NAME "libsonata"
 )
 
 target_link_libraries(sonata_python
@@ -19,17 +18,3 @@ target_link_libraries(sonata_python
     PRIVATE fmt::fmt-header-only
     PRIVATE pybind11::module
 )
-
-configure_file(
-    libsonata/__init__.py.in
-    ${SONATA_PYTHON_BUILD}/__init__.py
-)
-
-if (PYTHON_INSTALL_SUFFIX)
-    install(
-        DIRECTORY ${SONATA_PYTHON_BUILD}
-        DESTINATION ${PYTHON_INSTALL_SUFFIX}
-    )
-else()
-    message(WARNING "PYTHON_INSTALL_SUFFIX not set, Python bindings won't be installed")
-endif()
