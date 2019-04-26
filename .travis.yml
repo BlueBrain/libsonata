@@ -1,18 +1,14 @@
-matrix:
-  include:
-    - os: linux
-      dist: trusty
-      sudo: required
-
-cache:
-  directories:
-    - $HOME/.cache/pip
-
+os: linux
+dist: trusty
 language: python
 sudo: required
 python:
   - 3.6
   - 2.7
+
+cache:
+  directories:
+    - $HOME/.cache/pip
 
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; else brew install hdf5; fi

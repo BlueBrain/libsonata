@@ -1,5 +1,4 @@
 import inspect
-import multiprocessing
 import os
 import os.path as osp
 import platform
@@ -91,7 +90,7 @@ class CMakeBuild(build_ext, object):
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
         else:
-            build_args += ["--", "-j{}".format(max(1, multiprocessing.cpu_count() - 1))]
+            build_args += ["--", "-j"]
 
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
