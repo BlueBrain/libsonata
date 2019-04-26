@@ -2,6 +2,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
+#include <bbp/sonata/common.h>
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
 
@@ -28,6 +29,7 @@ py::capsule freeWhenDone(T *ptr)
         delete reinterpret_cast<T*>(p);
     });
 }
+
 
 
 // This little beauty passes std::vector data to NumPy array without extra copy.
@@ -138,6 +140,8 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
     const char* docString
 )
 {
+    m.attr("version") = VERSION;
+
     const auto imbueElementName = [](const char* msg) {
         return fmt::format(msg, fmt::arg("elem", Population::ELEMENT));
     };

@@ -129,7 +129,7 @@ setup(
     name="libsonata",
     description='SONATA files reader',
     author="BlueBrain Project, EPFL",
-    author_email="bbp-ou-hpc@groupes.epfl.ch",
+    author_email="bbp-ou-nse@groupes.epfl.ch",
     classifiers=[],
     ext_modules=[CMakeExtension("libsonata")],
     cmdclass=lazy_dict(
@@ -140,7 +140,6 @@ setup(
     ),
     zip_safe=False,
     use_scm_version=True,
-    python_requires=">=3.5",
     install_requires=install_requirements,
     setup_requires=["setuptools_scm"],
 )
