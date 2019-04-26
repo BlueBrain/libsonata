@@ -4,6 +4,7 @@ https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE
 # Installation
 
 ## Building the C++ library
+
 ```
 git clone git@github.com:BlueBrain/libsonata.git --recursive
 cd libsonata
@@ -13,6 +14,7 @@ make -j
 ```
 
 ## Installing as a Python package
+
 ```
 git clone git@github.com:BlueBrain/libsonata.git --recursive
 cd libsonata
