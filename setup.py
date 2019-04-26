@@ -72,17 +72,14 @@ class CMakeBuild(build_ext):
         # extdir = osp.join(extdir, 'libsonata')
         print("extdir: {}".format(extdir))
         print("CMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir)
-        cmake_project = ext.name[1:].capitalize()
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
-            "-DPYTHON_INSTALL_SUFFIX=" + sys.executable,
             "-DEXTLIB_FROM_SUBMODULES=ON",
             "-DSONATA_PYTHON=ON",
             "-DCMAKE_BUILD_TYPE=",
         ]
 
         optimize = "OFF" if self.debug else "ON"
-        cmake_args += ["-D" + cmake_project + "_CXX_OPTIMIZE:BOOL=" + optimize]
         build_args = ["--config", optimize, "--target", self.target]
 
         if platform.system() == "Windows":
