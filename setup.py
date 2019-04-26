@@ -1,4 +1,5 @@
 import inspect
+import multiprocessing
 import os
 import os.path as osp
 import platform
@@ -39,7 +40,7 @@ class CMakeExtension(Extension):
         self.sourcedir = osp.abspath(sourcedir)
 
 
-class CMakeBuild(build_ext):
+class CMakeBuild(build_ext, object):
     user_options = build_ext.user_options + [
         ('target=', None, "specify the CMake target to build")
     ]
@@ -69,14 +70,12 @@ class CMakeBuild(build_ext):
 
     def build_extension(self, ext):
         extdir = osp.abspath(osp.dirname(self.get_ext_fullpath(ext.name)))
-        # extdir = osp.join(extdir, 'libsonata')
-        print("extdir: {}".format(extdir))
-        print("CMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir)
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DEXTLIB_FROM_SUBMODULES=ON",
             "-DSONATA_PYTHON=ON",
             "-DCMAKE_BUILD_TYPE=",
+            '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
         optimize = "OFF" if self.debug else "ON"
@@ -92,7 +91,7 @@ class CMakeBuild(build_ext):
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
         else:
-            build_args += ["--", "-j{}".format(max(1, os.cpu_count() - 1))]
+            build_args += ["--", "-j{}".format(max(1, multiprocessing.cpu_count() - 1))]
 
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
