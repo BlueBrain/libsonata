@@ -16,11 +16,11 @@ python:
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; else brew install hdf5; fi
   - pip install --upgrade pip
-  - pip install virtualenv nose
+  - pip install virtualenv
   - virtualenv env && source env/bin/activate
 
 install:
-  - pip install .
+  - pip install nose .
 
 script:
   - nosetests python
