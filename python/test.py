@@ -1,7 +1,9 @@
+import os
 import unittest
 
 from libsonata import *
 
+PATH = os.path.dirname(os.path.realpath(__file__))
 
 class TestSelection(unittest.TestCase):
     def test_basic(self):
@@ -19,7 +21,8 @@ class TestSelection(unittest.TestCase):
 
 class TestNodePopulation(unittest.TestCase):
     def setUp(self):
-        self.test_obj = NodeStorage('./tests/data/nodes1.h5').open_population('nodes-A')
+        path = os.path.join(PATH, '../tests/data/nodes1.h5')
+        self.test_obj = NodeStorage(path).open_population('nodes-A')
 
     def test_name(self):
         self.assertEqual(self.test_obj.name, "nodes-A")
@@ -69,7 +72,8 @@ class TestNodePopulation(unittest.TestCase):
 
 class TestEdgePopulation(unittest.TestCase):
     def setUp(self):
-        self.test_obj = EdgeStorage('./tests/data/edges1.h5').open_population('edges-AB')
+        path = os.path.join(PATH, '../tests/data/edges1.h5')
+        self.test_obj = EdgeStorage(path).open_population('edges-AB')
 
     def test_source(self):
         self.assertEqual(self.test_obj.source, 'nodes-A')
