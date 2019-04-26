@@ -1,18 +1,29 @@
+language: python
+
 matrix:
   include:
     - os: linux
       dist: trusty
       sudo: required
+      python: 3.6
+    - os: linux
+      dist: trusty
+      sudo: required
+      python: 2.7
+
     - os: osx
       osx_image: xcode10.1
-language: python
-python:
-  - 3.6
-  - 2.7
+      language: generic
+      python: 3.6
+    - os: osx
+      osx_image: xcode10.1
+      language: generic
+      python: 2.7
 
 cache:
   directories:
     - $HOME/.cache/pip
+    - $HOME/Library/Caches/Homebrew
 
 before_install:
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; else brew install hdf5; fi
@@ -25,4 +36,4 @@ install:
 
 script:
   - nosetests python &&
-    rm -rf build && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DEXTLIB_FROM_SUBMODULES=ON .. && make test
+    rm -rf build && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DEXTLIB_FROM_SUBMODULES=ON .. && make && make test
