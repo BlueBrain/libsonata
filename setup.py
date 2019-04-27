@@ -123,11 +123,15 @@ install_requirements = [
     "numpy>=1.12.0",
 ]
 
+with open('VERSION') as versionf:
+    version = versionf.readline().strip()
+
 setup(
     name="libsonata",
     description='SONATA files reader',
     author="BlueBrain Project, EPFL",
     author_email="bbp-ou-nse@groupes.epfl.ch",
+    version=version,
     classifiers=[],
     ext_modules=[CMakeExtension("libsonata")],
     cmdclass=lazy_dict(
@@ -137,7 +141,6 @@ setup(
         test_doc=get_sphinx_command,
     ),
     zip_safe=False,
-    use_scm_version=True,
     install_requires=install_requirements,
     setup_requires=["setuptools_scm"],
 )
