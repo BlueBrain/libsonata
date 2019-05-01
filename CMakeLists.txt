@@ -21,7 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
-if(${PROJECT_NAME}_CXX_WARNINGS)
+if(SONATA_CXX_WARNINGS)
   set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
 else()
   set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic)
