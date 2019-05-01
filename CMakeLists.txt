@@ -11,6 +11,7 @@ project(sonata VERSION ${SONATA_VERSION})
 
 option(EXTLIB_FROM_SUBMODULES "Use Git submodules for header-only dependencies" OFF)
 option(SONATA_PYTHON "Build Python extensions" OFF)
+option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -20,7 +21,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
-set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
+if(${PROJECT_NAME}_CXX_WARNINGS)
+  set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
+else()
+  set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic)
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(ENABLE_COVERAGE ON)

@@ -74,6 +74,7 @@ class CMakeBuild(build_ext, object):
             "-DEXTLIB_FROM_SUBMODULES=ON",
             "-DSONATA_PYTHON=ON",
             "-DCMAKE_BUILD_TYPE=",
+            "-DSONATA_CXX_WARNINGS=OFF",
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
