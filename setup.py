@@ -128,6 +128,7 @@ with open('VERSION') as versionf:
     version = versionf.readline().strip()
 
 setup(
+
     name="libsonata",
     description='SONATA files reader',
     author="BlueBrain Project, EPFL",
