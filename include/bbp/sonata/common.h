@@ -1,3 +1,12 @@
+/*************************************************************************
+ * Copyright (C) 2018-2019 Blue Brain Project
+ *
+ * This file is part of 'libsonata', distributed under the terms
+ * of the GNU Lesser General Public License.
+ *
+ * See top-level LICENSE.txt file for details.
+ *************************************************************************/
+
 #pragma once
 
 #include <cstdint>
