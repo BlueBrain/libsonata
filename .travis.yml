@@ -26,13 +26,14 @@ cache:
     - $HOME/Library/Caches/Homebrew
 
 before_install:
+  - rm -rf dist *.egg-info && python setup.py sdist
   - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; else brew install hdf5; fi
   - pip install --upgrade pip
   - pip install virtualenv
   - virtualenv env && source env/bin/activate
 
 install:
-  - pip install nose .
+  - pip install nose dist/*.tar.gz
 
 script:
   - nosetests python &&
