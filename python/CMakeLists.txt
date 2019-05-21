@@ -1,5 +1,3 @@
-set(SONATA_PYTHON_BUILD ${CMAKE_CURRENT_BINARY_DIR}/libsonata)
-
 if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
 else()
@@ -18,3 +16,10 @@ target_link_libraries(sonata_python
     PRIVATE fmt::fmt-header-only
     PRIVATE pybind11::module
 )
+
+if (PYTHON_INSTALL_SUFFIX)
+    install(TARGETS sonata_python
+        LIBRARY
+        DESTINATION ${PYTHON_INSTALL_SUFFIX}
+    )
+endif()
