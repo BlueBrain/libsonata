@@ -31,6 +31,7 @@ py::capsule freeWhenDone(T *ptr)
 }
 
 
+
 // This little beauty passes std::vector data to NumPy array without extra copy.
 // For the details, please refer to:
 // https://github.com/pybind/pybind11/issues/1042#issuecomment-325941022
@@ -287,7 +288,7 @@ py::class_<Storage> bindStorageClass(
 } // unnamed namespace
 
 
-PYBIND11_MODULE(_libsonata_python, m)
+PYBIND11_MODULE(libsonata, m)
 {
     py::class_<Selection>(
         m, "Selection", "ID sequence in the form convenient for querying attributes"
