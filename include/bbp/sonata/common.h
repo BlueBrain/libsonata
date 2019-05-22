@@ -34,7 +34,6 @@
 
 namespace bbp {
 namespace sonata {
-const std::string version();
 
 using NodeID = uint64_t;
 using EdgeID = uint64_t;
