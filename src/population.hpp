@@ -39,32 +39,6 @@ std::set<std::string> _listChildren(const HighFive::Group& group, const std::set
 }
 
 
-template<typename Iterator>
-Selection _selectionFromValues(Iterator first, Iterator last)
-{
-    Selection::Ranges ranges;
-
-    Selection::Range range{ 0, 0 };
-    for (Iterator it = first; it != last; ++it) {
-        if (*it == range.second) {
-            ++range.second;
-        } else {
-            if (range.first < range.second) {
-                ranges.push_back(range);
-            }
-            range.first = *it;
-            range.second = *it + 1;
-        }
-    }
-
-    if (range.first < range.second) {
-        ranges.push_back(range);
-    }
-
-    return Selection(std::move(ranges));
-}
-
-
 template<typename T>
 std::vector<T> _readChunk(const HighFive::DataSet& dset, const Selection::Range& range)
 {

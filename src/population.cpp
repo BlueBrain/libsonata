@@ -49,7 +49,26 @@ Selection::Selection(const Selection::Ranges& ranges)
 
 Selection Selection::fromValues(const Selection::Values& values)
 {
-    return _selectionFromValues(values.begin(), values.end());
+    Selection::Ranges ranges;
+
+    Selection::Range range{ 0, 0 };
+    for (const auto v: values) {
+        if (v == range.second) {
+            ++range.second;
+        } else {
+            if (range.first < range.second) {
+                ranges.push_back(range);
+            }
+            range.first = v;
+            range.second = v + 1;
+        }
+    }
+
+    if (range.first < range.second) {
+        ranges.push_back(range);
+    }
+
+    return Selection(std::move(ranges));
 }
 
 
