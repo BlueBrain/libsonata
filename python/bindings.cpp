@@ -433,6 +433,16 @@ PYBIND11_MODULE(libsonata, m)
             "target"_a,
             "Find all edges connecting two given node sets"
         )
+        .def_static(
+        "write_indices",
+            &EdgePopulation::writeIndices,
+            "h5_filepath"_a,
+            "population"_a,
+            "max_source_node_id"_a,
+            "max_target_node_id"_a,
+            "overwrite"_a,
+            "Write bidirectional node->edge indices to EdgePopulation HDF5"
+        )
         ;
 
     bindStorageClass<EdgeStorage>(

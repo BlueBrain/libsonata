@@ -114,6 +114,22 @@ Selection EdgePopulation::connectingEdges(const std::vector<NodeID>& source, con
 
 //--------------------------------------------------------------------------------------------------
 
+void EdgePopulation::writeIndices(
+    const std::string& h5FilePath, const std::string& population,
+    NodeID maxSourceNodeID,
+    NodeID maxTargetNodeID,
+    bool overwrite
+)
+{
+    HDF5_LOCK_GUARD
+    HighFive::File h5File(h5FilePath, HighFive::File::ReadWrite);
+    auto h5Root = h5File.getGroup(fmt::format("/edges/{}", population));
+    edge_index::write(h5Root, maxSourceNodeID, maxTargetNodeID, overwrite);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+
 constexpr const char* EdgePopulation::ELEMENT;
 
 template class PopulationStorage<EdgePopulation>;

@@ -2,7 +2,9 @@
 
 #include <bbp/sonata/edges.h>
 
+#include <cstdio>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -113,6 +115,61 @@ TEST_CASE("EdgePopulation", "[edges]")
     CHECK(
         population.connectingEdges({2, 1, 2}, {2, 1, 2}) == Selection({{0, 4}})
     );
+}
+
+
+namespace {
+
+// TODO: remove after switching to C++17
+void copyFile(const std::string& srcFilePath, const std::string& dstFilePath)
+{
+    std::ifstream src(srcFilePath, std::ios::binary);
+    std::ofstream dst(dstFilePath, std::ios::binary);
+    dst << src.rdbuf();
+}
+
+}  // unnamed namespace
+
+
+TEST_CASE("EdgePopulation::writeIndices", "[edges]")
+{
+    const std::string srcFilePath = "./data/edges-no-index.h5";
+    const std::string dstFilePath = "./data/edges-no-index.h5.tmp";
+    {
+        const EdgePopulation population(srcFilePath, "", "edges-AB");
+
+        // no index datasets yet
+        CHECK_THROWS_AS(
+            population.afferentEdges({1, 2}),
+            SonataError
+        );
+        CHECK_THROWS_AS(
+            population.efferentEdges({1, 2}),
+            SonataError
+        );
+    }
+
+
+    copyFile(srcFilePath, dstFilePath);
+
+    try {
+        EdgePopulation::writeIndices(dstFilePath, "edges-AB", 4, 4);
+        const EdgePopulation population(dstFilePath, "", "edges-AB");
+        CHECK(
+            population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}})
+        );
+        CHECK(
+            population.efferentEdges({1, 2}) == Selection({{0, 4}})
+        );
+    } catch(...) {
+        try {
+            std::remove(dstFilePath.c_str());
+        } catch (...) {
+        }
+        throw;
+    }
+
+    std::remove(dstFilePath.c_str());
 }
 
 
