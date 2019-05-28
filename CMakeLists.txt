@@ -50,6 +50,7 @@ endif()
 
 set(SONATA_SRC
     src/common.cpp
+    src/edge_index.cpp
     src/edges.cpp
     src/hdf5_mutex.cpp
     src/nodes.cpp
