@@ -3,8 +3,10 @@ import unittest
 
 from libsonata import *
 
+
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, '../tests/data')
+
 
 class TestSelection(unittest.TestCase):
     def test_basic(self):
@@ -13,7 +15,7 @@ class TestSelection(unittest.TestCase):
         self.assertTrue(selection)
         self.assertEqual(selection.ranges, ranges)
         self.assertEqual(selection.flat_size, 5)
-        self.assertEqual(selection.flatten(), [3, 4, 0, 1, 2])
+        self.assertEqual(selection.flatten().tolist(), [3, 4, 0, 1, 2])
 
     def test_from_values(self):
         selection = Selection([1, 3, 4, 1])

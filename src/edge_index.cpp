@@ -100,10 +100,7 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
         const auto ids = resolve(indexGroup, nodeID).flatten();
         merged.insert(ids.begin(), ids.end());
     }
-    std::vector<EdgeID> result;
-    result.reserve(merged.size());
-    std::copy(merged.begin(), merged.end(), std::back_inserter(result));
-    return Selection::fromValues(result);
+    return Selection::fromValues(merged.begin(), merged.end());
 }
 
 }

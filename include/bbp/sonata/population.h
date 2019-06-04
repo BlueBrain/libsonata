@@ -34,6 +34,8 @@ public:
     explicit Selection(Ranges&& ranges);
     explicit Selection(const Ranges& ranges);
 
+    template<typename Iterator>
+    static Selection fromValues(Iterator first, Iterator last);
     static Selection fromValues(const Values& values);
 
     const Ranges& ranges() const;
@@ -47,6 +49,33 @@ public:
 private:
     const Ranges ranges_;
 };
+
+template<typename Iterator>
+Selection Selection::fromValues(Iterator first, Iterator last)
+{
+    Selection::Ranges ranges;
+
+    Selection::Range range{ 0, 0 };
+    while (first != last) {
+        const auto v = *first;
+        if (v == range.second) {
+            ++range.second;
+        } else {
+            if (range.first < range.second) {
+                ranges.push_back(range);
+            }
+            range.first = v;
+            range.second = v + 1;
+        }
+        ++first;
+    }
+
+    if (range.first < range.second) {
+        ranges.push_back(range);
+    }
+
+    return Selection(std::move(ranges));
+}
 
 //--------------------------------------------------------------------------------------------------
 

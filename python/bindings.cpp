@@ -299,7 +299,10 @@ PYBIND11_MODULE(libsonata, m)
             "Selection from list of intervals"
         )
         .def(
-            py::init(&Selection::fromValues),
+            py::init([](py::array_t<uint64_t, py::array::c_style | py::array::forcecast> values) {
+                const auto raw = values.unchecked<1>();
+                return Selection::fromValues(raw.data(0), raw.data(raw.shape(0)));
+            }),
             "values"_a,
             "Selection from list of IDs"
         )
@@ -310,8 +313,10 @@ PYBIND11_MODULE(libsonata, m)
         )
         .def(
             "flatten",
-            &Selection::flatten,
-            "List of IDs constituting Selection"
+            [](Selection& obj) {
+                return asArray(obj.flatten());
+            },
+            "Array of IDs constituting Selection"
         )
         .def_property_readonly(
             "flat_size",
