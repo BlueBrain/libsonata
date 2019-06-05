@@ -1,6 +1,8 @@
 import os
 import unittest
 
+import numpy as np
+
 from libsonata import *
 
 
@@ -18,8 +20,15 @@ class TestSelection(unittest.TestCase):
         self.assertEqual(selection.flatten().tolist(), [3, 4, 0, 1, 2])
 
     def test_from_values(self):
-        selection = Selection([1, 3, 4, 1])
-        self.assertEqual(selection.ranges, [(1, 2), (3, 5), (1, 2)])
+        values = [
+            [1, 3, 4, 1],
+            [0, 0, 0, 0],
+        ]
+        expected = [(1, 2), (3, 5), (1, 2)]
+        self.assertEqual(Selection(values[0]).ranges, expected)
+        self.assertEqual(Selection(np.array(values, dtype=np.uint64, order='C')[0]).ranges, expected)
+        self.assertEqual(Selection(np.array(values, dtype=np.uint32, order='C')[0]).ranges, expected)
+        self.assertEqual(Selection(np.array(values, dtype=np.uint64, order='F')[0]).ranges, expected)
 
 
 class TestNodePopulation(unittest.TestCase):
