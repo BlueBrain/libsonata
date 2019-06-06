@@ -122,17 +122,17 @@ std::unordered_map<NodeID, RawIndex> _groupNodeRanges(const std::vector<NodeID>&
         return result;
     }
 
-    uint64_t i0 = 0;
+    uint64_t rangeStart = 0;
     NodeID lastNodeID = nodeIDs[0];
     for (uint64_t i = 1; i < nodeIDs.size(); ++i) {
         if (nodeIDs[i] != lastNodeID) {
-            result[lastNodeID].push_back({i0, i});
-            i0 = i;
-            lastNodeID = nodeIDs[i0];
+            result[lastNodeID].push_back({rangeStart, i});
+            rangeStart = i;
+            lastNodeID = nodeIDs[rangeStart];
         }
     }
 
-    result[lastNodeID].push_back({i0, nodeIDs.size()});
+    result[lastNodeID].push_back({rangeStart, nodeIDs.size()});
 
     return result;
 }
@@ -160,7 +160,7 @@ void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, NodeID maxNodeID, High
     auto nodeToRanges = _groupNodeRanges(nodeIDs);
     const auto rangeCount = std::accumulate(
         nodeToRanges.begin(), nodeToRanges.end(), uint64_t(0),
-        [](uint64_t total, const std::pair<NodeID, RawIndex>& item) {
+        [](uint64_t total, decltype(nodeToRanges)::const_reference item) {
             return total + item.second.size();
         }
     );
