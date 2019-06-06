@@ -123,7 +123,7 @@ std::unordered_map<NodeID, RawIndex> _groupNodeRanges(const std::vector<NodeID>&
     }
 
     uint64_t rangeStart = 0;
-    NodeID lastNodeID = nodeIDs[0];
+    NodeID lastNodeID = nodeIDs[rangeStart];
     for (uint64_t i = 1; i < nodeIDs.size(); ++i) {
         if (nodeIDs[i] != lastNodeID) {
             result[lastNodeID].push_back({rangeStart, i});
