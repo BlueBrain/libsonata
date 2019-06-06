@@ -30,6 +30,10 @@ class TestSelection(unittest.TestCase):
         self.assertEqual(Selection(np.array(values, dtype=np.uint32, order='C')[0]).ranges, expected)
         self.assertEqual(Selection(np.array(values, dtype=np.uint64, order='F')[0]).ranges, expected)
 
+    def test_from_values_empty(self):
+        self.assertFalse(Selection([]))
+        self.assertFalse(Selection(np.array([], dtype=np.uint64)))
+
 
 class TestNodePopulation(unittest.TestCase):
     def setUp(self):
