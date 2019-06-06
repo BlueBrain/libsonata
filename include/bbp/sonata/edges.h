@@ -64,8 +64,8 @@ public:
      */
     static void writeIndices(
         const std::string& h5FilePath, const std::string& population,
-        NodeID maxSourceNodeID,
-        NodeID maxTargetNodeID,
+        uint64_t sourceNodeCount,
+        uint64_t targetNodeCount,
         bool overwrite = false
     );
 };

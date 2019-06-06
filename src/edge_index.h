@@ -26,8 +26,8 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
 
 void write(
     HighFive::Group& h5Root,
-    NodeID maxSourceNodeID,
-    NodeID maxTargetNodeID,
+    uint64_t sourceNodeCount,
+    uint64_t targetNodeCount,
     bool overwrite
 );
 

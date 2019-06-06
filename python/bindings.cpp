@@ -438,9 +438,9 @@ PYBIND11_MODULE(libsonata, m)
             &EdgePopulation::writeIndices,
             "h5_filepath"_a,
             "population"_a,
-            "max_source_node_id"_a,
-            "max_target_node_id"_a,
-            "overwrite"_a,
+            "source_node_count"_a,
+            "target_node_count"_a,
+            "overwrite"_a=false,
             "Write bidirectional node->edge indices to EdgePopulation HDF5"
         )
         ;

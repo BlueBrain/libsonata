@@ -153,7 +153,7 @@ void _writeIndexDataset(const RawIndex& data, const std::string& name, HighFive:
 }
 
 
-void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, NodeID maxNodeID, HighFive::Group& h5Root, const std::string& name)
+void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, uint64_t nodeCount, HighFive::Group& h5Root, const std::string& name)
 {
     auto indexGroup = h5Root.createGroup(name);
 
@@ -168,11 +168,11 @@ void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, NodeID maxNodeID, High
     RawIndex primaryIndex;
     RawIndex secondaryIndex;
 
-    primaryIndex.reserve(maxNodeID);
+    primaryIndex.reserve(nodeCount);
     secondaryIndex.reserve(rangeCount);
 
     uint64_t offset = 0;
-    for (NodeID nodeID = 0; nodeID < maxNodeID; ++nodeID) {
+    for (NodeID nodeID = 0; nodeID < nodeCount; ++nodeID) {
         const auto it = nodeToRanges.find(nodeID);
         if (it == nodeToRanges.end()) {
             primaryIndex.push_back({offset, offset});
@@ -196,8 +196,8 @@ void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, NodeID maxNodeID, High
 
 void write(
     HighFive::Group& h5Root,
-    NodeID maxSourceNodeID,
-    NodeID maxTargetNodeID,
+    uint64_t sourceNodeCount,
+    uint64_t targetNodeCount,
     bool overwrite
 )
 {
@@ -213,13 +213,13 @@ void write(
     try {
         _writeIndexGroup(
             _readNodeIDs(h5Root, SOURCE_NODE_ID_DSET),
-            maxSourceNodeID,
+            sourceNodeCount,
             h5Root,
             SOURCE_INDEX_GROUP
         );
         _writeIndexGroup(
             _readNodeIDs(h5Root, TARGET_NODE_ID_DSET),
-            maxTargetNodeID,
+            targetNodeCount,
             h5Root,
             TARGET_INDEX_GROUP
         );
