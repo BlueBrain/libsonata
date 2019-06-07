@@ -24,6 +24,13 @@ const HighFive::Group targetIndex(const HighFive::Group& h5Root);
 Selection resolve(const HighFive::Group& indexGroup, NodeID nodeID);
 Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& nodeIDs);
 
+void write(
+    HighFive::Group& h5Root,
+    uint64_t sourceNodeCount,
+    uint64_t targetNodeCount,
+    bool overwrite
+);
+
 }
 }
 } // namespace bbp::sonata::edge_index

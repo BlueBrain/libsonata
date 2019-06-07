@@ -58,6 +58,16 @@ public:
      * Find edges connecting two given nodes.
      */
     Selection connectingEdges(const std::vector<NodeID>& source, const std::vector<NodeID>& target) const;
+
+    /**
+     * Write bidirectional node->edge indices to EdgePopulation HDF5.
+     */
+    static void writeIndices(
+        const std::string& h5FilePath, const std::string& population,
+        uint64_t sourceNodeCount,
+        uint64_t targetNodeCount,
+        bool overwrite = false
+    );
 };
 
 //--------------------------------------------------------------------------------------------------
