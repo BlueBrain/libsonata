@@ -42,6 +42,7 @@ script:
   - nosetests python &&
     rm -rf build && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DEXTLIB_FROM_SUBMODULES=ON .. && make && make test
 
+
 deploy:
   provider: pypi
   user: bbp.opensource
