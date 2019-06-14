@@ -1,4 +1,7 @@
 language: python
+branches:
+  only:
+    - master
 
 matrix:
   include:
@@ -42,6 +45,7 @@ script:
 deploy:
   provider: pypi
   user: bbp.opensource
+  skip_existing: true
   # Will be activated once I have verified that it is working
   # on:
   #   tags: true
