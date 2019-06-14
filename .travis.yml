@@ -38,3 +38,12 @@ install:
 script:
   - nosetests python &&
     rm -rf build && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DEXTLIB_FROM_SUBMODULES=ON .. && make && make test
+
+deploy:
+  provider: pypi
+  user: bbp.opensource
+  # Will be activated once I have verified that it is working
+  # on:
+  #   tags: true
+  password:
+    secure: "Es1muWW5O7DtgOznhQmgZmPjpFCeCE9lJjVM7mjXMeOO7ENRVHIssH3zLXewgBDrtSmaCPVO4SF1b2jO4kFOo3NV65b6+1tGcKnaN53VPbOF5Na5cevxZxY63znRy4y8P8PtTkuFS3JGx9x0KBuFyH+oT0t6J3JFCWyhV4EArDXbouNMLu+i2nL5fC8wl1TLWVA38zjbloqXwai4P3osJ/IRGkvmAW8na4g5ygovYTfFdCkGViTnnmJo1KITIin3rNgQHA/wghMH+lvEhYeis6fCfHPPV/1LMmVCEFi1lTmPimON4+zPP6WB9e/8jpoQCXivmkTuLsEvxVRiMfP5j06KjSMyjmSDKTSLaFUGnsykmcCU5vQAcy6WZNujnH6p0WfMrMRV9dR0oDs2QZIFfgbTHOWLZGI1jSujlR8goHlCFTIPd7fCjLJ4VqHAV+f2eTWLd1v//CXTAw1ivrwdIO4mBo6zGcH0rQRPDaY5xyspvmoX9RtsLugfnPYEePhI0xA+xU1GK/7BA738Yru8N9Q4zkOth4jVLHisN5p/gQuiu0j5WUCIfXp1CVgcFb6iiEQ83I0deI3rspcpK17OGqdanU9fWccRsxqFyqmQisWEexMLOlbKYKKatfP2PZR7wmCk8cYnL1A7GrBCEmcOCP460rmGHqsDfGyYo6FImFM="
