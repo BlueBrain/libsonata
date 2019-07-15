@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 
+import sys
+
 import numpy as np
 import h5py
 
 
 def write_population_one_group(pop, prefix):
-    string_dtype = h5py.special_dtype(vlen=unicode)
+
+    if sys.version_info[0] == 2:
+        vlen_str_type = unicode
+    elif sys.version_info[0] == 3:
+        vlen_str_type = str
+    else:
+        raise 'Only python2/3 supported'
+
+    string_dtype = h5py.special_dtype(vlen=vlen_str_type)
 
     pop.create_dataset('%s_group_id' % prefix, data=np.zeros(6), dtype=np.uint8)
     pop.create_dataset('%s_group_index' % prefix, data=np.arange(6), dtype=np.uint16)
@@ -14,7 +24,8 @@ def write_population_one_group(pop, prefix):
     attrs = pop.create_group('0')
     attrs.create_dataset('attr-X', data=np.arange(11., 17.), dtype=np.float64)
     attrs.create_dataset('attr-Y', data=np.arange(21., 27.), dtype=np.int64)
-    attrs.create_dataset('attr-Z', data=[(2 * x) for x in 'abcdef'], dtype=string_dtype)
+    attrs.create_dataset('attr-Z', data=[(2 * x).encode('utf-8') for x in 'abcdef'],
+                         dtype=string_dtype)
 
     # All supported dtypes
     attrs.create_dataset('A-double', dtype=np.float64)
@@ -36,7 +47,8 @@ def write_population_one_group(pop, prefix):
     dparams = attrs.create_group('dynamics_params')
     dparams.create_dataset('dparam-X', data=np.arange(1011., 1017.), dtype=np.float64)
     dparams.create_dataset('dparam-Y', data=np.arange(1021., 1027.), dtype=np.int64)
-    dparams.create_dataset('dparam-Z', data=[('d-' + 2 * x) for x in 'abcdef'], dtype=string_dtype)
+    dparams.create_dataset('dparam-Z', data=[('d-' + 2 * x).encode('utf-8') for x in 'abcdef'],
+                           dtype=string_dtype)
 
 
 def write_population_two_groups(pop):
