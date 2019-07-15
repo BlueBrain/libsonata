@@ -98,11 +98,27 @@ class TestNodePopulation(unittest.TestCase):
 
     def test_enumeration_values(self):
         self.assertEqual(
-            self.test_obj.get_enumeration(
+            self.test_obj.get_attribute(
                 "E-mapping-good",
                 Selection([(0, 1), (2, 3)])
             ).tolist(),
             ["C", "C"]
+        )
+
+        self.assertEqual(
+            self.test_obj.get_attribute(
+                "E-mapping-good",
+                Selection([(0, 1), (2, 3)])
+            ).tolist(),
+            ["C", "C"]
+        )
+
+        self.assertEqual(
+            self.test_obj.get_enumeration(
+                "E-mapping-good",
+                Selection([(0, 1), (2, 3)])
+            ).tolist(),
+            [2, 2]
         )
 
         self.assertEqual(
@@ -112,9 +128,16 @@ class TestNodePopulation(unittest.TestCase):
 
         self.assertRaises(
             SonataError,
-            self.test_obj.get_enumeration,
+            self.test_obj.get_attribute,
             "E-mapping-bad",
-            4
+            1
+        )
+
+        self.assertRaises(
+            SonataError,
+            self.test_obj.get_enumeration,
+            "attr-X",
+            0
         )
 
 

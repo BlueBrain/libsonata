@@ -190,8 +190,14 @@ std::vector<T> Population::getAttribute(const std::string& name, const Selection
 }
 
 
-std::vector<std::string> Population::getEnumeration(const std::string& name, const Selection& selection) const
+template<>
+std::vector<std::string> Population::getAttribute(const std::string& name, const Selection& selection) const
 {
+    if (impl_->attributeEnumNames.count(name) == 0) {
+        HDF5_LOCK_GUARD
+        return _readSelection<std::string>(impl_->getAttributeDataSet(name), selection);
+    }
+
     auto indices = getAttribute<size_t>(name, selection);
     auto values = enumerationValues(name);
 
@@ -218,8 +224,27 @@ std::vector<T> Population::getAttribute(const std::string& name, const Selection
 }
 
 
-std::string Population::_attributeDataType(const std::string& name) const
+template <typename T>
+std::vector<T> Population::getEnumeration(const std::string& name, const Selection& selection) const
 {
+    if (impl_->attributeEnumNames.count(name) == 0) {
+        throw SonataError(fmt::format("Invalid enumeration attribute: {}", name));
+    }
+    if (!std::is_integral<T>::value) {
+        throw SonataError(fmt::format("Enumeration attribute '{}' can only be integer", name));
+    }
+
+    HDF5_LOCK_GUARD
+    return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
+}
+
+
+std::string Population::_attributeDataType(const std::string& name, bool remap) const
+{
+    if (remap && impl_->attributeEnumNames.count(name) > 0) {
+        return "string";
+    }
+
     HDF5_LOCK_GUARD
     return _getDataType(impl_->getAttributeDataSet(name), name);
 }
@@ -260,6 +285,8 @@ std::string Population::_dynamicsAttributeDataType(const std::string& name) cons
         const std::string&, const Selection&) const; \
     template std::vector<T> Population::getAttribute<T>( \
         const std::string&, const Selection&, const T&) const; \
+    template std::vector<T> Population::getEnumeration<T>( \
+        const std::string&, const Selection&) const; \
     template std::vector<T> Population::getDynamicsAttribute<T>( \
         const std::string&, const Selection&) const; \
     template std::vector<T> Population::getDynamicsAttribute<T>( \

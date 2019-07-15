@@ -70,9 +70,10 @@ py::object getAttributeVector(const Population& obj, const std::string& name, co
 }
 
 
+template<typename T>
 py::object getEnumerationVector(const Population& obj, const std::string& name, const Selection& selection)
 {
-    return asArray(obj.getEnumeration(name, selection));
+    return asArray(obj.getEnumeration<T>(name, selection));
 }
 
 
@@ -182,7 +183,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
             "get_attribute",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
                 const auto selection = Selection::fromValues({elemID});
-                const auto dtype = obj._attributeDataType(name);
+                const auto dtype = obj._attributeDataType(name, true);
                 DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
             },
             py::arg("name"),
@@ -195,7 +196,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
         .def(
             "get_attribute",
             [](Population& obj, const std::string& name, const Selection& selection) {
-                const auto dtype = obj._attributeDataType(name);
+                const auto dtype = obj._attributeDataType(name, true);
                 DISPATCH_TYPE(dtype, getAttributeVector, obj, name, selection);
             },
             "name"_a,
@@ -208,7 +209,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
         .def(
             "get_attribute",
             [](Population& obj, const std::string& name, const Selection& selection, const py::object& defaultValue) {
-                const auto dtype = obj._attributeDataType(name);
+                const auto dtype = obj._attributeDataType(name, true);
                 DISPATCH_TYPE(dtype, getAttributeVectorWithDefault, obj, name, selection, defaultValue);
             },
             "name"_a,
@@ -271,7 +272,8 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
             "get_enumeration",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
                 const auto selection = Selection::fromValues({elemID});
-                return getEnumerationVector(obj, name, selection);
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getEnumerationVector, obj, name, selection);
             },
             "name"_a,
             py::arg(imbueElementName("{elem}_id").c_str()),
@@ -283,7 +285,8 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
         .def(
             "get_enumeration",
             [](Population& obj, const std::string& name, const Selection& selection) {
-                return getEnumerationVector(obj, name, selection);
+                const auto dtype = obj._attributeDataType(name);
+                DISPATCH_TYPE(dtype, getEnumerationVector, obj, name, selection);
             },
             "name"_a,
             "selection"_a,

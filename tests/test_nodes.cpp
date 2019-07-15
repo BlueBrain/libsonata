@@ -93,11 +93,11 @@ TEST_CASE("NodePopulation", "[base]")
     );
 
     CHECK(
-        population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) == std::vector<size_t>{2, 2}
+        population.getEnumeration<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) == std::vector<size_t>{2, 2}
     );
 
     CHECK(
-        population.getEnumeration("E-mapping-good", Selection({{0, 1}})) == std::vector<std::string>{"C"}
+        population.getAttribute<std::string>("E-mapping-good", Selection({{0, 1}})) == std::vector<std::string>{"C"}
     );
 
     CHECK(
@@ -105,16 +105,11 @@ TEST_CASE("NodePopulation", "[base]")
     );
 
     CHECK(
-        population.getEnumeration("E-mapping-bad", Selection({{0, 1}})) == std::vector<std::string>{"C"}
+        population.getAttribute<std::string>("E-mapping-bad", Selection({{0, 1}})) == std::vector<std::string>{"C"}
     );
 
     CHECK_THROWS_AS(
-        population.getEnumeration("E-mapping-bad", Selection({{1, 2}})),
-        SonataError
-    );
-
-    CHECK_THROWS_AS(
-        population.getEnumeration("E-mapping-bad", Selection({{4, 5}})),
+        population.getAttribute<std::string>("E-mapping-bad", Selection({{1, 2}})),
         SonataError
     );
 

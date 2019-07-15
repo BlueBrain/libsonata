@@ -129,7 +129,8 @@ public:
      * @throw if there is no such attribute for the population
      * @throw if the attribute is not defined for _any_ element from the selection
      */
-    std::vector<std::string> getEnumeration(const std::string& name, const Selection& selection) const;
+    template <typename T>
+    std::vector<T> getEnumeration(const std::string& name, const Selection& selection) const;
 
     /**
      * Get all allowed attribute enumeration values
@@ -139,13 +140,13 @@ public:
      */
     std::vector<std::string> enumerationValues(const std::string& name) const;
     /**
-     * Get attribute data type
+     * Get attribute data type, optionally translating enumeration types
 
      * @internal
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
-    std::string _attributeDataType(const std::string& name) const;
+    std::string _attributeDataType(const std::string& name, bool remap = false) const;
 
     /**
      * All dynamics attribute names (JSON keys + union of attributes in groups)
@@ -193,6 +194,9 @@ protected:
     struct Impl;
     const std::unique_ptr<Impl> impl_;
 };
+
+template <>
+std::vector<std::string> Population::getAttribute(const std::string& name, const Selection& selection) const;
 
 //--------------------------------------------------------------------------------------------------
 
