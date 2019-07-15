@@ -168,11 +168,45 @@ const std::set<std::string>& Population::attributeNames() const
 }
 
 
+const std::set<std::string>& Population::enumerationNames() const
+{
+    return impl_->attributeEnumNames;
+}
+
+
+std::vector<std::string> Population::enumerationValues(const std::string& name) const
+{
+    HDF5_LOCK_GUARD
+    const auto dset = impl_->getLibraryDataSet(name);
+    return _readSelection<std::string>(dset, Selection({{0, dset.getSpace().getDimensions()[0]}}));
+}
+
+
 template<typename T>
 std::vector<T> Population::getAttribute(const std::string& name, const Selection& selection) const
 {
     HDF5_LOCK_GUARD
     return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
+}
+
+
+std::vector<std::string> Population::getEnumeration(const std::string& name, const Selection& selection) const
+{
+    auto indices = getAttribute<int>(name, selection);
+    auto values = enumerationValues(name);
+
+    std::vector<std::string> resolved;
+    resolved.reserve(indices.size());
+
+    int max = values.size();
+    for (const auto& i : indices) {
+        if (i < 0 or max <= i) {
+            throw SonataError(fmt::format("Invalid enumeration value: {}", i));
+        }
+        resolved.emplace_back(values[i]);
+    }
+
+    return resolved;
 }
 
 

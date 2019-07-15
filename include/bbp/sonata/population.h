@@ -98,6 +98,11 @@ public:
     const std::set<std::string>& attributeNames() const;
 
     /**
+     * All attribute names that are custom enumerations
+     */
+    const std::set<std::string>& enumerationNames() const;
+
+    /**
      * Get attribute values for given Selection
      *
      * @param name is a string to allow attributes not defined in spec
@@ -117,6 +122,22 @@ public:
     template <typename T>
     std::vector<T> getAttribute(const std::string& name, const Selection& selection, const T& defaultValue) const;
 
+    /**
+     * Get resolved enumeration attribute values for given Selection
+     *
+     * @param name is a string to allow attributes not defined in spec
+     * @throw if there is no such attribute for the population
+     * @throw if the attribute is not defined for _any_ element from the selection
+     */
+    std::vector<std::string> getEnumeration(const std::string& name, const Selection& selection) const;
+
+    /**
+     * Get all allowed attribute enumeration values
+     *
+     * @param name is a string to allow attributes not defined in spec
+     * @throw if there is no such attribute for the population
+     */
+    std::vector<std::string> enumerationValues(const std::string& name) const;
     /**
      * Get attribute data type
 

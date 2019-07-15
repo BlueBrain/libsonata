@@ -70,6 +70,12 @@ py::object getAttributeVector(const Population& obj, const std::string& name, co
 }
 
 
+py::object getEnumerationVector(const Population& obj, const std::string& name, const Selection& selection)
+{
+    return asArray(obj.getEnumeration(name, selection));
+}
+
+
 template<typename T>
 py::object getAttributeVectorWithDefault(
     const Population& obj, const std::string& name,
@@ -161,6 +167,17 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
             &Population::attributeNames,
             "Set of attribute names"
         )
+        .def_property_readonly(
+            "enumeration_names",
+            &Population::enumerationNames,
+            "Set of enumeration names"
+        )
+        .def(
+            "enumeration_values",
+            &Population::enumerationValues,
+            py::arg("name"),
+            "Get all allowed enumeration values for a given attribute name"
+        )
         .def(
             "get_attribute",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
@@ -248,6 +265,31 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
                 "Get dynamics attribute values for a given {elem} selection.\n"
                 "Use default value for {elem}s where attribute is not defined\n"
                 "(it should still be one of population attributes)."
+            ).c_str()
+        )
+        .def(
+            "get_enumeration",
+            [](Population& obj, const std::string& name, Selection::Value elemID) {
+                const auto selection = Selection::fromValues({elemID});
+                return getEnumerationVector(obj, name, selection);
+            },
+            "name"_a,
+            py::arg(imbueElementName("{elem}_id").c_str()),
+            imbueElementName(
+                "Get enumeration values for a given {elem} selection.\n"
+                "Raises an exception if the enumeration is not defined for some {elem}s."
+            ).c_str()
+        )
+        .def(
+            "get_enumeration",
+            [](Population& obj, const std::string& name, const Selection& selection) {
+                return getEnumerationVector(obj, name, selection);
+            },
+            "name"_a,
+            "selection"_a,
+            imbueElementName(
+                "Get enumeration values for a given {elem} selection.\n"
+                "Raises an exception if the enumeration is not defined for some {elem}s."
             ).c_str()
         )
     ;

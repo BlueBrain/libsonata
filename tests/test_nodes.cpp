@@ -20,7 +20,12 @@ TEST_CASE("NodePopulation", "[base]")
 
     REQUIRE(population.attributeNames() == std::set<std::string>{
       "attr-X", "attr-Y", "attr-Z",
-      "A-double", "A-float", "A-int64", "A-int32", "A-int16", "A-int8", "A-uint64", "A-uint32", "A-uint16", "A-uint8", "A-string", "A-enum"
+      "A-double", "A-float", "A-int64", "A-int32", "A-int16", "A-int8", "A-uint64", "A-uint32", "A-uint16", "A-uint8", "A-string", "A-enum",
+      "E-mapping-good", "E-mapping-bad"
+    });
+
+    REQUIRE(population.enumerationNames() == std::set<std::string>{
+      "E-mapping-good", "E-mapping-bad"
     });
 
     CHECK(
@@ -85,6 +90,32 @@ TEST_CASE("NodePopulation", "[base]")
     CHECK_THROWS_AS(
        population._attributeDataType("no-such-attribute"),
        SonataError
+    );
+
+    CHECK(
+        population.getAttribute<int>("E-mapping-good", Selection({{0, 1}, {2, 3}})) == std::vector<int>{2, 2}
+    );
+
+    CHECK(
+        population.getEnumeration("E-mapping-good", Selection({{0, 1}})) == std::vector<std::string>{"C"}
+    );
+
+    CHECK(
+        population.enumerationValues("E-mapping-good") == std::vector<std::string>{"A", "B", "C"}
+    );
+
+    CHECK(
+        population.getEnumeration("E-mapping-bad", Selection({{0, 1}})) == std::vector<std::string>{"C"}
+    );
+
+    CHECK_THROWS_AS(
+        population.getEnumeration("E-mapping-bad", Selection({{1, 2}})),
+        SonataError
+    );
+
+    CHECK_THROWS_AS(
+        population.getEnumeration("E-mapping-bad", Selection({{4, 5}})),
+        SonataError
     );
 
     REQUIRE(population.dynamicsAttributeNames() == std::set<std::string>{"dparam-X", "dparam-Y", "dparam-Z"});
