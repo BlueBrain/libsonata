@@ -198,7 +198,7 @@ std::vector<std::string> Population::getEnumeration(const std::string& name, con
     std::vector<std::string> resolved;
     resolved.reserve(indices.size());
 
-    int max = values.size();
+    auto max = values.size();
     for (const auto& i : indices) {
         if (i >= max) {
             throw SonataError(fmt::format("Invalid enumeration value: {}", i));
