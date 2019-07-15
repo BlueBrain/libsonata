@@ -192,7 +192,7 @@ std::vector<T> Population::getAttribute(const std::string& name, const Selection
 
 std::vector<std::string> Population::getEnumeration(const std::string& name, const Selection& selection) const
 {
-    auto indices = getAttribute<int>(name, selection);
+    auto indices = getAttribute<size_t>(name, selection);
     auto values = enumerationValues(name);
 
     std::vector<std::string> resolved;
@@ -200,7 +200,7 @@ std::vector<std::string> Population::getEnumeration(const std::string& name, con
 
     int max = values.size();
     for (const auto& i : indices) {
-        if (i < 0 or max <= i) {
+        if (i >= max) {
             throw SonataError(fmt::format("Invalid enumeration value: {}", i));
         }
         resolved.emplace_back(values[i]);

@@ -93,7 +93,7 @@ TEST_CASE("NodePopulation", "[base]")
     );
 
     CHECK(
-        population.getAttribute<int>("E-mapping-good", Selection({{0, 1}, {2, 3}})) == std::vector<int>{2, 2}
+        population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) == std::vector<size_t>{2, 2}
     );
 
     CHECK(
