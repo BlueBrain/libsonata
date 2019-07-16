@@ -43,10 +43,13 @@ option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
-set(CMAKE_CXX_STANDARD 11)
+set(HDF5_PREFER_PARALLEL "ON")
+
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SONATA_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+set(SONATA_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 
 if(SONATA_CXX_WARNINGS)
   set(SONATA_COMPILE_OPTIONS -Wall -Wextra -pedantic -Werror)
@@ -70,6 +73,21 @@ else()
     find_package(fmt REQUIRED)
     find_package(Catch2 REQUIRED)
     find_package(HighFive REQUIRED)
+endif()
+
+find_package(MPI)
+if (MPI_FOUND)
+    include_directories (${MPI_INCLUDE_PATH})
+endif()
+
+find_package(HDF5)
+if (HDF5_FOUND)
+    if (HDF5_IS_PARALLEL)
+        include_directories (${HDF5_INCLUDE_DIRS})
+        set (HDF5_LIBS ${HDF5_LIBRARIES})
+    else()
+        message (STATUS "HDF5 found, but no parallel IO support was found, HDF5 support in replib will be disabled")
+    endif()
 endif()
 
 # =============================================================================
@@ -131,6 +149,7 @@ target_compile_definitions(sonata_shared
 target_link_libraries(sonata_shared
     PRIVATE fmt::fmt-header-only
     PRIVATE HighFive
+    ${MPI_CXX_LIBRARIES}
 )
 
 target_compile_definitions(sonata_static
@@ -140,6 +159,10 @@ target_include_directories(sonata_static
     PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
 )
+
+include_directories(${SONATA_INCLUDE_DIR})
+include_directories(${SONATA_SRC_DIR})
+add_subdirectory(src/reports)
 
 # =============================================================================
 # Install
@@ -171,6 +194,7 @@ install(EXPORT sonata-targets
 # =============================================================================
 
 enable_testing()
+include(CMake/Catch.cmake)
 add_subdirectory(tests)
 
 if (ENABLE_COVERAGE)

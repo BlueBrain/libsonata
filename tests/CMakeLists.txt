@@ -4,7 +4,7 @@ set(TESTS_SRC
   test_nodes.cpp
   test_selection.cpp
 )
-
+include_directories(contrib)
 add_executable(unittests ${TESTS_SRC})
 target_link_libraries(unittests
     PRIVATE
@@ -13,3 +13,5 @@ target_link_libraries(unittests
 )
 
 add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
+add_subdirectory(reports)
