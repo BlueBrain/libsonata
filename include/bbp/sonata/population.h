@@ -105,6 +105,9 @@ public:
     /**
      * Get attribute values for given Selection
      *
+     * If string values are requested and the attribute is a custom
+     * enumeration, values will be resolved to strings.
+     *
      * @param name is a string to allow attributes not defined in spec
      * @throw if there is no such attribute for the population
      * @throw if the attribute is not defined for _any_ element from the selection
@@ -115,6 +118,9 @@ public:
     /**
      * Get attribute values for given Selection
      *
+     * If string values are requested and the attribute is a custom
+     * enumeration, values will be resolved to strings.
+     *
      * @param name is a string to allow attributes not defined in spec
      * @param default is a value to use for groups w/o given attribute
      * @throw if there is no such attribute for the population
@@ -123,9 +129,9 @@ public:
     std::vector<T> getAttribute(const std::string& name, const Selection& selection, const T& defaultValue) const;
 
     /**
-     * Get resolved enumeration attribute values for given Selection
+     * Get enumeration values for given attribute and Selection
      *
-     * @param name is a string to allow attributes not defined in spec
+     * @param name is a string to allow enumeration attributes not defined in spec
      * @throw if there is no such attribute for the population
      * @throw if the attribute is not defined for _any_ element from the selection
      */
