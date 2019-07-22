@@ -41,7 +41,7 @@ std::set<std::string> _listChildren(const HighFive::Group& group, const std::set
 
 std::set<std::string> _listCustomEnumerations(const HighFive::Group h5Group, const std::set<std::string>& attrs) {
     std::set<std::string> names{};
-    std::set<std::string> enums(_listChildren(h5Group));
+    const std::set<std::string> enums(_listChildren(h5Group));
     std::set_intersection(
         enums.begin(),
         enums.end(),

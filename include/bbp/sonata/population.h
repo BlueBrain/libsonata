@@ -98,14 +98,14 @@ public:
     const std::set<std::string>& attributeNames() const;
 
     /**
-     * All attribute names that are custom enumerations
+     * All attribute names that are explicit enumerations
      */
     const std::set<std::string>& enumerationNames() const;
 
     /**
      * Get attribute values for given Selection
      *
-     * If string values are requested and the attribute is a custom
+     * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
      *
      * @param name is a string to allow attributes not defined in spec
