@@ -152,7 +152,7 @@ public:
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
-    std::string _attributeDataType(const std::string& name, bool remap = false) const;
+    std::string _attributeDataType(const std::string& name, bool translate_enumeration = false) const;
 
     /**
      * All dynamics attribute names (JSON keys + union of attributes in groups)
