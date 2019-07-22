@@ -6,7 +6,10 @@
 #include <iterator>
 #include <string>
 #include <set>
+
+#ifdef HAVE_MPI
 #include <mpi.h>
+#endif
 //#include <spdlog/spdlog.h>
 
 #include "report.hpp"
@@ -23,9 +26,10 @@ class ReportingLib {
 
   public:
     static double m_atomicStep;
+#ifdef HAVE_MPI
     static MPI_Comm m_allCells;
     static int m_rank;
-
+#endif
     ReportingLib();
     ~ReportingLib();
 
@@ -53,7 +57,7 @@ class ReportingLib {
     int add_variable(const std::string& report_name, int cellnumber, double* pointer);
 
     void make_global_communicator();
-    void share_and_prepare(int rank, int num_nodes);
+    void share_and_prepare();
 
     int record_data(double timestep, int ncells, int* cellids, const std::string& report_name);
     int end_iteration(double timestep);

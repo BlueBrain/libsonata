@@ -3,7 +3,10 @@
 #include <chrono>
 #include <thread>
 #include <cmath>
+
+#ifdef HAVE_MPI
 #include <mpi.h>
+#endif
 
 #include <bbp/reports/records.hpp>
 
@@ -129,11 +132,13 @@ void print_data(std::vector<Neuron>& neurons) {
 }
 
 int main() {
+
+    int global_rank = 0;
+#ifdef HAVE_MPI
     std::cout << "+++++++MPI_INIT" << std::endl;
     MPI_Init(nullptr, nullptr);
-    int global_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
-
+#endif
     std::vector<Neuron> compartment_neurons;
     std::vector<Neuron> soma_neurons;
     std::vector<Neuron> spike_neurons;
@@ -186,7 +191,8 @@ int main() {
         change_data(soma_neurons);
     }
     records_flush(t);
-
+#ifdef HAVE_MPI
     MPI_Finalize();
+#endif
     return 0;
 }

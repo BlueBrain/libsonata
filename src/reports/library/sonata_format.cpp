@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <numeric>
-#include <mpi.h>
 
 #include "reportinglib.hpp"
 #include "sonata_format.hpp"
@@ -23,7 +22,7 @@ void SonataFormat::prepare_dataset() {
     std::cout << "Preparing SonataFormat Dataset for report: " << m_reportName << std::endl;
 
     // Prepare /report and /spikes headers
-    for(auto& kv: *m_cells) {
+   for(auto& kv: *m_cells) {
         // /report
         const std::vector<uint32_t > compartment_ids = kv.second.get_compartment_ids();
         element_ids.insert(element_ids.end(), compartment_ids.begin(), compartment_ids.end());
@@ -38,14 +37,14 @@ void SonataFormat::prepare_dataset() {
         }
     }
 
-    int compartment_offset = 0;
-    MPI_Scan(&m_totalCompartments, &compartment_offset, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_allCells);
-    compartment_offset -= m_totalCompartments;
+     int compartment_offset = get_compartment_offset();
 
     std::cout << "Total compartments are: " << m_totalCompartments << " and compartment_offset is: " << compartment_offset << std::endl;
 
     // Prepare index pointers
-    index_pointers[0] = compartment_offset;
+    if(!index_pointers.empty()) {
+        index_pointers[0] = compartment_offset;
+    }
     for (int i = 1; i < index_pointers.size(); i++) {
         int previousGid = node_ids[i-1];
         index_pointers[i] = index_pointers[i-1] + m_cells->at(previousGid).get_num_compartments();
@@ -77,7 +76,9 @@ void SonataFormat::write_spikes_header() {
     std::cout << "Writing spike header!" << std::endl;
     m_ioWriter->configure_group("/spikes");
     m_ioWriter->configure_attribute("/spikes", "sorting");
+#ifdef HAVE_MPI
     sort_spikes(spike_timestamps, spike_node_ids);
+#endif
     m_ioWriter->write("/spikes/timestamps", spike_timestamps);
     m_ioWriter->write("/spikes/node_ids", spike_node_ids);
 }
@@ -102,6 +103,16 @@ void SonataFormat::close() {
     m_ioWriter->close();
 }
 
+int SonataFormat::get_compartment_offset() {
+    int compartment_offset = 0;
+#ifdef HAVE_MPI
+    MPI_Scan(&m_totalCompartments, &compartment_offset, 1, MPI_INT, MPI_SUM, ReportingLib::m_allCells);
+    compartment_offset -= m_totalCompartments;
+#endif
+    return compartment_offset;
+}
+
+#ifdef HAVE_MPI
 // Sort spikes
 void SonataFormat::sort_spikes(std::vector<double>& spikevec_time, std::vector<int>& spikevec_gid) {
     int numprocs;
@@ -211,3 +222,4 @@ void SonataFormat::local_spikevec_sort(std::vector<double>& isvect,
     std::transform(perm.begin(), perm.end(), osvecg.begin(),
                    [&](std::size_t i) { return isvecg[i]; });
 }
+#endif
