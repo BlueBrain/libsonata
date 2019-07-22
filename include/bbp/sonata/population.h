@@ -118,7 +118,7 @@ public:
     /**
      * Get attribute values for given Selection
      *
-     * If string values are requested and the attribute is a custom
+     * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
      *
      * @param name is a string to allow attributes not defined in spec
