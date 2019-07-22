@@ -6,21 +6,24 @@
 HDF5Writer::HDF5Writer(const std::string& report_name)
 : IoWriter(report_name), m_file(0), m_dataSet(0) {
 
-    MPI_Info info = MPI_INFO_NULL;
     hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
-    // Enable MPI access
-    H5Pset_fapl_mpio(plist_id, ReportingLib::m_allCells, info);
 
-    // Create hdf5 file named after the report_name
-    m_file = H5Fcreate(report_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
-    m_offset[0] = 0;
-    m_offset[1] = 0;
+#ifdef HAVE_MPI
+    // Enable MPI access
+    MPI_Info info = MPI_INFO_NULL;
+    H5Pset_fapl_mpio(plist_id, ReportingLib::m_allCells, info);
 
     // Initialize independent/collective lists
     m_collective_list = H5Pcreate(H5P_DATASET_XFER);
     m_independent_list = H5Pcreate(H5P_DATASET_XFER);
     H5Pset_dxpl_mpio(m_collective_list, H5FD_MPIO_COLLECTIVE);
     H5Pset_dxpl_mpio(m_independent_list, H5FD_MPIO_INDEPENDENT);
+#endif
+
+    // Create hdf5 file named after the report_name
+    m_file = H5Fcreate(report_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
+    m_offset[0] = 0;
+    m_offset[1] = 0;
 
     H5Pclose(plist_id);
 }
@@ -181,15 +184,21 @@ void HDF5Writer::close() {
     H5Fclose(m_file);
 }
 
+
 hsize_t HDF5Writer::get_global_dims(int dimension) {
-    hsize_t global_dims = 0;
+    // Return dimension when serial
+    hsize_t global_dims = dimension;
+#ifdef HAVE_MPI
     MPI_Allreduce(&dimension, &global_dims, 1, MPI_INT, MPI_SUM, ReportingLib::m_allCells);
+#endif
     return global_dims;
 }
 
 hsize_t HDF5Writer::get_offset(int dimension) {
     hsize_t offset = 0;
+#ifdef HAVE_MPI
     MPI_Scan(&dimension, &offset, 1, MPI_INT, MPI_SUM, ReportingLib::m_allCells);
     offset -= dimension;
+#endif
     return offset;
 }

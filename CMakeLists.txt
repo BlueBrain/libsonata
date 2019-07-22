@@ -43,7 +43,7 @@ option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
-set(HDF5_PREFER_PARALLEL "ON")
+
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -67,16 +67,10 @@ endif()
 # Dependencies
 # =============================================================================
 
-if (EXTLIB_FROM_SUBMODULES)
-    add_subdirectory(extlib EXCLUDE_FROM_ALL)
-else()
-    find_package(fmt REQUIRED)
-    find_package(Catch2 REQUIRED)
-    find_package(HighFive REQUIRED)
-endif()
-
 find_package(MPI)
 if (MPI_FOUND)
+    set(HDF5_PREFER_PARALLEL "ON")
+    add_definitions(-DHAVE_MPI)
     include_directories (${MPI_INCLUDE_PATH})
 endif()
 
@@ -88,6 +82,13 @@ if (HDF5_FOUND)
     else()
         message (STATUS "HDF5 found, but no parallel IO support was found, HDF5 support in replib will be disabled")
     endif()
+endif()
+
+if (EXTLIB_FROM_SUBMODULES)
+    add_subdirectory(extlib EXCLUDE_FROM_ALL)
+else()
+    find_package(fmt REQUIRED)
+    find_package(HighFive REQUIRED)
 endif()
 
 # =============================================================================

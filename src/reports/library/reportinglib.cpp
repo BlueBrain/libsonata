@@ -9,8 +9,10 @@
 #include <spdlog/sinks/stdout_color_sinks.h>*/
 
 double ReportingLib::m_atomicStep = 1e-8;
+#ifdef HAVE_MPI
 MPI_Comm ReportingLib::m_allCells = MPI_COMM_WORLD;
 int ReportingLib::m_rank = 0;
+#endif
 
 ReportingLib::ReportingLib(): m_numReports(0) {
 
@@ -30,7 +32,7 @@ ReportingLib::~ReportingLib() {
 
 void ReportingLib::clear() {
 
-    for (auto &kv: m_reports) {
+    for (auto& kv: m_reports) {
         //m_logger->info("Deleting report: {}", kv.first);
         //std::cout << "Deleting " << kv.first << std::endl;
     }
@@ -98,6 +100,7 @@ int ReportingLib::add_variable(const std::string& report_name, int cellnumber, d
 
 void ReportingLib::make_global_communicator() {
 
+#ifdef HAVE_MPI
     int global_rank, global_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &global_size);
@@ -112,15 +115,24 @@ void ReportingLib::make_global_communicator() {
 
     printf("+++++++++WORLD RANK/SIZE: %d/%d \t ROW RANK/SIZE: %d/%d\n",
            global_rank, global_size, cell_rank, cell_size);
+#endif
 }
 
-void ReportingLib::share_and_prepare(int rank, int num_nodes) {
+void ReportingLib::share_and_prepare() {
 
+#ifdef HAVE_MPI
+    int rank, num_nodes;
+    MPI_Comm_rank(ReportingLib::m_allCells, &rank);
+    MPI_Comm_size(ReportingLib::m_allCells, &num_nodes);
+
+    std::cout << "Hello from rank " << rank << " , size: " << num_nodes << std::endl;
     m_rank = rank;
+
     // Split reports into different ranks?
 
     // Create communicator groups ?
 
+#endif
     // remove reports without cells
     for(auto& kv: m_reports) {
         if(kv.second->is_empty()){
@@ -129,8 +141,7 @@ void ReportingLib::share_and_prepare(int rank, int num_nodes) {
     }
 
     // Allocate buffers ?
-    std::cout << "========+++++ m_rank is " << m_rank << std::endl;
-    for (auto &kv : m_reports) {
+    for (auto& kv : m_reports) {
         std::cout << "========++ NUM CELLS " << kv.second->get_num_cells() << std::endl;
         kv.second->prepare_dataset();
     }
@@ -158,7 +169,7 @@ int ReportingLib::end_iteration(double timestep) {
 
 int ReportingLib::flush(double time) {
 
-    for (auto &kv : m_reports) {
+    for (auto& kv : m_reports) {
         kv.second->flush(time);
     }
     return 0;
@@ -177,7 +188,7 @@ int ReportingLib::set_max_buffer_size(const std::string& report_name, size_t buf
 
 int ReportingLib::set_max_buffer_size(size_t buf_size) {
 
-    for (auto &kv : m_reports) {
+    for (auto& kv : m_reports) {
         kv.second->set_max_buffer_size(buf_size);
     }
     return 0;

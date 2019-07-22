@@ -36,11 +36,7 @@ int records_finish_and_share() {
     }
     int rank, num_nodes = 0;
     if(first_report) {
-        MPI_Comm_rank(ReportingLib::m_allCells, &rank);
-        MPI_Comm_size(ReportingLib::m_allCells, &num_nodes);
-
-        std::cout << "Hello from rank " << rank << " , size: " << num_nodes << std::endl;
-        InitReports.share_and_prepare(rank, num_nodes);
+        InitReports.share_and_prepare();
         first_report = false;
     }
     return 0;

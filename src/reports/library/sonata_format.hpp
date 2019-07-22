@@ -25,6 +25,8 @@ class SonataFormat: public ReportFormat {
     const std::vector<uint64_t>& get_index_pointers() { return index_pointers; }
     const std::vector<uint32_t>& get_element_ids() { return element_ids; }
 
+    int get_compartment_offset();
+
     // Sort spikes
     double nrnmpi_dbl_allmin(double x, int numprocs);
     double nrnmpi_dbl_allmax(double x, int numprocs);
