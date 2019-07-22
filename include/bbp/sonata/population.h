@@ -99,6 +99,9 @@ public:
 
     /**
      * All attribute names that are explicit enumerations
+     *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      */
     const std::set<std::string>& enumerationNames() const;
 
@@ -107,6 +110,9 @@ public:
      *
      * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
+     *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
      * @param name is a string to allow attributes not defined in spec
      * @throw if there is no such attribute for the population
@@ -121,6 +127,9 @@ public:
      * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
      *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
+     *
      * @param name is a string to allow attributes not defined in spec
      * @param default is a value to use for groups w/o given attribute
      * @throw if there is no such attribute for the population
@@ -130,6 +139,9 @@ public:
 
     /**
      * Get enumeration values for given attribute and Selection
+     *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
      * @param name is a string to allow enumeration attributes not defined in spec
      * @throw if there is no such attribute for the population

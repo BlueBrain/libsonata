@@ -39,7 +39,7 @@ std::set<std::string> _listChildren(const HighFive::Group& group, const std::set
     return result;
 }
 
-std::set<std::string> _listCustomEnumerations(const HighFive::Group h5Group, const std::set<std::string>& attrs) {
+std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group, const std::set<std::string>& attrs) {
     std::set<std::string> names{};
     const std::set<std::string> enums(_listChildren(h5Group));
     std::set_intersection(
@@ -113,7 +113,7 @@ struct Population::Impl
         , attributeNames(_listChildren(h5Root.getGroup("0"), {H5_DYNAMICS_PARAMS, H5_LIBRARY}))
         , attributeEnumNames(
             h5Root.getGroup("0").exist(H5_LIBRARY)
-                ? _listCustomEnumerations(h5Root.getGroup("0").getGroup(H5_LIBRARY), attributeNames)
+                ? _listExplicitEnumerations(h5Root.getGroup("0").getGroup(H5_LIBRARY), attributeNames)
                 : std::set<std::string>{}
         )
         , dynamicsAttributeNames(
