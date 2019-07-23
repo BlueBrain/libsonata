@@ -140,4 +140,5 @@ setup(
     zip_safe=False,
     install_requires=install_requirements,
     setup_requires=["setuptools_scm"],
+    use_scm_version=True,
 )
