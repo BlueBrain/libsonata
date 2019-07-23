@@ -98,7 +98,21 @@ public:
     const std::set<std::string>& attributeNames() const;
 
     /**
+     * All attribute names that are explicit enumerations
+     *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
+     */
+    const std::set<std::string>& enumerationNames() const;
+
+    /**
      * Get attribute values for given Selection
+     *
+     * If string values are requested and the attribute is a explicit
+     * enumeration, values will be resolved to strings.
+     *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
      * @param name is a string to allow attributes not defined in spec
      * @throw if there is no such attribute for the population
@@ -110,6 +124,12 @@ public:
     /**
      * Get attribute values for given Selection
      *
+     * If string values are requested and the attribute is a explicit
+     * enumeration, values will be resolved to strings.
+     *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
+     *
      * @param name is a string to allow attributes not defined in spec
      * @param default is a value to use for groups w/o given attribute
      * @throw if there is no such attribute for the population
@@ -118,13 +138,33 @@ public:
     std::vector<T> getAttribute(const std::string& name, const Selection& selection, const T& defaultValue) const;
 
     /**
-     * Get attribute data type
+     * Get enumeration values for given attribute and Selection
+     *
+     * See also:
+     * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
+     *
+     * @param name is a string to allow enumeration attributes not defined in spec
+     * @throw if there is no such attribute for the population
+     * @throw if the attribute is not defined for _any_ element from the selection
+     */
+    template <typename T>
+    std::vector<T> getEnumeration(const std::string& name, const Selection& selection) const;
+
+    /**
+     * Get all allowed attribute enumeration values
+     *
+     * @param name is a string to allow attributes not defined in spec
+     * @throw if there is no such attribute for the population
+     */
+    std::vector<std::string> enumerationValues(const std::string& name) const;
+    /**
+     * Get attribute data type, optionally translating enumeration types
 
      * @internal
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
-    std::string _attributeDataType(const std::string& name) const;
+    std::string _attributeDataType(const std::string& name, bool translate_enumeration = false) const;
 
     /**
      * All dynamics attribute names (JSON keys + union of attributes in groups)
@@ -172,6 +212,9 @@ protected:
     struct Impl;
     const std::unique_ptr<Impl> impl_;
 };
+
+template <>
+std::vector<std::string> Population::getAttribute(const std::string& name, const Selection& selection) const;
 
 //--------------------------------------------------------------------------------------------------
 

@@ -56,6 +56,8 @@ class TestNodePopulation(unittest.TestCase):
                 'A-float', 'A-double',
                 'A-string',
                 'A-enum',
+                'E-mapping-good',
+                'E-mapping-bad'
             }
         )
 
@@ -84,6 +86,59 @@ class TestNodePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj.get_dynamics_attribute('dparam-X', Selection([0, 5]), 42.).tolist(), [1011., 1016.])
 
         self.assertRaises(SonataError, self.test_obj.get_dynamics_attribute, 'no-such-attribute', 0)
+
+    def test_enumeration_names(self):
+        self.assertEqual(
+            self.test_obj.enumeration_names,
+            {
+                'E-mapping-good',
+                'E-mapping-bad'
+            }
+        )
+
+    def test_enumeration_values(self):
+        self.assertEqual(
+            self.test_obj.get_attribute(
+                "E-mapping-good",
+                Selection([(0, 1), (2, 3)])
+            ).tolist(),
+            ["C", "C"]
+        )
+
+        self.assertEqual(
+            self.test_obj.get_attribute(
+                "E-mapping-good",
+                Selection([(0, 1), (2, 3)])
+            ).tolist(),
+            ["C", "C"]
+        )
+
+        self.assertEqual(
+            self.test_obj.get_enumeration(
+                "E-mapping-good",
+                Selection([(0, 1), (2, 3)])
+            ).tolist(),
+            [2, 2]
+        )
+
+        self.assertEqual(
+            self.test_obj.enumeration_values("E-mapping-good"),
+            ["A", "B", "C"]
+        )
+
+        self.assertRaises(
+            SonataError,
+            self.test_obj.get_attribute,
+            "E-mapping-bad",
+            1
+        )
+
+        self.assertRaises(
+            SonataError,
+            self.test_obj.get_enumeration,
+            "attr-X",
+            0
+        )
 
 
 class TestEdgePopulation(unittest.TestCase):

@@ -24,6 +24,7 @@ namespace sonata {
 namespace {
 
 const char* H5_DYNAMICS_PARAMS = "dynamics_params";
+const char* H5_LIBRARY = "@library";
 
 
 std::set<std::string> _listChildren(const HighFive::Group& group, const std::set<std::string>& ignoreNames = {})
@@ -36,6 +37,19 @@ std::set<std::string> _listChildren(const HighFive::Group& group, const std::set
         result.insert(name);
     }
     return result;
+}
+
+std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group, const std::set<std::string>& attrs) {
+    std::set<std::string> names{};
+    const std::set<std::string> enums(_listChildren(h5Group));
+    std::set_intersection(
+        enums.begin(),
+        enums.end(),
+        attrs.begin(),
+        attrs.end(),
+        std::inserter(names, names.begin())
+    );
+    return names;
 }
 
 
@@ -96,7 +110,12 @@ struct Population::Impl
         , prefix(_prefix)
         , h5File(h5FilePath)
         , h5Root(h5File.getGroup(fmt::format("/{}s", prefix)).getGroup(name))
-        , attributeNames(_listChildren(h5Root.getGroup("0"), {H5_DYNAMICS_PARAMS}))
+        , attributeNames(_listChildren(h5Root.getGroup("0"), {H5_DYNAMICS_PARAMS, H5_LIBRARY}))
+        , attributeEnumNames(
+            h5Root.getGroup("0").exist(H5_LIBRARY)
+                ? _listExplicitEnumerations(h5Root.getGroup("0").getGroup(H5_LIBRARY), attributeNames)
+                : std::set<std::string>{}
+        )
         , dynamicsAttributeNames(
             h5Root.getGroup("0").exist(H5_DYNAMICS_PARAMS)
                 ? _listChildren(h5Root.getGroup("0").getGroup(H5_DYNAMICS_PARAMS))
@@ -120,6 +139,14 @@ struct Population::Impl
         return h5Root.getGroup("0").getDataSet(name);
     }
 
+    HighFive::DataSet getLibraryDataSet(const std::string& name) const
+    {
+        if (!attributeEnumNames.count(name)) {
+            throw SonataError(fmt::format("No such enumeration attribute: '{}'", name));
+        }
+        return h5Root.getGroup("0").getGroup(H5_LIBRARY).getDataSet(name);
+    }
+
     HighFive::DataSet getDynamicsAttributeDataSet(const std::string& name) const
     {
         if (!dynamicsAttributeNames.count(name)) {
@@ -133,6 +160,7 @@ struct Population::Impl
     const HighFive::File h5File;
     const HighFive::Group h5Root;
     const std::set<std::string> attributeNames;
+    const std::set<std::string> attributeEnumNames;
     const std::set<std::string> dynamicsAttributeNames;
 };
 
