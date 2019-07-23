@@ -13,6 +13,9 @@ from setuptools.command.test import test
 from distutils.version import LooseVersion
 
 
+REQUIRED_NUMPY_VERSION = "numpy>=1.12.0"
+
+
 class lazy_dict(dict):
     """When the value associated to a key is a function, then returns
     the function call instead of the function.
@@ -120,9 +123,19 @@ class PkgTest(test):
         self.run_command('test_ext')
         self.run_command('test_doc')
 
+
 install_requirements = [
-    "numpy>=1.12.0",
+    REQUIRED_NUMPY_VERSION,
 ]
+
+setup_requires = [
+    "setuptools_scm",
+]
+
+# HACK: `setup_requires` uses `easy_install` to do the 'pre-installation' of
+# numpy, it doesn't realize it has to install numpy version that supports py2.
+if sys.version_info[0] == 3:
+    setup_requires.append(REQUIRED_NUMPY_VERSION)
 
 with open('VERSION') as versionf:
     version = versionf.readline().strip()
@@ -143,5 +156,5 @@ setup(
     ),
     zip_safe=False,
     install_requires=install_requirements,
-    setup_requires=["setuptools_scm"],
+    setup_requires=setup_requires,
 )
