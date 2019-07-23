@@ -124,15 +124,11 @@ install_requirements = [
     "numpy>=1.12.0",
 ]
 
-with open('VERSION') as versionf:
-    version = versionf.readline().strip()
-
 setup(
     name="libsonata",
     description='SONATA files reader',
     author="BlueBrain Project, EPFL",
     author_email="bbp-ou-nse@groupes.epfl.ch",
-    version=version,
     classifiers=[],
     ext_modules=[CMakeExtension("libsonata")],
     cmdclass=lazy_dict(
@@ -144,4 +140,5 @@ setup(
     zip_safe=False,
     install_requires=install_requirements,
     setup_requires=["setuptools_scm"],
+    use_scm_version=True,
 )
