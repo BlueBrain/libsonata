@@ -168,11 +168,51 @@ const std::set<std::string>& Population::attributeNames() const
 }
 
 
+const std::set<std::string>& Population::enumerationNames() const
+{
+    return impl_->attributeEnumNames;
+}
+
+
+std::vector<std::string> Population::enumerationValues(const std::string& name) const
+{
+    HDF5_LOCK_GUARD
+    const auto dset = impl_->getLibraryDataSet(name);
+    return _readSelection<std::string>(dset, Selection({{0, dset.getSpace().getDimensions()[0]}}));
+}
+
+
 template<typename T>
 std::vector<T> Population::getAttribute(const std::string& name, const Selection& selection) const
 {
     HDF5_LOCK_GUARD
     return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
+}
+
+
+template<>
+std::vector<std::string> Population::getAttribute(const std::string& name, const Selection& selection) const
+{
+    if (impl_->attributeEnumNames.count(name) == 0) {
+        HDF5_LOCK_GUARD
+        return _readSelection<std::string>(impl_->getAttributeDataSet(name), selection);
+    }
+
+    const auto indices = getAttribute<size_t>(name, selection);
+    const auto values = enumerationValues(name);
+
+    std::vector<std::string> resolved;
+    resolved.reserve(indices.size());
+
+    const auto max = values.size();
+    for (const auto& i : indices) {
+        if (i >= max) {
+            throw SonataError(fmt::format("Invalid enumeration value: {}", i));
+        }
+        resolved.emplace_back(values[i]);
+    }
+
+    return resolved;
 }
 
 
@@ -184,8 +224,27 @@ std::vector<T> Population::getAttribute(const std::string& name, const Selection
 }
 
 
-std::string Population::_attributeDataType(const std::string& name) const
+template <typename T>
+std::vector<T> Population::getEnumeration(const std::string& name, const Selection& selection) const
 {
+    if (impl_->attributeEnumNames.count(name) == 0) {
+        throw SonataError(fmt::format("Invalid enumeration attribute: {}", name));
+    }
+    if (!std::is_integral<T>::value) {
+        throw SonataError(fmt::format("Enumeration attribute '{}' can only be integer", name));
+    }
+
+    HDF5_LOCK_GUARD
+    return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
+}
+
+
+std::string Population::_attributeDataType(const std::string& name, bool translate_enumeration) const
+{
+    if (translate_enumeration && impl_->attributeEnumNames.count(name) > 0) {
+        return "string";
+    }
+
     HDF5_LOCK_GUARD
     return _getDataType(impl_->getAttributeDataSet(name), name);
 }
@@ -226,6 +285,8 @@ std::string Population::_dynamicsAttributeDataType(const std::string& name) cons
         const std::string&, const Selection&) const; \
     template std::vector<T> Population::getAttribute<T>( \
         const std::string&, const Selection&, const T&) const; \
+    template std::vector<T> Population::getEnumeration<T>( \
+        const std::string&, const Selection&) const; \
     template std::vector<T> Population::getDynamicsAttribute<T>( \
         const std::string&, const Selection&) const; \
     template std::vector<T> Population::getDynamicsAttribute<T>( \
@@ -243,6 +304,10 @@ INSTANTIATE_TEMPLATE_METHODS(int32_t)
 INSTANTIATE_TEMPLATE_METHODS(uint32_t)
 INSTANTIATE_TEMPLATE_METHODS(int64_t)
 INSTANTIATE_TEMPLATE_METHODS(uint64_t)
+
+#ifdef __APPLE__
+INSTANTIATE_TEMPLATE_METHODS(size_t)
+#endif
 
 INSTANTIATE_TEMPLATE_METHODS(std::string)
 
