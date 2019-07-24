@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <map>
 
 #include "cell.hpp"
@@ -35,7 +34,6 @@ class ReportFormat {
             int num_steps, std::shared_ptr<cells_t> cells, const KindFormat& kind);
 
     virtual void prepare_dataset() = 0;
-    //virtual void write_header() = 0;
     virtual void write_data() = 0;
     virtual void close() = 0;
 

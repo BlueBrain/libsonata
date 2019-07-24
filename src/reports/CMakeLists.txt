@@ -24,7 +24,7 @@ set(reportinglib_SOURCES
         "library/hdf5_writer.hpp")
 
 set(reportinglib_HEADERS
-        "${SONATA_INCLUDE_DIR}/bbp/reports/records.hpp")
+        "${SONATA_INCLUDE_DIR}/bbp/reports/records.h")
 
 set(client_SOURCES
         "client/main.cpp")

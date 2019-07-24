@@ -1,6 +1,6 @@
 #include <memory>
 #include <iostream>
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include <reports/library/report_format.hpp>
 #include <reports/library/sonata_format.hpp>
 

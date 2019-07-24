@@ -1,14 +1,11 @@
-#include <stdlib.h>
-#include <new>
 #include <iostream>
-#include <stdlib.h>
 
 #include "soma_report.hpp"
 
 SomaReport::SomaReport(const std::string& report_name, double tstart, double tend, double dt)
 : Report(report_name, tstart, tend, dt) {}
 
-int SomaReport::get_total_compartments() {
+size_t SomaReport::get_total_compartments() {
     // Every cell has only 1 compartment on a soma report
     return m_cells->size();
 }

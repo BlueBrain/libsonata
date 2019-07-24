@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include <reports/library/cell.hpp>
 #include <memory>
 

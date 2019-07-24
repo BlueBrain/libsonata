@@ -1,7 +1,6 @@
 #include <vector>
 #include <fstream>
-#include <mpi.h>
-#include "hdf5.h"
+#include <hdf5.h>
 
 #include "io_writer.hpp"
 
@@ -17,7 +16,7 @@ class HDF5Writer: public IoWriter {
 
   public:
     HDF5Writer(const std::string& report_name);
-    ~HDF5Writer();
+    ~HDF5Writer() = default;
 
     void configure_group(const std::string& group_name);
     void configure_attribute(const std::string& group_name, const std::string& attribute_name);

@@ -1,12 +1,12 @@
 #include <memory>
-#include "catch.hpp"
-#include <bbp/reports/records.hpp>
+#include <catch2/catch.hpp>
+#include <bbp/reports/records.h>
 
 std::vector<double> compartments {3.45, 563.12, 23.4, 779.2, 42.1};
 
 SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
     const double tstart = 0;
-    const double tend = 1.0;
+    const double tend = 0.3;
     const double dt = 0.1;
 
     WHEN("We add a new report and cell") {
@@ -61,7 +61,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
         }
         records_setup_communicator();
         records_finish_and_share();
-        // We record 2 steps
+
         double t = 0.0;
         for (int i = 0; i < num_steps; i++) {
             records_nrec(t, 10, cellids, report_name);

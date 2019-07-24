@@ -4,9 +4,9 @@ set(TESTS_SRC
   test_nodes.cpp
   test_selection.cpp
 )
-include_directories(contrib)
 add_executable(unittests ${TESTS_SRC})
 target_link_libraries(unittests
+    PRIVATE Catch2::Catch2
     PRIVATE sonata_shared
 )
 

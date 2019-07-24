@@ -1,8 +1,4 @@
-#include <stdlib.h>
-#include <new>
 #include <iostream>
-#include <fstream>
-#include <stdlib.h>
 #include <algorithm>
 #include <numeric>
 
@@ -12,10 +8,8 @@
 SonataFormat::SonataFormat(const std::string& report_name, size_t max_buffer_size, int num_steps, std::shared_ptr<cells_t> cells)
 : ReportFormat(report_name, max_buffer_size, num_steps, cells) {
     index_pointers.resize(cells->size());
-    m_ioWriter = IoWriter::create_IoWriter(HDF5, report_name);
+    m_ioWriter = IoWriter::create_IoWriter(IoWriter::Kind::HDF5, report_name);
 }
-
-SonataFormat::~SonataFormat() {}
 
 void SonataFormat::prepare_dataset() {
 

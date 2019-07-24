@@ -9,7 +9,7 @@ class AsciiWriter: public IoWriter {
 
   public:
     AsciiWriter(const std::string& report_name);
-    ~AsciiWriter();
+    ~AsciiWriter() = default;
 
     void write(const std::string& name, float* buffer, int steps_to_write, int total_steps, int total_compartments) override;
     void write(const std::string& name, const std::vector<int>& buffer) override;

@@ -8,13 +8,12 @@
 #include <mpi.h>
 #endif
 
-#include <bbp/reports/records.hpp>
+#include <bbp/reports/records.h>
 
 struct Neuron {
-    // some properties
-    int gid;
+    int node_id;
     std::string kind; // soma / compartment
-    std::vector<double> compartments;
+    std::vector<double> element_ids;
     std::vector<double> spike_timestamps;
 };
 
@@ -49,9 +48,9 @@ void generate_compartments(Neuron& neuron) {
         num_compartments = 1;
     }
 
-    neuron.compartments.reserve(num_compartments);
+    neuron.element_ids.reserve(num_compartments);
     for (int j = 0; j < num_compartments; j++) {
-        neuron.compartments.push_back(std::rand() % 10);
+        neuron.element_ids.push_back(std::rand() % 10);
     }
 }
 
@@ -73,7 +72,7 @@ std::vector<int> generate_data(std::vector<Neuron>& neurons, const std::string& 
         tmp_neuron.kind = kind;
 
         cellids.push_back(nextgid);
-        tmp_neuron.gid = nextgid++;
+        tmp_neuron.node_id = nextgid++;
 
         if (tmp_neuron.kind == "spike") {
             generate_spikes(tmp_neuron);
@@ -92,14 +91,14 @@ void init(const char* report_name, std::vector<Neuron>& neurons) {
 
     // logic for registering soma and compartment reports with reportinglib
     for (auto& neuron : neurons) {
-        records_add_report(report_name, neuron.gid, neuron.gid, neuron.gid, tstart, tstop, dt, neuron.kind.c_str());
+        records_add_report(report_name, neuron.node_id, neuron.node_id, neuron.node_id, tstart, tstop, dt, neuron.kind.c_str());
 
-        for (auto& compartment: neuron.compartments) {
-            records_add_var_with_mapping(report_name, neuron.gid, &compartment);
+        for (auto& compartment: neuron.element_ids) {
+            records_add_var_with_mapping(report_name, neuron.node_id, &compartment);
         }
 
         for (auto& spike: neuron.spike_timestamps) {
-            records_add_var_with_mapping(report_name, neuron.gid, &spike);
+            records_add_var_with_mapping(report_name, neuron.node_id, &spike);
         }
     }
 }
@@ -108,7 +107,7 @@ void change_data(std::vector<Neuron>& neurons) {
 
     // Increment in 1 per timestep every voltage
     for (auto& neuron : neurons) {
-        for (auto& compartment: neuron.compartments) {
+        for (auto& compartment: neuron.element_ids) {
             compartment++;
         }
     }
@@ -117,9 +116,9 @@ void change_data(std::vector<Neuron>& neurons) {
 void print_data(std::vector<Neuron>& neurons) {
 
     for (auto& neuron : neurons) {
-        std::cout << "++NEURON GID: " << neuron.gid << std::endl;
+        std::cout << "++NEURON node_id: " << neuron.node_id << std::endl;
         std::cout << "Compartments:" << std::endl;
-        for (auto& compartment: neuron.compartments) {
+        for (auto& compartment: neuron.element_ids) {
             std::cout << compartment << ", ";
         }
         std::cout << std::endl << std::endl;
