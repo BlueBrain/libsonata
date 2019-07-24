@@ -2,17 +2,17 @@
 #include <vector>
 #include <memory>
 
-enum KindWriter {HDF5, ASCII, MPIIO};
-
 class IoWriter {
   protected:
     std::string m_reportName;
 
   public:
-    IoWriter(const std::string& report_name);
-    virtual ~IoWriter();
+    enum class Kind {HDF5, ASCII, MPIIO};
 
-    static std::unique_ptr<IoWriter> create_IoWriter(const KindWriter& kind, const std::string& report_name);
+    IoWriter(const std::string& report_name);
+    virtual ~IoWriter() = default;
+
+    static std::unique_ptr<IoWriter> create_IoWriter(IoWriter::Kind kind, const std::string& report_name);
 
     // Not implemented by default, override by hdf5
     virtual void configure_group(const std::string& group_name) {}

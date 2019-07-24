@@ -43,8 +43,6 @@ option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
-
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -69,18 +67,32 @@ endif()
 
 find_package(MPI)
 if (MPI_FOUND)
+    # With MPI we prefer HDF5 parallel
     set(HDF5_PREFER_PARALLEL "ON")
-    add_definitions(-DHAVE_MPI)
-    include_directories (${MPI_INCLUDE_PATH})
+    include_directories(${MPI_INCLUDE_PATH})
 endif()
 
 find_package(HDF5)
 if (HDF5_FOUND)
-    if (HDF5_IS_PARALLEL)
-        include_directories (${HDF5_INCLUDE_DIRS})
-        set (HDF5_LIBS ${HDF5_LIBRARIES})
+    include_directories(${HDF5_INCLUDE_DIRS})
+    set(HDF5_LIBS ${HDF5_LIBRARIES})
+endif()
+
+if (MPI_FOUND)
+    if (HDF5_FOUND)
+        if (HDF5_IS_PARALLEL)
+            # When MPI and HDF5 parallel are found, enable mpi in the report library
+            add_definitions(-DHAVE_MPI)
+            message(STATUS "Both MPI and HDF5 parallel found, using reporting parallel implementation")
+        else()
+            message(STATUS "MPI and HDF5 found, but no parallel IO support for HDF5, using reporting serial implementation")
+        endif()
+    endif()
+else()
+    if (HDF5_FOUND)
+        message(STATUS "HDF5 found, Using reporting serial implementation")
     else()
-        message (STATUS "HDF5 found, but no parallel IO support was found, HDF5 support in replib will be disabled")
+        message(FATAL_ERROR "No MPI or HDF5 found")
     endif()
 endif()
 
@@ -89,6 +101,7 @@ if (EXTLIB_FROM_SUBMODULES)
 else()
     find_package(fmt REQUIRED)
     find_package(HighFive REQUIRED)
+    find_package(Catch2 REQUIRED)
 endif()
 
 # =============================================================================
@@ -150,7 +163,7 @@ target_compile_definitions(sonata_shared
 target_link_libraries(sonata_shared
     PRIVATE fmt::fmt-header-only
     PRIVATE HighFive
-    ${MPI_CXX_LIBRARIES}
+    PRIVATE ${MPI_CXX_LIBRARIES}
 )
 
 target_compile_definitions(sonata_static
@@ -195,7 +208,7 @@ install(EXPORT sonata-targets
 # =============================================================================
 
 enable_testing()
-include(CMake/Catch.cmake)
+include(extlib/Catch2/contrib/Catch.cmake)
 add_subdirectory(tests)
 
 if (ENABLE_COVERAGE)

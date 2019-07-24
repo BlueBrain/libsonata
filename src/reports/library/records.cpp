@@ -1,8 +1,7 @@
-#include <bbp/reports/records.hpp>
 #include <iostream>
+#include <bbp/reports/records.h>
 
 #ifdef DEBUG
-// Only with debug
 #include <iostream>
 #endif
 

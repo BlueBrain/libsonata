@@ -1,8 +1,5 @@
-#include <algorithm>
-#include <stdlib.h>
-#include <new>
 #include <iostream>
-#include <stdlib.h>
+#include <algorithm>
 
 #include "report_format.hpp"
 #include "sonata_format.hpp"

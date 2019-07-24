@@ -13,7 +13,7 @@ class SonataFormat: public ReportFormat {
 
   public:
     SonataFormat(const std::string& report_name, size_t max_buffer_size, int num_steps, std::shared_ptr<cells_t> cells);
-    ~SonataFormat();
+    ~SonataFormat() = default;
 
     void prepare_dataset() override;
     void write_report_header();

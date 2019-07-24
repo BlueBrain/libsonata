@@ -1,16 +1,12 @@
 #pragma once
 
 #include <map>
-#include <memory>
 #include <vector>
-#include <iterator>
 #include <string>
-#include <set>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
-//#include <spdlog/spdlog.h>
 
 #include "report.hpp"
 
@@ -20,9 +16,6 @@ class ReportingLib {
   private:
     ReportMap m_reports;
     int m_numReports;
-
-    /*using logger_t = std::shared_ptr<spdlog::logger>;
-    logger_t m_logger;*/
 
   public:
     static double m_atomicStep;
@@ -65,10 +58,6 @@ class ReportingLib {
     int set_max_buffer_size(const std::string& report_name, size_t buf_size);
     int set_max_buffer_size(size_t buf_size);
 
-    KindReport string_to_enum(const std::string& kind);
-
-    /*const logger_t& logger_get() const noexcept {
-        return this->m_logger;
-    }*/
+    Report::Kind string_to_enum(const std::string& kind);
 
 };

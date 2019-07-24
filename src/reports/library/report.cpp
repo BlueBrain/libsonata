@@ -1,8 +1,5 @@
-#include <stdlib.h>
-#include <new>
 #include <iostream>
 #include <cmath>
-#include <stdlib.h>
 
 #include "report.hpp"
 #include "soma_report.hpp"
@@ -23,19 +20,17 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     std::cout << "+Number of steps = " << m_numSteps << std::endl;
 }
 
-Report::~Report() {}
-
 std::shared_ptr<Report> Report::createReport(const std::string& report_name, double tstart,
-                                             double tend, double dt, KindReport kind) {
+                                             double tend, double dt, Report::Kind kind) {
     switch(kind) {
-        case COMPARTMENT:
+        case Report::Kind::COMPARTMENT:
             return std::make_shared<CompartmentReport>(report_name, tstart, tend, dt);
-        case SOMA:
+        case Report::Kind::SOMA:
             return std::make_shared<SomaReport>(report_name, tstart, tend, dt);
-        case SPIKE:
+        case Report::Kind::SPIKE:
             return std::make_shared<SpikeReport>(report_name, tstart, tend, dt);
         default:
-            std::cout << "Report type '" << kind << "' does not exist!" << std::endl;
+            std::cout << "Report type '" << static_cast<int>(kind) << "' does not exist!" << std::endl;
             break;
     }
     return nullptr;

@@ -1,14 +1,11 @@
-#include <stdlib.h>
-#include <new>
 #include <iostream>
-#include <stdlib.h>
 
 #include "spike_report.hpp"
 
 SpikeReport::SpikeReport(const std::string& report_name, double tstart, double tend, double dt)
 : Report(report_name, tstart, tend, dt) {}
 
-int SpikeReport::get_total_compartments() {
+size_t SpikeReport::get_total_compartments() {
     // Spike report doesnt have compartments
     return 0;
 }

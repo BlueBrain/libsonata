@@ -7,8 +7,6 @@
 #include "cell.hpp"
 #include "report_format.hpp"
 
-enum KindReport {COMPARTMENT, SOMA, SPIKE};
-
 class Report {
   private:
     std::string m_reportName;
@@ -26,8 +24,10 @@ class Report {
     std::shared_ptr<cells_t> m_cells;
 
   public:
+    enum class Kind {COMPARTMENT, SOMA, SPIKE};
+
     Report(const std::string& report_name, double tstart, double tend, double dt);
-    virtual ~Report();
+    virtual ~Report() = default;
 
     int get_num_cells() { return m_numCells; }
     bool is_empty() { return m_cells->empty(); }
@@ -40,10 +40,10 @@ class Report {
     int prepare_dataset();
 
     static std::shared_ptr<Report> createReport(const std::string& report_name, double tstart,
-                                                double tend, double dt, KindReport kind);
+                                                double tend, double dt, Report::Kind kind);
     void add_cell(int cell_number, unsigned long gid, unsigned long vgid);
     virtual int add_variable(int cell_number, double* pointer) = 0;
-    virtual int get_total_compartments() = 0;
+    virtual size_t get_total_compartments() = 0;
 
     virtual int recData(double timestep, int ncells, int* cellids);
     virtual int end_iteration(double timestep);

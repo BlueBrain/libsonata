@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include <reports/library/report.hpp>
 #include <memory>
 
@@ -7,7 +7,7 @@ SCENARIO( "Test Report class", "[Report]" ) {
     const double tend = 1.0;
     const double dt = 0.1;
     GIVEN( "An instance of a soma report" ) {
-        std::shared_ptr<Report> somaReport = Report::createReport("somaReport", tstart, tend, dt, SOMA);
+        std::shared_ptr<Report> somaReport = Report::createReport("somaReport", tstart, tend, dt, Report::Kind::SOMA);
         WHEN("We add a cell and a variable to a soma report") {
             somaReport->add_cell(1,1,1);
             double variableCompartment = 10;
@@ -30,7 +30,7 @@ SCENARIO( "Test Report class", "[Report]" ) {
     }
 
     GIVEN( "An instance of a compartment report" ) {
-        std::shared_ptr<Report> compartmentReport = Report::createReport("compartmentReport", tstart, tend, dt, COMPARTMENT);
+        std::shared_ptr<Report> compartmentReport = Report::createReport("compartmentReport", tstart, tend, dt, Report::Kind::COMPARTMENT);
         WHEN("We add 2 cells") {
             compartmentReport->add_cell(1,1,1);
             compartmentReport->add_cell(2,2,2);
@@ -63,7 +63,7 @@ SCENARIO( "Test Report class", "[Report]" ) {
     }
 
     GIVEN( "An instance of a spike report" ) {
-        std::shared_ptr<Report> spikeReport = Report::createReport("spikeReport", tstart, tend, dt, SPIKE);
+        std::shared_ptr<Report> spikeReport = Report::createReport("spikeReport", tstart, tend, dt, Report::Kind::SPIKE);
         WHEN("We try to add 2 cells with same id to a spike report") {
             spikeReport->add_cell(1,1,1);
             spikeReport->add_cell(1,2,2);
