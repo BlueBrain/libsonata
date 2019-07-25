@@ -3,6 +3,7 @@
 #include <hdf5.h>
 
 #include "io_writer.hpp"
+#include "h5typemap.hpp"
 
 class HDF5Writer: public IoWriter {
   private:
@@ -27,6 +28,9 @@ class HDF5Writer: public IoWriter {
     void write(const std::string& name, const std::vector<uint64_t>& buffer) override;
     void write(const std::string& name, const std::vector<float>& buffer) override;
     void write(const std::string& name, const std::vector<double>& buffer) override;
+
+    template <typename T>
+    void write_any(const std::string& name, const std::vector<T>& buffer);
 
     hsize_t get_global_dims(int dimension);
     hsize_t get_offset(int dimension);
