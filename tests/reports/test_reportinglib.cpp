@@ -59,7 +59,6 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
         if (std::fabs(num_steps * dt + tstart - tend) > 1e-9) {
             num_steps++;
         }
-        records_setup_communicator();
         records_finish_and_share();
 
         double t = 0.0;

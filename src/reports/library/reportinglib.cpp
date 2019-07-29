@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "reportinglib.hpp"
+#include "implementation_interface.hpp"
 
 double ReportingLib::m_atomicStep = 1e-8;
 #ifdef HAVE_MPI
@@ -9,7 +10,6 @@ int ReportingLib::m_rank = 0;
 #endif
 
 ReportingLib::ReportingLib(): m_numReports(0) {
-
 }
 
 ReportingLib::~ReportingLib() {
@@ -83,39 +83,15 @@ int ReportingLib::add_variable(const std::string& report_name, int cellnumber, d
 
 void ReportingLib::make_global_communicator() {
 
-#ifdef HAVE_MPI
-    int global_rank, global_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &global_size);
-    std::cout << "++++++Num reports for rank " << global_rank << " is " << m_numReports<< std::endl;
-
-    // Create a second communicator where
-    MPI_Comm_split(MPI_COMM_WORLD, m_numReports == 0, 0, &ReportingLib::m_allCells);
-
-    int cell_rank, cell_size;
-    MPI_Comm_rank(ReportingLib::m_allCells, &cell_rank);
-    MPI_Comm_size(ReportingLib::m_allCells, &cell_size);
-
-    printf("+++++++++WORLD RANK/SIZE: %d/%d \t ROW RANK/SIZE: %d/%d\n",
-           global_rank, global_size, cell_rank, cell_size);
-#endif
+    Implementation::init_comm(m_numReports);
 }
 
 void ReportingLib::share_and_prepare() {
 
-#ifdef HAVE_MPI
-    int rank, num_nodes;
-    MPI_Comm_rank(ReportingLib::m_allCells, &rank);
-    MPI_Comm_size(ReportingLib::m_allCells, &num_nodes);
+    // Split reports into different ranks
+    // Create communicator groups
+    m_rank = Implementation::init();
 
-    std::cout << "Hello from rank " << rank << " , size: " << num_nodes << std::endl;
-    m_rank = rank;
-
-    // Split reports into different ranks?
-
-    // Create communicator groups ?
-
-#endif
     // remove reports without cells
     for(auto& kv: m_reports) {
         if(kv.second->is_empty()){

@@ -32,8 +32,5 @@ class HDF5Writer: public IoWriter {
     template <typename T>
     void write_any(const std::string& name, const std::vector<T>& buffer);
 
-    hsize_t get_global_dims(int dimension);
-    hsize_t get_offset(int dimension);
-
     void close() override;
 };

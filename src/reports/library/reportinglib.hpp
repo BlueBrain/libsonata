@@ -21,8 +21,9 @@ class ReportingLib {
     static double m_atomicStep;
 #ifdef HAVE_MPI
     static MPI_Comm m_allCells;
-    static int m_rank;
 #endif
+    static int m_rank;
+
     ReportingLib();
     ~ReportingLib();
 

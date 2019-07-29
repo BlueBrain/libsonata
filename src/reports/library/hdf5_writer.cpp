@@ -1,25 +1,16 @@
 #include <iostream>
+#include <tuple>
 #include <mpi.h>
 
 #include "reportinglib.hpp"
 #include "hdf5_writer.hpp"
+#include "implementation_interface.hpp"
 
 HDF5Writer::HDF5Writer(const std::string& report_name)
 : IoWriter(report_name), m_file(0), m_dataSet(0), m_collective_list(0), m_independent_list(0) {
 
     hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
-
-#ifdef HAVE_MPI
-    // Enable MPI access
-    MPI_Info info = MPI_INFO_NULL;
-    H5Pset_fapl_mpio(plist_id, ReportingLib::m_allCells, info);
-
-    // Initialize independent/collective lists
-    m_collective_list = H5Pcreate(H5P_DATASET_XFER);
-    m_independent_list = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(m_collective_list, H5FD_MPIO_COLLECTIVE);
-    H5Pset_dxpl_mpio(m_independent_list, H5FD_MPIO_INDEPENDENT);
-#endif
+    std::tie(m_collective_list, m_independent_list) = Implementation::prepare_write(plist_id);
 
     // Create hdf5 file named after the report_name
     m_file = H5Fcreate(report_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
@@ -51,12 +42,12 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name, int total_st
 
     hsize_t dims[2];
     dims[0] = total_steps;
-    dims[1] = get_global_dims(total_compartments);
+    dims[1] = Implementation::get_global_dims(total_compartments);
     hid_t data_space = H5Screate_simple(2, dims, nullptr);
     m_dataSet = H5Dcreate(m_file, dataset_name.c_str(), H5T_IEEE_F32LE, data_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     // Caculate the offset of each rank
-    m_offset[1] = get_offset(total_compartments);
+    m_offset[1] = Implementation::get_offset(total_compartments);
     H5Sclose(data_space);
 }
 
@@ -110,8 +101,8 @@ void HDF5Writer::write_any(const std::string& name, const std::vector<T>& buffer
     hsize_t dims = buffer.size();
     hid_t type = h5typemap::get_h5_type(T(0));
 
-    hsize_t global_dims = get_global_dims(dims);
-    hsize_t offset = get_offset(dims);
+    hsize_t global_dims = Implementation::get_global_dims(dims);
+    hsize_t offset = Implementation::get_offset(dims);
 
     hid_t data_space = H5Screate_simple(1, &global_dims, nullptr);
     hid_t data_set = H5Dcreate(m_file, name.c_str(), type, data_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -120,7 +111,7 @@ void HDF5Writer::write_any(const std::string& name, const std::vector<T>& buffer
     hid_t memspace = H5Screate_simple(1, &dims, nullptr);
     H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &offset, nullptr, &dims, nullptr);
 
-    H5Dwrite(data_set, type, memspace, filespace, m_independent_list, &buffer[0]);
+    H5Dwrite(data_set, type, memspace, filespace, m_collective_list, &buffer[0]);
 
     H5Sclose(memspace);
     H5Sclose(filespace);
@@ -134,23 +125,4 @@ void HDF5Writer::close() {
         H5Dclose(m_dataSet);
     }
     H5Fclose(m_file);
-}
-
-
-hsize_t HDF5Writer::get_global_dims(int dimension) {
-    // Return dimension when serial
-    hsize_t global_dims = dimension;
-#ifdef HAVE_MPI
-    MPI_Allreduce(&dimension, &global_dims, 1, MPI_INT, MPI_SUM, ReportingLib::m_allCells);
-#endif
-    return global_dims;
-}
-
-hsize_t HDF5Writer::get_offset(int dimension) {
-    hsize_t offset = 0;
-#ifdef HAVE_MPI
-    MPI_Scan(&dimension, &offset, 1, MPI_INT, MPI_SUM, ReportingLib::m_allCells);
-    offset -= dimension;
-#endif
-    return offset;
 }
