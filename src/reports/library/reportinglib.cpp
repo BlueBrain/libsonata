@@ -3,13 +3,14 @@
 #include "reportinglib.hpp"
 #include "implementation_interface.hpp"
 
-double ReportingLib::m_atomicStep = 1e-8;
+double ReportingLib::m_atomic_step = 1e-8;
+bool ReportingLib::first_report = true;
 #ifdef HAVE_MPI
-MPI_Comm ReportingLib::m_allCells = MPI_COMM_WORLD;
+MPI_Comm ReportingLib::m_has_nodes = MPI_COMM_WORLD;
 int ReportingLib::m_rank = 0;
 #endif
 
-ReportingLib::ReportingLib(): m_numReports(0) {
+ReportingLib::ReportingLib(): m_num_reports(0) {
 }
 
 ReportingLib::~ReportingLib() {
@@ -25,11 +26,11 @@ void ReportingLib::clear() {
 }
 
 bool ReportingLib::is_empty() {
-    return (!m_numReports);
+    return (!m_num_reports);
 }
 
-int ReportingLib::get_num_reports() {
-    return m_numReports;
+int ReportingLib::get_num_reports() const {
+    return m_num_reports;
 }
 
 Report::Kind ReportingLib::string_to_enum(const std::string& kind) {
@@ -43,47 +44,47 @@ Report::Kind ReportingLib::string_to_enum(const std::string& kind) {
     }
 }
 
-int ReportingLib::add_report(const std::string& report_name, int cellnumber, unsigned long gid, unsigned long vgid,
-                             double tstart, double tend, double dt,const std::string& kind) {
+int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, uint64_t gid, uint64_t vgid,
+                             double tstart, double tend, double dt, const std::string& kind) {
 
     // check if this is the first time a Report with the given name is referenced
-    ReportMap::iterator reportFinder = m_reports.find(report_name);
+    auto report_finder = m_reports.find(report_name);
 
     std::shared_ptr<Report> report;
-    if (reportFinder != m_reports.end()) {
-        report = reportFinder->second;
+    if (report_finder != m_reports.end()) {
+        report = report_finder->second;
         std::cout << "Report '" << report_name << "' found!" << std::endl;
     } else {
         Report::Kind kind_report = string_to_enum(kind);
         // new report
-        report = Report::createReport(report_name, tstart, tend, dt, kind_report);
+        // TODO: remove factory and instantiate here
+        report = Report::create_report(report_name, tstart, tend, dt, kind_report);
         // Check if kind doesnt exist
         if(report) {
             m_reports[report_name] = report;
-            m_numReports++;
+            m_num_reports++;
         }
     }
 
     if (report) {
-        report->add_cell(cellnumber, gid, vgid);
+        report->add_node(node_id, gid, vgid);
     }
     return 0;
 }
 
-int ReportingLib::add_variable(const std::string& report_name, int cellnumber, double* pointer) {
+int ReportingLib::add_variable(const std::string& report_name, uint64_t node_id, double* voltage) {
 
-    ReportMap::iterator reportFinder = m_reports.find(report_name);
-
-    if (reportFinder != m_reports.end()) {
-        return reportFinder->second->add_variable(cellnumber, pointer);
+    auto report_finder = m_reports.find(report_name);
+    if (report_finder != m_reports.end()) {
+        return report_finder->second->add_variable(node_id, voltage);
     }
 
-    return 1;
+    return 0;
 }
 
 void ReportingLib::make_global_communicator() {
 
-    Implementation::init_comm(m_numReports);
+    Implementation::init_comm(m_num_reports);
 }
 
 void ReportingLib::share_and_prepare() {
@@ -92,7 +93,7 @@ void ReportingLib::share_and_prepare() {
     // Create communicator groups
     m_rank = Implementation::init();
 
-    // remove reports without cells
+    // remove reports without nodes
     for(auto& kv: m_reports) {
         if(kv.second->is_empty()){
             m_reports.erase(kv.first);
@@ -101,19 +102,18 @@ void ReportingLib::share_and_prepare() {
 
     // Allocate buffers
     for (auto& kv : m_reports) {
-        std::cout << "========++ NUM CELLS " << kv.second->get_num_cells() << std::endl;
+        std::cout << "========++ NUM NODES " << kv.second->get_num_nodes() << std::endl;
         kv.second->prepare_dataset();
     }
 }
 
-int ReportingLib::record_data(double timestep, int ncells, int* cellids, const std::string& report_name) {
+int ReportingLib::record_data(double timestep, const std::vector<uint64_t>& node_ids, const std::string& report_name) {
 
-    ReportMap::iterator reportFinder = m_reports.find(report_name);
-    if (reportFinder == m_reports.end()) {
+    if (m_reports.find(report_name) == m_reports.end()) {
         std::cout << "Report '" << report_name << "' doesn't exist!" << std::endl;
         return -1;
     }
-    m_reports[report_name]->recData(timestep, ncells, cellids);
+    m_reports[report_name]->record_data(timestep, node_ids);
     return 0;
 }
 
@@ -133,21 +133,20 @@ int ReportingLib::flush(double time) {
     return 0;
 }
 
-int ReportingLib::set_max_buffer_size(const std::string& report_name, size_t buf_size) {
+int ReportingLib::set_max_buffer_size(const std::string& report_name, size_t buffer_size) {
 
-    ReportMap::iterator reportFinder = m_reports.find(report_name);
-    if (reportFinder == m_reports.end()) {
+    if (m_reports.find(report_name) == m_reports.end()) {
         std::cout << "Report '" << report_name << "' doesn't exist!" << std::endl;
         return -1;
     }
-    m_reports[report_name]->set_max_buffer_size(buf_size);
+    m_reports[report_name]->set_max_buffer_size(buffer_size);
     return 0;
 }
 
-int ReportingLib::set_max_buffer_size(size_t buf_size) {
+int ReportingLib::set_max_buffer_size(size_t buffer_size) {
 
     for (auto& kv : m_reports) {
-        kv.second->set_max_buffer_size(buf_size);
+        kv.second->set_max_buffer_size(buffer_size);
     }
     return 0;
 }

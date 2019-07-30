@@ -1,6 +1,6 @@
 set(reportinglib_SOURCES
-        "library/cell.cpp"
-        "library/cell.hpp"
+        "library/node.cpp"
+        "library/node.hpp"
         "library/records.cpp"
         "library/report.cpp"
         "library/report.hpp"

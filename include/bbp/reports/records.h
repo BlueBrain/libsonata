@@ -14,23 +14,23 @@ extern "C" {
 #endif
 int records_clear();
 /**
- * Add cell to existing or new report
+ * Add node to existing or new report
  */
 int records_add_report(const char* reportName,
-                        int cellnumber,
-                        unsigned long gid,
-                        unsigned long vgid,
+                        uint64_t node_id,
+                        uint64_t gid,
+                        uint64_t vgid,
                         double tstart,
                         double tend,
                         double dt,
                         const char* kind);
 
 /**
- * Add compartment/spike to an existing cell on a report
+ * Add compartment/spike to an existing node on a report
  */
-int records_add_var_with_mapping(const char* _reportname,
-                                 int _cellnumber,
-                                 double* _pointer);
+int records_add_var_with_mapping(const char* report_name,
+                                 uint64_t node_id,
+                                 double* voltage);
 /**
  * Setup buffers
  */
@@ -39,29 +39,29 @@ int records_finish_and_share();
 void records_setup_communicator();
 
 /**
- * Save data of cellids[] to buffer
+ * Save data of nodeids[] to buffer
  */
-int records_nrec(double _time, int ncells, int* cellids, const char* report_name);
+int records_nrec(double time, int num_nodes, uint64_t* nodeids, const char* report_name);
 
 int records_end_iteration (double timestep);
 
-int records_getNumReports();
+int records_get_num_reports();
 
 int records_flush(double time);
 
 /**
  * Set a suggested maximum memory size each individual reports can use as a buffer
- * @param buf_size requested maximum memory allocatable by a Report buffer in Mbytes
+ * @param buffer_size requested maximum memory allocatable by a Report buffer in Mbytes
  * @return 0
  */
-size_t records_set_max_buffer_size_hint(size_t buf_size);
+size_t records_set_max_buffer_size_hint(size_t buffer_size);
 
 /**
  * Set a suggested maximum memory size each individual reports can use as a buffer
- * @param buf_size requested maximum memory allocatable by a Report buffer in Mbytes
+ * @param buffer_size requested maximum memory allocatable by a Report buffer in Mbytes
  * @return 0
  */
-size_t records_set_report_max_buffer_size_hint(char* report_name, size_t buf_size);
+size_t records_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size);
 
 void records_set_atomic_step(double step);
 

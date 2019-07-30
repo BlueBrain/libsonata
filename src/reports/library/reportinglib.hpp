@@ -11,18 +11,19 @@
 #include "report.hpp"
 
 class ReportingLib {
-    typedef std::map<std::string, std::shared_ptr<Report>> ReportMap;
+    typedef std::map<std::string, std::shared_ptr<Report>> reports_t;
 
   private:
-    ReportMap m_reports;
-    int m_numReports;
+    reports_t m_reports;
+    int m_num_reports;
 
   public:
-    static double m_atomicStep;
+    static double m_atomic_step;
 #ifdef HAVE_MPI
-    static MPI_Comm m_allCells;
+    static MPI_Comm m_has_nodes;
 #endif
     static int m_rank;
+    static bool first_report;
 
     ReportingLib();
     ~ReportingLib();
@@ -36,28 +37,28 @@ class ReportingLib {
 
     int flush(double time);
 
-    int get_num_reports();
+    int get_num_reports() const;
 
     /**
-     * Register a cell with a BinReport object.  Note that an earlier cell may have alreay created
+     * Register a node with a BinReport object.  Note that an earlier node may have alreay created
      * the main Report object, so this
-     * will simply add the cell to the end.
+     * will simply add the node to the end.
      *
      * @param report_name - Name of report, and key used to find the report
      * @param kind - The type of report ("compartment", "soma", "spike")
      */
-    int add_report(const std::string& report_name, int cellnumber, unsigned long gid, unsigned long vgid,
-                   double tstart, double tend, double dt,const std::string& kind);
-    int add_variable(const std::string& report_name, int cellnumber, double* pointer);
+    int add_report(const std::string& report_name, uint64_t node_id, uint64_t gid, uint64_t vgid,
+                   double tstart, double tend, double dt, const std::string& kind);
+    int add_variable(const std::string& report_name, uint64_t node_id, double* voltage);
 
     void make_global_communicator();
     void share_and_prepare();
 
-    int record_data(double timestep, int ncells, int* cellids, const std::string& report_name);
+    int record_data(double timestep, const std::vector<uint64_t>& node_ids, const std::string& report_name);
     int end_iteration(double timestep);
 
     int set_max_buffer_size(const std::string& report_name, size_t buf_size);
-    int set_max_buffer_size(size_t buf_size);
+    int set_max_buffer_size(size_t buffer_size);
 
     Report::Kind string_to_enum(const std::string& kind);
 

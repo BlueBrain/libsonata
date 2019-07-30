@@ -3,13 +3,13 @@
 class SpikeReport: public Report {
 
   public:
-    SpikeReport(const std::string& reportName, double tstart, double tend, double dt);
+    SpikeReport(const std::string& report_name, double tstart, double tend, double dt);
 
-    size_t get_total_compartments() override;
-    int add_variable(int cell_number, double* pointer) override;
+    size_t get_total_compartments() const override;
+    int add_variable(uint64_t node_id, double* spike_value) override;
 
     // We dont need this on spike reports
-    int recData(double timestep, int ncells, int* cellids) {}
+    int record_data(double timestep, const std::vector<uint64_t>& node_ids) {}
     int end_iteration(double timestep) {}
-    int flush(double time) {}
+    void flush(double time) {}
 };

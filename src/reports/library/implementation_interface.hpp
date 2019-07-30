@@ -39,18 +39,16 @@ namespace detail {
 
 #if defined(HAVE_MPI)
 
-
-
     struct ParallelImplementation {
 
         inline static void init_comm(int reports) {
             int global_rank, global_size;
             MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
             MPI_Comm_size(MPI_COMM_WORLD, &global_size);
-            std::cout << "++++++Num reports for rank " << global_rank << " is " << reports<< std::endl;
+            std::cout << "++++++Num reports for rank " << global_rank << " is " << reports << std::endl;
 
             // Create a second communicator
-            MPI_Comm_split(MPI_COMM_WORLD, reports == 0, 0, &ReportingLib::m_allCells);
+            MPI_Comm_split(MPI_COMM_WORLD, reports == 0, 0, &ReportingLib::m_has_nodes);
 
         };
 
@@ -59,19 +57,19 @@ namespace detail {
             MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
             MPI_Comm_size(MPI_COMM_WORLD, &global_size);
 
-            int cell_rank, cell_size;
-            MPI_Comm_rank(ReportingLib::m_allCells, &cell_rank);
-            MPI_Comm_size(ReportingLib::m_allCells, &cell_size);
+            int node_rank, node_size;
+            MPI_Comm_rank(ReportingLib::m_has_nodes, &node_rank);
+            MPI_Comm_size(ReportingLib::m_has_nodes, &node_size);
 
-            printf("+++++++++WORLD RANK/SIZE: %d/%d \t ROW RANK/SIZE: %d/%d\n", global_rank, global_size, cell_rank, cell_size);
-            return cell_rank;
+            printf("+++++++++WORLD RANK/SIZE: %d/%d \t ROW RANK/SIZE: %d/%d\n", global_rank, global_size, node_rank, node_size);
+            return node_rank;
         };
 
         inline static void close(){};
         inline static std::tuple<hid_t, hid_t> prepare_write(hid_t plist_id) {
             // Enable MPI access
             MPI_Info info = MPI_INFO_NULL;
-            H5Pset_fapl_mpio(plist_id, ReportingLib::m_allCells, info);
+            H5Pset_fapl_mpio(plist_id, ReportingLib::m_has_nodes, info);
 
             // Initialize independent/collective lists
             hid_t collective_list = H5Pcreate(H5P_DATASET_XFER);
@@ -81,24 +79,30 @@ namespace detail {
 
             return std::make_tuple(collective_list, independent_list);
         };
+
         inline static hsize_t get_offset(hsize_t value) {
             hsize_t offset = 0;
-            MPI_Scan(&value, &offset, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_allCells);
+            MPI_Scan(&value, &offset, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_has_nodes);
             offset -= value;
             return offset;
         };
+
         inline static hsize_t get_global_dims(hsize_t value) {
             hsize_t global_dims = value;
-            MPI_Allreduce(&value, &global_dims, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_allCells);
+            MPI_Allreduce(&value, &global_dims, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_has_nodes);
             return global_dims;
         };
+
         inline static void sort_spikes(std::vector<double>& spikevec_time, std::vector<int>& spikevec_gid) {
             int numprocs;
-            MPI_Comm_size(ReportingLib::m_allCells, &numprocs);
+            MPI_Comm_size(ReportingLib::m_has_nodes, &numprocs);
             double lmin_time = *(std::min_element(spikevec_time.begin(), spikevec_time.end()));
             double lmax_time = *(std::max_element(spikevec_time.begin(), spikevec_time.end()));
-            double min_time = nrnmpi_dbl_allmin(lmin_time, numprocs);
-            double max_time = nrnmpi_dbl_allmax(lmax_time, numprocs);
+
+            double min_time;
+            MPI_Allreduce(&lmin_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, ReportingLib::m_has_nodes);
+            double max_time;
+            MPI_Allreduce(&lmax_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, ReportingLib::m_has_nodes);
 
             std::vector<double> inTime = spikevec_time;
             std::vector<int> inGid = spikevec_gid;
@@ -121,7 +125,7 @@ namespace detail {
 
             // now let each rank know how many spikes they will receive
             // and get in turn all the buffer sizes to receive
-            nrnmpi_int_alltoall(&snd_cnts[0], &rcv_cnts[0], 1);
+            MPI_Alltoall(&snd_cnts[0], 1, MPI_INT, &rcv_cnts[0], 1, MPI_INT, ReportingLib::m_has_nodes);
             for (int i = 1; i < numprocs; i++) {
                 rcv_dsps[i] = rcv_dsps[i - 1] + rcv_cnts[i - 1];
             }
@@ -140,46 +144,14 @@ namespace detail {
             std::vector<int> svg_buf(new_sz, 0);
 
             // now exchange data
-            nrnmpi_dbl_alltoallv(spikevec_time.data(), &snd_cnts[0], &snd_dsps[0], svt_buf.data(),
-                                 &rcv_cnts[0], &rcv_dsps[0]);
-            nrnmpi_int_alltoallv(spikevec_gid.data(), &snd_cnts[0], &snd_dsps[0], svg_buf.data(),
-                                 &rcv_cnts[0], &rcv_dsps[0]);
+            MPI_Alltoallv(spikevec_time.data(), &snd_cnts[0], &snd_dsps[0], MPI_DOUBLE, svt_buf.data(),
+                                 &rcv_cnts[0], &rcv_dsps[0], MPI_DOUBLE, ReportingLib::m_has_nodes);
+            MPI_Alltoallv(spikevec_gid.data(), &snd_cnts[0], &snd_dsps[0], MPI_INT, svg_buf.data(),
+                                 &rcv_cnts[0], &rcv_dsps[0], MPI_INT, ReportingLib::m_has_nodes);
 
             local_spikevec_sort(svt_buf, svg_buf, spikevec_time, spikevec_gid);
 
         };
-
-        // Aux functions for sort_spikes
-        static double nrnmpi_dbl_allmin(double x, int numprocs) {
-            double result;
-            if (numprocs < 2) {
-                return x;
-            }
-            MPI_Allreduce(&x, &result, 1, MPI_DOUBLE, MPI_MIN, ReportingLib::m_allCells);
-            return result;
-        }
-
-        static double nrnmpi_dbl_allmax(double x, int numprocs) {
-            double result;
-            if (numprocs < 2) {
-                return x;
-            }
-            MPI_Allreduce(&x, &result, 1, MPI_DOUBLE, MPI_MAX, ReportingLib::m_allCells);
-            return result;
-        }
-
-        static void nrnmpi_int_alltoall(int* s, int* r, int n) {
-            MPI_Alltoall(s, n, MPI_INT, r, n, MPI_INT, ReportingLib::m_allCells);
-        }
-
-        static void nrnmpi_dbl_alltoallv(double* s, int* scnt,int* sdispl,
-                                                double* r, int* rcnt, int* rdispl) {
-            MPI_Alltoallv(s, scnt, sdispl, MPI_DOUBLE, r, rcnt, rdispl, MPI_DOUBLE, ReportingLib::m_allCells);
-        }
-
-        static void nrnmpi_int_alltoallv(int* s, int* scnt, int* sdispl, int* r, int* rcnt, int* rdispl) {
-            MPI_Alltoallv(s, scnt, sdispl, MPI_INT, r, rcnt, rdispl, MPI_INT, ReportingLib::m_allCells);
-        }
 
         static void local_spikevec_sort(std::vector<double>& isvect,
                                                std::vector<int>& isvecg,
@@ -204,8 +176,6 @@ namespace detail {
         }
     };
 
-
-
 #else
 
     struct SerialImplementation {
@@ -219,7 +189,6 @@ namespace detail {
     };
 
 #endif
-
 
 }  // namespace detail
 

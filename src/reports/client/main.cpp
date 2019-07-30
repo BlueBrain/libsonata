@@ -54,24 +54,24 @@ void generate_compartments(Neuron& neuron) {
     }
 }
 
-std::vector<int> generate_data(std::vector<Neuron>& neurons, const std::string& kind, int seed) {
+std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::string& kind, int seed) {
 
     // Set random seed for reproducibility
     std::srand(static_cast<unsigned int>(23487 * (seed + 1)));
 
-    std::vector<int> cellids;
+    std::vector<uint64_t> nodeids;
     // Each gid starts with the rank*10 (i.e. rank 5 will have gids: 51, 52, 53...)
     uint64_t nextgid = 1 + seed*10;
     uint32_t c_id = 0;
 
     // 5+-5 neurons
     int num_neurons = 5 + ((std::rand() % 10) - 5);
-    cellids.reserve(num_neurons);
+    nodeids.reserve(num_neurons);
     for (int i = 0; i < num_neurons; i++) {
         Neuron tmp_neuron;
         tmp_neuron.kind = kind;
 
-        cellids.push_back(nextgid);
+        nodeids.push_back(nextgid);
         tmp_neuron.node_id = nextgid++;
 
         if (tmp_neuron.kind == "spike") {
@@ -84,7 +84,7 @@ std::vector<int> generate_data(std::vector<Neuron>& neurons, const std::string& 
         neurons.push_back(tmp_neuron);
     }
 
-    return cellids;
+    return nodeids;
 }
 
 void init(const char* report_name, std::vector<Neuron>& neurons) {
@@ -141,20 +141,20 @@ int main() {
     std::vector<Neuron> compartment_neurons;
     std::vector<Neuron> soma_neurons;
     std::vector<Neuron> spike_neurons;
-    std::vector<int> compartment_cellids;
-    std::vector<int> soma_cellids;
-    std::vector<int> spike_cellids;
+    std::vector<uint64_t> compartment_nodeids;
+    std::vector<uint64_t> soma_nodeids;
+    std::vector<uint64_t> spike_nodeids;
 
     std::cout << "+++++++Generating Data" << std::endl;
-    // Each rank will get different number of cells (some even 0, so will be idle ranks)
-    compartment_cellids = generate_data(compartment_neurons, "compartment", global_rank);
-    soma_cellids = generate_data(soma_neurons, "soma", global_rank);
-    spike_cellids = generate_data(spike_neurons, "spike", global_rank);
+    // Each rank will get different number of nodes (some even 0, so will be idle ranks)
+    compartment_nodeids = generate_data(compartment_neurons, "compartment", global_rank);
+    soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
+    spike_nodeids = generate_data(spike_neurons, "spike", global_rank);
 
     // std::cout << "+++++++Printing Data" << std::endl;
     // print_data(spike_neurons);
 
-    std::cout << "++++++++Initializing report/cell/compartment structure" << std::endl;
+    std::cout << "++++++++Initializing report/node/compartment structure" << std::endl;
     const char* compartment_report = "compartment_report";
     const char* soma_report = "soma_report";
     const char* spike_report = "spike_report";
@@ -170,15 +170,15 @@ int main() {
 
     std::cout << "++++++++++Starting simulation!" << std::endl;
     // Calculate number of steps of the simulation
-    int num_steps = (int)std::floor((tstop - tstart) / dt);
-    if (std::fabs(num_steps * dt + tstart - tstop) > 1e-9) {
+    int num_steps = static_cast<int>((tstop - tstart) / dt);
+    if (std::fabs(num_steps * dt + tstart - tstop) > std::numeric_limits<float>::epsilon()) {
         num_steps++;
     }
     double t = 0.0;
     for(int i=0; i<num_steps; i++) {
         std::cout << "++++Recording data for t = " << t << std::endl;
-        records_nrec(t, compartment_cellids.size(), &compartment_cellids[0], compartment_report);
-        records_nrec(t, soma_cellids.size(), &soma_cellids[0], soma_report);
+        records_nrec(t, compartment_nodeids.size(), &compartment_nodeids[0], compartment_report);
+        records_nrec(t, soma_nodeids.size(), &soma_nodeids[0], soma_report);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 

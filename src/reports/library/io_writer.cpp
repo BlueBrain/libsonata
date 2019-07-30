@@ -4,9 +4,9 @@
 #include "ascii_writer.hpp"
 #include "hdf5_writer.hpp"
 
-IoWriter::IoWriter(const std::string& report_name): m_reportName(report_name) {}
+IoWriter::IoWriter(const std::string& report_name): m_report_name(report_name) {}
 
-std::unique_ptr<IoWriter> IoWriter::create_IoWriter(IoWriter::Kind kind, const std::string& report_name) {
+std::unique_ptr<IoWriter> IoWriter::create_io_writer(IoWriter::Kind kind, const std::string &report_name) {
 
     switch(kind) {
         case IoWriter::Kind::HDF5:

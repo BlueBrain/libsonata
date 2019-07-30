@@ -11,7 +11,7 @@ class AsciiWriter: public IoWriter {
     AsciiWriter(const std::string& report_name);
     ~AsciiWriter() = default;
 
-    void write(const std::string& name, float* buffer, int steps_to_write, int total_steps, int total_compartments) override;
+    void write(double* buffer, int steps_to_write, int total_steps, int total_compartments) override;
     void write(const std::string& name, const std::vector<int>& buffer) override;
     void write(const std::string& name, const std::vector<uint32_t>& buffer) override;
     void write(const std::string& name, const std::vector<uint64_t>& buffer) override;

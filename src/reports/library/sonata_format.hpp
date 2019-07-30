@@ -12,7 +12,7 @@ class SonataFormat: public ReportFormat {
     std::vector<int> spike_node_ids;
 
   public:
-    SonataFormat(const std::string& report_name, size_t max_buffer_size, int num_steps, std::shared_ptr<cells_t> cells);
+    SonataFormat(const std::string& report_name, size_t max_buffer_size, int num_steps, std::shared_ptr<nodes_t> nodes);
     ~SonataFormat() = default;
 
     void prepare_dataset() override;
@@ -21,8 +21,8 @@ class SonataFormat: public ReportFormat {
     void write_data() override;
     void close() override;
 
-    const std::vector<uint64_t>& get_node_ids() { return node_ids; }
-    const std::vector<uint64_t>& get_index_pointers() { return index_pointers; }
-    const std::vector<uint32_t>& get_element_ids() { return element_ids; }
+    const std::vector<uint64_t>& get_node_ids() const { return node_ids; }
+    const std::vector<uint64_t>& get_index_pointers() const { return index_pointers; }
+    const std::vector<uint32_t>& get_element_ids() const { return element_ids; }
 
 };

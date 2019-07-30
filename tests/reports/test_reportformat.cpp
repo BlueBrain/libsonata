@@ -5,35 +5,36 @@
 #include <reports/library/sonata_format.hpp>
 
 SCENARIO( "Test ReportFormat class", "[ReportFormat][IOWriter]" ) {
-    GIVEN( "A cell map structure" ) {
-        using cells_t = std::map<int, Cell>;
-        Cell cell(1,1);
+    GIVEN( "A node map structure" ) {
+        using nodes_t = std::map<uint64_t, Node>;
+        Node node(1,1);
         double compartment = 10;
         double compartment2 = 12;
-        cell.add_compartment(&compartment);
-        cell.add_compartment(&compartment2);
-        Cell cell2(2,2);
-        cell2.add_compartment(&compartment);
-        cell2.add_compartment(&compartment2);
-        cell2.add_compartment(&compartment2);
-        Cell cell42(42, 42);
+        node.add_compartment(&compartment);
+        node.add_compartment(&compartment2);
+        Node node2(2,2);
+        node2.add_compartment(&compartment);
+        node2.add_compartment(&compartment2);
+        node2.add_compartment(&compartment2);
+        Node node42(42, 42);
         std::vector<double> compartments {34.1, 55.21, 3.141592, 44, 2124, 42.42};
         for(double& elem: compartments) {
-            cell42.add_compartment(&elem);
+            node42.add_compartment(&elem);
         }
         WHEN("We record some data and prepare the dataset for a big enough max buffer size") {
-            std::shared_ptr<cells_t> cells = std::make_shared<cells_t>(
-                    std::initializer_list<cells_t::value_type>{{1, cell}, {2, cell2}, {42, cell42}});
+            std::shared_ptr<nodes_t> nodes = std::make_shared<nodes_t>(
+                    std::initializer_list<nodes_t::value_type>{{1, node}, {2, node2}, {42, node42}});
 
             int num_steps = 3;
             size_t max_buffer_size = 1024;
-            std::shared_ptr<ReportFormat> format = ReportFormat::create_ReportFormat(
-                    "test_reportformat", max_buffer_size, num_steps, cells, SONATA);
-            std::array<int, 3> cellids = {1, 42};
+            std::shared_ptr<ReportFormat> format = ReportFormat::create_report_format(
+                    "test_reportformat", max_buffer_size, num_steps, nodes, SONATA);
+            //std::array<uint64_t, 3> nodeids = {1, 42};
+            std::vector<uint64_t> nodeids = {1, 42};
 
             format->prepare_dataset();
             for (int i = 0; i < num_steps; i++) {
-                format->record_data(0, cellids.size(), &cellids[0]);
+                format->record_data(0, nodeids);
                 format->update_timestep(0.0);
             }
             format->write_data();
@@ -68,18 +69,19 @@ SCENARIO( "Test ReportFormat class", "[ReportFormat][IOWriter]" ) {
             }
         }
         WHEN("We record some other data and prepare the dataset for a small max buffer size") {
-            std::shared_ptr<cells_t> cells = std::make_shared<cells_t>(
-                    std::initializer_list<cells_t::value_type>{{1, cell}, {2, cell2}, {42, cell42}});
+            std::shared_ptr<nodes_t> nodes = std::make_shared<nodes_t>(
+                    std::initializer_list<nodes_t::value_type>{{1, node}, {2, node2}, {42, node42}});
 
             int num_steps = 3;
             size_t max_buffer_size = 128;
-            std::shared_ptr<ReportFormat> format2 = ReportFormat::create_ReportFormat(
-                    "test_reportformat2", max_buffer_size, num_steps, cells, SONATA);
-            std::array<int, 3> cellids = {1, 42};
+            std::shared_ptr<ReportFormat> format2 = ReportFormat::create_report_format(
+                    "test_reportformat2", max_buffer_size, num_steps, nodes, SONATA);
+            //std::array<uint64_t, 3> nodeids = {1, 42};
+            std::vector<uint64_t> nodeids = {1, 42};
 
             format2->prepare_dataset();
             for (int i = 0; i < num_steps; i++) {
-                format2->record_data(i, cellids.size(), &cellids[0]);
+                format2->record_data(i, nodeids);
                 format2->update_timestep(i);
             }
             format2->write_data();

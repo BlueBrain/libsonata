@@ -5,8 +5,8 @@
 AsciiWriter::AsciiWriter(const std::string& report_name)
 : IoWriter(report_name), m_file(report_name) {}
 
-void AsciiWriter::write(const std::string& name, float* buffer, int steps_to_write, int total_steps, int total_compartments) {
-    m_file << name << std::endl;
+void AsciiWriter::write(double* buffer, int steps_to_write, int total_steps, int total_compartments) {
+    //m_file << name << std::endl;
     size_t buffer_size = total_steps * total_compartments;
     for(int i=0; i<buffer_size; i++) {
         m_file << buffer[i] << ", ";
