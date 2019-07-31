@@ -2,9 +2,9 @@
 #include <tuple>
 #include <mpi.h>
 
-#include "reportinglib.hpp"
+#include <reports/library/reportinglib.hpp>
+#include <reports/library/implementation_interface.hpp>
 #include "hdf5_writer.hpp"
-#include "implementation_interface.hpp"
 
 HDF5Writer::HDF5Writer(const std::string& report_name)
 : IoWriter(report_name), m_file(0), m_dataset(0), m_collective_list(0), m_independent_list(0) {
@@ -25,37 +25,36 @@ void HDF5Writer::configure_group(const std::string& group_name) {
     H5Gclose(group);
 }
 
-void HDF5Writer::configure_attribute(const std::string& group_name, const std::string& attribute_name) {
+void HDF5Writer::configure_attribute(const std::string& group_name, const std::string& attribute_name, const std::string& attribute_value) {
     std::cout << "Configuring attribute: " << attribute_name << std::endl;
 
-    const std::string value = "time";
-    hsize_t attr_size = value.size();
+    hsize_t attr_size = attribute_value.size();
     hid_t attr_space = H5Screate_simple(1, &attr_size, &attr_size);
     hid_t attr_id = H5Acreate2(m_file, attribute_name.c_str(), H5T_C_S1, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_id, H5T_C_S1, value.c_str());
+    H5Awrite(attr_id, H5T_C_S1, attribute_value.c_str());
 
     H5Aclose (attr_id);
     H5Sclose (attr_space);
 }
 
-void HDF5Writer::configure_dataset(const std::string& dataset_name, int total_steps, int total_compartments) {
+void HDF5Writer::configure_dataset(const std::string& dataset_name, int total_steps, int total_elements) {
 
     hsize_t dims[2];
     dims[0] = total_steps;
-    dims[1] = Implementation::get_global_dims(total_compartments);
+    dims[1] = Implementation::get_global_dims(total_elements);
     hid_t data_space = H5Screate_simple(2, dims, nullptr);
     m_dataset = H5Dcreate(m_file, dataset_name.c_str(), H5T_IEEE_F32LE, data_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     // Caculate the offset of each rank
-    m_offset[1] = Implementation::get_offset(total_compartments);
+    m_offset[1] = Implementation::get_offset(total_elements);
     H5Sclose(data_space);
 }
 
-void HDF5Writer::write(double* buffer, int steps_to_write, int total_steps, int total_compartments) {
+void HDF5Writer::write(double* buffer, int steps_to_write, int total_steps, int total_elements) {
 
     hsize_t count[2];
     count[0] = steps_to_write;
-    count[1] = total_compartments;
+    count[1] = total_elements;
 
     hid_t memspace = H5Screate_simple(2, count, nullptr);
     hid_t filespace = H5Dget_space(m_dataset);

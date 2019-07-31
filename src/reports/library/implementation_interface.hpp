@@ -2,9 +2,12 @@
 
 #include <tuple>
 #include <iostream>
+#include <vector>
 #include <algorithm>
 #include <numeric>
 #include <hdf5.h>
+
+#include <reports/library/reportinglib.hpp>
 
 #if defined(HAVE_MPI)
 #include <mpi.h>

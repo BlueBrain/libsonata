@@ -1,22 +1,22 @@
 #include <catch2/catch.hpp>
-#include <reports/library/node.hpp>
+#include <reports/data/node.hpp>
 #include <memory>
 
 SCENARIO( "Test Node class", "[Node]" ) {
 
     GIVEN( "An instance of a Node" ) {
         Node node(3,3);
-        WHEN("We add a compartment") {
-            std::vector<double> compartments = {10, 11, 12, 13, 14};
-            for(auto& compartment: compartments) {
-                node.add_compartment(&compartment);
+        WHEN("We add a element") {
+            std::vector<double> elements = {10, 11, 12, 13, 14};
+            for(auto& element: elements) {
+                node.add_element(&element);
             }
-            THEN("Number of compartments is 5") {
-                REQUIRE(node.get_num_compartments() == 5);
+            THEN("Number of elements is 5") {
+                REQUIRE(node.get_num_elements() == 5);
             }
-            THEN("The compartment_ids are") {
+            THEN("The element_ids are") {
                 std::vector<uint32_t> compare = {3000, 3001, 3002, 3003, 3004};
-                REQUIRE(node.get_compartment_ids() == compare);
+                REQUIRE(node.get_element_ids() == compare);
             }
         }
 

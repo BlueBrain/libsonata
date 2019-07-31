@@ -4,8 +4,8 @@
 #include <string>
 #include <map>
 
-#include "node.hpp"
-#include "report_format.hpp"
+#include <reports/data/sonata_data.hpp>
+#include <reports/data/node.hpp>
 
 class Report {
   private:
@@ -17,20 +17,19 @@ class Report {
     int m_num_steps;
     size_t m_max_buffer_size;
 
-    std::unique_ptr<ReportFormat> m_report_format;
+    std::unique_ptr<SonataData> m_sonata_data;
 
   protected:
     using nodes_t = std::map<uint64_t, Node>;
     std::shared_ptr<nodes_t> m_nodes;
 
   public:
-    enum class Kind {COMPARTMENT, SOMA, SPIKE};
-
     Report(const std::string& report_name, double tstart, double tend, double dt);
     virtual ~Report() = default;
 
     int get_num_nodes() const { return m_num_nodes; }
     bool is_empty() const { return m_nodes->empty(); }
+
     /**
      * Allocates the buffers used to hold main
      * report data.
@@ -39,14 +38,14 @@ class Report {
      */
     int prepare_dataset();
 
-    static std::shared_ptr<Report> create_report(const std::string& report_name, double tstart,
-                                                double tend, double dt, Report::Kind kind);
     void add_node(uint64_t node_id, uint64_t gid, uint64_t vgid);
     virtual int add_variable(uint64_t node_id, double* voltage) = 0;
-    virtual size_t get_total_compartments() const = 0;
+    virtual bool check_add_variable(uint64_t node_id);
+    virtual size_t get_total_elements() const = 0;
 
     virtual int record_data(double timestep, const std::vector<uint64_t>& node_ids);
     virtual int end_iteration(double timestep);
     virtual void flush(double time);
+
     int set_max_buffer_size(size_t buffer_size);
 };

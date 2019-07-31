@@ -1,6 +1,4 @@
 set(reportinglib_SOURCES
-        "library/node.cpp"
-        "library/node.hpp"
         "library/records.cpp"
         "library/report.cpp"
         "library/report.hpp"
@@ -8,20 +6,17 @@ set(reportinglib_SOURCES
         "library/reportinglib.hpp"
         "library/soma_report.cpp"
         "library/soma_report.hpp"
-        "library/compartment_report.cpp"
-        "library/compartment_report.hpp"
+        "library/element_report.cpp"
+        "library/element_report.hpp"
         "library/spike_report.cpp"
         "library/spike_report.hpp"
-        "library/report_format.cpp"
-        "library/report_format.hpp"
-        "library/sonata_format.cpp"
-        "library/sonata_format.hpp"
-        "library/io_writer.cpp"
-        "library/io_writer.hpp"
-        "library/ascii_writer.cpp"
-        "library/ascii_writer.hpp"
-        "library/hdf5_writer.cpp"
-        "library/hdf5_writer.hpp")
+        "data/node.cpp"
+        "data/node.hpp"
+        "data/sonata_data.cpp"
+        "data/sonata_data.hpp"
+        "io/io_writer.hpp"
+        "io/hdf5_writer.cpp"
+        "io/hdf5_writer.hpp")
 
 set(reportinglib_HEADERS
         "${SONATA_INCLUDE_DIR}/bbp/reports/records.h")

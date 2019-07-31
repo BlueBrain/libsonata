@@ -45,7 +45,7 @@ class ReportingLib {
      * will simply add the node to the end.
      *
      * @param report_name - Name of report, and key used to find the report
-     * @param kind - The type of report ("compartment", "soma", "spike")
+     * @param kind - The type of report ("element", "soma", "spike")
      */
     int add_report(const std::string& report_name, uint64_t node_id, uint64_t gid, uint64_t vgid,
                    double tstart, double tend, double dt, const std::string& kind);
@@ -59,7 +59,4 @@ class ReportingLib {
 
     int set_max_buffer_size(const std::string& report_name, size_t buf_size);
     int set_max_buffer_size(size_t buffer_size);
-
-    Report::Kind string_to_enum(const std::string& kind);
-
 };

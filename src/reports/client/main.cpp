@@ -12,7 +12,7 @@
 
 struct Neuron {
     int node_id;
-    std::string kind; // soma / compartment
+    std::string kind; // soma / element
     std::vector<double> element_ids;
     std::vector<double> spike_timestamps;
 };
@@ -39,17 +39,17 @@ void generate_spikes(Neuron& neuron) {
     }
 }
 
-void generate_compartments(Neuron& neuron) {
+void generate_elements(Neuron& neuron) {
 
-    // 15+-5 compartments
-    int num_compartments = 50 + ((std::rand() % 10) - 5);
+    // 15+-5 elements
+    int num_elements = 50 + ((std::rand() % 10) - 5);
 
     if(neuron.kind == "soma"){
-        num_compartments = 1;
+        num_elements = 1;
     }
 
-    neuron.element_ids.reserve(num_compartments);
-    for (int j = 0; j < num_compartments; j++) {
+    neuron.element_ids.reserve(num_elements);
+    for (int j = 0; j < num_elements; j++) {
         neuron.element_ids.push_back(std::rand() % 10);
     }
 }
@@ -77,8 +77,8 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::str
         if (tmp_neuron.kind == "spike") {
             generate_spikes(tmp_neuron);
         } else {
-            // compartment or soma
-            generate_compartments(tmp_neuron);
+            // element or soma
+            generate_elements(tmp_neuron);
         }
 
         neurons.push_back(tmp_neuron);
@@ -89,12 +89,12 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::str
 
 void init(const char* report_name, std::vector<Neuron>& neurons) {
 
-    // logic for registering soma and compartment reports with reportinglib
+    // logic for registering soma and element reports with reportinglib
     for (auto& neuron : neurons) {
         records_add_report(report_name, neuron.node_id, neuron.node_id, neuron.node_id, tstart, tstop, dt, neuron.kind.c_str());
 
-        for (auto& compartment: neuron.element_ids) {
-            records_add_var_with_mapping(report_name, neuron.node_id, &compartment);
+        for (auto& element: neuron.element_ids) {
+            records_add_var_with_mapping(report_name, neuron.node_id, &element);
         }
 
         for (auto& spike: neuron.spike_timestamps) {
@@ -107,8 +107,8 @@ void change_data(std::vector<Neuron>& neurons) {
 
     // Increment in 1 per timestep every voltage
     for (auto& neuron : neurons) {
-        for (auto& compartment: neuron.element_ids) {
-            compartment++;
+        for (auto& element: neuron.element_ids) {
+            element++;
         }
     }
 }
@@ -117,9 +117,9 @@ void print_data(std::vector<Neuron>& neurons) {
 
     for (auto& neuron : neurons) {
         std::cout << "++NEURON node_id: " << neuron.node_id << std::endl;
-        std::cout << "Compartments:" << std::endl;
-        for (auto& compartment: neuron.element_ids) {
-            std::cout << compartment << ", ";
+        std::cout << "elements:" << std::endl;
+        for (auto& element: neuron.element_ids) {
+            std::cout << element << ", ";
         }
         std::cout << std::endl << std::endl;
         std::cout << "Spikes:" << std::endl;
@@ -138,28 +138,28 @@ int main() {
     MPI_Init(nullptr, nullptr);
     MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
 #endif
-    std::vector<Neuron> compartment_neurons;
+    std::vector<Neuron> element_neurons;
     std::vector<Neuron> soma_neurons;
     std::vector<Neuron> spike_neurons;
-    std::vector<uint64_t> compartment_nodeids;
+    std::vector<uint64_t> element_nodeids;
     std::vector<uint64_t> soma_nodeids;
     std::vector<uint64_t> spike_nodeids;
 
     std::cout << "+++++++Generating Data" << std::endl;
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
-    compartment_nodeids = generate_data(compartment_neurons, "compartment", global_rank);
+    element_nodeids = generate_data(element_neurons, "element", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
     spike_nodeids = generate_data(spike_neurons, "spike", global_rank);
 
     // std::cout << "+++++++Printing Data" << std::endl;
     // print_data(spike_neurons);
 
-    std::cout << "++++++++Initializing report/node/compartment structure" << std::endl;
-    const char* compartment_report = "compartment_report";
+    std::cout << "++++++++Initializing report/node/element structure" << std::endl;
+    const char* element_report = "element_report";
     const char* soma_report = "soma_report";
     const char* spike_report = "spike_report";
 
-    init(compartment_report, compartment_neurons);
+    init(element_report, element_neurons);
     init(soma_report, soma_neurons);
     init(spike_report, spike_neurons);
     records_set_max_buffer_size_hint(20);
@@ -177,7 +177,7 @@ int main() {
     double t = 0.0;
     for(int i=0; i<num_steps; i++) {
         std::cout << "++++Recording data for t = " << t << std::endl;
-        records_nrec(t, compartment_nodeids.size(), &compartment_nodeids[0], compartment_report);
+        records_nrec(t, element_nodeids.size(), &element_nodeids[0], element_report);
         records_nrec(t, soma_nodeids.size(), &soma_nodeids[0], soma_report);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -186,7 +186,7 @@ int main() {
         records_end_iteration(t);
         t += dt;
         // Change data every timestep
-        change_data(compartment_neurons);
+        change_data(element_neurons);
         change_data(soma_neurons);
     }
     records_flush(t);

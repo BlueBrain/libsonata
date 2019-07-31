@@ -1,7 +1,10 @@
 #include <iostream>
 
-#include "reportinglib.hpp"
 #include "implementation_interface.hpp"
+#include "reportinglib.hpp"
+#include "soma_report.hpp"
+#include "element_report.hpp"
+#include "spike_report.hpp"
 
 double ReportingLib::m_atomic_step = 1e-8;
 bool ReportingLib::first_report = true;
@@ -33,52 +36,52 @@ int ReportingLib::get_num_reports() const {
     return m_num_reports;
 }
 
-Report::Kind ReportingLib::string_to_enum(const std::string& kind) {
-
-    if(kind == "compartment") {
-        return Report::Kind::COMPARTMENT;
-    } else if (kind == "soma") {
-        return Report::Kind::SOMA;
-    } else if (kind == "spike") {
-        return Report::Kind::SPIKE;
-    }
-}
-
 int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, uint64_t gid, uint64_t vgid,
                              double tstart, double tend, double dt, const std::string& kind) {
+    try {
+        // check if this is the first time a Report with the given name is referenced
+        auto report_finder = m_reports.find(report_name);
 
-    // check if this is the first time a Report with the given name is referenced
-    auto report_finder = m_reports.find(report_name);
-
-    std::shared_ptr<Report> report;
-    if (report_finder != m_reports.end()) {
-        report = report_finder->second;
-        std::cout << "Report '" << report_name << "' found!" << std::endl;
-    } else {
-        Report::Kind kind_report = string_to_enum(kind);
-        // new report
-        // TODO: remove factory and instantiate here
-        report = Report::create_report(report_name, tstart, tend, dt, kind_report);
-        // Check if kind doesnt exist
-        if(report) {
-            m_reports[report_name] = report;
-            m_num_reports++;
+        std::shared_ptr <Report> report;
+        if (report_finder != m_reports.end()) {
+            report = report_finder->second;
+            std::cout << "Report '" << report_name << "' found!" << std::endl;
+        } else {
+            // new report
+            if (kind == "element") {
+                report = std::make_shared<ElementReport>(report_name, tstart, tend, dt);
+            } else if (kind == "soma") {
+                report = std::make_shared<SomaReport>(report_name, tstart, tend, dt);
+            } else if (kind == "spike") {
+                report = std::make_shared<SpikeReport>(report_name, tstart, tend, dt);
+            } else {
+                throw std::runtime_error("Kind " + kind + " doesn't exist!");
+            }
+            // Check if kind doesnt exist
+            if (report) {
+                m_reports[report_name] = report;
+                m_num_reports++;
+            }
         }
-    }
-
-    if (report) {
-        report->add_node(node_id, gid, vgid);
+        if (report) {
+            report->add_node(node_id, gid, vgid);
+        }
+    } catch (const std::exception& ex) {
+        std::cout << ex.what() << std::endl;
     }
     return 0;
 }
 
 int ReportingLib::add_variable(const std::string& report_name, uint64_t node_id, double* voltage) {
 
-    auto report_finder = m_reports.find(report_name);
-    if (report_finder != m_reports.end()) {
-        return report_finder->second->add_variable(node_id, voltage);
+    try {
+        auto report_finder = m_reports.find(report_name);
+        if (report_finder != m_reports.end()) {
+            return report_finder->second->add_variable(node_id, voltage);
+        }
+    } catch (const std::exception& ex) {
+        std::cout << ex.what() << std::endl;
     }
-
     return 0;
 }
 
