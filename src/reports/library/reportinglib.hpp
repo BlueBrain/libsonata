@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <spdlog/spdlog.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -49,7 +50,7 @@ class ReportingLib {
      */
     int add_report(const std::string& report_name, uint64_t node_id, uint64_t gid, uint64_t vgid,
                    double tstart, double tend, double dt, const std::string& kind);
-    int add_variable(const std::string& report_name, uint64_t node_id, double* voltage);
+    int add_variable(const std::string& report_name, uint64_t node_id, double* voltage, uint32_t element_id);
 
     void make_global_communicator();
     void share_and_prepare();

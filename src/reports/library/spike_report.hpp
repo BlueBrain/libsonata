@@ -6,7 +6,7 @@ class SpikeReport: public Report {
     SpikeReport(const std::string& report_name, double tstart, double tend, double dt);
 
     size_t get_total_elements() const override;
-    int add_variable(uint64_t node_id, double* spike_value) override;
+    int add_variable(uint64_t node_id, double* spike_value, uint32_t element_id) override;
 
     // We dont need this on spike reports
     int record_data(double timestep, const std::vector<uint64_t>& node_ids) {}

@@ -23,10 +23,10 @@ bool SomaReport::check_add_variable(uint64_t node_id) {
     }
 }
 
-int SomaReport::add_variable(uint64_t node_id, double* element_value) {
+int SomaReport::add_variable(uint64_t node_id, double* element_value, uint32_t compartment_id) {
 
     if (check_add_variable(node_id)) {
-        (*m_nodes)[node_id].add_element(element_value);
+        (*m_nodes)[node_id].add_element(element_value, compartment_id);
     }
     return 0;
 }

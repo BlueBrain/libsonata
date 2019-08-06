@@ -26,8 +26,8 @@ void HDF5Writer::configure_group(const std::string& group_name) {
 }
 
 void HDF5Writer::configure_attribute(const std::string& group_name, const std::string& attribute_name, const std::string& attribute_value) {
-    std::cout << "Configuring attribute: " << attribute_name << std::endl;
 
+    logger->trace("Configuring attribute '{}'", attribute_name);
     hsize_t attr_size = attribute_value.size();
     hid_t attr_space = H5Screate_simple(1, &attr_size, &attr_size);
     hid_t attr_id = H5Acreate2(m_file, attribute_name.c_str(), H5T_C_S1, attr_space, H5P_DEFAULT, H5P_DEFAULT);

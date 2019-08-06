@@ -3,16 +3,11 @@
 #include "node.hpp"
 
 Node::Node(uint64_t gid, uint64_t vgid): m_gid(gid), m_vgid(vgid) {
-    // element id would be gid+element_id.
-    //  i.e: for gid 3 and element 42 -> 3042
-    // TODO: what should be the id format?
-    m_element_id = gid*1000;
 }
 
-void Node::add_element(double* element_value) {
+void Node::add_element(double* element_value, uint32_t element_id) {
     m_elements.push_back(element_value);
-    m_element_ids.push_back(m_element_id);
-    m_element_id++;
+    m_element_ids.push_back(element_id);
 }
 
 void Node::add_spike(double* spike_timestamp) {

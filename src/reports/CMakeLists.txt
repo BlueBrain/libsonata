@@ -16,7 +16,9 @@ set(reportinglib_SOURCES
         "data/sonata_data.hpp"
         "io/io_writer.hpp"
         "io/hdf5_writer.cpp"
-        "io/hdf5_writer.hpp")
+        "io/hdf5_writer.hpp"
+        "utils/logger.cpp"
+        "utils/logger.hpp")
 
 set(reportinglib_HEADERS
         "${SONATA_INCLUDE_DIR}/bbp/reports/records.h")
@@ -24,15 +26,18 @@ set(reportinglib_HEADERS
 set(client_SOURCES
         "client/main.cpp")
 
-#include_directories(SYSTEM ${spdlog_include_directory})
+include_directories(SYSTEM ${spdlog_include_directory})
 
 add_library(reportinglib_obj OBJECT ${reportinglib_SOURCES} ${reportinglib_HEADERS})
 set_property(TARGET reportinglib_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Shared library
 add_library(reportinglib SHARED $<TARGET_OBJECTS:reportinglib_obj>)
-target_link_libraries(reportinglib ${HDF5_LIBS} ${MPI_CXX_LIBRARIES})
+target_link_libraries(reportinglib
+        ${HDF5_LIBS}
+        ${MPI_CXX_LIBRARIES})
 
 # Coreneuron simulator Client
 add_executable(client ${client_SOURCES})
-target_link_libraries(client PRIVATE reportinglib)
+target_link_libraries(client
+        PRIVATE reportinglib)

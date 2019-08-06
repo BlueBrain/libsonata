@@ -10,7 +10,6 @@ SonataData::SonataData(const std::string& report_name, size_t max_buffer_size, i
 : m_report_name(report_name), m_num_steps(num_steps), m_nodes(nodes), m_last_position(0), m_current_step(0),
 m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0) {
 
-    std::cout << "Creating SonataData for " << report_name << std::endl;
     prepare_buffer(max_buffer_size);
     m_index_pointers.resize(nodes->size());
 
@@ -25,8 +24,7 @@ SonataData::~SonataData() {
 
 void SonataData::prepare_buffer(size_t max_buffer_size) {
 
-    std::cout << "Prepare buffer for " << m_report_name << std::endl;
-
+    logger->trace("Prepare buffer for {}", m_report_name);
     for (auto& kv : *m_nodes) {
         m_total_elements += kv.second.get_num_elements();
         m_total_spikes += kv.second.get_num_spikes();
@@ -45,18 +43,18 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
 
         m_remaining_steps = m_num_steps;
 
-        std::cout << "max_buffer_size: " << max_buffer_size << std::endl;
-        std::cout << "m_totalelements: " << m_total_elements << std::endl;
-        std::cout << "Steps to write: " << m_steps_to_write << std::endl;
-        //m_bufferSize = m_totalelements * m_numSteps;
+        logger->trace("max_buffer_size: {}", max_buffer_size);
+        logger->trace("m_totalelements: {}", m_total_elements);
+        logger->trace("Steps to write: {}", m_steps_to_write);
+        logger->trace("Buffer size: {}", m_buffer_size);
+
         m_buffer_size = m_total_elements * m_steps_to_write;
         m_report_buffer = new double[m_buffer_size];
-        std::cout << "Buffer size: " << m_buffer_size << std::endl;
     }
 }
 
 int SonataData::record_data(double timestep, const std::vector<uint64_t>& node_ids) {
-    std::cout << "Recording data..." << std::endl;
+    logger->trace("Recording data for t={}", timestep);
     int local_position = m_last_position;
     int written;
     for(auto& kv: *m_nodes) {
@@ -67,25 +65,25 @@ int SonataData::record_data(double timestep, const std::vector<uint64_t>& node_i
         local_position += written;
     }
     m_last_position = local_position;
-    // print_buffer();
 }
 
 int SonataData::update_timestep(double timestep) {
 
+    logger->trace("Updating timestep t={}", timestep);
     m_current_step++;
     if(m_current_step == m_steps_to_write) {
         write_data();
         m_last_position = 0;
         m_current_step = 0;
         m_remaining_steps -= m_steps_to_write;
-        std::cout << "--Remaining steps: " << m_remaining_steps << std::endl;
-        std::cout << "--Steps to write: " << m_steps_to_write << std::endl;
+        logger->trace("Remaining steps: {}", m_remaining_steps);
+        logger->trace("Steps to write: {}", m_steps_to_write);
     }
 }
 
 void SonataData::prepare_dataset() {
 
-    std::cout << "Preparing SonataData Dataset for report: " << m_report_name << std::endl;
+    logger->trace("Preparing SonataData Dataset for report: {}", m_report_name);
     // Prepare /report and /spikes headers
     for(auto& kv: *m_nodes) {
         // /report
@@ -102,7 +100,7 @@ void SonataData::prepare_dataset() {
         }
     }
     int element_offset = Implementation::get_offset(m_total_elements);
-    std::cout << "Total elements are: " << m_total_elements << " and element_offset is: " << element_offset << std::endl;
+    logger->trace("Total elements are: {} and element offset is: {}", m_total_elements, element_offset);
 
     // Prepare index pointers
     if(!m_index_pointers.empty()) {
@@ -124,7 +122,7 @@ void SonataData::prepare_dataset() {
 }
 void SonataData::write_report_header() {
     //TODO: remove configure_group and add it to write_any()
-    std::cout << "Writing report header!" << std::endl;
+    logger->trace("Writing report header!");
     m_io_writer->configure_group("/report");
     m_io_writer->configure_group("/report/mapping");
     m_io_writer->configure_dataset("/report/data", m_num_steps, m_total_elements);
@@ -136,7 +134,7 @@ void SonataData::write_report_header() {
 
 void SonataData::write_spikes_header() {
 
-    std::cout << "Writing spike header!" << std::endl;
+    logger->trace("Writing spike header!");
     m_io_writer->configure_group("/spikes");
     m_io_writer->configure_attribute("/spikes", "sorting", "time");
     Implementation::sort_spikes(m_spike_timestamps, m_spike_node_ids);
@@ -147,10 +145,10 @@ void SonataData::write_spikes_header() {
 void SonataData::write_data() {
 
     if(m_remaining_steps > 0) {
-        std::cout << "Writing data from SonataData! " << std::endl;
-        std::cout << "++Remaining steps: " << m_remaining_steps << std::endl;
-        std::cout << "++Steps to write: " << m_steps_to_write << std::endl;
-        std::cout << "++total elements: " << m_total_elements << std::endl;
+        logger->trace("Writing timestep data to file!");
+        logger->trace("Remaining steps: {}", m_remaining_steps);
+        logger->trace("Steps to write: {}", m_steps_to_write);
+        logger->trace("Total elements: {}", m_total_elements);
         if (m_remaining_steps < m_steps_to_write) {
             // Write remaining steps
             m_io_writer->write(m_report_buffer, m_remaining_steps, m_num_steps, m_total_elements);

@@ -102,7 +102,10 @@ else()
     find_package(fmt REQUIRED)
     find_package(HighFive REQUIRED)
     find_package(Catch2 REQUIRED)
+    find_package(spdlog REQUIRED)
 endif()
+
+set(spdlog_include_directory ${PROJECT_SOURCE_DIR}/extlib/spdlog/include)
 
 # =============================================================================
 # Targets

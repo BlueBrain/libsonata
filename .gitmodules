@@ -10,3 +10,6 @@
 [submodule "extlib/Catch2"]
 	path = extlib/Catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "extlib/spdlog"]
+	path = extlib/spdlog
+	url = https://github.com/gabime/spdlog.git

@@ -4,6 +4,8 @@ set(TEST_SOURCES
         ${all_TESTS}
         )
 
+include_directories(SYSTEM ${spdlog_include_directory})
+
 add_executable(unit-tests ${TEST_SOURCES})
 target_link_libraries(unit-tests
     PRIVATE Catch2::Catch2

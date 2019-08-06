@@ -9,6 +9,9 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
     const double tend = 0.3;
     const double dt = 0.1;
 
+    const int mapping_size = 1;
+    int mapping[mapping_size] = {142};
+
     WHEN("We add a new report (element) and node") {
         const char* report_name = "myElementReport";
         records_add_report(report_name, 1, 1, 1, tstart, tend, dt, "element");
@@ -37,7 +40,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
         const char* report_name = "mySomaReport";
         records_add_report(report_name, 1, 1, 1, tstart, tend, dt, "soma");
         double soma_value = 42;
-        records_add_var_with_mapping(report_name, 1, &soma_value);
+        records_add_var_with_mapping(report_name, 1, &soma_value, mapping_size, mapping);
         THEN( "Number of reports is 2" ) {
             REQUIRE( records_get_num_reports() == 2 );
         }
@@ -46,7 +49,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
     WHEN("We add a second variable to an existing node in a soma report") {
         const char* report_name = "mySomaReport";
         double soma_value = 42;
-        records_add_var_with_mapping(report_name, 1, &soma_value);
+        records_add_var_with_mapping(report_name, 1, &soma_value, mapping_size, mapping);
         THEN( "Number of reports is 2" ) {
             REQUIRE( records_get_num_reports() == 2 );
         }
@@ -69,7 +72,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
         for(int node_id: node_ids) {
             records_add_report(report_name, node_id, node_id, node_id, tstart, tend, dt, "element");
             for(double& voltage: elements) {
-                records_add_var_with_mapping(report_name, node_id, &voltage);
+                records_add_var_with_mapping(report_name, node_id, &voltage, mapping_size, mapping);
             }
         }
         THEN( "Number of reports is 3" ) {

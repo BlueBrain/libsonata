@@ -30,7 +30,9 @@ int records_add_report(const char* reportName,
  */
 int records_add_var_with_mapping(const char* report_name,
                                  uint64_t node_id,
-                                 double* voltage);
+                                 double* voltage,
+                                 int mapping_size,
+                                 int* mapping_value);
 /**
  * Setup buffers
  */

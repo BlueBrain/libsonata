@@ -10,7 +10,7 @@ size_t SpikeReport::get_total_elements() const {
     return 0;
 }
 
-int SpikeReport::add_variable(uint64_t node_id, double* spike_value) {
+int SpikeReport::add_variable(uint64_t node_id, double* spike_value, uint32_t element_id) {
 
     if (check_add_variable(node_id)) {
         (*m_nodes)[node_id].add_spike(spike_value);

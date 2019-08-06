@@ -8,12 +8,13 @@
 #include <mpi.h>
 #endif
 
+#include <reports/utils/logger.hpp>
 #include <bbp/reports/records.h>
 
 struct Neuron {
     int node_id;
     std::string kind; // soma / element
-    std::vector<double> element_ids;
+    std::vector<double> voltages;
     std::vector<double> spike_timestamps;
 };
 
@@ -48,9 +49,9 @@ void generate_elements(Neuron& neuron) {
         num_elements = 1;
     }
 
-    neuron.element_ids.reserve(num_elements);
+    neuron.voltages.reserve(num_elements);
     for (int j = 0; j < num_elements; j++) {
-        neuron.element_ids.push_back(std::rand() % 10);
+        neuron.voltages.push_back(std::rand() % 10);
     }
 }
 
@@ -93,12 +94,17 @@ void init(const char* report_name, std::vector<Neuron>& neurons) {
     for (auto& neuron : neurons) {
         records_add_report(report_name, neuron.node_id, neuron.node_id, neuron.node_id, tstart, tstop, dt, neuron.kind.c_str());
 
-        for (auto& element: neuron.element_ids) {
-            records_add_var_with_mapping(report_name, neuron.node_id, &element);
+        const int mapping_size = 1;
+        int element_id = neuron.node_id*1000;
+        int mapping[mapping_size] = {element_id};
+
+        for (auto& element: neuron.voltages) {
+            records_add_var_with_mapping(report_name, neuron.node_id, &element, mapping_size, mapping);
+            mapping[0] = ++element_id;
         }
 
         for (auto& spike: neuron.spike_timestamps) {
-            records_add_var_with_mapping(report_name, neuron.node_id, &spike);
+            records_add_var_with_mapping(report_name, neuron.node_id, &spike, mapping_size, mapping);
         }
     }
 }
@@ -107,7 +113,7 @@ void change_data(std::vector<Neuron>& neurons) {
 
     // Increment in 1 per timestep every voltage
     for (auto& neuron : neurons) {
-        for (auto& element: neuron.element_ids) {
+        for (auto& element: neuron.voltages) {
             element++;
         }
     }
@@ -118,7 +124,7 @@ void print_data(std::vector<Neuron>& neurons) {
     for (auto& neuron : neurons) {
         std::cout << "++NEURON node_id: " << neuron.node_id << std::endl;
         std::cout << "elements:" << std::endl;
-        for (auto& element: neuron.element_ids) {
+        for (auto& element: neuron.voltages) {
             std::cout << element << ", ";
         }
         std::cout << std::endl << std::endl;
@@ -131,13 +137,15 @@ void print_data(std::vector<Neuron>& neurons) {
 }
 
 int main() {
-
+    logger->set_level(spdlog::level::trace);
     int global_rank = 0;
 #ifdef HAVE_MPI
-    std::cout << "+++++++MPI_INIT" << std::endl;
     MPI_Init(nullptr, nullptr);
     MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
 #endif
+    if(global_rank == 0) {
+        logger->info("Starting...");
+    }
     std::vector<Neuron> element_neurons;
     std::vector<Neuron> soma_neurons;
     std::vector<Neuron> spike_neurons;
@@ -145,16 +153,15 @@ int main() {
     std::vector<uint64_t> soma_nodeids;
     std::vector<uint64_t> spike_nodeids;
 
-    std::cout << "+++++++Generating Data" << std::endl;
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
     element_nodeids = generate_data(element_neurons, "element", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
     spike_nodeids = generate_data(spike_neurons, "spike", global_rank);
 
-    // std::cout << "+++++++Printing Data" << std::endl;
-    // print_data(spike_neurons);
 
-    std::cout << "++++++++Initializing report/node/element structure" << std::endl;
+    if(global_rank == 0) {
+        logger->info("Initializing data structures (reports, nodes, elements)");
+    }
     const char* element_report = "element_report";
     const char* soma_report = "soma_report";
     const char* spike_report = "spike_report";
@@ -164,11 +171,12 @@ int main() {
     init(spike_report, spike_neurons);
     records_set_max_buffer_size_hint(20);
 
-    std::cout << "++++++++++Prepare datasets" << std::endl;
     records_setup_communicator();
     records_finish_and_share();
 
-    std::cout << "++++++++++Starting simulation!" << std::endl;
+    if(global_rank == 0) {
+        logger->info("Starting the simulation!");
+    }
     // Calculate number of steps of the simulation
     int num_steps = static_cast<int>((tstop - tstart) / dt);
     if (std::fabs(num_steps * dt + tstart - tstop) > std::numeric_limits<float>::epsilon()) {
@@ -176,7 +184,9 @@ int main() {
     }
     double t = 0.0;
     for(int i=0; i<num_steps; i++) {
-        std::cout << "++++Recording data for t = " << t << std::endl;
+        if(global_rank == 0) {
+            logger->info("Recording data for t = {}", t);
+        }
         records_nrec(t, element_nodeids.size(), &element_nodeids[0], element_report);
         records_nrec(t, soma_nodeids.size(), &soma_nodeids[0], soma_report);
 
@@ -190,6 +200,10 @@ int main() {
         change_data(soma_neurons);
     }
     records_flush(t);
+
+    if(global_rank == 0) {
+        logger->info("Finalizing...");
+    }
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

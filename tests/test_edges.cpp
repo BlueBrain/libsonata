@@ -1,5 +1,4 @@
 #include <catch2/catch.hpp>
-
 #include <bbp/sonata/edges.h>
 
 #include <cstdio>

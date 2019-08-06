@@ -8,3 +8,4 @@ target_link_libraries(HighFive INTERFACE
 
 add_subdirectory(fmt)
 add_subdirectory(Catch2)
+add_subdirectory(spdlog)

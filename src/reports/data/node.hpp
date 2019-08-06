@@ -19,7 +19,7 @@ public:
 
     int fill_data(double* data, bool node_to_be_recorded);
 
-    void add_element(double* element_value);
+    void add_element(double* element_value, uint32_t element_id);
     void add_spike(double* spike_timestamp);
     size_t get_num_elements () const { return m_elements.size(); }
     size_t get_num_spikes () const { return m_spikes.size(); }

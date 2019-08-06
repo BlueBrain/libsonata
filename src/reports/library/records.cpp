@@ -19,9 +19,9 @@ int records_add_report(const char* reportName, uint64_t node_id, uint64_t gid, u
     return InitReports.add_report(std::string(reportName), node_id, gid, vgid, tstart, tend, dt, std::string(kind));
 }
 
-int records_add_var_with_mapping(const char* report_name, uint64_t node_id, double* voltage) {
-
-    return InitReports.add_variable(std::string(report_name), node_id, voltage);
+int records_add_var_with_mapping(const char* report_name, uint64_t node_id, double* voltage, int mapping_size, int* mapping_value) {
+    uint32_t element_id = mapping_value[0];
+    return InitReports.add_variable(std::string(report_name), node_id, voltage, element_id);
 }
 
 void records_setup_communicator() {
@@ -29,10 +29,6 @@ void records_setup_communicator() {
 }
 
 int records_finish_and_share() {
-    if (InitReports.is_empty()) {
-        return 0;
-    }
-    int rank, num_nodes = 0;
     if(ReportingLib::first_report) {
         InitReports.share_and_prepare();
         ReportingLib::first_report = false;

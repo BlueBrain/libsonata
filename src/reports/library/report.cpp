@@ -2,7 +2,9 @@
 #include <cmath>
 #include <limits>
 
+#include <reports/utils/logger.hpp>
 #include "report.hpp"
+#include "reportinglib.hpp"
 
 #define DEFAULT_MAX_BUFFER_SIZE 1024
 
@@ -16,8 +18,7 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     }
     // Default max buffer size
     m_max_buffer_size = DEFAULT_MAX_BUFFER_SIZE;
-    std::cout << "Creating report " << m_report_name << std::endl;
-    std::cout << "+Number of steps = " << m_num_steps << std::endl;
+    logger->info("Creating report: {} with number of steps {} as rank {}", m_report_name, m_num_steps, ReportingLib::m_rank);
 }
 
 void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
@@ -26,11 +27,9 @@ void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
         // node is new insert it into the map
         m_nodes->insert(std::make_pair(node_id, Node(gid, vgid)));
         m_num_nodes++;
-        std::cout << "Report: Added node " << gid << std::endl;
+        logger->trace("Added Node with GID {}", gid);
     } else {
         throw std::runtime_error("Warning: attempted to add node "+ std::to_string(node_id)+" to the target multiple time on same node. Ignoring.");
-        /*std::cerr << "Warning: attempted to add node " << node_id
-                  << " to the target multiple time on same node.  Ignoring." << std::endl;*/
     }
 }
 
@@ -57,7 +56,7 @@ void Report::flush(double time) {
 }
 
 int Report::set_max_buffer_size(size_t buffer_size) {
-    std::cout << "Setting buffer size to " << buffer_size << std::endl;
+    logger->debug("Setting buffer size to {}", buffer_size);
     m_max_buffer_size = buffer_size;
 }
 

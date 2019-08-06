@@ -9,16 +9,18 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
         Node node(1,1);
         double element = 10;
         double element2 = 12;
-        node.add_element(&element);
-        node.add_element(&element2);
+        node.add_element(&element, 0);
+        node.add_element(&element2, 1);
         Node node2(2,2);
-        node2.add_element(&element);
-        node2.add_element(&element2);
-        node2.add_element(&element2);
+        node2.add_element(&element, 10);
+        node2.add_element(&element2, 11);
+        node2.add_element(&element2, 12);
         Node node42(42, 42);
         std::vector<double> elements {34.1, 55.21, 3.141592, 44, 2124, 42.42};
+        int i = 20;
         for(double& elem: elements) {
-            node42.add_element(&elem);
+            node42.add_element(&elem, i);
+            ++i;
         }
         WHEN("We record some data and prepare the dataset for a big enough max buffer size") {
             std::shared_ptr<nodes_t> nodes = std::make_shared<nodes_t>(
@@ -51,8 +53,10 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
 
             THEN("We check the element ids of the sonata report") {
                 const std::vector<uint32_t> element_ids = sonata->get_element_ids();
-                std::vector<uint32_t> compare = { 1000, 1001, 2000, 2001, 2002, 42000, 42001,
-                                                  42002, 42003, 42004, 42005 };
+                /*std::vector<uint32_t> compare = { 1000, 1001, 2000, 2001, 2002, 42000, 42001,
+                                                  42002, 42003, 42004, 42005 };*/
+                std::vector<uint32_t> compare = { 0, 1, 10, 11, 12, 20, 21,
+                                                  22, 23, 24, 25 };
                 REQUIRE(element_ids == compare);
             }
 

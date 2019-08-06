@@ -39,7 +39,7 @@ class Report {
     int prepare_dataset();
 
     void add_node(uint64_t node_id, uint64_t gid, uint64_t vgid);
-    virtual int add_variable(uint64_t node_id, double* voltage) = 0;
+    virtual int add_variable(uint64_t node_id, double* voltage, uint32_t element_id) = 0;
     virtual bool check_add_variable(uint64_t node_id);
     virtual size_t get_total_elements() const = 0;
 

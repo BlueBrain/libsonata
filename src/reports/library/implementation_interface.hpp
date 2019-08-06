@@ -7,6 +7,7 @@
 #include <numeric>
 #include <hdf5.h>
 
+#include <reports/utils/logger.hpp>
 #include <reports/library/reportinglib.hpp>
 
 #if defined(HAVE_MPI)
@@ -17,11 +18,8 @@ namespace detail {
 
     template <class TImpl>
     struct Implementation {
-        inline static int init() {
-            return TImpl::init();
-        }
-        inline static void init_comm(int reports) {
-            TImpl::init_comm(reports);
+        inline static int init(int reports) {
+            return TImpl::init(reports);
         }
         inline static void close() {
             TImpl::close();
@@ -44,28 +42,18 @@ namespace detail {
 
     struct ParallelImplementation {
 
-        inline static void init_comm(int reports) {
+        inline static int init(int reports) {
             int global_rank, global_size;
             MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
             MPI_Comm_size(MPI_COMM_WORLD, &global_size);
-            std::cout << "++++++Num reports for rank " << global_rank << " is " << reports << std::endl;
 
-            // Create a second communicator
             MPI_Comm_split(MPI_COMM_WORLD, reports == 0, 0, &ReportingLib::m_has_nodes);
-
-        };
-
-        inline static int init() {
-            int global_rank, global_size;
-            MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
-            MPI_Comm_size(MPI_COMM_WORLD, &global_size);
 
             int node_rank, node_size;
             MPI_Comm_rank(ReportingLib::m_has_nodes, &node_rank);
             MPI_Comm_size(ReportingLib::m_has_nodes, &node_size);
-
-            printf("+++++++++WORLD RANK/SIZE: %d/%d \t ROW RANK/SIZE: %d/%d\n", global_rank, global_size, node_rank, node_size);
-            return node_rank;
+            logger->trace("WORLD RANK/SIZE: {}/{} \t num_reports!=0 RANK/SIZE: {}/{}", global_rank, global_size, node_rank, node_size);
+            return global_rank;
         };
 
         inline static void close(){};
@@ -182,8 +170,7 @@ namespace detail {
 #else
 
     struct SerialImplementation {
-        inline static int init() { std::cout << "INIT serial! " << std::endl; return 0; };
-        inline static void init_comm(int reports) {};
+        inline static int init(int reports) { return 0; };
         inline static void close(){};
         inline static std::tuple<hid_t, hid_t> prepare_write(hid_t plist_id) {};
         inline static hsize_t get_offset(hsize_t value) { return 0; };

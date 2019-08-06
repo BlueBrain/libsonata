@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <reports/utils/logger.hpp>
 #include "implementation_interface.hpp"
 #include "reportinglib.hpp"
 #include "soma_report.hpp"
@@ -23,7 +24,7 @@ ReportingLib::~ReportingLib() {
 void ReportingLib::clear() {
 
     for (auto& kv: m_reports) {
-        std::cout << "Deleting " << kv.first << std::endl;
+        logger->debug("Deleting report: {} from rank {}", kv.first, ReportingLib::m_rank);
     }
     m_reports.clear();
 }
@@ -39,13 +40,10 @@ int ReportingLib::get_num_reports() const {
 int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, uint64_t gid, uint64_t vgid,
                              double tstart, double tend, double dt, const std::string& kind) {
     try {
-        // check if this is the first time a Report with the given name is referenced
-        auto report_finder = m_reports.find(report_name);
-
         std::shared_ptr <Report> report;
-        if (report_finder != m_reports.end()) {
-            report = report_finder->second;
-            std::cout << "Report '" << report_name << "' found!" << std::endl;
+        // check if this is the first time a Report with the given name is referenced
+        if (m_reports.find(report_name) != m_reports.end()) {
+            report = m_reports[report_name];
         } else {
             // new report
             if (kind == "element") {
@@ -67,45 +65,44 @@ int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, u
             report->add_node(node_id, gid, vgid);
         }
     } catch (const std::exception& ex) {
-        std::cout << ex.what() << std::endl;
+        logger->error(ex.what());
     }
     return 0;
 }
 
-int ReportingLib::add_variable(const std::string& report_name, uint64_t node_id, double* voltage) {
+int ReportingLib::add_variable(const std::string& report_name, uint64_t node_id, double* voltage, uint32_t element_id) {
 
     try {
-        auto report_finder = m_reports.find(report_name);
-        if (report_finder != m_reports.end()) {
-            return report_finder->second->add_variable(node_id, voltage);
+        if (m_reports.find(report_name) != m_reports.end()) {
+            return m_reports[report_name]->add_variable(node_id, voltage, element_id);
         }
     } catch (const std::exception& ex) {
-        std::cout << ex.what() << std::endl;
+        logger->error(ex.what());
     }
     return 0;
 }
 
 void ReportingLib::make_global_communicator() {
 
-    Implementation::init_comm(m_num_reports);
 }
 
 void ReportingLib::share_and_prepare() {
-
     // Split reports into different ranks
     // Create communicator groups
-    m_rank = Implementation::init();
+    m_rank = Implementation::init(m_num_reports);
+    if(m_rank == 0) {
+        logger->info("Initializing communicators and preparing datasets");
 
+    }
     // remove reports without nodes
     for(auto& kv: m_reports) {
         if(kv.second->is_empty()){
             m_reports.erase(kv.first);
         }
     }
-
     // Allocate buffers
     for (auto& kv : m_reports) {
-        std::cout << "========++ NUM NODES " << kv.second->get_num_nodes() << std::endl;
+        logger->trace("Preparing datasets of report {} from rank {} with {} NODES", kv.first, m_rank, kv.second->get_num_nodes());
         kv.second->prepare_dataset();
     }
 }
@@ -113,7 +110,7 @@ void ReportingLib::share_and_prepare() {
 int ReportingLib::record_data(double timestep, const std::vector<uint64_t>& node_ids, const std::string& report_name) {
 
     if (m_reports.find(report_name) == m_reports.end()) {
-        std::cout << "Report '" << report_name << "' doesn't exist!" << std::endl;
+        logger->warn("Report {} doesn't exist!", report_name);
         return -1;
     }
     m_reports[report_name]->record_data(timestep, node_ids);
@@ -139,7 +136,7 @@ int ReportingLib::flush(double time) {
 int ReportingLib::set_max_buffer_size(const std::string& report_name, size_t buffer_size) {
 
     if (m_reports.find(report_name) == m_reports.end()) {
-        std::cout << "Report '" << report_name << "' doesn't exist!" << std::endl;
+        logger->warn("Report {} doesn't exist!", report_name);
         return -1;
     }
     m_reports[report_name]->set_max_buffer_size(buffer_size);
