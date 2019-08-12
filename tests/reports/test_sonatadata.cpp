@@ -31,7 +31,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
             std::shared_ptr<SonataData> sonata = std::make_shared<SonataData>("test_sonatadata", max_buffer_size, num_steps, nodes);
             std::vector<uint64_t> nodeids = {1, 42};
 
-            sonata->prepare_dataset();
+            sonata->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
                 sonata->record_data(0, nodeids);
                 sonata->update_timestep(0.0);
@@ -75,7 +75,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
             std::shared_ptr<SonataData> sonata2 = std::make_shared<SonataData>("test_sonatadata2", max_buffer_size, num_steps, nodes);
             std::vector<uint64_t> nodeids = {1, 42};
 
-            sonata2->prepare_dataset();
+            sonata2->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
                 sonata2->record_data(i, nodeids);
                 sonata2->update_timestep(i);

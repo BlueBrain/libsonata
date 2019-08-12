@@ -43,10 +43,10 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
 
         m_remaining_steps = m_num_steps;
 
-        logger->trace("max_buffer_size: {}", max_buffer_size);
-        logger->trace("m_totalelements: {}", m_total_elements);
-        logger->trace("Steps to write: {}", m_steps_to_write);
-        logger->trace("Buffer size: {}", m_buffer_size);
+        logger->trace("-Total elements: {}", m_total_elements);
+        logger->trace("-Steps to write: {}", m_steps_to_write);
+        logger->trace("-Max Buffer size: {}", max_buffer_size);
+        logger->trace("-Buffer size: {}", m_buffer_size);
 
         m_buffer_size = m_total_elements * m_steps_to_write;
         m_report_buffer = new double[m_buffer_size];
@@ -76,12 +76,10 @@ int SonataData::update_timestep(double timestep) {
         m_last_position = 0;
         m_current_step = 0;
         m_remaining_steps -= m_steps_to_write;
-        logger->trace("Remaining steps: {}", m_remaining_steps);
-        logger->trace("Steps to write: {}", m_steps_to_write);
     }
 }
 
-void SonataData::prepare_dataset() {
+void SonataData::prepare_dataset(bool spike_report) {
 
     logger->trace("Preparing SonataData Dataset for report: {}", m_report_name);
     // Prepare /report and /spikes headers
@@ -116,13 +114,13 @@ void SonataData::prepare_dataset() {
         write_report_header();
     }
 
-    if(m_total_spikes > 0) {
+    if(spike_report) {
         write_spikes_header();
     }
 }
 void SonataData::write_report_header() {
     //TODO: remove configure_group and add it to write_any()
-    logger->trace("Writing report header!");
+    logger->trace("Writing REPORT header!");
     m_io_writer->configure_group("/report");
     m_io_writer->configure_group("/report/mapping");
     m_io_writer->configure_dataset("/report/data", m_num_steps, m_total_elements);
@@ -134,7 +132,7 @@ void SonataData::write_report_header() {
 
 void SonataData::write_spikes_header() {
 
-    logger->trace("Writing spike header!");
+    logger->trace("Writing SPIKE header!");
     m_io_writer->configure_group("/spikes");
     m_io_writer->configure_attribute("/spikes", "sorting", "time");
     Implementation::sort_spikes(m_spike_timestamps, m_spike_node_ids);
@@ -146,9 +144,9 @@ void SonataData::write_data() {
 
     if(m_remaining_steps > 0) {
         logger->trace("Writing timestep data to file!");
-        logger->trace("Remaining steps: {}", m_remaining_steps);
-        logger->trace("Steps to write: {}", m_steps_to_write);
-        logger->trace("Total elements: {}", m_total_elements);
+        logger->trace("-Remaining steps: {}", m_remaining_steps);
+        logger->trace("-Steps to write: {}", m_steps_to_write);
+        logger->trace("-Total elements: {}", m_total_elements);
         if (m_remaining_steps < m_steps_to_write) {
             // Write remaining steps
             m_io_writer->write(m_report_buffer, m_remaining_steps, m_num_steps, m_total_elements);

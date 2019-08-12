@@ -85,10 +85,12 @@ namespace detail {
         };
 
         inline static void sort_spikes(std::vector<double>& spikevec_time, std::vector<int>& spikevec_gid) {
-            int numprocs;
-            MPI_Comm_size(ReportingLib::m_has_nodes, &numprocs);
-            double lmin_time = *(std::min_element(spikevec_time.begin(), spikevec_time.end()));
-            double lmax_time = *(std::max_element(spikevec_time.begin(), spikevec_time.end()));
+            double lmin_time = std::numeric_limits<int>::max();
+            double lmax_time = std::numeric_limits<int>::min();
+            if(!spikevec_time.empty()) {
+                lmin_time = *(std::min_element(spikevec_time.begin(), spikevec_time.end()));
+                lmax_time = *(std::max_element(spikevec_time.begin(), spikevec_time.end()));
+            }
 
             double min_time;
             MPI_Allreduce(&lmin_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, ReportingLib::m_has_nodes);
@@ -99,6 +101,8 @@ namespace detail {
             std::vector<int> inGid = spikevec_gid;
             local_spikevec_sort(inTime, inGid, spikevec_time, spikevec_gid);
 
+            int numprocs;
+            MPI_Comm_size(ReportingLib::m_has_nodes, &numprocs);
             // allocate send and receive counts and displacements for MPI_Alltoallv
             std::vector<int> snd_cnts(numprocs);
             std::vector<int> rcv_cnts(numprocs);

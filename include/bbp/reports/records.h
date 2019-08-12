@@ -67,6 +67,21 @@ size_t records_set_report_max_buffer_size_hint(char* report_name, size_t buffer_
 
 void records_set_atomic_step(double step);
 
+
+// NOT REQUIRED FOR SONATA
+int records_extra_mapping(char* report_name, uint64_t node_id, int num_values, int* values);
+void records_set_steps_to_buffer(int steps);
+void records_set_auto_flush(int mode);
+int records_rec(double time);
+int records_time_data();
+void records_refresh_pointers(double* (*refreshFunction)(double*));
+char* records_saveinit(char*, int, int*, int*, int);
+char* records_savebuffer(int);
+void records_saveglobal();
+void records_savestate(void);
+char* records_restoreinit(char* save_file, int* length);
+char* records_restore(uint64_t node_id, int* piece_count, int* length);
+
 #if defined(__cplusplus)
 }
 #endif

@@ -34,7 +34,7 @@ class SonataData {
     SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, std::shared_ptr<nodes_t> nodes);
     ~SonataData();
 
-    void prepare_dataset();
+    void prepare_dataset(bool spike_report);
     void write_report_header();
     void write_spikes_header();
     void write_data();

@@ -17,3 +17,8 @@ int SpikeReport::add_variable(uint64_t node_id, double* spike_value, uint32_t el
     }
     return 0;
 }
+
+int SpikeReport::prepare_sonata_dataset() {
+    m_sonata_data->prepare_dataset(true);
+    return 0;
+}

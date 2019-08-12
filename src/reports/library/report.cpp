@@ -18,7 +18,6 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     }
     // Default max buffer size
     m_max_buffer_size = DEFAULT_MAX_BUFFER_SIZE;
-    logger->info("Creating report: {} with number of steps {} as rank {}", m_report_name, m_num_steps, ReportingLib::m_rank);
 }
 
 void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
@@ -35,7 +34,12 @@ void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
 
 int Report::prepare_dataset() {
     m_sonata_data = std::make_unique<SonataData>(m_report_name, m_max_buffer_size, m_num_steps, m_nodes);
-    m_sonata_data->prepare_dataset();
+    return prepare_sonata_dataset();
+}
+
+int Report::prepare_sonata_dataset() {
+    m_sonata_data->prepare_dataset(false);
+    return 0;
 }
 
 int Report::record_data(double timestep, const std::vector<uint64_t>& node_ids) {
@@ -56,7 +60,7 @@ void Report::flush(double time) {
 }
 
 int Report::set_max_buffer_size(size_t buffer_size) {
-    logger->debug("Setting buffer size to {}", buffer_size);
+    logger->trace("Setting buffer size to {}", buffer_size);
     m_max_buffer_size = buffer_size;
 }
 

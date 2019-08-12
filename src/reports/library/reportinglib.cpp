@@ -57,6 +57,7 @@ int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, u
             }
             // Check if kind doesnt exist
             if (report) {
+                logger->info("Creating report {} type {} from rank {}", report_name, kind, m_rank);
                 m_reports[report_name] = report;
                 m_num_reports++;
             }
@@ -87,6 +88,14 @@ void ReportingLib::make_global_communicator() {
 }
 
 void ReportingLib::share_and_prepare() {
+
+    // remove reports without nodes
+    for(auto& kv: m_reports) {
+        if(kv.second->is_empty()){
+            m_reports.erase(kv.first);
+        }
+    }
+
     // Split reports into different ranks
     // Create communicator groups
     m_rank = Implementation::init(m_num_reports);
@@ -94,12 +103,7 @@ void ReportingLib::share_and_prepare() {
         logger->info("Initializing communicators and preparing datasets");
 
     }
-    // remove reports without nodes
-    for(auto& kv: m_reports) {
-        if(kv.second->is_empty()){
-            m_reports.erase(kv.first);
-        }
-    }
+
     // Allocate buffers
     for (auto& kv : m_reports) {
         logger->trace("Preparing datasets of report {} from rank {} with {} NODES", kv.first, m_rank, kv.second->get_num_nodes());

@@ -42,7 +42,7 @@ void generate_spikes(Neuron& neuron) {
 
 void generate_elements(Neuron& neuron) {
 
-    // 15+-5 elements
+    // 50+-5 elements
     int num_elements = 50 + ((std::rand() % 10) - 5);
 
     if(neuron.kind == "soma"){
@@ -173,6 +173,8 @@ int main() {
 
     records_setup_communicator();
     records_finish_and_share();
+
+    records_time_data();
 
     if(global_rank == 0) {
         logger->info("Starting the simulation!");

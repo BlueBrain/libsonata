@@ -17,11 +17,11 @@ class Report {
     int m_num_steps;
     size_t m_max_buffer_size;
 
-    std::unique_ptr<SonataData> m_sonata_data;
-
   protected:
     using nodes_t = std::map<uint64_t, Node>;
     std::shared_ptr<nodes_t> m_nodes;
+
+    std::unique_ptr<SonataData> m_sonata_data;
 
   public:
     Report(const std::string& report_name, double tstart, double tend, double dt);
@@ -37,6 +37,7 @@ class Report {
      * @return 0 on success, non zero on failure
      */
     int prepare_dataset();
+    virtual int prepare_sonata_dataset();
 
     void add_node(uint64_t node_id, uint64_t gid, uint64_t vgid);
     virtual int add_variable(uint64_t node_id, double* voltage, uint32_t element_id) = 0;

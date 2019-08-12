@@ -1,9 +1,6 @@
 #include <iostream>
 #include <bbp/reports/records.h>
-
-#ifdef DEBUG
-#include <iostream>
-#endif
+#include <reports/utils/logger.hpp>
 
 ReportingLib InitReports;
 
@@ -68,4 +65,42 @@ void records_set_atomic_step(double step) {
 
 int records_get_num_reports() {
     return InitReports.get_num_reports();
+}
+
+// NOT REQUIRED FOR SONATA
+int records_extra_mapping(char* report_name, uint64_t node_id, int num_values, int* values) {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+void records_set_steps_to_buffer(int steps) {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+void records_set_auto_flush(int mode) {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+int records_rec(double time) {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+int records_time_data() {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+void records_refresh_pointers(double* (*refreshFunction)(double*)) {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+char* records_saveinit(char*, int, int*, int*, int) {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+char* records_savebuffer(int) {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+void records_saveglobal() {
+    logger->warn("Function {} NOT implemented", __FUNCTION__);
+}
+void records_savestate(void){
+    logger->warn("Function NOT implemented");
+}
+char* records_restoreinit(char* save_file, int* length) {
+    logger->warn("Function NOT implemented");
+}
+char* records_restore(uint64_t node_id, int* piece_count, int* length) {
+    logger->warn("Function NOT implemented");
 }
