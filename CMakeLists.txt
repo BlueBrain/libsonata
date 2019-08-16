@@ -21,9 +21,9 @@ string(REPLACE "\n"
                PY_PKG_VERSION_FULL
                "${PY_PKG_VERSION_FULL}")
 list(GET PY_PKG_VERSION_FULL -1 PY_PKG_VERSION_FULL)
-# keep MAJOR.MINOR.PATCH
+# keep MAJOR.MINOR.PATCH (PATCH being optional)
 string(REGEX
-       REPLACE "([0-9]+\\.[0-9]+\\.[0-9]+).*"
+       REPLACE "([0-9]+\\.[0-9]+(\\.[0-9]+)?).*"
                "\\1"
                SONATA_VERSION
                "${PY_PKG_VERSION_FULL}")
