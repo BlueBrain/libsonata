@@ -90,9 +90,9 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
     std::vector<T> result(selection.flatSize());
 
     T* dst = result.data();
-    for (const auto& range: selection.ranges()) {
+    for (const Selection::Range& range: selection.ranges()) {
         assert (range.first < range.second);
-        size_t chunkSize = range.second - range.first;
+        unsigned long long chunkSize = range.second - range.first;
         dset.select({range.first}, {chunkSize}).read(dst);
         dst += chunkSize;
     }
