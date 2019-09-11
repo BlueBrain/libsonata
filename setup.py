@@ -76,6 +76,7 @@ class CMakeBuild(build_ext, object):
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DEXTLIB_FROM_SUBMODULES=ON",
             "-DSONATA_PYTHON=ON",
+            "-DSONATA_VERSION=" + self.distribution.get_version(),
             "-DCMAKE_BUILD_TYPE=",
             "-DSONATA_CXX_WARNINGS=OFF",
             '-DPYTHON_EXECUTABLE=' + sys.executable
