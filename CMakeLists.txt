@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.3)
 cmake_policy(VERSION 3.3)
 
-# get version from Python package
 execute_process(COMMAND git describe --tags
                 RESULT_VARIABLE GIT_VERSION_FAILED
                 OUTPUT_VARIABLE GIT_PKG_VERSION_FULL
