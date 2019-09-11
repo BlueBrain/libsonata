@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 cmake_policy(VERSION 3.3)
 
 execute_process(COMMAND git describe --tags
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                 RESULT_VARIABLE GIT_VERSION_FAILED
                 OUTPUT_VARIABLE GIT_PKG_VERSION_FULL
                 ERROR_VARIABLE GIT_VERSION_ERROR
