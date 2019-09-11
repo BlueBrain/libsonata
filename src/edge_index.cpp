@@ -66,7 +66,7 @@ Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID)
     RawIndex primaryRange;
     indexGroup
         .getDataSet(NODE_ID_TO_RANGES_DSET)
-        .select({ nodeID, 0 }, { 1, 2 })
+        .select({ static_cast<size_t>(nodeID), 0 }, { 1, 2 })
         .read(primaryRange);
 
     const uint64_t primaryRangeBegin = primaryRange[0][0];
@@ -79,7 +79,7 @@ Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID)
     RawIndex secondaryRange;
     indexGroup
         .getDataSet(RANGE_TO_EDGE_ID_DSET)
-        .select({ primaryRangeBegin, 0 }, { primaryRangeEnd - primaryRangeBegin, 2 })
+        .select({ static_cast<size_t>(primaryRangeBegin), 0 }, { static_cast<size_t>(primaryRangeEnd - primaryRangeBegin), 2 })
         .read(secondaryRange);
 
     Selection::Ranges ranges;

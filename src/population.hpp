@@ -58,8 +58,8 @@ std::vector<T> _readChunk(const HighFive::DataSet& dset, const Selection::Range&
 {
     std::vector<T> result;
     assert (range.first < range.second);
-    size_t chunkSize = range.second - range.first;
-    dset.select({range.first}, {chunkSize}).read(result);
+    auto chunkSize = static_cast<size_t>(range.second - range.first);
+    dset.select({static_cast<size_t>(range.first)}, {chunkSize}).read(result);
     return result;
 }
 
@@ -90,10 +90,10 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
     std::vector<T> result(selection.flatSize());
 
     T* dst = result.data();
-    for (const auto& range: selection.ranges()) {
+    for (const Selection::Range& range: selection.ranges()) {
         assert (range.first < range.second);
-        size_t chunkSize = range.second - range.first;
-        dset.select({range.first}, {chunkSize}).read(dst);
+        auto chunkSize = static_cast<size_t>(range.second - range.first);
+        dset.select({static_cast<size_t>(range.first)}, {chunkSize}).read(dst);
         dst += chunkSize;
     }
 
