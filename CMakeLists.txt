@@ -1,30 +1,34 @@
 cmake_minimum_required(VERSION 3.3)
 cmake_policy(VERSION 3.3)
 
-execute_process(COMMAND git describe --tags
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                RESULT_VARIABLE GIT_VERSION_FAILED
-                OUTPUT_VARIABLE GIT_PKG_VERSION_FULL
-                ERROR_VARIABLE GIT_VERSION_ERROR
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(GIT_VERSION_FAILED)
-  message(
-    FATAL_ERROR
-      "Could not retrieve version from command 'git describe --tags'\n"
-      ${GIT_VERSION_ERROR})
-endif()
+if(VERSION_INFO)
+    set(SONATA_VERSION ${VERSION_INFO})
+else()
+    execute_process(COMMAND git describe --tags
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    RESULT_VARIABLE GIT_VERSION_FAILED
+                    OUTPUT_VARIABLE GIT_PKG_VERSION_FULL
+                    ERROR_VARIABLE GIT_VERSION_ERROR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(GIT_VERSION_FAILED)
+      message(
+        FATAL_ERROR
+          "Could not retrieve version from command 'git describe --tags'\n"
+          ${GIT_VERSION_ERROR})
+    endif()
 # keep last line of command output
-string(REPLACE "\n"
-               ";"
-               GIT_PKG_VERSION_FULL
-               "${GIT_PKG_VERSION_FULL}")
-list(GET GIT_PKG_VERSION_FULL -1 GIT_PKG_VERSION_FULL)
+    string(REPLACE "\n"
+                   ";"
+                   GIT_PKG_VERSION_FULL
+                   "${GIT_PKG_VERSION_FULL}")
+    list(GET GIT_PKG_VERSION_FULL -1 GIT_PKG_VERSION_FULL)
 # keep MAJOR.MINOR.PATCH (PATCH being optional)
-string(REGEX
-       REPLACE "v?([0-9]+\\.[0-9]+(\\.[0-9]+)?).*"
-               "\\1"
-               SONATA_VERSION
-               "${GIT_PKG_VERSION_FULL}")
+    string(REGEX
+           REPLACE "v?([0-9]+\\.[0-9]+(\\.[0-9]+)?).*"
+                   "\\1"
+                   SONATA_VERSION
+                   "${GIT_PKG_VERSION_FULL}")
+endif()
 
 # Get "major.minor" from string "major.minor.version"
 string(REGEX MATCH "^(.*)\\.[^.]*$" dummy ${SONATA_VERSION})
