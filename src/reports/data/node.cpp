@@ -21,11 +21,6 @@ int Node::fill_data(double* data, bool node_to_be_recorded) {
         for (auto &elem: m_elements) {
             data[reporting_total++] = *elem;
         }
-    } else {
-        // Set all element values to default values
-        int num_elements = m_elements.size();
-        std::fill(data, data + num_elements, 0.0);
-        reporting_total = num_elements;
     }
     return reporting_total;
 }

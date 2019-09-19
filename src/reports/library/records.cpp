@@ -9,7 +9,8 @@ int records_clear() {
 }
 
 int records_add_report(const char* reportName, uint64_t node_id, uint64_t gid, uint64_t vgid,
-                       double tstart, double tend, double dt, const char* kind) {
+                       double tstart, double tend, double dt, int mapping_size, const char* kind,
+                       int attributes_mapping_size, char* unit) {
     // if we are adding reports, then we should reset the flag for sharing reports
     ReportingLib::first_report = true;
 
@@ -33,10 +34,10 @@ int records_finish_and_share() {
     return 0;
 }
 
-int records_nrec(double time, int num_nodes, uint64_t* nodeids, const char* report_name) {
+int records_nrec(double step, int num_nodes, int* nodeids, const char* report_name) {
     if (!InitReports.is_empty()) {
         const std::vector<uint64_t> node_ids(nodeids, nodeids + num_nodes);
-        return InitReports.record_data(time, node_ids, std::string(report_name));
+        return InitReports.record_data(step, node_ids, std::string(report_name));
     }
     return 0;
 }
@@ -52,11 +53,11 @@ int records_flush(double time) {
 }
 
 size_t records_set_max_buffer_size_hint(size_t buffer_size) {
-    return InitReports.set_max_buffer_size(buffer_size * 1024/*1048576*/);
+    return InitReports.set_max_buffer_size(buffer_size * /*1024*/1048576);
 }
 
 size_t records_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size) {
-    return InitReports.set_max_buffer_size(std::string(report_name), buffer_size * 1024/*1048576*/);
+    return InitReports.set_max_buffer_size(std::string(report_name), buffer_size * /*1024*/1048576);
 }
 
 void records_set_atomic_step(double step) {

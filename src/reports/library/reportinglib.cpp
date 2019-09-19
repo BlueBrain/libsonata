@@ -46,7 +46,7 @@ int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, u
             report = m_reports[report_name];
         } else {
             // new report
-            if (kind == "element") {
+            if (kind == "compartment") {
                 report = std::make_shared<ElementReport>(report_name, tstart, tend, dt);
             } else if (kind == "soma") {
                 report = std::make_shared<SomaReport>(report_name, tstart, tend, dt);
@@ -111,13 +111,13 @@ void ReportingLib::share_and_prepare() {
     }
 }
 
-int ReportingLib::record_data(double timestep, const std::vector<uint64_t>& node_ids, const std::string& report_name) {
+int ReportingLib::record_data(double step, const std::vector<uint64_t>& node_ids, const std::string& report_name) {
 
     if (m_reports.find(report_name) == m_reports.end()) {
         logger->warn("Report {} doesn't exist!", report_name);
         return -1;
     }
-    m_reports[report_name]->record_data(timestep, node_ids);
+    m_reports[report_name]->record_data(step, node_ids);
     return 0;
 }
 

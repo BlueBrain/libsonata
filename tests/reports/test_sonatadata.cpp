@@ -33,7 +33,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
 
             sonata->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
-                sonata->record_data(0, nodeids);
+                sonata->record_data(0, nodeids, 1);
                 sonata->update_timestep(0.0);
             }
             sonata->write_data();
@@ -77,7 +77,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
 
             sonata2->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
-                sonata2->record_data(i, nodeids);
+                sonata2->record_data(i, nodeids, 1);
                 sonata2->update_timestep(i);
             }
             sonata2->write_data();

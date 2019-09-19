@@ -8,7 +8,7 @@
 
 SonataData::SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, std::shared_ptr<nodes_t> nodes)
 : m_report_name(report_name), m_num_steps(num_steps), m_nodes(nodes), m_last_position(0), m_current_step(0),
-m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0) {
+m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0), m_nodes_recorded(0) {
 
     prepare_buffer(max_buffer_size);
     m_index_pointers.resize(nodes->size());
@@ -32,7 +32,7 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
 
     if(m_total_elements > 0) {
         // Calculate the timesteps that fit given a buffer size
-        int max_steps_to_write = max_buffer_size / sizeof(float) / m_total_elements;
+        int max_steps_to_write = max_buffer_size / sizeof(double) / m_total_elements;
         if (max_steps_to_write < m_num_steps) {
             // Minimum 1 timestep required to write
             m_steps_to_write = max_steps_to_write > 0? max_steps_to_write: 1;
@@ -53,24 +53,40 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
     }
 }
 
-int SonataData::record_data(double timestep, const std::vector<uint64_t>& node_ids) {
-    logger->trace("Recording data for t={}", timestep);
-    int local_position = m_last_position;
-    int written;
-    for(auto& kv: *m_nodes) {
-        int current_gid = kv.first;
-        // Check if node is set to be recorded (found in nodeids)
-        bool node_to_be_recorded = std::find(node_ids.begin(), node_ids.end(), current_gid) != node_ids.end();
-        written = kv.second.fill_data(&m_report_buffer[local_position], node_to_be_recorded);
-        local_position += written;
+int SonataData::record_data(double step, const std::vector<uint64_t>& node_ids, int period) {
+
+    int global_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
+    logger->trace("Recording data for step={} nodeids_size={} m_nodes_size={} RANK={}", step, node_ids.size(), m_nodes->size(), global_rank);
+    for(auto& node: node_ids) {
+        logger->trace("Cellid: {}", node);
     }
-    m_last_position = local_position;
+
+    // Record data every reporting step (step%period)
+    if(static_cast<int>(step) % period == 0) {
+        int local_position = m_last_position;
+        int written;
+        for (auto &kv: *m_nodes) {
+            int current_gid = kv.first;
+            // Check if node is set to be recorded (found in nodeids)
+            bool node_to_be_recorded = std::find(node_ids.begin(), node_ids.end(), current_gid) != node_ids.end();
+            written = kv.second.fill_data(&m_report_buffer[local_position], node_to_be_recorded);
+            local_position += kv.second.get_num_elements();
+        }
+        m_nodes_recorded += node_ids.size();
+    }
+    // Check if we recorded all the nodes for the current reporting step
+    if(m_nodes_recorded == m_nodes->size()) {
+        m_last_position += m_total_elements;
+        // Increase the reporting step every period (once all nodeids are recorded)
+        m_current_step++;
+        m_nodes_recorded = 0;
+    }
 }
 
 int SonataData::update_timestep(double timestep) {
 
     logger->trace("Updating timestep t={}", timestep);
-    m_current_step++;
     if(m_current_step == m_steps_to_write) {
         write_data();
         m_last_position = 0;

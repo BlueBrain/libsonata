@@ -55,7 +55,7 @@ class ReportingLib {
     void make_global_communicator();
     void share_and_prepare();
 
-    int record_data(double timestep, const std::vector<uint64_t>& node_ids, const std::string& report_name);
+    int record_data(double step, const std::vector<uint64_t>& node_ids, const std::string& report_name);
     int end_iteration(double timestep);
 
     int set_max_buffer_size(const std::string& report_name, size_t buf_size);

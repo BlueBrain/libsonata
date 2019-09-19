@@ -92,7 +92,8 @@ void init(const char* report_name, std::vector<Neuron>& neurons) {
 
     // logic for registering soma and element reports with reportinglib
     for (auto& neuron : neurons) {
-        records_add_report(report_name, neuron.node_id, neuron.node_id, neuron.node_id, tstart, tstop, dt, neuron.kind.c_str());
+        records_add_report(report_name, neuron.node_id, neuron.node_id, neuron.node_id, tstart, tstop, dt,
+                0, neuron.kind.c_str(), 0, nullptr);
 
         const int mapping_size = 1;
         int element_id = neuron.node_id*1000;
@@ -158,6 +159,9 @@ int main() {
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
     spike_nodeids = generate_data(spike_neurons, "spike", global_rank);
 
+    std::vector<int> int_element_nodeids(begin(element_nodeids), end(element_nodeids));
+    std::vector<int> int_soma_nodeids(begin(soma_nodeids), end(soma_nodeids));
+
 
     if(global_rank == 0) {
         logger->info("Initializing data structures (reports, nodes, elements)");
@@ -189,8 +193,8 @@ int main() {
         if(global_rank == 0) {
             logger->info("Recording data for t = {}", t);
         }
-        records_nrec(t, element_nodeids.size(), &element_nodeids[0], element_report);
-        records_nrec(t, soma_nodeids.size(), &soma_nodeids[0], soma_report);
+        records_nrec(t, element_nodeids.size(), &int_element_nodeids[0], element_report);
+        records_nrec(t, soma_nodeids.size(), &int_soma_nodeids[0], soma_report);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 

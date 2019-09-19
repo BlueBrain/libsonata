@@ -14,7 +14,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add a new report (element) and node") {
         const char* report_name = "myElementReport";
-        records_add_report(report_name, 1, 1, 1, tstart, tend, dt, "element");
+        records_add_report(report_name, 1, 1, 1, tstart, tend, dt, 0, "element", 0, nullptr);
         THEN( "Number of reports is 1" ) {
             REQUIRE( records_get_num_reports() == 1 );
         }
@@ -22,7 +22,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add a node to an existing element report") {
         const char* report_name = "myElementReport";
-        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, "element");
+        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, 0, "element", 0, nullptr);
         THEN( "Number of reports is still 1" ) {
             REQUIRE( records_get_num_reports() == 1 );
         }
@@ -30,7 +30,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add an existing node to an existing element report") {
         const char* report_name = "myElementReport";
-        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, "element");
+        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, 0, "element", 0, nullptr);
         THEN( "Number of reports is still 1" ) {
             REQUIRE( records_get_num_reports() == 1 );
         }
@@ -38,7 +38,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add a second report (soma), a node and a variable") {
         const char* report_name = "mySomaReport";
-        records_add_report(report_name, 1, 1, 1, tstart, tend, dt, "soma");
+        records_add_report(report_name, 1, 1, 1, tstart, tend, dt, 0, "soma", 0, nullptr);
         double soma_value = 42;
         records_add_var_with_mapping(report_name, 1, &soma_value, mapping_size, mapping);
         THEN( "Number of reports is 2" ) {
@@ -57,7 +57,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add a report of a non existing type") {
         const char* report_name = "myWeirdReport";
-        records_add_report(report_name, 44, 44, 44, tstart, tend, dt, "weird");
+        records_add_report(report_name, 44, 44, 44, tstart, tend, dt, 0, "weird", 0, nullptr);
         THEN( "Number of reports is still 2" ) {
             REQUIRE( records_get_num_reports() == 2 );
         }
@@ -70,7 +70,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
         std::vector<uint64_t> node_ids{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
         for(int node_id: node_ids) {
-            records_add_report(report_name, node_id, node_id, node_id, tstart, tend, dt, "element");
+            records_add_report(report_name, node_id, node_id, node_id, tstart, tend, dt, 0, "element", 0, nullptr);
             for(double& voltage: elements) {
                 records_add_var_with_mapping(report_name, node_id, &voltage, mapping_size, mapping);
             }
@@ -82,7 +82,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We record data") {
         const char *report_name = "elementReport";
-        uint64_t nodeids[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        int nodeids[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
         int num_steps = static_cast<int>((tend - tstart) / dt);
         if (std::fabs(num_steps * dt + tstart - tend) > std::numeric_limits<float>::epsilon()) {

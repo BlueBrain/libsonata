@@ -18,6 +18,8 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     }
     // Default max buffer size
     m_max_buffer_size = DEFAULT_MAX_BUFFER_SIZE;
+
+    m_reporting_period = static_cast<int> (dt / ReportingLib::m_atomic_step);
 }
 
 void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
@@ -42,8 +44,8 @@ int Report::prepare_sonata_dataset() {
     return 0;
 }
 
-int Report::record_data(double timestep, const std::vector<uint64_t>& node_ids) {
-    m_sonata_data->record_data(timestep, node_ids);
+int Report::record_data(double step, const std::vector<uint64_t>& node_ids) {
+    m_sonata_data->record_data(step, node_ids, m_reporting_period);
 }
 
 int Report::end_iteration(double timestep) {

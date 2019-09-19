@@ -16,6 +16,7 @@ class SonataData {
     int m_current_step;
     int m_last_position;
     int m_remaining_steps;
+    int m_nodes_recorded;
 
     std::vector<uint64_t> m_node_ids;
     std::vector<uint64_t> m_index_pointers;
@@ -40,7 +41,7 @@ class SonataData {
     void write_data();
     void close();
 
-    int record_data(double timestep, const std::vector<uint64_t>& node_ids);
+    int record_data(double step, const std::vector<uint64_t>& node_ids, int period);
     int update_timestep(double timestep);
 
     int get_num_steps() const { return m_num_steps; }

@@ -14,6 +14,7 @@ class Report {
     double m_tstart;
     double m_tend;
     double m_dt;
+    int m_reporting_period;
     int m_num_steps;
     size_t m_max_buffer_size;
 
@@ -44,7 +45,7 @@ class Report {
     virtual bool check_add_variable(uint64_t node_id);
     virtual size_t get_total_elements() const = 0;
 
-    virtual int record_data(double timestep, const std::vector<uint64_t>& node_ids);
+    virtual int record_data(double step, const std::vector<uint64_t>& node_ids);
     virtual int end_iteration(double timestep);
     virtual void flush(double time);
 

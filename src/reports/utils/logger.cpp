@@ -9,6 +9,7 @@ struct Logger {
     Logger(const std::string& name, std::string pattern) {
         logger = spdlog::stdout_color_mt(name);
         logger->set_pattern(std::move(pattern));
+        logger->set_level(spdlog::level::info);
     }
 };
 

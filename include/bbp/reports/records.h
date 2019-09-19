@@ -23,7 +23,10 @@ int records_add_report(const char* reportName,
                         double tstart,
                         double tend,
                         double dt,
-                        const char* kind);
+                        int mapping_size,
+                        const char* kind,
+                        int attributes_mapping_size,
+                        char* unit);
 
 /**
  * Add compartment/spike to an existing node on a report
@@ -43,7 +46,7 @@ void records_setup_communicator();
 /**
  * Save data of nodeids[] to buffer
  */
-int records_nrec(double time, int num_nodes, uint64_t* nodeids, const char* report_name);
+int records_nrec(double step, int num_nodes, int* nodeids, const char* report_name);
 
 int records_end_iteration (double timestep);
 
