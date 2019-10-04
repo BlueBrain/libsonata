@@ -174,6 +174,11 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(
             "Set of enumeration names"
         )
         .def(
+            "__len__",
+            &Population::size,
+            imbueElementName("Get the total number of {elem}s in the population").c_str()
+        )
+        .def(
             "enumeration_values",
             &Population::enumerationValues,
             py::arg("name"),

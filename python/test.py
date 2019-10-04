@@ -45,6 +45,7 @@ class TestNodePopulation(unittest.TestCase):
 
     def test_size(self):
         self.assertEqual(self.test_obj.size, 6)
+        self.assertEqual(len(self.test_obj), 6)
 
     def test_attribute_names(self):
         self.assertEqual(
