@@ -10,7 +10,7 @@ HDF5Writer::HDF5Writer(const std::string& report_name)
 : IoWriter(report_name), m_file(0), m_dataset(0), m_collective_list(0), m_independent_list(0) {
 
     hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
-    std::tie(m_collective_list, m_independent_list) = Implementation::prepare_write(plist_id);
+    std::tie(m_collective_list, m_independent_list) = Implementation::prepare_write(report_name, plist_id);
 
     // Create hdf5 file named after the report_name
     m_file = H5Fcreate(report_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
@@ -41,12 +41,12 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name, int total_st
 
     hsize_t dims[2];
     dims[0] = total_steps;
-    dims[1] = Implementation::get_global_dims(total_elements);
+    dims[1] = Implementation::get_global_dims(m_report_name, total_elements);
     hid_t data_space = H5Screate_simple(2, dims, nullptr);
     m_dataset = H5Dcreate(m_file, dataset_name.c_str(), H5T_IEEE_F32LE, data_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     // Caculate the offset of each rank
-    m_offset[1] = Implementation::get_offset(total_elements);
+    m_offset[1] = Implementation::get_offset(m_report_name, total_elements);
     H5Sclose(data_space);
 }
 
@@ -100,8 +100,8 @@ void HDF5Writer::write_any(const std::string& dataset_name, const std::vector<T>
     hsize_t dims = buffer.size();
     hid_t type = h5typemap::get_h5_type(T(0));
 
-    hsize_t global_dims = Implementation::get_global_dims(dims);
-    hsize_t offset = Implementation::get_offset(dims);
+    hsize_t global_dims = Implementation::get_global_dims(m_report_name, dims);
+    hsize_t offset = Implementation::get_offset(m_report_name, dims);
 
     hid_t data_space = H5Screate_simple(1, &global_dims, nullptr);
     hid_t data_set = H5Dcreate(m_file, dataset_name.c_str(), type, data_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

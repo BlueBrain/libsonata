@@ -13,6 +13,7 @@
 
 class ReportingLib {
     typedef std::map<std::string, std::shared_ptr<Report>> reports_t;
+    typedef std::map<std::string, MPI_Comm> communicators_t;
 
   private:
     reports_t m_reports;
@@ -22,6 +23,7 @@ class ReportingLib {
     static double m_atomic_step;
 #ifdef HAVE_MPI
     static MPI_Comm m_has_nodes;
+    static communicators_t m_communicators;
 #endif
     static int m_rank;
     static bool first_report;
@@ -55,7 +57,7 @@ class ReportingLib {
     void make_global_communicator();
     void share_and_prepare();
 
-    int record_data(double step, const std::vector<uint64_t>& node_ids, const std::string& report_name);
+    int record_data(double step, std::vector<uint64_t>& node_ids, const std::string& report_name);
     int end_iteration(double timestep);
 
     int set_max_buffer_size(const std::string& report_name, size_t buf_size);

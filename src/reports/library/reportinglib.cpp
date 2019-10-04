@@ -11,6 +11,7 @@ double ReportingLib::m_atomic_step = 1e-8;
 bool ReportingLib::first_report = true;
 #ifdef HAVE_MPI
 MPI_Comm ReportingLib::m_has_nodes = MPI_COMM_WORLD;
+ReportingLib::communicators_t ReportingLib::m_communicators;
 int ReportingLib::m_rank = 0;
 #endif
 
@@ -95,23 +96,28 @@ void ReportingLib::share_and_prepare() {
             m_reports.erase(kv.first);
         }
     }
+   
+    std::vector<std::string> report_names;
+    report_names.reserve(m_num_reports);
+    for(auto& kv: m_reports) {
+        report_names.push_back(kv.first);
+    }
 
     // Split reports into different ranks
     // Create communicator groups
-    m_rank = Implementation::init(m_num_reports);
+    m_rank = Implementation::init(report_names);
     if(m_rank == 0) {
         logger->info("Initializing communicators and preparing datasets");
-
     }
 
     // Allocate buffers
     for (auto& kv : m_reports) {
-        logger->trace("Preparing datasets of report {} from rank {} with {} NODES", kv.first, m_rank, kv.second->get_num_nodes());
+        logger->info("Preparing datasets of report {} from rank {} with {} NODES", kv.first, m_rank, kv.second->get_num_nodes());
         kv.second->prepare_dataset();
     }
 }
 
-int ReportingLib::record_data(double step, const std::vector<uint64_t>& node_ids, const std::string& report_name) {
+int ReportingLib::record_data(double step, std::vector<uint64_t>& node_ids, const std::string& report_name) {
 
     if (m_reports.find(report_name) == m_reports.end()) {
         logger->warn("Report {} doesn't exist!", report_name);

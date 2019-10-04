@@ -28,13 +28,13 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
 
             int num_steps = 3;
             size_t max_buffer_size = 1024;
-            std::shared_ptr<SonataData> sonata = std::make_shared<SonataData>("test_sonatadata", max_buffer_size, num_steps, nodes);
+            std::shared_ptr<SonataData> sonata = std::make_shared<SonataData>("test_sonatadata", max_buffer_size, 1.0, 0.0, num_steps, nodes);
             std::vector<uint64_t> nodeids = {1, 42};
 
             sonata->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
-                sonata->record_data(0, nodeids, 1);
-                sonata->update_timestep(0.0);
+                sonata->record_data(0, nodeids);
+                sonata->update_timestep(0.0, false);
             }
             sonata->write_data();
             sonata->close();
@@ -72,13 +72,13 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
 
             int num_steps = 3;
             size_t max_buffer_size = 128;
-            std::shared_ptr<SonataData> sonata2 = std::make_shared<SonataData>("test_sonatadata2", max_buffer_size, num_steps, nodes);
+            std::shared_ptr<SonataData> sonata2 = std::make_shared<SonataData>("test_sonatadata2", max_buffer_size, num_steps, 1.0, 0.0, nodes);
             std::vector<uint64_t> nodeids = {1, 42};
 
             sonata2->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
-                sonata2->record_data(i, nodeids, 1);
-                sonata2->update_timestep(i);
+                sonata2->record_data(i, nodeids);
+                sonata2->update_timestep(i, false);
             }
             sonata2->write_data();
             sonata2->close();

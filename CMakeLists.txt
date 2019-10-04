@@ -56,7 +56,7 @@ else()
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(ENABLE_COVERAGE ON)
+    set(ENABLE_COVERAGE OFF)
 else()
     set(ENABLE_COVERAGE OFF)
 endif()

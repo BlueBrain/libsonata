@@ -3,6 +3,7 @@
 #include <tuple>
 #include <iostream>
 #include <vector>
+#include <set>
 #include <algorithm>
 #include <numeric>
 #include <hdf5.h>
@@ -14,24 +15,27 @@
 #include <mpi.h>
 #endif
 
+#define MAX_REPORT_NAME_SIZE 256
+#define MAX_REPORTS 3
+
 namespace detail {
 
     template <class TImpl>
     struct Implementation {
-        inline static int init(int reports) {
-            return TImpl::init(reports);
+        inline static int init(const std::vector<std::string>& report_names) {
+            return TImpl::init(report_names);
         }
         inline static void close() {
             TImpl::close();
         }
-        inline static std::tuple<hid_t, hid_t> prepare_write(hid_t plist_id) {
-            return TImpl::prepare_write(plist_id);
+        inline static std::tuple<hid_t, hid_t> prepare_write(const std::string& report_name, hid_t plist_id) {
+            return TImpl::prepare_write(report_name, plist_id);
         }
-        inline static hsize_t get_offset(hsize_t value) {
-            return TImpl::get_offset(value);
+        inline static hsize_t get_offset(const std::string& report_name, hsize_t value) {
+            return TImpl::get_offset(report_name, value);
         }
-        inline static hsize_t get_global_dims(hsize_t value) {
-            return TImpl::get_global_dims(value);
+        inline static hsize_t get_global_dims(const std::string& report_name, hsize_t value) {
+            return TImpl::get_global_dims(report_name, value);
         }
         inline static void sort_spikes(std::vector<double>& spikevec_time, std::vector<int>& spikevec_gid) {
             TImpl::sort_spikes(spikevec_time, spikevec_gid);
@@ -42,25 +46,69 @@ namespace detail {
 
     struct ParallelImplementation {
 
-        inline static int init(int reports) {
+        inline static int init(const std::vector<std::string>& report_names) {
+
+            // size_t MPI type
+            int mpi_size_type = MPI_UINT64_T;
+            if (sizeof(size_t) == 4) {
+                mpi_size_type = MPI_UINT32_T;
+            }
+
             int global_rank, global_size;
             MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
             MPI_Comm_size(MPI_COMM_WORLD, &global_size);
 
-            MPI_Comm_split(MPI_COMM_WORLD, reports == 0, 0, &ReportingLib::m_has_nodes);
+            // Create a first communicator with the ranks with at least 1 report
+            int num_reports = report_names.size();
+            MPI_Comm_split(MPI_COMM_WORLD, num_reports == 0, 0, &ReportingLib::m_has_nodes);
 
-            int node_rank, node_size;
-            MPI_Comm_rank(ReportingLib::m_has_nodes, &node_rank);
-            MPI_Comm_size(ReportingLib::m_has_nodes, &node_size);
-            logger->trace("WORLD RANK/SIZE: {}/{} \t num_reports!=0 RANK/SIZE: {}/{}", global_rank, global_size, node_rank, node_size);
+            // Send report numbers and generate offset array for allgatherv
+            std::vector<int> report_sizes(global_size);
+            MPI_Allgather(&num_reports, 1, MPI_INT, report_sizes.data(), 1, MPI_INT, ReportingLib::m_has_nodes);
+            std::vector<int> offsets(global_size+1);
+            offsets[0] = 0;
+            std::partial_sum(report_sizes.begin(), report_sizes.end(), offsets.begin()+1);
+
+            // Create auxiliar map to associate hash with report name
+            std::map<size_t, std::string> hash_report_names;
+            std::hash<std::string> hasher;
+            std::vector<size_t> local_report_hashes;
+            local_report_hashes.reserve(num_reports);
+            for(const auto& elem: report_names) {
+                size_t report_hash = hasher(elem);
+                local_report_hashes.push_back(report_hash);
+                hash_report_names[report_hash] = elem;
+            }
+
+            // Get global number of reports
+            size_t total_num_reports = std::accumulate(report_sizes.begin(), report_sizes.end(), 0);
+            std::vector<size_t> global_report_hashes(total_num_reports);
+            MPI_Allgatherv(local_report_hashes.data(), num_reports, mpi_size_type, global_report_hashes.data(), 
+                            report_sizes.data(), offsets.data(), mpi_size_type, ReportingLib::m_has_nodes);            
+
+            // Eliminate duplicates
+            std::set<size_t> result (global_report_hashes.begin(), global_report_hashes.end());
+            // Create communicators per report name
+            for(auto& elem: global_report_hashes) {
+                MPI_Comm_split(ReportingLib::m_has_nodes, std::find(local_report_hashes.begin(), local_report_hashes.end(), elem) != local_report_hashes.end(), 
+                               0, &ReportingLib::m_communicators[hash_report_names[elem]]);
+            }
+
+            /*logger->trace("WORLD RANK/SIZE: {}/{} \t Size communicators: {}", global_rank, global_size, ReportingLib::m_communicators.size());
+            for(auto& kv: ReportingLib::m_communicators) {
+                int node_rank, node_size;
+                MPI_Comm_rank(kv.second, &node_rank);
+                MPI_Comm_size(kv.second, &node_size);
+                logger->trace("WORLD RANK/SIZE: {}/{} \t report:{} \t RANK/SIZE: {}/{}", global_rank, global_size, kv.first, node_rank, node_size);
+            }*/
             return global_rank;
         };
 
         inline static void close(){};
-        inline static std::tuple<hid_t, hid_t> prepare_write(hid_t plist_id) {
+        inline static std::tuple<hid_t, hid_t> prepare_write(const std::string& report_name, hid_t plist_id) {
             // Enable MPI access
             MPI_Info info = MPI_INFO_NULL;
-            H5Pset_fapl_mpio(plist_id, ReportingLib::m_has_nodes, info);
+            H5Pset_fapl_mpio(plist_id, ReportingLib::m_communicators[report_name], info);
 
             // Initialize independent/collective lists
             hid_t collective_list = H5Pcreate(H5P_DATASET_XFER);
@@ -71,16 +119,16 @@ namespace detail {
             return std::make_tuple(collective_list, independent_list);
         };
 
-        inline static hsize_t get_offset(hsize_t value) {
+        inline static hsize_t get_offset(const std::string& report_name, hsize_t value) {
             hsize_t offset = 0;
-            MPI_Scan(&value, &offset, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_has_nodes);
+            MPI_Scan(&value, &offset, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_communicators[report_name]);
             offset -= value;
             return offset;
         };
 
-        inline static hsize_t get_global_dims(hsize_t value) {
+        inline static hsize_t get_global_dims(const std::string& report_name, hsize_t value) {
             hsize_t global_dims = value;
-            MPI_Allreduce(&value, &global_dims, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_has_nodes);
+            MPI_Allreduce(&value, &global_dims, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_communicators[report_name]);
             return global_dims;
         };
 
@@ -174,11 +222,11 @@ namespace detail {
 #else
 
     struct SerialImplementation {
-        inline static int init(int reports) { return 0; };
+        inline static int init(const std::vector<std::string>& report_names) { return 0; };
         inline static void close(){};
-        inline static std::tuple<hid_t, hid_t> prepare_write(hid_t plist_id) {};
-        inline static hsize_t get_offset(hsize_t value) { return 0; };
-        inline static hsize_t get_global_dims(hsize_t value) { return value; };
+        inline static std::tuple<hid_t, hid_t> prepare_write(const std::string& report_name, hid_t plist_id) {};
+        inline static hsize_t get_offset(const std::string& report_name, hsize_t value) { return 0; };
+        inline static hsize_t get_global_dims(const std::string& report_name, hsize_t value) { return value; };
         inline static void sort_spikes(std::vector<double>& spikevec_time, std::vector<int>& spikevec_gid) {};
     };
 

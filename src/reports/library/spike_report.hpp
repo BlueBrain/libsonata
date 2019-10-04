@@ -10,7 +10,7 @@ class SpikeReport: public Report {
 
     int prepare_sonata_dataset();
     // We dont need this on spike reports
-    int record_data(double timestep, const std::vector<uint64_t>& node_ids) {}
-    int end_iteration(double timestep) {}
+    void record_data(double timestep, const std::vector<uint64_t>& node_ids) {}
+    void end_iteration(double timestep) {}
     void flush(double time) {}
 };
