@@ -21,6 +21,7 @@ class ReportingLib {
 
   public:
     static double m_atomic_step;
+    static double m_mindelay;
 #ifdef HAVE_MPI
     static MPI_Comm m_has_nodes;
     static communicators_t m_communicators;
@@ -55,9 +56,10 @@ class ReportingLib {
     int add_variable(const std::string& report_name, uint64_t node_id, double* voltage, uint32_t element_id);
 
     void make_global_communicator();
-    void share_and_prepare();
+    void prepare_datasets();
 
-    int record_data(double step, std::vector<uint64_t>& node_ids, const std::string& report_name);
+    int record_nodes_data(double step, const std::vector<uint64_t>& node_ids, const std::string& report_name);
+    int record_data(double step);
     int end_iteration(double timestep);
 
     int set_max_buffer_size(const std::string& report_name, size_t buf_size);

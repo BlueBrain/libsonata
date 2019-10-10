@@ -43,12 +43,15 @@ int records_finish_and_share();
 
 void records_setup_communicator();
 
+void records_set_mindelay(double mindelay);
+
 /**
  * Save data of nodeids[] to buffer
  */
 int records_nrec(double step, int num_nodes, int* nodeids, const char* report_name);
+int records_rec(double step);
 
-int records_end_iteration (double timestep);
+int records_end_iteration(double timestep);
 
 int records_get_num_reports();
 
@@ -70,12 +73,10 @@ size_t records_set_report_max_buffer_size_hint(char* report_name, size_t buffer_
 
 void records_set_atomic_step(double step);
 
-
 // NOT REQUIRED FOR SONATA
 int records_extra_mapping(char* report_name, uint64_t node_id, int num_values, int* values);
 void records_set_steps_to_buffer(int steps);
 void records_set_auto_flush(int mode);
-int records_rec(double time);
 int records_time_data();
 void records_refresh_pointers(double* (*refreshFunction)(double*));
 char* records_saveinit(char*, int, int*, int*, int);

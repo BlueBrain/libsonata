@@ -49,7 +49,7 @@ namespace detail {
         inline static int init(const std::vector<std::string>& report_names) {
 
             // size_t MPI type
-            int mpi_size_type = MPI_UINT64_T;
+            MPI_Datatype mpi_size_type = MPI_UINT64_T;
             if (sizeof(size_t) == 4) {
                 mpi_size_type = MPI_UINT32_T;
             }

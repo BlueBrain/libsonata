@@ -44,7 +44,8 @@ class Report {
     virtual bool check_add_variable(uint64_t node_id);
     virtual size_t get_total_elements() const = 0;
 
-    virtual void record_data(double step, std::vector<uint64_t>& node_ids);
+    virtual void record_data(double step, const std::vector<uint64_t>& node_ids);
+    virtual void record_data(double step);
     virtual void end_iteration(double timestep);
     virtual void flush(double time);
 

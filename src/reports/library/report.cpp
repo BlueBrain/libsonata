@@ -21,7 +21,6 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
 }
 
 void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
-
     if (m_nodes->find(node_id) == m_nodes->end()) {
         // node is new insert it into the map
         m_nodes->insert(std::make_pair(node_id, Node(gid, vgid)));
@@ -42,10 +41,21 @@ int Report::prepare_sonata_dataset() {
     return 0;
 }
 
-void Report::record_data(double step, std::vector<uint64_t>& node_ids) {
+void Report::record_data(double step, const std::vector<uint64_t>& node_ids) {
     if(m_sonata_data->is_due_to_report(step)) {
         m_sonata_data->record_data(step, node_ids);
     }
+}
+
+void Report::record_data(double step) {
+    // Construct a vector with all the node_ids
+    std::vector<uint64_t> node_ids;
+    node_ids.reserve(m_nodes->size());
+    for(auto const& kv: *m_nodes) {
+        node_ids.push_back(kv.first);
+    }
+    
+    record_data(step, node_ids);
 }
 
 void Report::end_iteration(double timestep) {
@@ -53,9 +63,11 @@ void Report::end_iteration(double timestep) {
 }
 
 void Report::flush(double time) {
-
+    if(ReportingLib::m_rank == 0) {
+        logger->info("Flush() called at t={}", time);
+    }
     // Write if there are any remaining steps to write
-    m_sonata_data->write_data();
+    m_sonata_data->update_timestep(time, true);
     if(time - m_tend + m_dt / 2 > 1e-6) {
         m_sonata_data->close();
     }

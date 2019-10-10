@@ -29,17 +29,27 @@ void records_setup_communicator() {
 
 int records_finish_and_share() {
     if(ReportingLib::first_report) {
-        InitReports.share_and_prepare();
+        InitReports.prepare_datasets();
         ReportingLib::first_report = false;
     }
     return 0;
 }
 
+void records_set_mindelay(double mindelay) {
+    ReportingLib::m_mindelay = mindelay;
+}
+
 int records_nrec(double step, int num_nodes, int* nodeids, const char* report_name) {
     if (!InitReports.is_empty()) {
-        std::vector<uint64_t> node_ids;
-        node_ids.assign(nodeids, nodeids + num_nodes);
-        return InitReports.record_data(step, node_ids, std::string(report_name));
+        const std::vector<uint64_t> node_ids(nodeids, nodeids + num_nodes);
+        return InitReports.record_nodes_data(step, node_ids, std::string(report_name));
+    }
+    return 0;
+}
+
+int records_rec(double step) {
+    if (!InitReports.is_empty()) {
+        return InitReports.record_data(step);
     }
     return 0;
 }
@@ -80,10 +90,6 @@ void records_set_steps_to_buffer(int steps) {
 }
 void records_set_auto_flush(int mode) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
-}
-int records_rec(double time) {
-    logger->trace("Function {} NOT implemented", __FUNCTION__);
-    return 0;
 }
 int records_time_data() {
     logger->trace("Function {} NOT implemented", __FUNCTION__);

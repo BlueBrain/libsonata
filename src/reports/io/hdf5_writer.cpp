@@ -26,7 +26,6 @@ void HDF5Writer::configure_group(const std::string& group_name) {
 }
 
 void HDF5Writer::configure_attribute(const std::string& group_name, const std::string& attribute_name, const std::string& attribute_value) {
-
     logger->trace("Configuring attribute '{}'", attribute_name);
     hsize_t attr_size = attribute_value.size();
     hid_t attr_space = H5Screate_simple(1, &attr_size, &attr_size);
@@ -38,7 +37,6 @@ void HDF5Writer::configure_attribute(const std::string& group_name, const std::s
 }
 
 void HDF5Writer::configure_dataset(const std::string& dataset_name, int total_steps, int total_elements) {
-
     hsize_t dims[2];
     dims[0] = total_steps;
     dims[1] = Implementation::get_global_dims(m_report_name, total_elements);
@@ -51,7 +49,6 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name, int total_st
 }
 
 void HDF5Writer::write(double* buffer, int steps_to_write, int total_steps, int total_elements) {
-
     hsize_t count[2];
     count[0] = steps_to_write;
     count[1] = total_elements;
@@ -74,7 +71,6 @@ void HDF5Writer::write(double* buffer, int steps_to_write, int total_steps, int 
 }
 
 void HDF5Writer::write(const std::string& dataset_name, const std::vector<int>& buffer) {
-
     write_any(dataset_name, buffer);
 }
 
@@ -96,7 +92,6 @@ void HDF5Writer::write(const std::string& dataset_name, const std::vector<double
 
 template <typename T>
 void HDF5Writer::write_any(const std::string& dataset_name, const std::vector<T>& buffer) {
-
     hsize_t dims = buffer.size();
     hid_t type = h5typemap::get_h5_type(T(0));
 
