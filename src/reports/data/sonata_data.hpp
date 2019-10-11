@@ -19,7 +19,8 @@ class SonataData {
     int m_remaining_steps;
     int m_reporting_period;
     double m_last_step_recorded;
-
+    double m_last_step;
+    
     std::vector<uint64_t> m_node_ids;
     std::vector<uint64_t> m_index_pointers;
     std::vector<uint32_t> m_element_ids;
@@ -35,7 +36,7 @@ class SonataData {
     void prepare_buffer(size_t max_buffer_size, double dt);
 
   public:
-    SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, std::shared_ptr<nodes_t> nodes);
+    SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, double tend, std::shared_ptr<nodes_t> nodes);
     ~SonataData();
 
     void prepare_dataset(bool spike_report);

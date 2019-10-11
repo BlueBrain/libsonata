@@ -18,6 +18,7 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     }
     // Default max buffer size
     m_max_buffer_size = DEFAULT_MAX_BUFFER_SIZE;
+    m_report_is_closed = false;
 }
 
 void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
@@ -32,7 +33,7 @@ void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
 }
 
 int Report::prepare_dataset() {
-    m_sonata_data = std::make_unique<SonataData>(m_report_name, m_max_buffer_size, m_num_steps, m_dt, m_tstart, m_nodes);
+    m_sonata_data = std::make_unique<SonataData>(m_report_name, m_max_buffer_size, m_num_steps, m_dt, m_tstart, m_tend, m_nodes);
     return prepare_sonata_dataset();
 }
 
@@ -62,6 +63,12 @@ void Report::end_iteration(double timestep) {
     m_sonata_data->update_timestep(timestep, false);
 }
 
+void Report::refresh_pointers(refresh_function_t refresh_function) {
+    for(auto& kv: *m_nodes) {
+        kv.second.refresh_pointers(refresh_function);
+    }
+}
+
 void Report::flush(double time) {
     if(ReportingLib::m_rank == 0) {
         logger->info("Flush() called at t={}", time);
@@ -69,7 +76,10 @@ void Report::flush(double time) {
     // Write if there are any remaining steps to write
     m_sonata_data->update_timestep(time, true);
     if(time - m_tend + m_dt / 2 > 1e-6) {
-        m_sonata_data->close();
+        if(!m_report_is_closed) {
+            m_sonata_data->close();
+            m_report_is_closed = true;
+        }
     }
 }
 

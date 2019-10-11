@@ -6,7 +6,7 @@
 #include <reports/io/hdf5_writer.hpp>
 #include "sonata_data.hpp"
 
-SonataData::SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, std::shared_ptr<nodes_t> nodes)
+SonataData::SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, double tend, std::shared_ptr<nodes_t> nodes)
 : m_report_name(report_name), m_num_steps(num_steps), m_nodes(nodes), m_last_position(0), m_current_step(0),
 m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0) {
 
@@ -15,6 +15,7 @@ m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), 
 
     m_reporting_period = static_cast<int> (dt / ReportingLib::m_atomic_step);
     m_last_step_recorded = tstart / ReportingLib::m_atomic_step;
+    m_last_step = tend / ReportingLib::m_atomic_step;
 
     m_io_writer = std::make_unique<HDF5Writer>(report_name);
 }
@@ -71,9 +72,11 @@ bool SonataData::is_due_to_report(double step) {
     // Dont record data if current step < tstart
     if(step < m_last_step_recorded) {
         return false;
-    }
+    // Dont record data if current step > tend   
+    } else if (step > m_last_step ) {
+        return false;
     // Dont record data if is not a reporting step (step%period)
-    else if(static_cast<int>(step-m_last_step_recorded) % m_reporting_period != 0) {
+    } else if(static_cast<int>(step-m_last_step_recorded) % m_reporting_period != 0) {
         return false;
     }
     return true;
@@ -137,18 +140,20 @@ void SonataData::record_data(double step, const std::vector<uint64_t>& node_ids)
 }
 
 void SonataData::update_timestep(double timestep, bool force_write) {
-    if(ReportingLib::m_rank == 0) {
-        logger->trace("Updating timestep t={}", timestep);
-    }
-    // Force write could be called when flushing or when mindelay writes 1 less step (NEURON feature)
-    if(m_current_step == m_steps_to_write || force_write) {
+    if(m_remaining_steps > 0) {
         if(ReportingLib::m_rank == 0) {
-            logger->info("Writing to file! steps_to_write={}, current_step={}, remaining_steps={}", m_steps_to_write, m_current_step, m_remaining_steps);
+            logger->trace("Updating timestep t={}", timestep);
         }
-        write_data(m_current_step);
-        m_remaining_steps -= m_current_step;
-        m_last_position = 0;
-        m_current_step = 0;
+        // Force write could be called when flushing or when mindelay writes 1 less step (NEURON feature)
+        if(m_current_step == m_steps_to_write || force_write) {
+            if(ReportingLib::m_rank == 0) {
+                logger->info("Writing to file {}! steps_to_write={}, current_step={}, remaining_steps={}", m_report_name, m_steps_to_write, m_current_step, m_remaining_steps);
+            }
+            write_data(m_current_step);
+            m_remaining_steps -= m_current_step;
+            m_last_position = 0;
+            m_current_step = 0;
+        }
     }
 }
 
@@ -215,9 +220,9 @@ void SonataData::write_spikes_header() {
 void SonataData::write_data(int steps_to_write) {
     if(m_remaining_steps > 0) {
         if(ReportingLib::m_rank == 0) {
-            logger->trace("Writing timestep data to file!");
-            logger->trace("-Remaining steps: {}", m_remaining_steps);
-            logger->trace("-Steps to write: {}", steps_to_write);
+            logger->info("Writing timestep data to file {}", m_report_name);
+            logger->info("-Remaining steps: {}", m_remaining_steps);
+            logger->info("-Steps to write: {}", steps_to_write);
         }
         if (m_remaining_steps < steps_to_write) {
             // Write remaining steps

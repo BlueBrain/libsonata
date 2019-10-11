@@ -80,6 +80,10 @@ int records_get_num_reports() {
     return InitReports.get_num_reports();
 }
 
+void records_refresh_pointers(double* (*refresh_function)(double*)) {
+    InitReports.refresh_pointers(refresh_function);
+}
+
 // NOT REQUIRED FOR SONATA
 int records_extra_mapping(char* report_name, uint64_t node_id, int num_values, int* values) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
@@ -94,9 +98,6 @@ void records_set_auto_flush(int mode) {
 int records_time_data() {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
     return 0;
-}
-void records_refresh_pointers(double* (*refreshFunction)(double*)) {
-    logger->trace("Function {} NOT implemented", __FUNCTION__);
 }
 char* records_saveinit(char*, int, int*, int*, int) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);

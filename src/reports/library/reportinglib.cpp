@@ -58,7 +58,7 @@ int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, u
             }
             // Check if kind doesnt exist
             if (report) {
-                logger->trace("Creating report {} type {} from rank {}", report_name, kind, m_rank);
+                logger->trace("Creating report {} type {} tstart{} and tstop {} from rank {}", report_name, kind, tstart, tend, m_rank);
                 m_reports[report_name] = report;
                 m_num_reports++;
             }
@@ -134,6 +134,12 @@ int ReportingLib::end_iteration(double timestep) {
         kv.second->end_iteration(timestep);
     }
     return 0;
+}
+
+void ReportingLib::refresh_pointers(refresh_function_t refresh_function) {
+    for (auto& kv : m_reports) {
+        kv.second->refresh_pointers(refresh_function);
+    }
 }
 
 int ReportingLib::flush(double time) {

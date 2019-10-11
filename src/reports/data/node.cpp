@@ -24,3 +24,10 @@ int Node::fill_data(double* data, bool node_to_be_recorded) {
     }
     return reporting_total;
 }
+
+void Node::refresh_pointers(refresh_function_t refresh_function) {
+    for (auto &elem: m_elements) {
+        elem = refresh_function(elem);
+    }
+}
+

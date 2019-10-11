@@ -40,6 +40,7 @@ class ReportingLib {
     bool is_empty();
 
     int flush(double time);
+    void refresh_pointers(refresh_function_t refresh_function);
 
     int get_num_reports() const;
 

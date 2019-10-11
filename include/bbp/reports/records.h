@@ -57,6 +57,7 @@ int records_get_num_reports();
 
 int records_flush(double time);
 
+void records_refresh_pointers(double* (*refresh_function)(double*));
 /**
  * Set a suggested maximum memory size each individual reports can use as a buffer
  * @param buffer_size requested maximum memory allocatable by a Report buffer in Mbytes
@@ -78,7 +79,6 @@ int records_extra_mapping(char* report_name, uint64_t node_id, int num_values, i
 void records_set_steps_to_buffer(int steps);
 void records_set_auto_flush(int mode);
 int records_time_data();
-void records_refresh_pointers(double* (*refreshFunction)(double*));
 char* records_saveinit(char*, int, int*, int*, int);
 char* records_savebuffer(int);
 void records_saveglobal();
