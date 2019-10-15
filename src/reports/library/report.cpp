@@ -49,14 +49,9 @@ void Report::record_data(double step, const std::vector<uint64_t>& node_ids) {
 }
 
 void Report::record_data(double step) {
-    // Construct a vector with all the node_ids
-    std::vector<uint64_t> node_ids;
-    node_ids.reserve(m_nodes->size());
-    for(auto const& kv: *m_nodes) {
-        node_ids.push_back(kv.first);
+    if(m_sonata_data->is_due_to_report(step)) {
+        m_sonata_data->record_data(step);
     }
-    
-    record_data(step, node_ids);
 }
 
 void Report::end_iteration(double timestep) {
@@ -74,7 +69,8 @@ void Report::flush(double time) {
         logger->info("Flush() called at t={}", time);
     }
     // Write if there are any remaining steps to write
-    m_sonata_data->update_timestep(time, true);
+    //m_sonata_data->update_timestep(time, true);
+    m_sonata_data->write_data();
     if(time - m_tend + m_dt / 2 > 1e-6) {
         if(!m_report_is_closed) {
             m_sonata_data->close();

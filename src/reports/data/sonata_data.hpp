@@ -42,11 +42,12 @@ class SonataData {
     void prepare_dataset(bool spike_report);
     void write_report_header();
     void write_spikes_header();
-    void write_data(int steps_to_write);
+    void write_data();
     void close();
 
     bool is_due_to_report(double step);
     void record_data(double step, const std::vector<uint64_t>& node_ids);
+    void record_data(double step);
     void update_timestep(double timestep, bool force_write);
 
     int get_num_steps() const { return m_num_steps; }

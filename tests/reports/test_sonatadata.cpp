@@ -36,7 +36,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
                 sonata->record_data(0, nodeids);
                 sonata->update_timestep(0.0, false);
             }
-            sonata->write_data(num_steps);
+            sonata->write_data();
             sonata->close();
 
             THEN("The buffer size is the total number of steps times the total number of elements") {
@@ -80,7 +80,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
                 sonata2->record_data(i, nodeids);
                 sonata2->update_timestep(i, false);
             }
-            sonata2->write_data(num_steps);
+            sonata2->write_data();
             sonata2->close();
 
             THEN("The buffer size is the number of steps to write that fit on the buffer times the total elements") {

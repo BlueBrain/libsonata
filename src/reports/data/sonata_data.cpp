@@ -107,10 +107,8 @@ void SonataData::record_data(double step, const std::vector<uint64_t>& node_ids)
     // Increase the amount of recordings of a certain vector of gids
     m_node_steps[node_ids]++;
     
-    bool ready_to_write = false;
     int nodes_recorded = 0;
     std::set<int> num_recordings;
-    int num_steps_recorded = 0;
     for(auto& kv: m_node_steps) {
         nodes_recorded+=kv.first.size();
         // There will be one element in the set when all the node_ids of certain rank have the same number of recordings
@@ -118,18 +116,37 @@ void SonataData::record_data(double step, const std::vector<uint64_t>& node_ids)
         
         // If all nodes of the rank has recorded and has the same number of steps recorded
         if(nodes_recorded == m_nodes->size() && num_recordings.size()==1) {
-            ready_to_write = true;
-            num_steps_recorded = kv.second;
+            int num_steps_recorded = kv.second;
+            m_last_position += m_total_elements*num_steps_recorded;
+            // Increase the reporting step every period by the number of steps recorded (once all nodeids are recorded)
+            m_current_step+=num_steps_recorded;
+            m_node_steps.clear();
+            m_last_step_recorded += m_reporting_period*num_steps_recorded;
         }
     }
     num_recordings.clear();
+}
+
+void SonataData::record_data(double step) {
+    int local_position = m_last_position;
+    if(ReportingLib::m_rank == 0) {
+        logger->trace("RANK={} Recording data for step={} last_step_recorded={} buffer_size={} and offset={}", 
+                    ReportingLib::m_rank, step, m_last_step_recorded, m_buffer_size, local_position);
+    }
     
-    if(ready_to_write) {
-        m_last_position += m_total_elements*num_steps_recorded;
-        // Increase the reporting step every period by the number of steps recorded (once all nodeids are recorded)
-        m_current_step+=num_steps_recorded;
-        m_node_steps.clear();
-        m_last_step_recorded += m_reporting_period*num_steps_recorded;
+    int written;
+    for (auto &kv: *m_nodes) {
+        int current_gid = kv.first;
+        written = kv.second.fill_data(&m_report_buffer[local_position], true);
+        local_position += kv.second.get_num_elements();
+    }
+    
+    m_current_step++;
+    m_last_position += m_total_elements;    
+    m_last_step_recorded += m_reporting_period;
+    
+    if(m_current_step == m_steps_to_write) {
+        write_data();
     }
 }
 
@@ -139,14 +156,11 @@ void SonataData::update_timestep(double timestep, bool force_write) {
             logger->trace("Updating timestep t={}", timestep);
         }
         // Force write could be called when flushing or when mindelay writes 1 less step (NEURON feature, current_step > 1)
-        if(m_current_step == m_steps_to_write || force_write || m_current_step > 1) {
+        if(m_current_step == m_steps_to_write || m_current_step > 1) {
             if(ReportingLib::m_rank == 0) {
                 logger->info("Writing to file {}! steps_to_write={}, current_step={}, remaining_steps={}", m_report_name, m_steps_to_write, m_current_step, m_remaining_steps);
             }
-            write_data(m_current_step);
-            m_remaining_steps -= m_current_step;
-            m_last_position = 0;
-            m_current_step = 0;
+            write_data();
         }
     }
 }
@@ -211,19 +225,17 @@ void SonataData::write_spikes_header() {
     m_io_writer->write("/spikes/node_ids", m_spike_node_ids);
 }
 
-void SonataData::write_data(int steps_to_write) {
+void SonataData::write_data() {
     if(m_remaining_steps > 0) {
         if(ReportingLib::m_rank == 0) {
             logger->info("Writing timestep data to file {}", m_report_name);
             logger->info("-Remaining steps: {}", m_remaining_steps);
-            logger->info("-Steps to write: {}", steps_to_write);
+            logger->info("-Steps to write: {}", m_current_step);
         }
-        if (m_remaining_steps < steps_to_write) {
-            // Write remaining steps
-            m_io_writer->write(m_report_buffer, m_remaining_steps, m_num_steps, m_total_elements);
-        } else {
-            m_io_writer->write(m_report_buffer, steps_to_write, m_num_steps, m_total_elements);
-        }
+        m_io_writer->write(m_report_buffer, m_current_step, m_num_steps, m_total_elements);
+        m_remaining_steps -= m_current_step;
+        m_last_position = 0;
+        m_current_step = 0;
     }
 }
 
