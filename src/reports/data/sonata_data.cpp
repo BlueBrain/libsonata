@@ -130,12 +130,6 @@ void SonataData::record_data(double step, const std::vector<uint64_t>& node_ids)
         m_current_step+=num_steps_recorded;
         m_node_steps.clear();
         m_last_step_recorded += m_reporting_period*num_steps_recorded;
-        // We force the write if the amount of steps recorded per node is bigger than 1
-        if(num_steps_recorded > 1) {
-            update_timestep(step*ReportingLib::m_atomic_step, true);
-        } else {
-            update_timestep(step*ReportingLib::m_atomic_step, false);
-        }
     }
 }
 
@@ -144,8 +138,8 @@ void SonataData::update_timestep(double timestep, bool force_write) {
         if(ReportingLib::m_rank == 0) {
             logger->trace("Updating timestep t={}", timestep);
         }
-        // Force write could be called when flushing or when mindelay writes 1 less step (NEURON feature)
-        if(m_current_step == m_steps_to_write || force_write) {
+        // Force write could be called when flushing or when mindelay writes 1 less step (NEURON feature, current_step > 1)
+        if(m_current_step == m_steps_to_write || force_write || m_current_step > 1) {
             if(ReportingLib::m_rank == 0) {
                 logger->info("Writing to file {}! steps_to_write={}, current_step={}, remaining_steps={}", m_report_name, m_steps_to_write, m_current_step, m_remaining_steps);
             }
