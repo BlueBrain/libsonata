@@ -3,8 +3,8 @@
 #include <bbp/sonata/edges.h>
 
 #include <cstdio>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -14,33 +14,30 @@ using namespace bbp::sonata;
 
 namespace std {
 
-std::ostream& operator<<(std::ostream& oss, const Selection& selection)
-{
+std::ostream& operator<<(std::ostream& oss, const Selection& selection) {
     oss << "{ ";
-    for (const auto& range: selection.ranges()) {
+    for (const auto& range : selection.ranges()) {
         oss << range.first << ":" << range.second << " ";
     }
     oss << "}";
     return oss;
 }
 
-}
+}  // namespace std
 
 
 namespace bbp {
 namespace sonata {
 
-bool operator==(const Selection& lhs, const Selection& rhs)
-{
+bool operator==(const Selection& lhs, const Selection& rhs) {
     return lhs.ranges() == rhs.ranges();
 }
 
-}
-}
+}  // namespace sonata
+}  // namespace bbp
 
 
-TEST_CASE("EdgePopulation", "[edges]")
-{
+TEST_CASE("EdgePopulation", "[edges]") {
     const EdgePopulation population("./data/edges1.h5", "", "edges-AB");
 
     CHECK(population.source() == "nodes-A");
@@ -48,81 +45,38 @@ TEST_CASE("EdgePopulation", "[edges]")
 
     REQUIRE(population.size() == 6);
 
-    CHECK(
-        population.sourceNodeIDs(Selection({{0, 3}, {4, 5}})) == std::vector<NodeID>{1, 1, 2, 3}
-    );
-    CHECK(
-        population.targetNodeIDs(Selection({{0, 3}, {4, 5}})) == std::vector<NodeID>{1, 2, 1, 0}
-    );
+    CHECK(population.sourceNodeIDs(Selection({{0, 3}, {4, 5}})) == std::vector<NodeID>{1, 1, 2, 3});
+    CHECK(population.targetNodeIDs(Selection({{0, 3}, {4, 5}})) == std::vector<NodeID>{1, 2, 1, 0});
 
-    CHECK(
-        population.afferentEdges({}).empty()
-    );
-    CHECK(
-        population.afferentEdges({3}).empty()
-    );
-    CHECK(
-        population.afferentEdges({1}) == Selection({{0, 1}, {2, 4}})
-    );
-    CHECK(
-        population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}})
-    );
-    CHECK(
-        population.afferentEdges({999}).empty()
-    );
+    CHECK(population.afferentEdges({}).empty());
+    CHECK(population.afferentEdges({3}).empty());
+    CHECK(population.afferentEdges({1}) == Selection({{0, 1}, {2, 4}}));
+    CHECK(population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}}));
+    CHECK(population.afferentEdges({999}).empty());
 
-    CHECK(
-        population.efferentEdges({}).empty()
-    );
-    CHECK(
-        population.efferentEdges({0}).empty()
-    );
-    CHECK(
-        population.efferentEdges({1}) == Selection({{0, 2}})
-    );
-    CHECK(
-        population.efferentEdges({1, 3}) == Selection({{0, 2}, {4, 6}})
-    );
-    CHECK(
-        population.efferentEdges({1, 2}) == Selection({{0, 4}})
-    );
-    CHECK(
-        population.efferentEdges({999}).empty()
-    );
+    CHECK(population.efferentEdges({}).empty());
+    CHECK(population.efferentEdges({0}).empty());
+    CHECK(population.efferentEdges({1}) == Selection({{0, 2}}));
+    CHECK(population.efferentEdges({1, 3}) == Selection({{0, 2}, {4, 6}}));
+    CHECK(population.efferentEdges({1, 2}) == Selection({{0, 4}}));
+    CHECK(population.efferentEdges({999}).empty());
 
-    CHECK(
-        population.connectingEdges({}, {0, 1, 2, 3}).empty()
-    );
-    CHECK(
-        population.connectingEdges({0, 1, 2, 3}, {}).empty()
-    );
-    CHECK(
-        population.connectingEdges({0, 1}, {0, 3}).empty()
-    );
-    CHECK(
-        population.connectingEdges({3}, {0}) == Selection({{4, 5}})
-    );
-    CHECK(
-        population.connectingEdges({1, 2}, {1, 2}) == Selection({{0, 4}})
-    );
-    CHECK(
-        population.connectingEdges({0, 1, 2, 3}, {2}) == Selection({{1, 2}, {5, 6}})
-    );
-    CHECK(
-        population.connectingEdges({999}, {999}).empty()
-    );
+    CHECK(population.connectingEdges({}, {0, 1, 2, 3}).empty());
+    CHECK(population.connectingEdges({0, 1, 2, 3}, {}).empty());
+    CHECK(population.connectingEdges({0, 1}, {0, 3}).empty());
+    CHECK(population.connectingEdges({3}, {0}) == Selection({{4, 5}}));
+    CHECK(population.connectingEdges({1, 2}, {1, 2}) == Selection({{0, 4}}));
+    CHECK(population.connectingEdges({0, 1, 2, 3}, {2}) == Selection({{1, 2}, {5, 6}}));
+    CHECK(population.connectingEdges({999}, {999}).empty());
     // duplicate node IDs are ignored; order of node IDs is not relevant
-    CHECK(
-        population.connectingEdges({2, 1, 2}, {2, 1, 2}) == Selection({{0, 4}})
-    );
+    CHECK(population.connectingEdges({2, 1, 2}, {2, 1, 2}) == Selection({{0, 4}}));
 }
 
 
 namespace {
 
 // TODO: remove after switching to C++17
-void copyFile(const std::string& srcFilePath, const std::string& dstFilePath)
-{
+void copyFile(const std::string& srcFilePath, const std::string& dstFilePath) {
     std::ifstream src(srcFilePath, std::ios::binary);
     std::ofstream dst(dstFilePath, std::ios::binary);
     dst << src.rdbuf();
@@ -131,22 +85,15 @@ void copyFile(const std::string& srcFilePath, const std::string& dstFilePath)
 }  // unnamed namespace
 
 
-TEST_CASE("EdgePopulation::writeIndices", "[edges]")
-{
+TEST_CASE("EdgePopulation::writeIndices", "[edges]") {
     const std::string srcFilePath = "./data/edges-no-index.h5";
     const std::string dstFilePath = "./data/edges-no-index.h5.tmp";
     {
         const EdgePopulation population(srcFilePath, "", "edges-AB");
 
         // no index datasets yet
-        CHECK_THROWS_AS(
-            population.afferentEdges({1, 2}),
-            SonataError
-        );
-        CHECK_THROWS_AS(
-            population.efferentEdges({1, 2}),
-            SonataError
-        );
+        CHECK_THROWS_AS(population.afferentEdges({1, 2}), SonataError);
+        CHECK_THROWS_AS(population.efferentEdges({1, 2}), SonataError);
     }
 
 
@@ -155,13 +102,9 @@ TEST_CASE("EdgePopulation::writeIndices", "[edges]")
     try {
         EdgePopulation::writeIndices(dstFilePath, "edges-AB", 4, 4);
         const EdgePopulation population(dstFilePath, "", "edges-AB");
-        CHECK(
-            population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}})
-        );
-        CHECK(
-            population.efferentEdges({1, 2}) == Selection({{0, 4}})
-        );
-    } catch(...) {
+        CHECK(population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}}));
+        CHECK(population.efferentEdges({1, 2}) == Selection({{0, 4}}));
+    } catch (...) {
         try {
             std::remove(dstFilePath.c_str());
         } catch (...) {
@@ -173,29 +116,15 @@ TEST_CASE("EdgePopulation::writeIndices", "[edges]")
 }
 
 
-TEST_CASE("EdgeStorage", "[edges]")
-{
+TEST_CASE("EdgeStorage", "[edges]") {
     // CSV not supported at the moment
-    CHECK_THROWS_AS(
-        EdgeStorage("./data/edges1.h5", "csv-file"),
-        SonataError
-    );
+    CHECK_THROWS_AS(EdgeStorage("./data/edges1.h5", "csv-file"), SonataError);
 
     const EdgeStorage edges("./data/edges1.h5");
-    CHECK(
-        edges.populationNames() == std::set<std::string>{"edges-AB", "edges-AC"}
-    );
+    CHECK(edges.populationNames() == std::set<std::string>{"edges-AB", "edges-AC"});
 
-    CHECK(
-        edges.openPopulation("edges-AB")
-    );
-    CHECK_THROWS_AS(
-        edges.openPopulation("no-such-population"),
-        SonataError
-    );
+    CHECK(edges.openPopulation("edges-AB"));
+    CHECK_THROWS_AS(edges.openPopulation("no-such-population"), SonataError);
     // multi-group populations not supported at the moment
-    CHECK_THROWS_AS(
-        edges.openPopulation("edges-AC"),
-        SonataError
-    );
+    CHECK_THROWS_AS(edges.openPopulation("edges-AC"), SonataError);
 }

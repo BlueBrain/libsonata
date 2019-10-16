@@ -22,4 +22,5 @@ namespace sonata {
 
 std::mutex& hdf5Mutex();
 
-}} // namespace bbp::sonata
+}
+}  // namespace bbp

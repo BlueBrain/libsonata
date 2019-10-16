@@ -10,8 +10,7 @@
 using namespace bbp::sonata;
 
 
-TEST_CASE("NodePopulation", "[base]")
-{
+TEST_CASE("NodePopulation", "[base]") {
     const NodePopulation population("./data/nodes1.h5", "", "nodes-A");
 
     CHECK(population.name() == "nodes-A");
@@ -24,53 +23,37 @@ TEST_CASE("NodePopulation", "[base]")
       "E-mapping-good", "E-mapping-bad"
     });
 
-    REQUIRE(population.enumerationNames() == std::set<std::string>{
-      "E-mapping-good", "E-mapping-bad"
-    });
+    REQUIRE(population.enumerationNames() ==
+            std::set<std::string>{"E-mapping-good", "E-mapping-bad"});
 
-    CHECK(
-       population.getAttribute<double>("attr-X", Selection({{0, 1}, {5, 6}})) == std::vector<double>{11.0, 16.0}
-    );
-    CHECK(
-       population.getAttribute<float>("attr-X", Selection({{0, 1}})) == std::vector<float>{11.0f}
-    );
-    CHECK(
-       population.getAttribute<uint64_t>("attr-Y", Selection({{0, 1}, {5, 6}})) == std::vector<uint64_t>{21, 26}
-    );
-    CHECK(
-       population.getAttribute<int64_t>("attr-Y", Selection({{0, 1}})) == std::vector<int64_t>{21}
-    );
-    CHECK(
-       population.getAttribute<uint32_t>("attr-Y", Selection({{0, 1}})) == std::vector<uint32_t>{21}
-    );
-    CHECK(
-       population.getAttribute<int32_t>("attr-Y", Selection({{0, 1}})) == std::vector<int32_t>{21}
-    );
-    CHECK(
-       population.getAttribute<uint8_t>("attr-Y", Selection({{0, 1}})) == std::vector<uint8_t>{21}
-    );
-    CHECK(
-       population.getAttribute<int8_t>("attr-Y", Selection({{0, 1}})) == std::vector<int8_t>{21}
-    );
-    CHECK(
-       population.getAttribute<std::string>("attr-Z", Selection({{0, 2}})) == std::vector<std::string>{"aa", "bb"}
-    );
-    CHECK(
-       population.getAttribute<std::string>("attr-Z", Selection({{0, 1}, {5, 6}})) == std::vector<std::string>{"aa", "ff"}
-    );
-    CHECK_THROWS_AS(
-       population.getAttribute<double>("no-such-attribute", Selection({{0, 1}})),
-       SonataError
-    );
+    CHECK(population.getAttribute<double>("attr-X", Selection({{0, 1}, {5, 6}})) ==
+          std::vector<double>{11.0, 16.0});
+    CHECK(population.getAttribute<float>("attr-X", Selection({{0, 1}})) ==
+          std::vector<float>{11.0f});
+    CHECK(population.getAttribute<uint64_t>("attr-Y", Selection({{0, 1}, {5, 6}})) ==
+          std::vector<uint64_t>{21, 26});
+    CHECK(population.getAttribute<int64_t>("attr-Y", Selection({{0, 1}})) ==
+          std::vector<int64_t>{21});
+    CHECK(population.getAttribute<uint32_t>("attr-Y", Selection({{0, 1}})) ==
+          std::vector<uint32_t>{21});
+    CHECK(population.getAttribute<int32_t>("attr-Y", Selection({{0, 1}})) ==
+          std::vector<int32_t>{21});
+    CHECK(population.getAttribute<uint8_t>("attr-Y", Selection({{0, 1}})) ==
+          std::vector<uint8_t>{21});
+    CHECK(population.getAttribute<int8_t>("attr-Y", Selection({{0, 1}})) ==
+          std::vector<int8_t>{21});
+    CHECK(population.getAttribute<std::string>("attr-Z", Selection({{0, 2}})) ==
+          std::vector<std::string>{"aa", "bb"});
+    CHECK(population.getAttribute<std::string>("attr-Z", Selection({{0, 1}, {5, 6}})) ==
+          std::vector<std::string>{"aa", "ff"});
+    CHECK_THROWS_AS(population.getAttribute<double>("no-such-attribute", Selection({{0, 1}})),
+                    SonataError);
 
     // getAttribute with default value
-    CHECK(
-       population.getAttribute<double>("attr-X", Selection({{0, 1}, {5, 6}}), 42.0) == std::vector<double>{11.0, 16.0}
-    );
-    CHECK_THROWS_AS(
-       population.getAttribute<double>("no-such-attribute", Selection({{0, 1}}), 42.0),
-       SonataError
-    );
+    CHECK(population.getAttribute<double>("attr-X", Selection({{0, 1}, {5, 6}}), 42.0) ==
+          std::vector<double>{11.0, 16.0});
+    CHECK_THROWS_AS(population.getAttribute<double>("no-such-attribute", Selection({{0, 1}}), 42.0),
+                    SonataError);
 
     CHECK(population._attributeDataType("A-double") == "double");
     CHECK(population._attributeDataType("A-float") == "float");
@@ -83,85 +66,61 @@ TEST_CASE("NodePopulation", "[base]")
     CHECK(population._attributeDataType("A-uint16") == "uint16_t");
     CHECK(population._attributeDataType("A-uint8") == "uint8_t");
     CHECK(population._attributeDataType("A-string") == "string");
-    CHECK_THROWS_AS(
-      population._attributeDataType("A-enum"),
-      SonataError
-    );
-    CHECK_THROWS_AS(
-       population._attributeDataType("no-such-attribute"),
-       SonataError
-    );
+    CHECK_THROWS_AS(population._attributeDataType("A-enum"), SonataError);
+    CHECK_THROWS_AS(population._attributeDataType("no-such-attribute"), SonataError);
 
-    CHECK(
-        population.getEnumeration<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) == std::vector<size_t>{2, 2}
-    );
+    CHECK(population.getEnumeration<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) ==
+          std::vector<size_t>{2, 2});
 
-    CHECK(
-        population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) == std::vector<size_t>{2, 2}
-    );
+    CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) ==
+          std::vector<size_t>{2, 2});
 
-    CHECK(
-        population.getAttribute<std::string>("E-mapping-good", Selection({{0, 1}})) == std::vector<std::string>{"C"}
-    );
+    CHECK(population.getAttribute<std::string>("E-mapping-good", Selection({{0, 1}})) ==
+          std::vector<std::string>{"C"});
 
-    CHECK(
-        population.enumerationValues("E-mapping-good") == std::vector<std::string>{"A", "B", "C"}
-    );
+    CHECK(population.enumerationValues("E-mapping-good") ==
+          std::vector<std::string>{"A", "B", "C"});
 
-    CHECK(
-        population.getAttribute<std::string>("E-mapping-bad", Selection({{0, 1}})) == std::vector<std::string>{"C"}
-    );
+    CHECK(population.getAttribute<std::string>("E-mapping-bad", Selection({{0, 1}})) ==
+          std::vector<std::string>{"C"});
 
-    CHECK_THROWS_AS(
-        population.getAttribute<std::string>("E-mapping-bad", Selection({{1, 2}})),
-        SonataError
-    );
+    CHECK_THROWS_AS(population.getAttribute<std::string>("E-mapping-bad", Selection({{1, 2}})),
+                    SonataError);
 
-    REQUIRE(population.dynamicsAttributeNames() == std::set<std::string>{"dparam-X", "dparam-Y", "dparam-Z"});
+    REQUIRE(population.dynamicsAttributeNames() ==
+            std::set<std::string>{"dparam-X", "dparam-Y", "dparam-Z"});
 
-    CHECK(
-       population.getDynamicsAttribute<double>("dparam-X", Selection({{0, 1}, {5, 6}})) == std::vector<double>{1011.0, 1016.0}
-    );
-    CHECK(
-       population.getDynamicsAttribute<float>("dparam-X", Selection({{0, 1}})) == std::vector<float>{1011.0f}
-    );
-    CHECK(
-       population.getDynamicsAttribute<uint64_t>("dparam-Y", Selection({{0, 1}, {5, 6}})) == std::vector<uint64_t>{1021, 1026}
-    );
-    CHECK(
-       population.getDynamicsAttribute<int64_t>("dparam-Y", Selection({{0, 1}})) == std::vector<int64_t>{1021}
-    );
-    CHECK(
-       population.getDynamicsAttribute<uint32_t>("dparam-Y", Selection({{0, 1}})) == std::vector<uint32_t>{1021}
-    );
-    CHECK(
-       population.getDynamicsAttribute<int32_t>("dparam-Y", Selection({{0, 1}})) == std::vector<int32_t>{1021}
-    );
-    CHECK(
-       population.getDynamicsAttribute<uint16_t>("dparam-Y", Selection({{0, 1}})) == std::vector<uint16_t>{1021}
-    );
-    CHECK(
-       population.getDynamicsAttribute<int16_t>("dparam-Y", Selection({{0, 1}})) == std::vector<int16_t>{1021}
-    );
-    CHECK(
-       population.getDynamicsAttribute<std::string>("dparam-Z", Selection({{0, 2}})) == std::vector<std::string>{"d-aa", "d-bb"}
-    );
-    CHECK(
-       population.getDynamicsAttribute<std::string>("dparam-Z", Selection({{0, 1}, {5, 6}})) == std::vector<std::string>{"d-aa", "d-ff"}
-    );
-    CHECK_THROWS_AS(
-       population.getDynamicsAttribute<double>("no-such-attribute", Selection({{0, 1}})),
-       SonataError
-    );
+    CHECK(population.getDynamicsAttribute<double>("dparam-X", Selection({{0, 1}, {5, 6}})) ==
+          std::vector<double>{1011.0, 1016.0});
+    CHECK(population.getDynamicsAttribute<float>("dparam-X", Selection({{0, 1}})) ==
+          std::vector<float>{1011.0f});
+    CHECK(population.getDynamicsAttribute<uint64_t>("dparam-Y", Selection({{0, 1}, {5, 6}})) ==
+          std::vector<uint64_t>{1021, 1026});
+    CHECK(population.getDynamicsAttribute<int64_t>("dparam-Y", Selection({{0, 1}})) ==
+          std::vector<int64_t>{1021});
+    CHECK(population.getDynamicsAttribute<uint32_t>("dparam-Y", Selection({{0, 1}})) ==
+          std::vector<uint32_t>{1021});
+    CHECK(population.getDynamicsAttribute<int32_t>("dparam-Y", Selection({{0, 1}})) ==
+          std::vector<int32_t>{1021});
+    CHECK(population.getDynamicsAttribute<uint16_t>("dparam-Y", Selection({{0, 1}})) ==
+          std::vector<uint16_t>{1021});
+    CHECK(population.getDynamicsAttribute<int16_t>("dparam-Y", Selection({{0, 1}})) ==
+          std::vector<int16_t>{1021});
+    CHECK(population.getDynamicsAttribute<std::string>("dparam-Z", Selection({{0, 2}})) ==
+          std::vector<std::string>{"d-aa", "d-bb"});
+    CHECK(population.getDynamicsAttribute<std::string>("dparam-Z", Selection({{0, 1}, {5, 6}})) ==
+          std::vector<std::string>{"d-aa", "d-ff"});
+    CHECK_THROWS_AS(population.getDynamicsAttribute<double>("no-such-attribute",
+                                                            Selection({{0, 1}})),
+                    SonataError);
 
     // getDynamicsAttribute with default value
-    CHECK(
-       population.getDynamicsAttribute<double>("dparam-X", Selection({{0, 1}, {5, 6}}), 42.0) == std::vector<double>{1011.0, 1016.0}
-    );
-    CHECK_THROWS_AS(
-       population.getDynamicsAttribute<double>("no-such-attribute", Selection({{0, 1}}), 42.0),
-       SonataError
-    );
+    CHECK(population.getDynamicsAttribute<double>("dparam-X", Selection({{0, 1}, {5, 6}}), 42.0) ==
+          std::vector<double>{1011.0, 1016.0});
+    CHECK_THROWS_AS(population.getDynamicsAttribute<double>("no-such-attribute",
+                                                            Selection({{0, 1}}),
+                                                            42.0),
+                    SonataError);
 
     CHECK(population._dynamicsAttributeDataType("dparam-X") == "double");
     CHECK(population._dynamicsAttributeDataType("dparam-Y") == "int64_t");

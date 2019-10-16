@@ -21,14 +21,14 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
-class SONATA_API NodePopulation : public Population
+class SONATA_API NodePopulation: public Population
 {
-public:
+  public:
     constexpr static const char* ELEMENT = "node";
 
-    NodePopulation(
-        const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name
-    );
+    NodePopulation(const std::string& h5FilePath,
+                   const std::string& csvFilePath,
+                   const std::string& name);
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -37,5 +37,5 @@ using NodeStorage = PopulationStorage<NodePopulation>;
 
 //--------------------------------------------------------------------------------------------------
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp
