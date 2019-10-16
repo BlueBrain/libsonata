@@ -207,9 +207,9 @@ protected:
 
     Population(const Population&) = delete;
 
-    Population(Population&&);
+    Population(Population&&) noexcept;
 
-    virtual ~Population();
+    virtual ~Population() noexcept;
 
     struct Impl;
     const std::unique_ptr<Impl> impl_;
@@ -228,9 +228,9 @@ public:
 
     PopulationStorage(const PopulationStorage&) = delete;
 
-    PopulationStorage(PopulationStorage&&);
+    PopulationStorage(PopulationStorage&&) noexcept;
 
-    ~PopulationStorage();
+    ~PopulationStorage() noexcept;
 
     /**
      * List all populations.
