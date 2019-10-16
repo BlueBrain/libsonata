@@ -15,6 +15,7 @@ class SonataData {
     int m_num_steps;
     int m_steps_to_write;
     int m_current_step;
+    int m_steps_recorded;
     int m_last_position;
     int m_remaining_steps;
     int m_reporting_period;
@@ -28,7 +29,8 @@ class SonataData {
     std::vector<double> m_spike_timestamps;
     std::vector<int> m_spike_node_ids;
 
-    std::map<std::vector<uint64_t>, int> m_node_steps;
+    std::set<uint64_t> m_nodes_recorded;
+    
     std::unique_ptr<IoWriter> m_io_writer;
     using nodes_t = std::map<uint64_t, Node>;
     std::shared_ptr<nodes_t> m_nodes;

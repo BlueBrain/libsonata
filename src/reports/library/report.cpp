@@ -69,7 +69,6 @@ void Report::flush(double time) {
         logger->info("Flush() called at t={}", time);
     }
     // Write if there are any remaining steps to write
-    //m_sonata_data->update_timestep(time, true);
     m_sonata_data->write_data();
     if(time - m_tend + m_dt / 2 > 1e-6) {
         if(!m_report_is_closed) {
