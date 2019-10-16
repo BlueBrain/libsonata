@@ -167,3 +167,10 @@ TEST_CASE("NodePopulation", "[base]")
     CHECK(population._dynamicsAttributeDataType("dparam-Y") == "int64_t");
     CHECK(population._dynamicsAttributeDataType("dparam-Z") == "string");
 }
+
+
+TEST_CASE("NodePopulationMove", "[base]") {
+    NodePopulation population("./data/nodes1.h5", "", "nodes-A");
+    NodePopulation pop2 = std::move(population);
+    CHECK(pop2.name() == "nodes-A");
+}

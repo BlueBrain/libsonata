@@ -145,6 +145,10 @@ Population::Population(
 }
 
 
+Population::Population(Population&& p)
+    : impl_(std::move(const_cast<std::unique_ptr<Population::Impl>&>(p.impl_))) {}
+
+
 Population::~Population() = default;
 
 

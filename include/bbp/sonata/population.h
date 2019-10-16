@@ -207,6 +207,8 @@ protected:
 
     Population(const Population&) = delete;
 
+    Population(Population&&);
+
     virtual ~Population();
 
     struct Impl;
@@ -225,6 +227,8 @@ public:
     PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath = "");
 
     PopulationStorage(const PopulationStorage&) = delete;
+
+    PopulationStorage(PopulationStorage&&);
 
     ~PopulationStorage();
 
