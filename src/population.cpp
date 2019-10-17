@@ -145,7 +145,11 @@ Population::Population(
 }
 
 
-Population::~Population() = default;
+Population::Population(Population&& p) noexcept
+    : impl_(std::move(const_cast<std::unique_ptr<Population::Impl>&>(p.impl_))) {}
+
+
+Population::~Population() noexcept = default;
 
 
 std::string Population::name() const
