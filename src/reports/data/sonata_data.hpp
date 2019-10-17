@@ -35,7 +35,7 @@ class SonataData {
     using nodes_t = std::map<uint64_t, Node>;
     std::shared_ptr<nodes_t> m_nodes;
 
-    void prepare_buffer(size_t max_buffer_size, double dt);
+    void prepare_buffer(size_t max_buffer_size);
 
   public:
     SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, double tend, std::shared_ptr<nodes_t> nodes);

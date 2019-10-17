@@ -21,7 +21,7 @@ class ReportingLib {
 
   public:
     static double m_atomic_step;
-    static double m_mindelay;
+    static double m_min_steps_to_record;
 #ifdef HAVE_MPI
     static MPI_Comm m_has_nodes;
     static communicators_t m_communicators;

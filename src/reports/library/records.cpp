@@ -35,8 +35,8 @@ int records_finish_and_share() {
     return 0;
 }
 
-void records_set_mindelay(double mindelay) {
-    ReportingLib::m_mindelay = mindelay;
+void records_set_min_steps_to_record(int steps) {
+    ReportingLib::m_min_steps_to_record = steps;
 }
 
 int records_nrec(double step, int num_nodes, int* nodeids, const char* report_name) {

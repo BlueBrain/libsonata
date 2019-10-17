@@ -43,7 +43,7 @@ int records_finish_and_share();
 
 void records_setup_communicator();
 
-void records_set_mindelay(double mindelay);
+void records_set_min_steps_to_record(int steps);
 
 /**
  * Save data of nodeids[] to buffer

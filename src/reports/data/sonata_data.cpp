@@ -8,15 +8,14 @@
 
 SonataData::SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, double tend, std::shared_ptr<nodes_t> nodes)
 : m_report_name(report_name), m_num_steps(num_steps), m_nodes(nodes), m_last_position(0), m_current_step(0),
-m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0) {
+m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0), m_steps_recorded(0) {
 
-    prepare_buffer(max_buffer_size, dt);
+    prepare_buffer(max_buffer_size);
     m_index_pointers.resize(nodes->size());
 
     m_reporting_period = static_cast<int> (dt / ReportingLib::m_atomic_step);
     m_last_step_recorded = tstart / ReportingLib::m_atomic_step;
     m_last_step = tend / ReportingLib::m_atomic_step;
-    m_steps_recorded = 0;
 
     m_io_writer = std::make_unique<HDF5Writer>(report_name);
 }
@@ -27,7 +26,7 @@ SonataData::~SonataData() {
     }
 }
 
-void SonataData::prepare_buffer(size_t max_buffer_size, double dt) {
+void SonataData::prepare_buffer(size_t max_buffer_size) {
     logger->trace("Prepare buffer for {}", m_report_name);
     for (auto& kv : *m_nodes) {
         m_total_elements += kv.second.get_num_elements();
@@ -38,10 +37,8 @@ void SonataData::prepare_buffer(size_t max_buffer_size, double dt) {
         // Calculate the timesteps that fit given a buffer size
         int max_steps_to_write = max_buffer_size / sizeof(double) / m_total_elements;
         if (max_steps_to_write < m_num_steps) {
-        
-            int max_steps_mindelay = static_cast<int>(ReportingLib::m_mindelay / dt + 0.5);
-            if(max_steps_to_write < max_steps_mindelay) {
-                m_steps_to_write = max_steps_mindelay;
+            if(max_steps_to_write < ReportingLib::m_min_steps_to_record) {
+                m_steps_to_write = ReportingLib::m_min_steps_to_record;
             } else {
                 // Minimum 1 timestep required to write
                 m_steps_to_write = max_steps_to_write > 0? max_steps_to_write: 1;

@@ -8,7 +8,7 @@
 #include "spike_report.hpp"
 
 double ReportingLib::m_atomic_step = 1e-8;
-double ReportingLib::m_mindelay = 0.0;
+double ReportingLib::m_min_steps_to_record = 0.0;
 bool ReportingLib::first_report = true;
 #ifdef HAVE_MPI
 MPI_Comm ReportingLib::m_has_nodes = MPI_COMM_WORLD;
@@ -94,7 +94,7 @@ void ReportingLib::make_global_communicator() {
     // Create communicator groups
     m_rank = Implementation::init(report_names);
     if(m_rank == 0) {
-        logger->info("Initializing communicators and preparing datasets with mindelay={}", m_mindelay);
+        logger->info("Initializing communicators and preparing datasets with m_min_steps_to_record={}", m_min_steps_to_record);
     }
 }
 
