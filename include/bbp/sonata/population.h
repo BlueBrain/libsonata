@@ -212,7 +212,7 @@ protected:
     virtual ~Population() noexcept;
 
     struct Impl;
-    const std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Impl> impl_;
 };
 
 template <>
@@ -246,7 +246,7 @@ public:
 
 protected:
     struct Impl;
-    const std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Impl> impl_;
 };
 
 //--------------------------------------------------------------------------------------------------
