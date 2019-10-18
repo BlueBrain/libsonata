@@ -50,7 +50,7 @@ class SonataData {
     bool is_due_to_report(double step);
     void record_data(double step, const std::vector<uint64_t>& node_ids);
     void record_data(double step);
-    void update_timestep(double timestep, bool force_write);
+    void update_timestep(double timestep);
 
     int get_num_steps() const { return m_num_steps; }
     size_t get_buffer_size() const { return m_buffer_size; }

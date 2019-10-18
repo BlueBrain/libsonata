@@ -18,6 +18,14 @@
 #define MAX_REPORT_NAME_SIZE 256
 #define MAX_REPORTS 3
 
+static MPI_Comm get_Comm(const std::string& report_name) {
+    if ( ReportingLib::m_communicators.find(report_name) != ReportingLib::m_communicators.end() ) {
+        // Found
+        return ReportingLib::m_communicators[report_name];
+    }
+    return MPI_COMM_WORLD;
+}
+
 namespace detail {
 
     template <class TImpl>
@@ -108,7 +116,7 @@ namespace detail {
         inline static std::tuple<hid_t, hid_t> prepare_write(const std::string& report_name, hid_t plist_id) {
             // Enable MPI access
             MPI_Info info = MPI_INFO_NULL;
-            H5Pset_fapl_mpio(plist_id, ReportingLib::m_communicators[report_name], info);
+            H5Pset_fapl_mpio(plist_id, get_Comm(report_name), info);
 
             // Initialize independent/collective lists
             hid_t collective_list = H5Pcreate(H5P_DATASET_XFER);
@@ -121,14 +129,14 @@ namespace detail {
 
         inline static hsize_t get_offset(const std::string& report_name, hsize_t value) {
             hsize_t offset = 0;
-            MPI_Scan(&value, &offset, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_communicators[report_name]);
+            MPI_Scan(&value, &offset, 1, MPI_UNSIGNED_LONG, MPI_SUM, get_Comm(report_name));
             offset -= value;
             return offset;
         };
 
         inline static hsize_t get_global_dims(const std::string& report_name, hsize_t value) {
             hsize_t global_dims = value;
-            MPI_Allreduce(&value, &global_dims, 1, MPI_UNSIGNED_LONG, MPI_SUM, ReportingLib::m_communicators[report_name]);
+            MPI_Allreduce(&value, &global_dims, 1, MPI_UNSIGNED_LONG, MPI_SUM, get_Comm(report_name));
             return global_dims;
         };
 

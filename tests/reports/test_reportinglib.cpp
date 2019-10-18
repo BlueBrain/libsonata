@@ -14,7 +14,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add a new report (element) and node") {
         const char* report_name = "myElementReport";
-        records_add_report(report_name, 1, 1, 1, tstart, tend, dt, 0, "element", 0, nullptr);
+        records_add_report(report_name, 1, 1, 1, tstart, tend, dt, 0, "compartment", 0, nullptr);
         THEN( "Number of reports is 1" ) {
             REQUIRE( records_get_num_reports() == 1 );
         }
@@ -22,7 +22,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add a node to an existing element report") {
         const char* report_name = "myElementReport";
-        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, 0, "element", 0, nullptr);
+        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, 0, "compartment", 0, nullptr);
         THEN( "Number of reports is still 1" ) {
             REQUIRE( records_get_num_reports() == 1 );
         }
@@ -30,7 +30,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add an existing node to an existing element report") {
         const char* report_name = "myElementReport";
-        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, 0, "element", 0, nullptr);
+        records_add_report(report_name, 2, 2, 2, tstart, tend, dt, 0, "compartment", 0, nullptr);
         THEN( "Number of reports is still 1" ) {
             REQUIRE( records_get_num_reports() == 1 );
         }
@@ -48,7 +48,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
 
     WHEN("We add a second variable to an existing node in a soma report") {
         const char* report_name = "mySomaReport";
-        double soma_value = 42;
+        double soma_value = 24;
         records_add_var_with_mapping(report_name, 1, &soma_value, mapping_size, mapping);
         THEN( "Number of reports is 2" ) {
             REQUIRE( records_get_num_reports() == 2 );
@@ -70,7 +70,7 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
         std::vector<uint64_t> node_ids{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
         for(int node_id: node_ids) {
-            records_add_report(report_name, node_id, node_id, node_id, tstart, tend, dt, 0, "element", 0, nullptr);
+            records_add_report(report_name, node_id, node_id, node_id, tstart, tend, dt, 0, "compartment", 0, nullptr);
             for(double& voltage: elements) {
                 records_add_var_with_mapping(report_name, node_id, &voltage, mapping_size, mapping);
             }
@@ -88,12 +88,14 @@ SCENARIO( "Test reportinglib API", "[reportinglib]" ) {
         if (std::fabs(num_steps * dt + tstart - tend) > std::numeric_limits<float>::epsilon()) {
             num_steps++;
         }
+        records_set_atomic_step(dt);
         records_setup_communicator();
         records_finish_and_share();
 
         double t = 0.0;
         for (int i = 0; i < num_steps; i++) {
-            records_nrec(t, 10, nodeids, report_name);
+            //records_nrec(i, 10, nodeids, report_name);
+            records_rec(i);
             records_end_iteration(t);
             t+=dt;
         }

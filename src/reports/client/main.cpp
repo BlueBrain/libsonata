@@ -155,7 +155,7 @@ int main() {
     std::vector<uint64_t> spike_nodeids;
 
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
-    element_nodeids = generate_data(element_neurons, "element", global_rank);
+    element_nodeids = generate_data(element_neurons, "compartment", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
     spike_nodeids = generate_data(spike_neurons, "spike", global_rank);
 
@@ -166,7 +166,7 @@ int main() {
     if(global_rank == 0) {
         logger->info("Initializing data structures (reports, nodes, elements)");
     }
-    const char* element_report = "element_report";
+    const char* element_report = "compartment_report";
     const char* soma_report = "soma_report";
     const char* spike_report = "spike_report";
 
@@ -174,6 +174,7 @@ int main() {
     init(soma_report, soma_neurons);
     init(spike_report, spike_neurons);
     records_set_max_buffer_size_hint(20);
+    records_set_atomic_step(dt);
 
     records_setup_communicator();
     records_finish_and_share();
@@ -191,11 +192,12 @@ int main() {
     double t = 0.0;
     for(int i=0; i<num_steps; i++) {
         if(global_rank == 0) {
-            logger->info("Recording data for t = {}", t);
+            logger->info("Recording data for step = {}", i);
         }
-        records_nrec(t, element_nodeids.size(), &int_element_nodeids[0], element_report);
-        records_nrec(t, soma_nodeids.size(), &int_soma_nodeids[0], soma_report);
-
+        records_nrec(i, element_nodeids.size(), &int_element_nodeids[0], element_report);
+        records_nrec(i, soma_nodeids.size(), &int_soma_nodeids[0], soma_report);
+        // Also works
+        // records_rec(i);
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Update timestep on reportinglib

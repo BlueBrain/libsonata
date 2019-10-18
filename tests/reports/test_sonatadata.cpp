@@ -2,9 +2,14 @@
 #include <iostream>
 #include <catch2/catch.hpp>
 #include <reports/data/sonata_data.hpp>
+#include <bbp/reports/records.h>
 
 SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
     GIVEN( "A node map structure" ) {
+        double dt = 1.0;
+        double tstart = 0.0;
+        double tend = 3.0;
+        records_set_atomic_step(dt);
         using nodes_t = std::map<uint64_t, Node>;
         Node node(1,1);
         double element = 10;
@@ -28,19 +33,21 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
 
             int num_steps = 3;
             size_t max_buffer_size = 1024;
-            std::shared_ptr<SonataData> sonata = std::make_shared<SonataData>("test_sonatadata", max_buffer_size, 1.0, 0.0, 3.0, num_steps, nodes);
-            std::vector<uint64_t> nodeids = {1, 42};
+            std::unique_ptr<SonataData> sonata = std::make_unique<SonataData>("test_sonatadata", max_buffer_size, num_steps, dt, tstart, tend, nodes);
+            std::vector<uint64_t> nodeids_1 = {1, 42};
+            std::vector<uint64_t> nodeids_2 = {2};
 
             sonata->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
-                sonata->record_data(0, nodeids);
-                sonata->update_timestep(0.0, false);
+                sonata->record_data(i, nodeids_1);
+                sonata->record_data(i, nodeids_2);
+                sonata->update_timestep(i);
             }
-            sonata->write_data();
+            //sonata->write_data();
             sonata->close();
 
             THEN("The buffer size is the total number of steps times the total number of elements") {
-                // 1024 / sizeof(float) / 11 = 23 > 3 (total number of steps)
+                // 1024 / sizeof(double) / 11 = 11.6 > 3 (total number of steps)
                 // buffer_size = 11 * 3
                 REQUIRE(sonata->get_buffer_size() == 33);
             }
@@ -69,22 +76,20 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
         WHEN("We record some other data and prepare the dataset for a small max buffer size") {
             std::shared_ptr<nodes_t> nodes = std::make_shared<nodes_t>(
                     std::initializer_list<nodes_t::value_type>{{1, node}, {2, node2}, {42, node42}});
-
             int num_steps = 3;
-            size_t max_buffer_size = 128;
-            std::shared_ptr<SonataData> sonata2 = std::make_shared<SonataData>("test_sonatadata2", max_buffer_size, num_steps, 1.0, 0.0, 3.0, nodes);
-            std::vector<uint64_t> nodeids = {1, 42};
+            size_t max_buffer_size = 256;
+            std::unique_ptr<SonataData> sonata2 = std::make_unique<SonataData>("test_sonatadata2", max_buffer_size, num_steps, dt, tstart, tend, nodes);
 
             sonata2->prepare_dataset(false);
             for (int i = 0; i < num_steps; i++) {
-                sonata2->record_data(i, nodeids);
-                sonata2->update_timestep(i, false);
+                sonata2->record_data(i);
+                sonata2->update_timestep(i);
             }
-            sonata2->write_data();
+            //sonata2->write_data();
             sonata2->close();
 
             THEN("The buffer size is the number of steps to write that fit on the buffer times the total elements") {
-                // 128 / sizeof(float) / 11 = 2
+                // 256 / sizeof(double) / 11 = 2
                 // buffer_size = 11 * 2
                 REQUIRE(sonata2->get_buffer_size() == 22);
             }

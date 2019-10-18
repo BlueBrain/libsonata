@@ -55,7 +55,7 @@ void Report::record_data(double step) {
 }
 
 void Report::end_iteration(double timestep) {
-    m_sonata_data->update_timestep(timestep, false);
+    m_sonata_data->update_timestep(timestep);
 }
 
 void Report::refresh_pointers(refresh_function_t refresh_function) {
