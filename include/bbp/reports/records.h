@@ -45,6 +45,8 @@ void records_setup_communicator();
 
 void records_set_min_steps_to_record(int steps);
 
+void records_write_spikes(const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids);
+
 /**
  * Save data of nodeids[] to buffer
  */

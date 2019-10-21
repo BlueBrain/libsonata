@@ -39,6 +39,7 @@ class SonataData {
 
   public:
     SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, double tend, std::shared_ptr<nodes_t> nodes);
+    SonataData(const std::string& report_name, const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids);
     ~SonataData();
 
     void prepare_dataset(bool spike_report);

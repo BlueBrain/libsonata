@@ -164,3 +164,9 @@ int ReportingLib::set_max_buffer_size(size_t buffer_size) {
     }
     return 0;
 }
+
+void ReportingLib::write_spikes(const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids) {
+    SonataData spike_data ("spikes", spike_timestamps, spike_node_ids);
+    spike_data.write_spikes_header();
+    spike_data.close();
+}

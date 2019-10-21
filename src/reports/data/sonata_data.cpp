@@ -20,6 +20,14 @@ m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), 
     m_io_writer = std::make_unique<HDF5Writer>(report_name);
 }
 
+SonataData::SonataData(const std::string& report_name, const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids)
+: m_last_position(0), m_current_step(0), m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0), m_steps_recorded(0) {
+
+    m_spike_timestamps = spike_timestamps;
+    m_spike_node_ids = spike_node_ids;
+    m_io_writer = std::make_unique<HDF5Writer>(report_name);
+}
+
 SonataData::~SonataData() {
     if(m_buffer_size > 0) {
         delete[] m_report_buffer;

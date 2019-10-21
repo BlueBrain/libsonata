@@ -84,6 +84,10 @@ void records_refresh_pointers(double* (*refresh_function)(double*)) {
     InitReports.refresh_pointers(refresh_function);
 }
 
+void records_write_spikes(const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids) {
+    InitReports.write_spikes(spike_timestamps, spike_node_ids);
+}
+
 // NOT REQUIRED FOR SONATA
 int records_extra_mapping(char* report_name, uint64_t node_id, int num_values, int* values) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);

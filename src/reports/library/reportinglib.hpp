@@ -65,4 +65,5 @@ class ReportingLib {
 
     int set_max_buffer_size(const std::string& report_name, size_t buf_size);
     int set_max_buffer_size(size_t buffer_size);
+    void write_spikes(const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids);
 };
