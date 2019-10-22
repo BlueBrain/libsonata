@@ -59,4 +59,6 @@ class SonataData {
     const std::vector<uint64_t>& get_node_ids() const { return m_node_ids; }
     const std::vector<uint64_t>& get_index_pointers() const { return m_index_pointers; }
     const std::vector<uint32_t>& get_element_ids() const { return m_element_ids; }
+    const std::vector<double>& get_spike_timestamps() const { return m_spike_timestamps; }
+    const std::vector<int>& get_spike_node_ids() const { return m_spike_node_ids; }
 };

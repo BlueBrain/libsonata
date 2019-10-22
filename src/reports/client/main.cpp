@@ -15,40 +15,34 @@ struct Neuron {
     int node_id;
     std::string kind; // soma / element
     std::vector<double> voltages;
-    std::vector<double> spike_timestamps;
 };
 
 const double dt = 0.1;
 const double tstart = 0.0;
 const double tstop = 0.3;
 
-void generate_spikes(Neuron& neuron) {
-
-    int num_spikes = 0;
-    int rand = std::rand()%60;
-    if (rand > 45) {
-        num_spikes = 2;
-    } else if(rand > 20) {
-        num_spikes = 1;
-    } // Otherwise 0
-
-    neuron.spike_timestamps.reserve(num_spikes);
+void generate_spikes(std::vector<uint64_t> nodeids, std::vector<double>& spike_timestamps, std::vector<int>& spike_node_ids) {
+    // Generate 0-100 spikes
+    int num_spikes = std::rand()%100;
+    spike_timestamps.reserve(num_spikes);
+    spike_node_ids.reserve(num_spikes);
     for(int i=0; i<num_spikes; i++) {
         // timestamp between tstart and tstop
         double timestamp = tstart + static_cast<double> (std::rand()) / (static_cast<double> (RAND_MAX/(tstop-tstart)));
-        neuron.spike_timestamps.push_back(timestamp);
+        // get an index to the nodeids
+        int index = std::rand() % nodeids.size();
+        int gid = nodeids[index];
+        spike_timestamps.push_back(timestamp);
+        spike_node_ids.push_back(gid);
     }
 }
 
 void generate_elements(Neuron& neuron) {
-
     // 50+-5 elements
     int num_elements = 50 + ((std::rand() % 10) - 5);
-
     if(neuron.kind == "soma"){
         num_elements = 1;
     }
-
     neuron.voltages.reserve(num_elements);
     for (int j = 0; j < num_elements; j++) {
         neuron.voltages.push_back(std::rand() % 10);
@@ -56,7 +50,6 @@ void generate_elements(Neuron& neuron) {
 }
 
 std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::string& kind, int seed) {
-
     // Set random seed for reproducibility
     std::srand(static_cast<unsigned int>(23487 * (seed + 1)));
 
@@ -79,12 +72,10 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::str
         generate_elements(tmp_neuron);
         neurons.push_back(tmp_neuron);
     }
-
     return nodeids;
 }
 
 void init(const char* report_name, std::vector<Neuron>& neurons) {
-
     // logic for registering soma and element reports with reportinglib
     for (auto& neuron : neurons) {
         records_add_report(report_name, neuron.node_id, neuron.node_id, neuron.node_id, tstart, tstop, dt,
@@ -102,7 +93,6 @@ void init(const char* report_name, std::vector<Neuron>& neurons) {
 }
 
 void change_data(std::vector<Neuron>& neurons) {
-
     // Increment in 1 per timestep every voltage
     for (auto& neuron : neurons) {
         for (auto& element: neuron.voltages) {
@@ -112,7 +102,6 @@ void change_data(std::vector<Neuron>& neurons) {
 }
 
 void print_data(std::vector<Neuron>& neurons) {
-
     for (auto& neuron : neurons) {
         std::cout << "++NEURON node_id: " << neuron.node_id << std::endl;
         std::cout << "elements:" << std::endl;
@@ -137,21 +126,22 @@ int main() {
     std::vector<Neuron> soma_neurons;
     std::vector<uint64_t> element_nodeids;
     std::vector<uint64_t> soma_nodeids;
+    std::vector<double> spike_timestamps;
+    std::vector<int> spike_node_ids;
 
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
     element_nodeids = generate_data(element_neurons, "compartment", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
+    generate_spikes(soma_nodeids, spike_timestamps, spike_node_ids);
 
     std::vector<int> int_element_nodeids(begin(element_nodeids), end(element_nodeids));
     std::vector<int> int_soma_nodeids(begin(soma_nodeids), end(soma_nodeids));
-
 
     if(global_rank == 0) {
         logger->info("Initializing data structures (reports, nodes, elements)");
     }
     const char* element_report = "compartment_report";
     const char* soma_report = "soma_report";
-    const char* spike_report = "spike_report";
 
     init(element_report, element_neurons);
     init(soma_report, soma_neurons);
@@ -160,7 +150,6 @@ int main() {
 
     records_setup_communicator();
     records_finish_and_share();
-
     records_time_data();
 
     if(global_rank == 0) {
@@ -190,6 +179,8 @@ int main() {
         change_data(soma_neurons);
     }
     records_flush(t);
+    // Write the spikes
+    records_write_spikes(spike_timestamps, spike_node_ids);
 
     if(global_rank == 0) {
         logger->info("Finalizing...");

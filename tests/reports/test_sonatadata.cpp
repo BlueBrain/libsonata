@@ -95,5 +95,23 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
             }
         }
     }
-
+    GIVEN( "Spike data" ) {
+        std::vector<double> spike_timestamps {0.3, 0.1, 0.2, 1.3, 0.7};
+        std::vector<int> spike_node_ids {3, 5, 2, 3, 2};
+        std::unique_ptr<SonataData> sonata_spikes = std::make_unique<SonataData>("spikes", spike_timestamps, spike_node_ids);
+        WHEN("We write the spikes") {
+            sonata_spikes->write_spikes_header();
+            THEN("We check that the spike nodes ids are ordered according to timestamps") {
+                const std::vector<int> node_ids = sonata_spikes->get_spike_node_ids();
+                std::vector<int> compare = {5, 2, 3, 2, 3};
+                REQUIRE(node_ids == compare);
+            }
+            THEN("We check that the spike timestamps are in order") {
+                const std::vector<double> timestamps = sonata_spikes->get_spike_timestamps();
+                std::vector<double> compare = {0.1, 0.2, 0.3, 0.7, 1.3};
+                REQUIRE(timestamps == compare);
+            }
+        }
+        sonata_spikes->close();
+    }
 }
