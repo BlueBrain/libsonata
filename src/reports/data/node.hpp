@@ -12,7 +12,6 @@ class Node {
 
     std::vector<uint32_t > m_element_ids;
     std::vector<double*> m_elements;
-    std::vector<double*> m_spikes;
 
 public:
     Node(uint64_t gid, uint64_t vgid);
@@ -23,10 +22,7 @@ public:
     void refresh_pointers(refresh_function_t refresh_function);
 
     void add_element(double* element_value, uint32_t element_id);
-    void add_spike(double* spike_timestamp);
     size_t get_num_elements () const { return m_elements.size(); }
-    size_t get_num_spikes () const { return m_spikes.size(); }
     
     const std::vector<uint32_t>& get_element_ids() const { return m_element_ids; }
-    const std::vector<double*>& get_spike_timestamps() const { return m_spikes; }
 };

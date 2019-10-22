@@ -75,13 +75,8 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::str
         nodeids.push_back(nextgid);
         tmp_neuron.node_id = nextgid++;
 
-        if (tmp_neuron.kind == "spike") {
-            generate_spikes(tmp_neuron);
-        } else {
-            // element or soma
-            generate_elements(tmp_neuron);
-        }
-
+        // element or soma
+        generate_elements(tmp_neuron);
         neurons.push_back(tmp_neuron);
     }
 
@@ -102,10 +97,6 @@ void init(const char* report_name, std::vector<Neuron>& neurons) {
         for (auto& element: neuron.voltages) {
             records_add_var_with_mapping(report_name, neuron.node_id, &element, mapping_size, mapping);
             mapping[0] = ++element_id;
-        }
-
-        for (auto& spike: neuron.spike_timestamps) {
-            records_add_var_with_mapping(report_name, neuron.node_id, &spike, mapping_size, mapping);
         }
     }
 }
@@ -129,11 +120,6 @@ void print_data(std::vector<Neuron>& neurons) {
             std::cout << element << ", ";
         }
         std::cout << std::endl << std::endl;
-        std::cout << "Spikes:" << std::endl;
-        for (auto& spike: neuron.spike_timestamps) {
-            std::cout << spike << ", ";
-        }
-        std::cout << std::endl;
     }
 }
 
@@ -149,15 +135,12 @@ int main() {
     }
     std::vector<Neuron> element_neurons;
     std::vector<Neuron> soma_neurons;
-    std::vector<Neuron> spike_neurons;
     std::vector<uint64_t> element_nodeids;
     std::vector<uint64_t> soma_nodeids;
-    std::vector<uint64_t> spike_nodeids;
 
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
     element_nodeids = generate_data(element_neurons, "compartment", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
-    spike_nodeids = generate_data(spike_neurons, "spike", global_rank);
 
     std::vector<int> int_element_nodeids(begin(element_nodeids), end(element_nodeids));
     std::vector<int> int_soma_nodeids(begin(soma_nodeids), end(soma_nodeids));
@@ -172,7 +155,6 @@ int main() {
 
     init(element_report, element_neurons);
     init(soma_report, soma_neurons);
-    init(spike_report, spike_neurons);
     records_set_max_buffer_size_hint(20);
     records_set_atomic_step(dt);
 

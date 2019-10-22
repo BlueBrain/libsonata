@@ -11,7 +11,6 @@ class SonataData {
     double* m_report_buffer;
     size_t m_buffer_size;
     int m_total_elements;
-    int m_total_spikes;
     int m_num_steps;
     int m_steps_to_write;
     int m_current_step;
@@ -42,7 +41,7 @@ class SonataData {
     SonataData(const std::string& report_name, const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids);
     ~SonataData();
 
-    void prepare_dataset(bool spike_report);
+    void prepare_dataset();
     void write_report_header();
     void write_spikes_header();
     void write_data();

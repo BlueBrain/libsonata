@@ -8,8 +8,6 @@ set(reportinglib_SOURCES
         "library/soma_report.hpp"
         "library/element_report.cpp"
         "library/element_report.hpp"
-        "library/spike_report.cpp"
-        "library/spike_report.hpp"
         "data/node.cpp"
         "data/node.hpp"
         "data/sonata_data.cpp"

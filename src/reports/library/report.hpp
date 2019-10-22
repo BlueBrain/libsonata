@@ -40,7 +40,6 @@ class Report {
      * @return 0 on success, non zero on failure
      */
     int prepare_dataset();
-    virtual int prepare_sonata_dataset();
 
     void add_node(uint64_t node_id, uint64_t gid, uint64_t vgid);
     virtual int add_variable(uint64_t node_id, double* voltage, uint32_t element_id) = 0;

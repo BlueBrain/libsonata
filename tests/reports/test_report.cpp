@@ -2,7 +2,6 @@
 #include <reports/library/report.hpp>
 #include <reports/library/element_report.hpp>
 #include <reports/library/soma_report.hpp>
-#include <reports/library/spike_report.hpp>
 #include <memory>
 
 SCENARIO( "Test Report class", "[Report]" ) {
@@ -64,17 +63,6 @@ SCENARIO( "Test Report class", "[Report]" ) {
             }
             THEN("The number of elements is 6") {
                 REQUIRE(element_report->get_total_elements() == 10);
-            }
-        }
-    }
-
-    GIVEN( "An instance of a spike report" ) {
-        std::shared_ptr<Report> spike_report = std::make_shared<SpikeReport>("spikeReport", tstart, tend, dt);
-        WHEN("We try to add 2 nodes with same id to a spike report") {
-            spike_report->add_node(1,1,1);
-            REQUIRE_THROWS(spike_report->add_node(1,2,2));
-            THEN("Number of nodes is still 1 (ignoring second insert)") {
-                REQUIRE(spike_report->get_num_nodes() == 1);
             }
         }
     }

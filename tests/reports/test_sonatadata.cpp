@@ -37,7 +37,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
             std::vector<uint64_t> nodeids_1 = {1, 42};
             std::vector<uint64_t> nodeids_2 = {2};
 
-            sonata->prepare_dataset(false);
+            sonata->prepare_dataset();
             for (int i = 0; i < num_steps; i++) {
                 sonata->record_data(i, nodeids_1);
                 sonata->record_data(i, nodeids_2);
@@ -80,7 +80,7 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
             size_t max_buffer_size = 256;
             std::unique_ptr<SonataData> sonata2 = std::make_unique<SonataData>("test_sonatadata2", max_buffer_size, num_steps, dt, tstart, tend, nodes);
 
-            sonata2->prepare_dataset(false);
+            sonata2->prepare_dataset();
             for (int i = 0; i < num_steps; i++) {
                 sonata2->record_data(i);
                 sonata2->update_timestep(i);

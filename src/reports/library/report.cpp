@@ -34,11 +34,7 @@ void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
 
 int Report::prepare_dataset() {
     m_sonata_data = std::make_unique<SonataData>(m_report_name, m_max_buffer_size, m_num_steps, m_dt, m_tstart, m_tend, m_nodes);
-    return prepare_sonata_dataset();
-}
-
-int Report::prepare_sonata_dataset() {
-    m_sonata_data->prepare_dataset(false);
+    m_sonata_data->prepare_dataset();
     return 0;
 }
 

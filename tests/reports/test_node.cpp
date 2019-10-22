@@ -23,16 +23,6 @@ SCENARIO( "Test Node class", "[Node]" ) {
                 REQUIRE(node.get_element_ids() == compare);
             }
         }
-
-        WHEN("We add 2 spikes") {
-            double spike1 = 20;
-            double spike2 = 30;
-            node.add_spike(&spike1);
-            node.add_spike(&spike2);
-            THEN("Number of spikes is 2") {
-                REQUIRE(node.get_num_spikes() == 2);
-            }
-        }
     }
 
 }

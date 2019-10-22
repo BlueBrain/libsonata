@@ -8,7 +8,7 @@
 
 SonataData::SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, double tend, std::shared_ptr<nodes_t> nodes)
 : m_report_name(report_name), m_num_steps(num_steps), m_nodes(nodes), m_last_position(0), m_current_step(0),
-m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0), m_steps_recorded(0) {
+m_total_elements(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0), m_steps_recorded(0) {
 
     prepare_buffer(max_buffer_size);
     m_index_pointers.resize(nodes->size());
@@ -21,7 +21,7 @@ m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), 
 }
 
 SonataData::SonataData(const std::string& report_name, const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids)
-: m_last_position(0), m_current_step(0), m_total_elements(0), m_total_spikes(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0), m_steps_recorded(0) {
+: m_last_position(0), m_current_step(0), m_total_elements(0), m_remaining_steps(0), m_buffer_size(0), m_steps_to_write(0), m_steps_recorded(0) {
 
     m_spike_timestamps = spike_timestamps;
     m_spike_node_ids = spike_node_ids;
@@ -38,9 +38,7 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
     logger->trace("Prepare buffer for {}", m_report_name);
     for (auto& kv : *m_nodes) {
         m_total_elements += kv.second.get_num_elements();
-        m_total_spikes += kv.second.get_num_spikes();
     }
-
     if(m_total_elements > 0) {
         // Calculate the timesteps that fit given a buffer size
         int max_steps_to_write = max_buffer_size / sizeof(double) / m_total_elements;
@@ -121,14 +119,12 @@ void SonataData::record_data(double step) {
         logger->trace("RANK={} Recording data for step={} last_step_recorded={} buffer_size={} and offset={}", 
                     ReportingLib::m_rank, step, m_last_step_recorded, m_buffer_size, local_position);
     }
-    
     int written;
     for (auto &kv: *m_nodes) {
         int current_gid = kv.first;
         written = kv.second.fill_data(&m_report_buffer[local_position], true);
         local_position += kv.second.get_num_elements();
     }
-    
     m_current_step++;
     m_last_position += m_total_elements;    
     m_last_step_recorded += m_reporting_period;
@@ -159,22 +155,14 @@ void SonataData::update_timestep(double timestep) {
     }
 }
 
-void SonataData::prepare_dataset(bool spike_report) {
+void SonataData::prepare_dataset() {
     logger->trace("Preparing SonataData Dataset for report: {}", m_report_name);
-    // Prepare /report and /spikes headers
+    // Prepare /report
     for(auto& kv: *m_nodes) {
         // /report
         const std::vector<uint32_t> element_ids = kv.second.get_element_ids();
         m_element_ids.insert(m_element_ids.end(), element_ids.begin(), element_ids.end());
         m_node_ids.push_back(kv.first);
-
-        // /spikes
-        const std::vector<double*> spikes = kv.second.get_spike_timestamps();
-        for(auto& timestamp: spikes) {
-
-            m_spike_node_ids.push_back(kv.first);
-            m_spike_timestamps.push_back(*timestamp);
-        }
     }
     int element_offset = Implementation::get_offset(m_report_name, m_total_elements);
     logger->trace("Total elements are: {} and element offset is: {}", m_total_elements, element_offset);
@@ -187,16 +175,12 @@ void SonataData::prepare_dataset(bool spike_report) {
         int previous_gid = m_node_ids[i-1];
         m_index_pointers[i] = m_index_pointers[i-1] + m_nodes->at(previous_gid).get_num_elements();
     }
-
-    // We only write the headers if there are elements/spikes to write
+    // We only write the headers if there are elements to write
     if(m_total_elements > 0 ) {
         write_report_header();
     }
-
-    if(spike_report) {
-        write_spikes_header();
-    }
 }
+
 void SonataData::write_report_header() {
     //TODO: remove configure_group and add it to write_any()
     logger->trace("Writing REPORT header!");
@@ -210,7 +194,6 @@ void SonataData::write_report_header() {
 }
 
 void SonataData::write_spikes_header() {
-
     logger->trace("Writing SPIKE header!");
     m_io_writer->configure_group("/spikes");
     m_io_writer->configure_attribute("/spikes", "sorting", "time");

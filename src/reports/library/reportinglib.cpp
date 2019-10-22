@@ -5,7 +5,6 @@
 #include "reportinglib.hpp"
 #include "soma_report.hpp"
 #include "element_report.hpp"
-#include "spike_report.hpp"
 
 double ReportingLib::m_atomic_step = 1e-8;
 double ReportingLib::m_min_steps_to_record = 0.0;
@@ -51,8 +50,6 @@ int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, u
                 report = std::make_shared<ElementReport>(report_name, tstart, tend, dt);
             } else if (kind == "soma") {
                 report = std::make_shared<SomaReport>(report_name, tstart, tend, dt);
-            } else if (kind == "spike") {
-                report = std::make_shared<SpikeReport>(report_name, tstart, tend, dt);
             } else {
                 throw std::runtime_error("Kind " + kind + " doesn't exist!");
             }
