@@ -1,10 +1,9 @@
 #pragma once
 
-#include <reports/library/reportinglib.hpp>
-
 /**
  * Provides a bridge between c-based programs in order to have access to the c++-based objects
  */
+#include <vector>
 #ifndef __cplusplus
 #include <stddef.h>
 #endif

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <bbp/reports/records.h>
+#include <reports/library/reportinglib.hpp>
 #include <reports/utils/logger.hpp>
 
 ReportingLib InitReports;

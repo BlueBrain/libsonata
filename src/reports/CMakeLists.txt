@@ -39,3 +39,12 @@ target_link_libraries(reportinglib
 add_executable(client ${client_SOURCES})
 target_link_libraries(client
         PRIVATE reportinglib)
+
+install(TARGETS reportinglib
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib )
+
+# install files in hierarchy
+foreach ( file ${reportinglib_HEADERS} )
+    install( FILES ${file} DESTINATION include/reportinglib )
+endforeach()
