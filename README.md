@@ -29,33 +29,33 @@ pip install .
 ### NodeStorage
 
 ```python
->> import libsonata
+>>> import libsonata
 
->> nodes = libsonata.NodeStorage('path/to/H5/file')
+>>> nodes = libsonata.NodeStorage('path/to/H5/file')
 
 # list populations
->> nodes.population_names
+>>> nodes.population_names
 
 # open population
->> population = nodes.open_population(<name>)
+>>> population = nodes.open_population(<name>)
 ```
 
 ### NodePopulation
 
 ```python
 # total number of nodes in the population
->> population.size
+>>> population.size
 
 # attribute names
->> population.attribute_names
+>>> population.attribute_names
 
 # get attribute value for single node, say 42
->> population.get_attribute('mtype', 42)
+>>> population.get_attribute('mtype', 42)
 
 # ...or Selection of nodes (see below) => returns NumPy array with corresponding values
->> selection = libsonata.Selection(values=[1, 5, 9, 42])  # nodes 1, 5, 9, 42
->> mtypes = population.get_attribute('mtype', selection)
->> list(zip(selection.flatten(), mtypes))
+>>> selection = libsonata.Selection(values=[1, 5, 9, 42])  # nodes 1, 5, 9, 42
+>>> mtypes = population.get_attribute('mtype', selection)
+>>> list(zip(selection.flatten(), mtypes))
 [(1, u'mtype_of_1'), (5, u'mtype_of_5'), (9, u'mtype_of_9'), (42, u'mtype_of_42')]
 ```
 
@@ -71,20 +71,18 @@ For instance, `{1, 2, 3, 5}` sequence becomes `{[1, 4), [5, 6)}`.
 `EdgePopulation` connectivity queries (see below) return `Selection`s as well.
 
 ```python
->> import numpy as np
-
->> selection = libsonata.Selection(np.asarray([1, 2, 3, 5]))
->> selection.ranges
+>>> selection = libsonata.Selection([1, 2, 3, 5])
+>>> selection.ranges
 [(1, 4), (5, 6)]
 ```
 
 ```python
->> selection = libsonata.Selection([(1, 4), (5, 6)])
->> selection.flatten()
+>>> selection = libsonata.Selection([(1, 4), (5, 6)])
+>>> selection.flatten()
 [1, 2, 3, 5]
->> selection.flat_size
+>>> selection.flat_size
 4
->> bool(selection)
+>>> bool(selection)
 True
 ```
 
@@ -95,58 +93,50 @@ True
 Population handling for `EdgeStorage` is analogous to `NodeStorage`:
 
 ```python
->> edges = libsonata.EdgeStorage('path/to/H5/file')
+>>> edges = libsonata.EdgeStorage('path/to/H5/file')
 
 # list populations
->> edges.population_names
+>>> edges.population_names
 
 # open population
->> population = edges.open_population(<name>)
+>>> population = edges.open_population(<name>)
 ```
 
 ### EdgePopulation
 
 ```python
 # total number of edges in the population
->> population.size
+>>> population.size
 
 # attribute names
->> population.attribute_names
+>>> population.attribute_names
 
 # get attribute value for single edge, say 123
->> population.get_attribute('delay', 123)
+>>> population.get_attribute('delay', 123)
 
 # ...or Selection of edges => returns NumPy array with corresponding values
->> selection = libsonata.Selection([1, 5, 9])
->> population.get_attribute('delay', selection) # returns delays for edges 1, 5, 9
+>>> selection = libsonata.Selection([1, 5, 9])
+>>> population.get_attribute('delay', selection) # returns delays for edges 1, 5, 9
 ```
 
 ...with additional methods for querying connectivity, where the results are selections that can be applied like above
 
 ```python
 # get source / target node ID for the 42nd edge:
->> population.source_node(42)
->> population.target_node(42)
+>>> population.source_node(42)
+>>> population.target_node(42)
 
 # query connectivity (result is Selection object)
->> selection_to_1 = population.afferent_edges(1)  # all edges with target 1
->> population.target_nodes(selection_to_1)  # since selection only contains edges targetting 1
-                                            # this will be a numpy array of all 1's
-
->> selection_from_2 = population.efferent_edges(2)  # all edges sourced from on 2
-
->> selection = population.connecting_edges(2, 1)  # this selection is all edges from 2 to 1, thus:
-
->> set(selection.flatten()) == (set(selection_to_1.flatten()) & 
-                                set(selection_from_2.flatten()))
-True
+>>> selection_to_1 = population.afferent_edges(1)  # all edges with target node_id 1
+>>> population.target_nodes(selection_to_1)  # since selection only contains edges
+                                             # targeting node_id 1 the result will be a
+                                             # numpy array of all 1's
+>>> selection_from_2 = population.efferent_edges(2)  # all edges sourced from node_id 2
+>>> selection = population.connecting_edges(2, 1)  # this selection is all edges from
+                                                   # node_id 2 to node_id 1
 
 # ...or their vectorized analogues
->> selection = population.afferent_edges([1, 2, 3])
->> selection = population.efferent_edges([1, 2, 3])
->> selection = population.connecting_edges([1, 2, 3], [4, 5, 6])
-
-# ...(works for NumPy arrays as well)
->> import numpy as np
->> selection = population.afferent_edges(np.asarray([1, 2, 3]))
+>>> selection = population.afferent_edges([1, 2, 3])
+>>> selection = population.efferent_edges([1, 2, 3])
+>>> selection = population.connecting_edges([1, 2, 3], [4, 5, 6])
 ```
