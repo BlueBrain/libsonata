@@ -30,17 +30,17 @@ add_library(reportinglib_obj OBJECT ${reportinglib_SOURCES} ${reportinglib_HEADE
 set_property(TARGET reportinglib_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Shared library
-add_library(reportinglib SHARED $<TARGET_OBJECTS:reportinglib_obj>)
-target_link_libraries(reportinglib
+add_library(reportinglibsonata SHARED $<TARGET_OBJECTS:reportinglib_obj>)
+target_link_libraries(reportinglibsonata
         ${HDF5_LIBS}
         ${MPI_CXX_LIBRARIES})
 
 # Coreneuron simulator Client
 add_executable(client ${client_SOURCES})
 target_link_libraries(client
-        PRIVATE reportinglib)
+        PRIVATE reportinglibsonata)
 
-install(TARGETS reportinglib
+install(TARGETS reportinglibsonata
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib )
 

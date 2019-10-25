@@ -15,17 +15,6 @@
 #include <mpi.h>
 #endif
 
-#define MAX_REPORT_NAME_SIZE 256
-#define MAX_REPORTS 3
-
-static MPI_Comm get_Comm(const std::string& report_name) {
-    if ( ReportingLib::m_communicators.find(report_name) != ReportingLib::m_communicators.end() ) {
-        // Found
-        return ReportingLib::m_communicators[report_name];
-    }
-    return MPI_COMM_WORLD;
-}
-
 namespace detail {
 
     template <class TImpl>
@@ -51,6 +40,14 @@ namespace detail {
     };
 
 #if defined(HAVE_MPI)
+
+    static MPI_Comm get_Comm(const std::string& report_name) {
+    if ( ReportingLib::m_communicators.find(report_name) != ReportingLib::m_communicators.end() ) {
+        // Found
+        return ReportingLib::m_communicators[report_name];
+    }
+    return MPI_COMM_WORLD;
+    }
 
     struct ParallelImplementation {
 

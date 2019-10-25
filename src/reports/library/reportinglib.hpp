@@ -13,8 +13,9 @@
 
 class ReportingLib {
     typedef std::map<std::string, std::shared_ptr<Report>> reports_t;
+#ifdef HAVE_MPI
     typedef std::map<std::string, MPI_Comm> communicators_t;
-
+#endif
   private:
     reports_t m_reports;
     int m_num_reports;
