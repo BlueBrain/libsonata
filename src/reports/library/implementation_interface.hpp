@@ -229,10 +229,12 @@ namespace detail {
     struct SerialImplementation {
         inline static int init(const std::vector<std::string>& report_names) { return 0; };
         inline static void close(){};
-        inline static std::tuple<hid_t, hid_t> prepare_write(const std::string& report_name, hid_t plist_id) {};
+        inline static std::tuple<hid_t, hid_t> prepare_write(const std::string& report_name, hid_t plist_id) {
+            return std::make_tuple(H5Pcreate(H5P_DATASET_XFER), H5Pcreate(H5P_DATASET_XFER));
+        }
         inline static hsize_t get_offset(const std::string& report_name, hsize_t value) { return 0; };
         inline static hsize_t get_global_dims(const std::string& report_name, hsize_t value) { return value; };
-        inline static void sort_spikes(std::vector<double>& spikevec_time, std::vector<int>& spikevec_gid) {};
+        inline static void sort_spikes(std::vector<double>& spikevec_time, std::vector<int>& spikevec_gid) { logger->info("sort spikes SERIAL"); };
     };
 
 #endif

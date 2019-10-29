@@ -62,7 +62,7 @@ void Report::refresh_pointers(refresh_function_t refresh_function) {
 
 void Report::flush(double time) {
     if(ReportingLib::m_rank == 0) {
-        logger->info("Flush() called at t={}", time);
+        logger->debug("Flush() called at t={}", time);
     }
     // Write if there are any remaining steps to write
     m_sonata_data->write_data();

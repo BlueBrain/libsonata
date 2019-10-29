@@ -9,10 +9,10 @@
 double ReportingLib::m_atomic_step = 1e-8;
 double ReportingLib::m_min_steps_to_record = 0.0;
 bool ReportingLib::first_report = true;
+int ReportingLib::m_rank = 0;
 #ifdef HAVE_MPI
 MPI_Comm ReportingLib::m_has_nodes = MPI_COMM_WORLD;
 ReportingLib::communicators_t ReportingLib::m_communicators;
-int ReportingLib::m_rank = 0;
 #endif
 
 ReportingLib::ReportingLib(): m_num_reports(0) {
@@ -55,7 +55,7 @@ int ReportingLib::add_report(const std::string& report_name, uint64_t node_id, u
             }
             // Check if kind doesnt exist
             if (report) {
-                logger->trace("Creating report {} type {} tstart{} and tstop {} from rank {}", report_name, kind, tstart, tend, m_rank);
+                logger->debug("Creating report {} type {} tstart {} and tstop {} from rank {}", report_name, kind, tstart, tend, m_rank);
                 m_reports[report_name] = report;
                 m_num_reports++;
             }
@@ -91,7 +91,7 @@ void ReportingLib::make_global_communicator() {
     // Create communicator groups
     m_rank = Implementation::init(report_names);
     if(m_rank == 0) {
-        logger->info("Initializing communicators and preparing datasets with m_min_steps_to_record={}", m_min_steps_to_record);
+        logger->info("Initializing communicators and preparing SONATA datasets");
     }
 }
 
@@ -105,7 +105,7 @@ void ReportingLib::prepare_datasets() {
 
     // Allocate buffers
     for (auto& kv : m_reports) {
-        logger->info("Preparing datasets of report {} from rank {} with {} NODES", kv.first, m_rank, kv.second->get_num_nodes());
+        logger->debug("Preparing datasets of report {} from rank {} with {} NODES", kv.first, m_rank, kv.second->get_num_nodes());
         kv.second->prepare_dataset();
     }
 }

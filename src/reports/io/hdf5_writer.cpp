@@ -1,6 +1,5 @@
 #include <iostream>
 #include <tuple>
-#include <mpi.h>
 
 #include <reports/library/reportinglib.hpp>
 #include <reports/library/implementation_interface.hpp>

@@ -57,16 +57,16 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
         m_remaining_steps = m_num_steps;
 
         if(ReportingLib::m_rank == 0) {
-            logger->info("-Total elements: {}", m_total_elements);
-            logger->info("-Num steps: {}", m_num_steps);
-            logger->info("-Steps to write: {}", m_steps_to_write);
-            logger->info("-Max Steps to write: {}", max_steps_to_write);
-            logger->info("-Max Buffer size: {}", max_buffer_size);
+            logger->debug("-Total elements: {}", m_total_elements);
+            logger->debug("-Num steps: {}", m_num_steps);
+            logger->debug("-Steps to write: {}", m_steps_to_write);
+            logger->debug("-Max Steps to write: {}", max_steps_to_write);
+            logger->debug("-Max Buffer size: {}", max_buffer_size);
         }
         m_buffer_size = m_total_elements * (m_steps_to_write);
         m_report_buffer = new double[m_buffer_size];
         if(ReportingLib::m_rank == 0) {
-            logger->info("-Buffer size: {}", m_buffer_size);
+            logger->debug("-Buffer size: {}", m_buffer_size);
         }
     }
 }
@@ -207,9 +207,9 @@ void SonataData::write_data() {
         m_io_writer->write(m_report_buffer, m_current_step, m_num_steps, m_total_elements);
         m_remaining_steps -= m_current_step;
         if(ReportingLib::m_rank == 0) {
-            logger->info("Writing timestep data to file {}", m_report_name);
-            logger->info("-Steps written: {}", m_current_step);
-            logger->info("-Remaining steps: {}", m_remaining_steps);
+            logger->debug("Writing timestep data to file {}", m_report_name);
+            logger->debug("-Steps written: {}", m_current_step);
+            logger->debug("-Remaining steps: {}", m_remaining_steps);
         }
         m_last_position = 0;
         m_current_step = 0;
