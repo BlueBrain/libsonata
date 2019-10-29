@@ -11,6 +11,9 @@
 
 #include "report.hpp"
 
+/**
+ *  \brief Contains and manages the reports
+ */
 class ReportingLib {
     typedef std::map<std::string, std::shared_ptr<Report>> reports_t;
 #ifdef HAVE_MPI
@@ -34,7 +37,8 @@ class ReportingLib {
     ~ReportingLib();
 
     /**
-     * Destroy all report objects.  This should invoke their destructor which will close the report
+     * \brief Destroy all report objects.
+     * This should invoke their destructor which will close the report
      * file and clean up
      */
     void clear();
@@ -46,7 +50,8 @@ class ReportingLib {
     int get_num_reports() const;
 
     /**
-     * Register a node with a BinReport object.  Note that an earlier node may have alreay created
+     * \brief Register a node with a BinReport object.
+     * Note that an earlier node may have already created
      * the main Report object, so this
      * will simply add the node to the end.
      *
