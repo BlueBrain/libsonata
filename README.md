@@ -13,12 +13,10 @@ cmake  -DCMAKE_BUILD_TYPE=Release  -DEXTLIB_FROM_SUBMODULES=ON ..
 make -j
 ```
 
-## Installing as a Python package
+## Installing as a Python package, directly from GitHub
 
 ```shell
-git clone git@github.com:BlueBrain/libsonata.git --recursive
-cd libsonata
-pip install .
+pip install git+https://github.com/BlueBrain/libsonata
 ```
 
 
