@@ -217,7 +217,7 @@ class SONATA_API Population
     virtual ~Population() noexcept;
 
     struct Impl;
-    const std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Impl> impl_;
 };
 
 template <>
@@ -252,7 +252,7 @@ class SONATA_API PopulationStorage
 
   protected:
     struct Impl;
-    const std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Impl> impl_;
 };
 
 //--------------------------------------------------------------------------------------------------

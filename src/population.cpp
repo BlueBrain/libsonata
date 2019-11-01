@@ -125,8 +125,7 @@ Population::Population(const std::string& h5FilePath,
     }()) {}
 
 
-Population::Population(Population&& p) noexcept
-    : impl_(std::move(const_cast<std::unique_ptr<Population::Impl>&>(p.impl_))) {}
+Population::Population(Population&& p) noexcept = default;
 
 
 Population::~Population() noexcept = default;

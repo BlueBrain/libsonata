@@ -189,8 +189,7 @@ PopulationStorage<Population>::PopulationStorage(const std::string& h5FilePath,
 
 template <typename Population>
 PopulationStorage<Population>::PopulationStorage(PopulationStorage<Population>&& st) noexcept
-    : impl_(std::move(
-        const_cast<std::unique_ptr<PopulationStorage<Population>::Impl>&>(st.impl_))) {}
+    = default;
 
 
 template<typename Population>
