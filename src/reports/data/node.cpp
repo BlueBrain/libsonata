@@ -2,7 +2,12 @@
 
 #include "node.hpp"
 
-Node::Node(uint64_t gid, uint64_t vgid): m_gid(gid), m_vgid(vgid) {
+Node::Node(uint64_t gid)
+    : m_gid(gid)
+{}
+
+uint64_t Node::get_gid() const {
+    return m_gid;
 }
 
 void Node::add_element(double* element_value, uint32_t element_id) {
@@ -10,15 +15,13 @@ void Node::add_element(double* element_value, uint32_t element_id) {
     m_element_ids.push_back(element_id);
 }
 
-int Node::fill_data(double* data, bool node_to_be_recorded) {
+size_t Node::fill_data(double* data) {
     // Copy data from node data structures to buffer
-    int reporting_total = 0;
-    if(node_to_be_recorded) {
-        for (auto &elem: m_elements) {
-            data[reporting_total++] = *elem;
-        }
+    for (auto &elem: m_elements) {
+        0[data++] = *elem;
     }
-    return reporting_total;
+
+    return get_num_elements();
 }
 
 void Node::refresh_pointers(refresh_function_t refresh_function) {

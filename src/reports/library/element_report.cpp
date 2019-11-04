@@ -14,10 +14,3 @@ size_t ElementReport::get_total_elements() const {
     return total;
 }
 
-int ElementReport::add_variable(uint64_t node_id, double* element_value, uint32_t element_id) {
-
-    if (check_add_variable(node_id)) {
-        (*m_nodes)[node_id].add_element(element_value, element_id);
-    }
-    return 0;
-}

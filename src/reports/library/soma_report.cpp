@@ -12,21 +12,14 @@ size_t SomaReport::get_total_elements() const {
 }
 
 bool SomaReport::check_add_variable(uint64_t node_id) {
-    if (m_nodes->find(node_id) != m_nodes->end()) {
-        if((*m_nodes)[node_id].get_num_elements() == 0) {
-            return true;
-        } else {
-            throw std::runtime_error("ERROR: Soma report nodes can only have 1 element");
-        }
-    } else {
+    if (!node_exists(node_id)) {
         throw std::runtime_error("ERROR: Searching this node: " + std::to_string(node_id));
     }
-}
 
-int SomaReport::add_variable(uint64_t node_id, double* element_value, uint32_t compartment_id) {
-
-    if (check_add_variable(node_id)) {
-        (*m_nodes)[node_id].add_element(element_value, compartment_id);
+    if(get_node(node_id).get_num_elements() > 0) {
+        throw std::runtime_error("ERROR: Soma report nodes can only have 1 element");
     }
-    return 0;
+
+    return true;
 }
+

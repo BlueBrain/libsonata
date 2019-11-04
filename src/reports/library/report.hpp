@@ -12,7 +12,6 @@ typedef double* (*refresh_function_t)(double*);
 class Report {
   private:
     std::string m_report_name;
-    int m_num_nodes;
     double m_tstart;
     double m_tend;
     double m_dt;
@@ -30,7 +29,7 @@ class Report {
     Report(const std::string& report_name, double tstart, double tend, double dt);
     virtual ~Report() = default;
 
-    int get_num_nodes() const { return m_num_nodes; }
+    int get_num_nodes() const { return m_nodes->size(); }
     bool is_empty() const { return m_nodes->empty(); }
 
     /**
@@ -41,8 +40,10 @@ class Report {
      */
     int prepare_dataset();
 
-    void add_node(uint64_t node_id, uint64_t gid, uint64_t vgid);
-    virtual int add_variable(uint64_t node_id, double* voltage, uint32_t element_id) = 0;
+    void add_node(uint64_t node_id, uint64_t gid);
+    bool node_exists(uint64_t node_id) const;
+    const Node& get_node(uint64_t node_id) const;
+    virtual void add_variable(uint64_t node_id, double* voltage, uint32_t element_id);
     virtual bool check_add_variable(uint64_t node_id);
     virtual size_t get_total_elements() const = 0;
 

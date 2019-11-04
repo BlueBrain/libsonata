@@ -98,11 +98,12 @@ void SonataData::record_data(double step, const std::vector<uint64_t>& node_ids)
         int current_gid = kv.first;
         if(node_ids.size() == m_nodes->size()) {
             // Record every node
-            written = kv.second.fill_data(&m_report_buffer[local_position], true);
+            written = kv.second.fill_data(&m_report_buffer[local_position]);
         } else {
             // Check if node is set to be recorded (found in nodeids)
-            bool node_to_be_recorded = std::find(node_ids.begin(), node_ids.end(), current_gid) != node_ids.end();
-            written = kv.second.fill_data(&m_report_buffer[local_position], node_to_be_recorded);
+            if (std::find(node_ids.begin(), node_ids.end(), current_gid) != node_ids.end()) {
+                written = kv.second.fill_data(&m_report_buffer[local_position]);
+            }
         }
         local_position += kv.second.get_num_elements();
     }
@@ -122,7 +123,7 @@ void SonataData::record_data(double step) {
     int written;
     for (auto &kv: *m_nodes) {
         int current_gid = kv.first;
-        written = kv.second.fill_data(&m_report_buffer[local_position], true);
+        written = kv.second.fill_data(&m_report_buffer[local_position]);
         local_position += kv.second.get_num_elements();
     }
     m_current_step++;
@@ -162,7 +163,7 @@ void SonataData::prepare_dataset() {
         // /report
         const std::vector<uint32_t> element_ids = kv.second.get_element_ids();
         m_element_ids.insert(m_element_ids.end(), element_ids.begin(), element_ids.end());
-        m_node_ids.push_back(kv.first);
+        m_node_ids.push_back(kv.second.get_gid());
     }
     int element_offset = Implementation::get_offset(m_report_name, m_total_elements);
     logger->trace("Total elements are: {} and element offset is: {}", m_total_elements, element_offset);

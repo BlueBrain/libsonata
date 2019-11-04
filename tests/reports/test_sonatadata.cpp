@@ -11,16 +11,16 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
         double tend = 3.0;
         records_set_atomic_step(dt);
         using nodes_t = std::map<uint64_t, Node>;
-        Node node(1,1);
+        Node node{1};
         double element = 10;
         double element2 = 12;
         node.add_element(&element, 0);
         node.add_element(&element2, 1);
-        Node node2(2,2);
+        Node node2{2};
         node2.add_element(&element, 10);
         node2.add_element(&element2, 11);
         node2.add_element(&element2, 12);
-        Node node42(42, 42);
+        Node node42{42};
         std::vector<double> elements {34.1, 55.21, 3.141592, 44, 2124, 42.42};
         int i = 20;
         for(double& elem: elements) {

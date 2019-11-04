@@ -13,7 +13,7 @@ SCENARIO( "Test Report class", "[Report]" ) {
     GIVEN( "An instance of a soma report" ) {
         std::shared_ptr<Report> soma_report = std::make_shared<SomaReport>("somaReport", tstart, tend, dt);
         WHEN("We add a node and a variable to a soma report") {
-            soma_report->add_node(1,1,1);
+            soma_report->add_node(1, 1);
             double element_value = 10;
             soma_report->add_variable(1, &element_value, soma_id);
             THEN("Number of nodes and elements is 1") {
@@ -22,7 +22,7 @@ SCENARIO( "Test Report class", "[Report]" ) {
             }
         }
         WHEN("We add 2 elements to a given node in a soma report") {
-            soma_report->add_node(1,1,1);
+            soma_report->add_node(1, 1);
             double element_value = 42;
             soma_report->add_variable(1, &element_value, soma_id);
             //soma_report->add_variable(1, &element_value);
@@ -37,8 +37,8 @@ SCENARIO( "Test Report class", "[Report]" ) {
     GIVEN( "An instance of a element report" ) {
         std::shared_ptr<Report> element_report = std::make_shared<ElementReport>("elementReport", tstart, tend, dt);
         WHEN("We add 2 nodes") {
-            element_report->add_node(1,1,1);
-            element_report->add_node(2,2,2);
+            element_report->add_node(1, 1);
+            element_report->add_node(2, 2);
 
             THEN("Number of nodes is 2") {
                 REQUIRE(element_report->get_num_nodes() == 2);
@@ -46,8 +46,8 @@ SCENARIO( "Test Report class", "[Report]" ) {
         }
 
         WHEN("We add 10 elements") {
-            element_report->add_node(1,1,1);
-            element_report->add_node(2,2,2);
+            element_report->add_node(1, 1);
+            element_report->add_node(2, 2);
             double element_value = 10;
             element_report->add_variable(1, &element_value, element_id);
 

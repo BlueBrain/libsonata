@@ -9,7 +9,7 @@
 #define DEFAULT_MAX_BUFFER_SIZE 1024
 
 Report::Report(const std::string& report_name, double tstart, double tend, double dt)
-: m_report_name(report_name), m_tstart(tstart), m_tend(tend), m_dt(dt), m_num_nodes(0) {
+: m_report_name(report_name), m_tstart(tstart), m_tend(tend), m_dt(dt) {
     m_nodes = std::make_shared<nodes_t>();
     // Calculate number of reporting steps
     m_num_steps = static_cast<int>((tend - tstart) / dt);
@@ -21,14 +21,29 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     m_report_is_closed = false;
 }
 
-void Report::add_node(uint64_t node_id, uint64_t gid, uint64_t vgid) {
-    if (m_nodes->find(node_id) == m_nodes->end()) {
-        // node is new insert it into the map
-        m_nodes->insert(std::make_pair(node_id, Node(gid, vgid)));
-        m_num_nodes++;
-        logger->trace("Added Node with GID {}", gid);
-    } else {
+void Report::add_node(uint64_t node_id, uint64_t gid) {
+    if (node_exists(node_id)) {
         throw std::runtime_error("Warning: attempted to add node "+ std::to_string(node_id)+" to the target multiple time on same node. Ignoring.");
+    }
+
+    // node is new insert it into the map
+    m_nodes->emplace(node_id, Node{gid});
+    logger->trace("Added Node");
+}
+
+bool Report::node_exists(uint64_t node_id) const
+{
+    return m_nodes->find(node_id) != m_nodes->end();
+}
+
+const Node& Report::get_node(uint64_t node_id) const {
+    return m_nodes->at(node_id);
+}
+
+void Report::add_variable(uint64_t node_id, double* element_value, uint32_t compartment_id) {
+
+    if (check_add_variable(node_id)) {
+        m_nodes->at(node_id).add_element(element_value, compartment_id);
     }
 }
 
