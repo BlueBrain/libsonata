@@ -47,7 +47,7 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name, int total_st
     H5Sclose(data_space);
 }
 
-void HDF5Writer::write(double* buffer, int steps_to_write, int total_steps, int total_elements) {
+void HDF5Writer::write(const std::vector<double>& buffer, int steps_to_write, int total_steps, int total_elements) {
     hsize_t count[2];
     count[0] = steps_to_write;
     count[1] = total_elements;
@@ -62,7 +62,7 @@ void HDF5Writer::write(double* buffer, int steps_to_write, int total_steps, int 
         H5Sselect_hyperslab(space, H5S_SELECT_OR, &m_offset[i], NULL, &count[i], NULL);
     }*/
 
-    H5Dwrite(m_dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, buffer);
+    H5Dwrite(m_dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, &buffer[0]);
     m_offset[0] += steps_to_write;
 
     H5Sclose(filespace);

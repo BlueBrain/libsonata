@@ -28,12 +28,6 @@ SonataData::SonataData(const std::string& report_name, const std::vector<double>
     m_io_writer = std::make_unique<HDF5Writer>(report_name);
 }
 
-SonataData::~SonataData() {
-    if(m_buffer_size > 0) {
-        delete[] m_report_buffer;
-    }
-}
-
 void SonataData::prepare_buffer(size_t max_buffer_size) {
     logger->trace("Prepare buffer for {}", m_report_name);
     for (auto& kv : *m_nodes) {
@@ -64,7 +58,7 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
             logger->debug("-Max Buffer size: {}", max_buffer_size);
         }
         m_buffer_size = m_total_elements * (m_steps_to_write);
-        m_report_buffer = new double[m_buffer_size];
+        m_report_buffer.resize(m_buffer_size);
         if(ReportingLib::m_rank == 0) {
             logger->debug("-Buffer size: {}", m_buffer_size);
         }

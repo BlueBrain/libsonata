@@ -19,9 +19,6 @@ class ReportingLib {
 #ifdef HAVE_MPI
     using communicators_t = std::map<std::string, MPI_Comm>;
 #endif
-  private:
-    reports_t m_reports;
-
   public:
     static double m_atomic_step;
     static double m_min_steps_to_record;
@@ -59,4 +56,7 @@ class ReportingLib {
         std::for_each(m_reports.begin(), m_reports.end(),
                 [&](reports_t::value_type arg){((*(arg.second)).*fun)(data);});
     }
+
+  private:
+    reports_t m_reports;
 };
