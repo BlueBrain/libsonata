@@ -17,20 +17,20 @@ class SonataData {
     void write_data();
     void close();
 
-    bool is_due_to_report(double step);
+    bool is_due_to_report(double step) const;
     void record_data(double step, const std::vector<uint64_t>& node_ids);
     void record_data(double step);
     void update_timestep(double timestep);
 
-    int get_num_steps() const { return m_num_steps; }
-    size_t get_buffer_size() const { return m_buffer_size; }
-    const std::vector<double>& get_report_buffer() const { return m_report_buffer; }
+    int get_num_steps() const noexcept { return m_num_steps; }
+    size_t get_buffer_size() const noexcept { return m_buffer_size; }
+    const std::vector<double>& get_report_buffer() const noexcept { return m_report_buffer; }
 
-    const std::vector<uint64_t>& get_node_ids() const { return m_node_ids; }
-    const std::vector<uint64_t>& get_index_pointers() const { return m_index_pointers; }
-    const std::vector<uint32_t>& get_element_ids() const { return m_element_ids; }
-    const std::vector<double>& get_spike_timestamps() const { return m_spike_timestamps; }
-    const std::vector<int>& get_spike_node_ids() const { return m_spike_node_ids; }
+    const std::vector<uint64_t>& get_node_ids() const noexcept { return m_node_ids; }
+    const std::vector<uint64_t>& get_index_pointers() const noexcept { return m_index_pointers; }
+    const std::vector<uint32_t>& get_element_ids() const noexcept { return m_element_ids; }
+    const std::vector<double>& get_spike_timestamps() const noexcept { return m_spike_timestamps; }
+    const std::vector<int>& get_spike_node_ids() const noexcept { return m_spike_node_ids; }
 
   private:
     std::string m_report_name;

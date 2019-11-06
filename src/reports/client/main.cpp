@@ -17,11 +17,11 @@ struct Neuron {
     std::vector<double> voltages;
 };
 
-const double dt = 0.1;
-const double tstart = 0.0;
-const double tstop = 0.3;
+const static double dt = 0.1;
+const static double tstart = 0.0;
+const static double tstop = 0.3;
 
-void generate_spikes(std::vector<uint64_t> nodeids, std::vector<double>& spike_timestamps, std::vector<int>& spike_node_ids) {
+void generate_spikes(const std::vector<uint64_t>& nodeids, std::vector<double>& spike_timestamps, std::vector<int>& spike_node_ids) {
     // Generate 0-100 spikes
     int num_spikes = std::rand()%100;
     spike_timestamps.reserve(num_spikes);
@@ -50,10 +50,11 @@ void generate_elements(Neuron& neuron) {
 }
 
 std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::string& kind, int seed) {
+
+    std::vector<uint64_t> nodeids;
     // Set random seed for reproducibility
     std::srand(static_cast<unsigned int>(23487 * (seed + 1)));
 
-    std::vector<uint64_t> nodeids;
     // Each gid starts with the rank*10 (i.e. rank 5 will have gids: 51, 52, 53...)
     uint64_t nextgid = 1 + seed*10;
     uint32_t c_id = 0;

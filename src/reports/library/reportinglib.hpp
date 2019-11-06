@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <string>
 #include <spdlog/spdlog.h>
@@ -15,9 +15,9 @@
  *  \brief Contains and manages the reports
  */
 class ReportingLib {
-    using reports_t = std::map<std::string, std::shared_ptr<Report>>;
+    using reports_t = std::unordered_map<std::string, std::shared_ptr<Report>>;
 #ifdef HAVE_MPI
-    using communicators_t = std::map<std::string, MPI_Comm>;
+    using communicators_t = std::unordered_map<std::string, MPI_Comm>;
 #endif
   public:
     static double m_atomic_step;
@@ -37,7 +37,7 @@ class ReportingLib {
     void clear();
     bool is_empty();
 
-    int get_num_reports() const;
+    int get_num_reports() const noexcept { return m_reports.size(); }
 
     std::shared_ptr<Report> create_report(const std::string& name, const std::string& king,
                                           double tstart, double tend, double dt);

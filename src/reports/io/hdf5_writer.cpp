@@ -55,14 +55,14 @@ void HDF5Writer::write(const std::vector<double>& buffer, int steps_to_write, in
     hid_t memspace = H5Screate_simple(2, count, nullptr);
     hid_t filespace = H5Dget_space(m_dataset);
 
-    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, m_offset, nullptr, count, nullptr);
+    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, m_offset.data(), nullptr, count, nullptr);
     /*for(int i=0; i<steps_to_write; i++) {
         if(i==0)
             H5Sselect_hyperslab(space, H5S_SELECT_SET, &m_offset[i], NULL, &count[i], NULL);
         H5Sselect_hyperslab(space, H5S_SELECT_OR, &m_offset[i], NULL, &count[i], NULL);
     }*/
 
-    H5Dwrite(m_dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, &buffer[0]);
+    H5Dwrite(m_dataset, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, buffer.data());
     m_offset[0] += steps_to_write;
 
     H5Sclose(filespace);
@@ -104,7 +104,7 @@ void HDF5Writer::write_any(const std::string& dataset_name, const std::vector<T>
     hid_t memspace = H5Screate_simple(1, &dims, nullptr);
     H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &offset, nullptr, &dims, nullptr);
 
-    H5Dwrite(data_set, type, memspace, filespace, m_collective_list, &buffer[0]);
+    H5Dwrite(data_set, type, memspace, filespace, m_collective_list, buffer.data());
 
     H5Sclose(memspace);
     H5Sclose(filespace);

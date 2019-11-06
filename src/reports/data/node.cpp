@@ -6,10 +6,6 @@ Node::Node(uint64_t gid)
     : m_gid(gid)
 {}
 
-uint64_t Node::get_gid() const {
-    return m_gid;
-}
-
 void Node::add_element(double* element_value, uint32_t element_id) {
     m_elements.push_back(element_value);
     m_element_ids.push_back(element_id);

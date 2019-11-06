@@ -26,10 +26,6 @@ bool ReportingLib::is_empty() {
     return m_reports.empty();
 }
 
-int ReportingLib::get_num_reports() const {
-    return m_reports.size();
-}
-
 std::shared_ptr<Report> ReportingLib::create_report(const std::string& name,
         const std::string& kind, double tstart, double tend, double dt) {
     if (kind == "compartment") {

@@ -29,5 +29,5 @@ class HDF5Writer: public IoWriter {
     hid_t m_collective_list;
     hid_t m_independent_list;
 
-    hsize_t m_offset[2];
+    std::array<hsize_t, 2> m_offset;
 };

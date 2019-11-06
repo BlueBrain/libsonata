@@ -65,7 +65,7 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
     }
 }
 
-bool SonataData::is_due_to_report(double step) {
+bool SonataData::is_due_to_report(double step) const {
     // Dont record data if current step < tstart
     if(step < m_last_step_recorded) {
         return false;

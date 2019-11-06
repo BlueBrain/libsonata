@@ -1,5 +1,4 @@
 #pragma once
-
 #include <memory>
 #include <string>
 #include <map>
@@ -13,8 +12,8 @@ class Report {
   public:
     Report(const std::string& report_name, double tstart, double tend, double dt);
     virtual ~Report() = default;
-    int get_num_nodes() const { return m_nodes->size(); }
-    bool is_empty() const { return m_nodes->empty(); }
+    int get_num_nodes() const noexcept { return m_nodes->size(); }
+    bool is_empty() const noexcept { return m_nodes->empty(); }
     /**
      * Allocates the buffers used to hold main
      * report data.

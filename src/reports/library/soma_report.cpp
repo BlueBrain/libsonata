@@ -6,7 +6,7 @@
 SomaReport::SomaReport(const std::string& report_name, double tstart, double tend, double dt)
 : Report(report_name, tstart, tend, dt) {}
 
-size_t SomaReport::get_total_elements() const {
+size_t SomaReport::get_total_elements() const noexcept {
     // Every node has only 1 element on a soma report
     return m_nodes->size();
 }
