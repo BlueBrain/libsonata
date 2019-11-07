@@ -27,7 +27,7 @@ void Report::add_node(uint64_t node_id, uint64_t gid) {
     }
 
     // node is new insert it into the map
-    m_nodes->emplace(node_id, Node{gid});
+    m_nodes->emplace(node_id, std::make_shared<Node>(gid));
     logger->trace("Added Node");
 }
 
@@ -36,15 +36,8 @@ bool Report::node_exists(uint64_t node_id) const
     return m_nodes->find(node_id) != m_nodes->end();
 }
 
-const Node& Report::get_node(uint64_t node_id) const {
+std::shared_ptr<Node> Report::get_node(uint64_t node_id) {
     return m_nodes->at(node_id);
-}
-
-void Report::add_variable(uint64_t node_id, double* element_value, uint32_t compartment_id) {
-
-    if (check_add_variable(node_id)) {
-        m_nodes->at(node_id).add_element(element_value, compartment_id);
-    }
 }
 
 int Report::prepare_dataset() {
@@ -69,9 +62,9 @@ void Report::end_iteration(double timestep) {
     m_sonata_data->update_timestep(timestep);
 }
 
-void Report::refresh_pointers(refresh_function_t refresh_function) {
+void Report::refresh_pointers(std::function<double*(double*)> refresh_function) {
     for(auto& kv: *m_nodes) {
-        kv.second.refresh_pointers(refresh_function);
+        kv.second->refresh_pointers(refresh_function);
     }
 }
 
@@ -94,10 +87,3 @@ void Report::set_max_buffer_size(size_t buffer_size) {
     m_max_buffer_size = buffer_size;
 }
 
-bool Report::check_add_variable(uint64_t node_id) {
-    if (m_nodes->find(node_id) != m_nodes->end()) {
-        return true;
-    } else {
-        throw std::runtime_error("ERROR: Searching this node: " + std::to_string(node_id));
-    }
-}

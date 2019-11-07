@@ -6,8 +6,6 @@
 #include <reports/data/sonata_data.hpp>
 #include <reports/data/node.hpp>
 
-typedef double* (*refresh_function_t)(double*);
-
 class Report {
   public:
     Report(const std::string& report_name, double tstart, double tend, double dt);
@@ -21,22 +19,21 @@ class Report {
      * @return 0 on success, non zero on failure
      */
     int prepare_dataset();
-    void add_node(uint64_t node_id, uint64_t gid);
+
+    virtual void add_node(uint64_t node_id, uint64_t gid);
     bool node_exists(uint64_t node_id) const;
-    const Node& get_node(uint64_t node_id) const;
-    virtual void add_variable(uint64_t node_id, double* voltage, uint32_t element_id);
-    virtual bool check_add_variable(uint64_t node_id);
+    std::shared_ptr<Node> get_node(uint64_t node_id);
     virtual size_t get_total_elements() const = 0;
 
     virtual void record_data(double step, const std::vector<uint64_t>& node_ids);
     virtual void record_data(double step);
     virtual void end_iteration(double timestep);
     virtual void flush(double time);
-    void refresh_pointers(refresh_function_t refresh_function);
+    void refresh_pointers(std::function<double*(double*)> refresh_function);
     void set_max_buffer_size(size_t buffer_size);
 
   protected:
-    using nodes_t = std::map<uint64_t, Node>;
+    using nodes_t = std::map<uint64_t, std::shared_ptr<Node>>;
     std::shared_ptr<nodes_t> m_nodes;
     std::unique_ptr<SonataData> m_sonata_data;
 

@@ -10,6 +10,8 @@ set(reportinglib_SOURCES
         "library/element_report.hpp"
         "data/node.cpp"
         "data/node.hpp"
+        "data/soma_node.cpp"
+        "data/soma_node.hpp"
         "data/sonata_data.cpp"
         "data/sonata_data.hpp"
         "io/io_writer.hpp"

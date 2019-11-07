@@ -1,4 +1,4 @@
-#include <iostream>
+#include <algorithm>
 
 #include "node.hpp"
 
@@ -11,18 +11,11 @@ void Node::add_element(double* element_value, uint32_t element_id) {
     m_element_ids.push_back(element_id);
 }
 
-size_t Node::fill_data(double* data) {
-    // Copy data from node data structures to buffer
-    for (auto &elem: m_elements) {
-        0[data++] = *elem;
-    }
-
-    return get_num_elements();
+void Node::fill_data(std::vector<double>::iterator it) {
+    std::transform(m_elements.begin(), m_elements.end(), it, [](auto elem){ return *elem; });
 }
 
-void Node::refresh_pointers(refresh_function_t refresh_function) {
-    for (auto &elem: m_elements) {
-        elem = refresh_function(elem);
-    }
+void Node::refresh_pointers(std::function<double*(double*)> refresh_function) {
+    std::transform(m_elements.begin(), m_elements.end(), m_elements.begin(), refresh_function);
 }
 

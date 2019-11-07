@@ -15,7 +15,7 @@ SCENARIO( "Test Report class", "[Report]" ) {
         WHEN("We add a node and a variable to a soma report") {
             soma_report->add_node(1, 1);
             double element_value = 10;
-            soma_report->add_variable(1, &element_value, soma_id);
+            soma_report->get_node(1)->add_element(&element_value, soma_id);
             THEN("Number of nodes and elements is 1") {
                 REQUIRE(soma_report->get_num_nodes() == 1);
                 REQUIRE(soma_report->get_total_elements() == 1);
@@ -24,9 +24,9 @@ SCENARIO( "Test Report class", "[Report]" ) {
         WHEN("We add 2 elements to a given node in a soma report") {
             soma_report->add_node(1, 1);
             double element_value = 42;
-            soma_report->add_variable(1, &element_value, soma_id);
-            //soma_report->add_variable(1, &element_value);
-            REQUIRE_THROWS(soma_report->add_variable(1, &element_value, soma_id));
+            soma_report->get_node(1)->add_element(&element_value, soma_id);
+            //soma_report->get_node(1)->add_element(&element_value);
+            REQUIRE_THROWS(soma_report->get_node(1)->add_element(&element_value, soma_id));
             THEN("Number of nodes and elements is still 1") {
                 REQUIRE(soma_report->get_num_nodes() == 1);
                 REQUIRE(soma_report->get_total_elements() == 1);
@@ -49,15 +49,15 @@ SCENARIO( "Test Report class", "[Report]" ) {
             element_report->add_node(1, 1);
             element_report->add_node(2, 2);
             double element_value = 10;
-            element_report->add_variable(1, &element_value, element_id);
+            element_report->get_node(1)->add_element(&element_value, element_id);
 
             std::vector<double> voltages = { 1, 20, 300, 4000, 500, 60, 7, 0.8, 9 };
             for(auto& voltage: voltages) {
-                element_report->add_variable(2, &voltage, element_id);
+                element_report->get_node(2)->add_element(&voltage, element_id);
             }
 
             // Doesn't exists
-            REQUIRE_THROWS(element_report->add_variable(3, &element_value, element_id));
+            REQUIRE_THROWS(element_report->get_node(3)->add_element(&element_value, element_id));
             THEN("Number of nodes is 2") {
                 REQUIRE(element_report->get_num_nodes() == 2);
             }

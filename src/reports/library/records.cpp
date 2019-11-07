@@ -37,7 +37,8 @@ int records_add_var_with_mapping(const char* report_name, uint64_t node_id, doub
     uint32_t element_id = mapping_value[0];
     try {
         auto report = InitReports.get_report(report_name);
-        report->add_variable(node_id, voltage, element_id);
+        auto node = report->get_node(node_id);
+        node->add_element(voltage, element_id);
     } catch (const std::exception& err) {
         logger->error(err.what());
     }
@@ -126,7 +127,8 @@ int records_get_num_reports() {
 }
 
 void records_refresh_pointers(double* (*refresh_function)(double*)) {
-    InitReports.apply_all(&Report::refresh_pointers, refresh_function);
+    std::function<double*(double*)> fun(refresh_function); // This conversion is needed as apply_all is a magic template
+    InitReports.apply_all(&Report::refresh_pointers, fun);
 }
 
 void records_write_spikes(const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids) {

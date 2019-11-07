@@ -29,14 +29,14 @@ SCENARIO( "Test Node class", "[Node]" ) {
             }
             THEN("fill_data will return something correct") {
                 std::vector<double> result(5, -1.);
-                node.fill_data(result.data());
+                node.fill_data(result.begin());
                 REQUIRE(result == elements);
             }
             THEN("refresh_pointers will be call on all elements") {
                 node.refresh_pointers(&square);
                 std::vector<double> compare{100, 121, 144, 169, 196};
                 std::vector<double> result(5, -1);
-                node.fill_data(result.data());
+                node.fill_data(result.begin());
                 REQUIRE(result == compare);
             }
         }
