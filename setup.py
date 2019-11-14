@@ -95,7 +95,11 @@ class CMakeBuild(build_ext, object):
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
         else:
-            build_args += ["--", "-j"]
+            try:
+                CPU_COUNT = os.cpu_count()  # python 3.4+
+            except:
+                CPU_COUNT = 2
+            build_args += ["--", "-j%d" % CPU_COUNT]
 
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
