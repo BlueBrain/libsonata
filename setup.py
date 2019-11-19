@@ -107,7 +107,7 @@ class CMakeBuild(build_ext, object):
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
         else:
-            build_args += ["--", "-j".format(max(MIN_CPU_CORES, get_cpu_count()))]
+            build_args += ["--", "-j{}".format(max(MIN_CPU_CORES, get_cpu_count()))]
 
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
