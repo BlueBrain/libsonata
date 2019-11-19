@@ -216,7 +216,8 @@ protected:
 };
 
 template <>
-std::vector<std::string> Population::getAttribute(const std::string& name, const Selection& selection) const;
+std::vector<std::string> Population::getAttribute<std::string>(
+    const std::string& name, const Selection& selection) const;
 
 //--------------------------------------------------------------------------------------------------
 

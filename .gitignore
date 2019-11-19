@@ -3,3 +3,4 @@ build
 .tox/
 libsonata.cpython-*.so
 python/__pycache__/
+*.pyc

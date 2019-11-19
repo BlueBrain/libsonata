@@ -145,7 +145,7 @@ Population::Population(
 }
 
 
-Population::Population(Population&& p) noexcept = default;
+Population::Population(Population&&) noexcept = default;
 
 
 Population::~Population() noexcept = default;
@@ -193,8 +193,9 @@ std::vector<T> Population::getAttribute(const std::string& name, const Selection
 }
 
 
-template<>
-std::vector<std::string> Population::getAttribute(const std::string& name, const Selection& selection) const
+template <>
+std::vector<std::string> Population::getAttribute<std::string>(
+    const std::string& name, const Selection& selection) const
 {
     if (impl_->attributeEnumNames.count(name) == 0) {
         HDF5_LOCK_GUARD
@@ -312,9 +313,23 @@ INSTANTIATE_TEMPLATE_METHODS(uint64_t)
 INSTANTIATE_TEMPLATE_METHODS(size_t)
 #endif
 
-INSTANTIATE_TEMPLATE_METHODS(std::string)
-
 #undef INSTANTIATE_TEMPLATE_METHODS
+
+/* std:: string already has an Population::getAttribute(
+      const std::string& name, const Selection& selection) overload, so
+ * can't use the macro defined above, expand the rest by hand
+ */
+template std::vector<std::string> Population::getAttribute<std::string>( \
+    const std::string&, const Selection&, const std::string&) const; \
+template
+std::vector<std::string> Population::getEnumeration<std::string>(
+    const std::string&, const Selection&) const;
+template
+std::vector<std::string> Population::getDynamicsAttribute<std::string>(
+    const std::string&, const Selection&) const;
+template
+std::vector<std::string> Population::getDynamicsAttribute<std::string>(
+    const std::string&, const Selection&, const std::string&) const;
 
 //--------------------------------------------------------------------------------------------------
 

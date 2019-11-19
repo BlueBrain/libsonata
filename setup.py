@@ -1,6 +1,5 @@
 import inspect
 import os
-import os.path as osp
 import platform
 import re
 import subprocess
@@ -14,6 +13,7 @@ from distutils.version import LooseVersion
 
 
 REQUIRED_NUMPY_VERSION = "numpy>=1.12.0"
+MIN_CPU_CORES = 2
 
 
 class lazy_dict(dict):
@@ -36,10 +36,22 @@ def get_sphinx_command():
     return BuildDoc
 
 
+def get_cpu_count():
+    try:
+        return len(os.sched_getaffinity(0))  # linux only
+    except:
+        pass
+
+    try:
+        return os.cpu_count()  # python 3.4+
+    except:
+        return 1  # default
+
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
-        self.sourcedir = osp.abspath(sourcedir)
+        self.sourcedir = os.path.abspath(sourcedir)
 
 
 class CMakeBuild(build_ext, object):
@@ -71,7 +83,7 @@ class CMakeBuild(build_ext, object):
             self.build_extension(ext)
 
     def build_extension(self, ext):
-        extdir = osp.abspath(osp.dirname(self.get_ext_fullpath(ext.name)))
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DEXTLIB_FROM_SUBMODULES=ON",
@@ -95,13 +107,13 @@ class CMakeBuild(build_ext, object):
                 cmake_args += ["-A", "x64"]
             build_args += ["--", "/m"]
         else:
-            build_args += ["--", "-j"]
+            build_args += ["--", "-j{}".format(max(MIN_CPU_CORES, get_cpu_count()))]
 
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get("CXXFLAGS", ""), self.distribution.get_version()
         )
-        if not osp.exists(self.build_temp):
+        if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(
             ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env
