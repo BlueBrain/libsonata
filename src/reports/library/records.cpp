@@ -15,6 +15,9 @@ int records_add_report(const char* reportName, uint64_t node_id, uint64_t gid, u
                        int attributes_mapping_size, char* unit) {
     // if we are adding reports, then we should reset the flag for sharing reports
     ReportingLib::first_report = true;
+    if (node_id != gid) {
+        throw std::runtime_error("node_id should always be equal to gid");
+    }
 
     try {
         if (!InitReports.report_exists(reportName)) {

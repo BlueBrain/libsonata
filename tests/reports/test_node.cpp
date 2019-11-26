@@ -1,6 +1,7 @@
 #include <catch2/catch.hpp>
 #include <spdlog/spdlog.h>
 #include <reports/data/node.hpp>
+#include <reports/data/soma_node.hpp>
 #include <memory>
 
 double* square(double* elem)
@@ -13,6 +14,18 @@ SCENARIO( "Test Node class", "[Node]" ) {
 
     GIVEN( "An instance of a Node" ) {
         Node node{1};
+        { // Initial conditions
+            REQUIRE(node.get_gid() == 1);
+            REQUIRE(node.get_num_elements() == 0);
+            REQUIRE(node.get_element_ids().empty());
+
+            std::vector<double> res;
+            node.fill_data(res.begin());
+            REQUIRE(res.empty());
+
+            REQUIRE_NOTHROW(node.refresh_pointers(&square));
+        }
+
         WHEN("We add a element") {
             std::vector<double> elements = {10, 11, 12, 13, 14};
             size_t i = 0;
@@ -38,6 +51,23 @@ SCENARIO( "Test Node class", "[Node]" ) {
                 std::vector<double> result(5, -1);
                 node.fill_data(result.begin());
                 REQUIRE(result == compare);
+            }
+        }
+    }
+
+    GIVEN( "An instance of a soma node" ) {
+        SomaNode node{1};
+        WHEN("We add one element") {
+            double elem1 = 1;
+            node.add_element(&elem1, 1);
+
+            THEN("Number of elements is 1") {
+                REQUIRE(node.get_num_elements() == 1);
+            }
+
+            THEN("Adding an other element throw") {
+                REQUIRE_THROWS(node.add_element(&elem1, 2));
+                REQUIRE(node.get_num_elements() == 1);
             }
         }
     }

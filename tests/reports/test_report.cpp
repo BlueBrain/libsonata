@@ -19,6 +19,9 @@ SCENARIO( "Test Report class", "[Report]" ) {
             THEN("Number of nodes and elements is 1") {
                 REQUIRE(soma_report->get_num_nodes() == 1);
                 REQUIRE(soma_report->get_total_elements() == 1);
+                REQUIRE(soma_report->node_exists(1) == true);
+                REQUIRE(soma_report->node_exists(2) == false);
+                REQUIRE(soma_report->is_empty() == false);
             }
         }
         WHEN("We add 2 elements to a given node in a soma report") {
