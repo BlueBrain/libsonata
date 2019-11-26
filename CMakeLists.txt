@@ -56,7 +56,7 @@ else()
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(ENABLE_COVERAGE OFF)
+    set(ENABLE_COVERAGE ON)
 else()
     set(ENABLE_COVERAGE OFF)
 endif()
@@ -128,6 +128,8 @@ configure_file (
 
 add_library(sonata_shared SHARED ${SONATA_SRC})
 add_library(sonata_static STATIC ${SONATA_SRC})
+# Define sonata_report target
+add_subdirectory(src/reports)
 
 foreach(TARGET sonata_shared sonata_static)
     set_target_properties(${TARGET}
@@ -176,10 +178,6 @@ target_include_directories(sonata_static
     PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
 )
-
-include_directories(${SONATA_INCLUDE_DIR})
-include_directories(${SONATA_SRC_DIR})
-add_subdirectory(src/reports)
 
 # =============================================================================
 # Install

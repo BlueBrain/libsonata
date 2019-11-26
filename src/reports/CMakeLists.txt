@@ -26,27 +26,35 @@ set(reportinglib_HEADERS
 set(client_SOURCES
         "client/main.cpp")
 
+include_directories(${SONATA_INCLUDE_DIR})
+include_directories(${SONATA_SRC_DIR})
 include_directories(SYSTEM ${spdlog_include_directory})
 
 add_library(reportinglib_obj OBJECT ${reportinglib_SOURCES} ${reportinglib_HEADERS})
 set_property(TARGET reportinglib_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Shared library
-add_library(sonatareport SHARED $<TARGET_OBJECTS:reportinglib_obj>)
-target_link_libraries(sonatareport
-        ${HDF5_LIBS}
-        ${MPI_CXX_LIBRARIES})
+add_library(sonata_report SHARED $<TARGET_OBJECTS:reportinglib_obj>)
+target_link_libraries(sonata_report
+    PRIVATE ${HDF5_LIBS}
+    PRIVATE ${MPI_CXX_LIBRARIES})
 
 # Coreneuron simulator Client
 add_executable(client ${client_SOURCES})
 target_link_libraries(client
-        PRIVATE sonatareport)
+        PRIVATE sonata_report
+        PRIVATE ${MPI_CXX_LIBRARIES})
 
-install(TARGETS sonatareport
+set_target_properties(sonata_report
+        PROPERTIES
+        OUTPUT_NAME "sonatareport"
+        )
+target_compile_definitions(sonata_report
+        PUBLIC SONATA_DLL
+        PRIVATE SONATA_DLL_EXPORTS
+        )
+
+install(TARGETS sonata_report
+    EXPORT sonata-targets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib )
-
-# install files in hierarchy
-foreach ( file ${reportinglib_HEADERS} )
-    install( FILES ${file} DESTINATION include/reportinglib )
-endforeach()
