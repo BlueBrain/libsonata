@@ -4,7 +4,10 @@
 
 #include <reports/utils/logger.hpp>
 #include "report.hpp"
-#include "reportinglib.hpp"
+#include "sonatareport.hpp"
+
+namespace bbp {
+namespace sonata {
 
 #define DEFAULT_MAX_BUFFER_SIZE 1024
 
@@ -21,13 +24,13 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     m_report_is_closed = false;
 }
 
-void Report::add_node(uint64_t node_id, uint64_t gid) {
+void Report::add_node(uint64_t node_id) {
     if (node_exists(node_id)) {
         throw std::runtime_error("Warning: attempted to add node "+ std::to_string(node_id)+" to the target multiple time on same node. Ignoring.");
     }
 
     // node is new insert it into the map
-    m_nodes->emplace(node_id, std::make_shared<Node>(gid));
+    m_nodes->emplace(node_id, std::make_shared<Node>(node_id));
     logger->trace("Added Node");
 }
 
@@ -69,7 +72,7 @@ void Report::refresh_pointers(std::function<double*(double*)> refresh_function) 
 }
 
 void Report::flush(double time) {
-    if(ReportingLib::m_rank == 0) {
+    if(SonataReport::m_rank == 0) {
         logger->debug("Flush() called at t={}", time);
     }
     // Write if there are any remaining steps to write
@@ -87,3 +90,5 @@ void Report::set_max_buffer_size(size_t buffer_size) {
     m_max_buffer_size = buffer_size;
 }
 
+}
+} // namespace bbp::sonata

@@ -4,6 +4,8 @@
 #include <reports/data/soma_node.hpp>
 #include <memory>
 
+using namespace bbp::sonata;
+
 double* square(double* elem)
 {
     *elem *= *elem;

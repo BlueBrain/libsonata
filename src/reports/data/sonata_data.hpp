@@ -5,6 +5,9 @@
 #include <reports/io/io_writer.hpp>
 #include "node.hpp"
 
+namespace bbp {
+namespace sonata {
+
 class SonataData {
     using nodes_t = std::map<uint64_t, std::shared_ptr<Node>>;
   public:
@@ -57,3 +60,6 @@ class SonataData {
 
     void prepare_buffer(size_t max_buffer_size);
 };
+
+}
+} // namespace bbp::sonata

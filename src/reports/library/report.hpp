@@ -6,6 +6,9 @@
 #include <reports/data/sonata_data.hpp>
 #include <reports/data/node.hpp>
 
+namespace bbp {
+namespace sonata {
+
 class Report {
   public:
     Report(const std::string& report_name, double tstart, double tend, double dt);
@@ -20,7 +23,7 @@ class Report {
      */
     int prepare_dataset();
 
-    virtual void add_node(uint64_t node_id, uint64_t gid);
+    virtual void add_node(uint64_t node_id);
     bool node_exists(uint64_t node_id) const;
     std::shared_ptr<Node> get_node(uint64_t node_id);
     virtual size_t get_total_elements() const = 0;
@@ -46,3 +49,6 @@ class Report {
     size_t m_max_buffer_size;
     bool m_report_is_closed;
 };
+
+}
+} // namespace bbp::sonata

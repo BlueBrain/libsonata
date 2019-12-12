@@ -2,14 +2,24 @@
 #include <iostream>
 #include <catch2/catch.hpp>
 #include <reports/data/sonata_data.hpp>
-#include <bbp/reports/records.h>
+#include <bbp/sonata/reports.h>
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
+using namespace bbp::sonata;
 
 SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
+
+    int global_rank, global_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &global_size);
+
     GIVEN( "A node map structure" ) {
         double dt = 1.0;
         double tstart = 0.0;
         double tend = 3.0;
-        records_set_atomic_step(dt);
+        sonata_set_atomic_step(dt);
         using nodes_t = std::map<uint64_t, std::shared_ptr<Node>>;
         auto node = std::make_shared<Node>(1);
         double element = 10;
@@ -70,7 +80,9 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
             THEN("We check the index pointers of the sonata report") {
                 const std::vector<uint64_t> index_pointers = sonata->get_index_pointers();
                 std::vector<uint64_t> compare = { 0, 2, 5 };
-                REQUIRE(index_pointers == compare);
+                if(global_size == 1) {
+                    REQUIRE(index_pointers == compare);
+                }
             }
         }
         WHEN("We record some other data and prepare the dataset for a small max buffer size") {
@@ -104,12 +116,17 @@ SCENARIO( "Test SonataData class", "[SonataData][IOWriter]" ) {
             THEN("We check that the spike nodes ids are ordered according to timestamps") {
                 const std::vector<int> node_ids = sonata_spikes->get_spike_node_ids();
                 std::vector<int> compare = {5, 2, 3, 2, 3};
-                REQUIRE(node_ids == compare);
+                if(global_size == 1) {
+                    REQUIRE(node_ids == compare);
+                }
+
             }
             THEN("We check that the spike timestamps are in order") {
                 const std::vector<double> timestamps = sonata_spikes->get_spike_timestamps();
                 std::vector<double> compare = {0.1, 0.2, 0.3, 0.7, 1.3};
-                REQUIRE(timestamps == compare);
+                if(global_size == 1) {
+                    REQUIRE(timestamps == compare);
+                }
             }
         }
         sonata_spikes->close();

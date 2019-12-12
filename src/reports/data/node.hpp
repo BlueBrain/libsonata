@@ -4,6 +4,9 @@
 #include <functional>
 #include <vector>
 
+namespace bbp {
+namespace sonata {
+
 class Node {
 public:
     Node(uint64_t gid);
@@ -25,3 +28,5 @@ public:
     std::vector<double*> m_elements;
 };
 
+}
+} // namespace bbp::sonata

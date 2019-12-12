@@ -2,6 +2,9 @@
 
 #include "element_report.hpp"
 
+namespace bbp {
+namespace sonata {
+
 ElementReport::ElementReport(const std::string& report_name, double tstart, double tend, double dt)
 : Report(report_name, tstart, tend, dt) {}
 
@@ -13,3 +16,5 @@ size_t ElementReport::get_total_elements() const noexcept {
     return total;
 }
 
+}
+} // namespace bbp::sonata

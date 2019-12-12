@@ -1,7 +1,7 @@
 #include <iostream>
 #include <tuple>
 
-#include <reports/library/reportinglib.hpp>
+#include <reports/library/sonatareport.hpp>
 #include <reports/library/implementation_interface.hpp>
 #include "hdf5_writer.hpp"
 

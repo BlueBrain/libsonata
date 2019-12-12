@@ -9,12 +9,15 @@
 #include <hdf5.h>
 
 #include <reports/utils/logger.hpp>
-#include <reports/library/reportinglib.hpp>
+#include <reports/library/sonatareport.hpp>
 
 #if defined(HAVE_MPI)
 #include <mpi.h>
 #endif
 
+
+namespace bbp {
+namespace sonata {
 namespace detail {
 
     template <class TImpl>
@@ -42,9 +45,9 @@ namespace detail {
 #if defined(HAVE_MPI)
 
     static MPI_Comm get_Comm(const std::string& report_name) {
-    if ( ReportingLib::m_communicators.find(report_name) != ReportingLib::m_communicators.end() ) {
+    if ( SonataReport::m_communicators.find(report_name) != SonataReport::m_communicators.end() ) {
         // Found
-        return ReportingLib::m_communicators[report_name];
+        return SonataReport::m_communicators[report_name];
     }
     return MPI_COMM_WORLD;
     }
@@ -65,11 +68,11 @@ namespace detail {
 
             // Create a first communicator with the ranks with at least 1 report
             int num_reports = report_names.size();
-            MPI_Comm_split(MPI_COMM_WORLD, num_reports == 0, 0, &ReportingLib::m_has_nodes);
+            MPI_Comm_split(MPI_COMM_WORLD, num_reports == 0, 0, &SonataReport::m_has_nodes);
 
             // Send report numbers and generate offset array for allgatherv
             std::vector<int> report_sizes(global_size);
-            MPI_Allgather(&num_reports, 1, MPI_INT, report_sizes.data(), 1, MPI_INT, ReportingLib::m_has_nodes);
+            MPI_Allgather(&num_reports, 1, MPI_INT, report_sizes.data(), 1, MPI_INT, SonataReport::m_has_nodes);
             std::vector<int> offsets(global_size+1);
             offsets[0] = 0;
             std::partial_sum(report_sizes.begin(), report_sizes.end(), offsets.begin()+1);
@@ -89,18 +92,18 @@ namespace detail {
             size_t total_num_reports = std::accumulate(report_sizes.begin(), report_sizes.end(), 0);
             std::vector<size_t> global_report_hashes(total_num_reports);
             MPI_Allgatherv(local_report_hashes.data(), num_reports, mpi_size_type, global_report_hashes.data(), 
-                            report_sizes.data(), offsets.data(), mpi_size_type, ReportingLib::m_has_nodes);            
+                            report_sizes.data(), offsets.data(), mpi_size_type, SonataReport::m_has_nodes);
 
             // Eliminate duplicates
             std::set<size_t> result (global_report_hashes.begin(), global_report_hashes.end());
             // Create communicators per report name
             for(auto& elem: global_report_hashes) {
-                MPI_Comm_split(ReportingLib::m_has_nodes, std::find(local_report_hashes.begin(), local_report_hashes.end(), elem) != local_report_hashes.end(), 
-                               0, &ReportingLib::m_communicators[hash_report_names[elem]]);
+                MPI_Comm_split(SonataReport::m_has_nodes, std::find(local_report_hashes.begin(), local_report_hashes.end(), elem) != local_report_hashes.end(),
+                               0, &SonataReport::m_communicators[hash_report_names[elem]]);
             }
 
-            /*logger->trace("WORLD RANK/SIZE: {}/{} \t Size communicators: {}", global_rank, global_size, ReportingLib::m_communicators.size());
-            for(auto& kv: ReportingLib::m_communicators) {
+            /*logger->trace("WORLD RANK/SIZE: {}/{} \t Size communicators: {}", global_rank, global_size, SonataReport::m_communicators.size());
+            for(auto& kv: SonataReport::m_communicators) {
                 int node_rank, node_size;
                 MPI_Comm_rank(kv.second, &node_rank);
                 MPI_Comm_size(kv.second, &node_size);
@@ -146,16 +149,16 @@ namespace detail {
             }
 
             double min_time;
-            MPI_Allreduce(&lmin_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, ReportingLib::m_has_nodes);
+            MPI_Allreduce(&lmin_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, SonataReport::m_has_nodes);
             double max_time;
-            MPI_Allreduce(&lmax_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, ReportingLib::m_has_nodes);
+            MPI_Allreduce(&lmax_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, SonataReport::m_has_nodes);
 
             std::vector<double> inTime = spikevec_time;
             std::vector<int> inGid = spikevec_gid;
             local_spikevec_sort(inTime, inGid, spikevec_time, spikevec_gid);
 
             int numprocs;
-            MPI_Comm_size(ReportingLib::m_has_nodes, &numprocs);
+            MPI_Comm_size(SonataReport::m_has_nodes, &numprocs);
             // allocate send and receive counts and displacements for MPI_Alltoallv
             std::vector<int> snd_cnts(numprocs);
             std::vector<int> rcv_cnts(numprocs);
@@ -173,7 +176,7 @@ namespace detail {
 
             // now let each rank know how many spikes they will receive
             // and get in turn all the buffer sizes to receive
-            MPI_Alltoall(&snd_cnts[0], 1, MPI_INT, &rcv_cnts[0], 1, MPI_INT, ReportingLib::m_has_nodes);
+            MPI_Alltoall(&snd_cnts[0], 1, MPI_INT, &rcv_cnts[0], 1, MPI_INT, SonataReport::m_has_nodes);
             for (int i = 1; i < numprocs; i++) {
                 rcv_dsps[i] = rcv_dsps[i - 1] + rcv_cnts[i - 1];
             }
@@ -193,9 +196,9 @@ namespace detail {
 
             // now exchange data
             MPI_Alltoallv(spikevec_time.data(), &snd_cnts[0], &snd_dsps[0], MPI_DOUBLE, svt_buf.data(),
-                                 &rcv_cnts[0], &rcv_dsps[0], MPI_DOUBLE, ReportingLib::m_has_nodes);
+                                 &rcv_cnts[0], &rcv_dsps[0], MPI_DOUBLE, SonataReport::m_has_nodes);
             MPI_Alltoallv(spikevec_gid.data(), &snd_cnts[0], &snd_dsps[0], MPI_INT, svg_buf.data(),
-                                 &rcv_cnts[0], &rcv_dsps[0], MPI_INT, ReportingLib::m_has_nodes);
+                                 &rcv_cnts[0], &rcv_dsps[0], MPI_INT, SonataReport::m_has_nodes);
 
             local_spikevec_sort(svt_buf, svg_buf, spikevec_time, spikevec_gid);
 
@@ -240,11 +243,13 @@ namespace detail {
 #endif
 
 }  // namespace detail
+}
+} // namespace bbp::sonata
 
-using Implementation = detail::Implementation<
+using Implementation = bbp::sonata::detail::Implementation<
 #if defined(HAVE_MPI)
-        detail::ParallelImplementation
+        bbp::sonata::detail::ParallelImplementation
 #else
-        detail::SerialImplementation
+        bbp::sonata::detail::SerialImplementation
 #endif
     >;

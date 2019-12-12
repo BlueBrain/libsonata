@@ -11,10 +11,13 @@
 
 #include "report.hpp"
 
+namespace bbp {
+namespace sonata {
+
 /**
  *  \brief Contains and manages the reports
  */
-class ReportingLib {
+class SonataReport {
     using reports_t = std::unordered_map<std::string, std::shared_ptr<Report>>;
 #ifdef HAVE_MPI
     using communicators_t = std::unordered_map<std::string, MPI_Comm>;
@@ -46,7 +49,7 @@ class ReportingLib {
 
     bool report_exists(const std::string& name) const;
 
-    void make_global_communicator();
+    void create_communicators();
     void prepare_datasets();
 
     void write_spikes(const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids);
@@ -60,3 +63,6 @@ class ReportingLib {
   private:
     reports_t m_reports;
 };
+
+}
+} // namespace bbp::sonata

@@ -1,9 +1,9 @@
-set(reportinglib_SOURCES
-        "library/records.cpp"
+set(sonatareport_SOURCES
+        "library/reports.cpp"
         "library/report.cpp"
         "library/report.hpp"
-        "library/reportinglib.cpp"
-        "library/reportinglib.hpp"
+        "library/sonatareport.cpp"
+        "library/sonatareport.hpp"
         "library/soma_report.cpp"
         "library/soma_report.hpp"
         "library/element_report.cpp"
@@ -20,8 +20,8 @@ set(reportinglib_SOURCES
         "utils/logger.cpp"
         "utils/logger.hpp")
 
-set(reportinglib_HEADERS
-        "${SONATA_INCLUDE_DIR}/bbp/reports/records.h")
+set(sonatareport_HEADERS
+        "${SONATA_INCLUDE_DIR}/bbp/sonata/reports.h")
 
 set(client_SOURCES
         "client/main.cpp")
@@ -30,11 +30,11 @@ include_directories(${SONATA_INCLUDE_DIR})
 include_directories(${SONATA_SRC_DIR})
 include_directories(SYSTEM ${spdlog_include_directory})
 
-add_library(reportinglib_obj OBJECT ${reportinglib_SOURCES} ${reportinglib_HEADERS})
-set_property(TARGET reportinglib_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(sonatareport_obj OBJECT ${sonatareport_SOURCES} ${sonatareport_HEADERS})
+set_property(TARGET sonatareport_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Shared library
-add_library(sonata_report SHARED $<TARGET_OBJECTS:reportinglib_obj>)
+add_library(sonata_report SHARED $<TARGET_OBJECTS:sonatareport_obj>)
 target_link_libraries(sonata_report
     PRIVATE ${HDF5_LIBS}
     PRIVATE ${MPI_CXX_LIBRARIES})

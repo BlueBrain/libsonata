@@ -1,0 +1,35 @@
+#! /bin/sh
+
+export OMP_NUM_THREADS=1
+
+# Run the executable
+/usr/bin/mpiexec -n 4  @CMAKE_BINARY_DIR@/src/reports/client
+exitvalue=$?
+
+# Check for error result
+if [ $exitvalue -ne 0 ]; then
+  echo "Error status value: $exitvalue"
+  exit $exitvalue
+fi
+
+h5diff -c compartment_report @CMAKE_CURRENT_SOURCE_DIR@/compartment_report.ref > diff_compartment.dat /report/data 2>&1
+h5diff -c soma_report @CMAKE_CURRENT_SOURCE_DIR@/soma_report.ref > diff_soma.dat /report/data 2>&1
+h5diff -c spikes @CMAKE_CURRENT_SOURCE_DIR@/spikes.ref /spikes/timestamps > diff_spikes.dat 2>&1
+
+if [ -s diff_compartment.dat ]
+then
+  echo "Compartment results are different, check the file diff_compartment.dat. Test failed!"
+  exit 1
+elif [ -s diff_soma.dat ]
+then
+  echo "Soma results are different, check the file diff_soma.dat. Test failed!"
+  exit 1
+elif [ -s diff_spikes.dat ]
+then
+  echo "Spike results are different, check the file diff_spikes.dat. Test failed!"
+  exit 1
+else
+  echo "Results are the same, test passed"
+  rm -f *.dat
+  exit 0
+fi

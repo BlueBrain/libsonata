@@ -9,7 +9,7 @@
 #endif
 
 #include <reports/utils/logger.hpp>
-#include <bbp/reports/records.h>
+#include <bbp/sonata/reports.h>
 
 struct Neuron {
     int node_id;
@@ -76,18 +76,17 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons, const std::str
     return nodeids;
 }
 
-void init(const char* report_name, std::vector<Neuron>& neurons) {
+void init(const char* report_name, std::vector<Neuron>& neurons, const std::string& kind) {
     // logic for registering soma and element reports with reportinglib
+    sonata_create_report(report_name, tstart, tstop, dt, kind.c_str());
     for (auto& neuron : neurons) {
-        records_add_report(report_name, neuron.node_id, neuron.node_id, neuron.node_id, tstart, tstop, dt,
-                0, neuron.kind.c_str(), 0, nullptr);
-
+        sonata_add_node(report_name, neuron.node_id);
         const int mapping_size = 1;
         int element_id = neuron.node_id*1000;
         int mapping[mapping_size] = {element_id};
 
         for (auto& element: neuron.voltages) {
-            records_add_var_with_mapping(report_name, neuron.node_id, &element, mapping_size, mapping);
+            sonata_add_element(report_name, neuron.node_id, element_id, &element);
             mapping[0] = ++element_id;
         }
     }
@@ -144,14 +143,14 @@ int main() {
     const char* element_report = "compartment_report";
     const char* soma_report = "soma_report";
 
-    init(element_report, element_neurons);
-    init(soma_report, soma_neurons);
-    records_set_max_buffer_size_hint(20);
-    records_set_atomic_step(dt);
+    init(element_report, element_neurons, "compartment");
+    init(soma_report, soma_neurons, "soma");
+    sonata_set_max_buffer_size_hint(20);
+    sonata_set_atomic_step(dt);
 
-    records_setup_communicator();
-    records_finish_and_share();
-    records_time_data();
+    sonata_setup_communicators();
+    sonata_prepare_datasets();
+    sonata_time_data();
 
     if(global_rank == 0) {
         logger->info("Starting the simulation!");
@@ -166,22 +165,22 @@ int main() {
         if(global_rank == 0) {
             logger->info("Recording data for step = {}", i);
         }
-        records_nrec(i, element_nodeids.size(), &int_element_nodeids[0], element_report);
-        records_nrec(i, soma_nodeids.size(), &int_soma_nodeids[0], soma_report);
+        sonata_record_node_data(i, element_nodeids.size(), &int_element_nodeids[0], element_report);
+        sonata_record_node_data(i, soma_nodeids.size(), &int_soma_nodeids[0], soma_report);
         // Also works
-        // records_rec(i);
+        // sonata_rec(i);
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Update timestep on reportinglib
-        records_end_iteration(t);
+        sonata_end_iteration(t);
         t += dt;
         // Change data every timestep
         change_data(element_neurons);
         change_data(soma_neurons);
     }
-    records_flush(t);
+    sonata_flush(t);
     // Write the spikes
-    records_write_spikes(spike_timestamps, spike_node_ids);
+    sonata_write_spikes(spike_timestamps.data(), spike_timestamps.size(), spike_node_ids.data(), spike_node_ids.size());
 
     if(global_rank == 0) {
         logger->info("Finalizing...");
