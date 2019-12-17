@@ -6,7 +6,7 @@
 set -euo pipefail
 
 VENV=venv-clang-format
-CLANG_FORMAT_VERSION=7.1.0
+CLANG_FORMAT_VERSION=9.0.0
 
 if [[ ! -d $VENV ]]; then
     python3 -mvenv "$VENV"

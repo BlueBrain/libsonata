@@ -7,9 +7,9 @@
  * See top-level LICENSE.txt file for details.
  *************************************************************************/
 
-#include "population.hpp"
-#include "hdf5_mutex.hpp"
 #include "edge_index.h"
+#include "hdf5_mutex.hpp"
+#include "population.hpp"
 
 #include <bbp/sonata/common.h>
 #include <bbp/sonata/edges.h>
@@ -34,16 +34,13 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
-EdgePopulation::EdgePopulation(
-    const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name
-)
-    : Population(h5FilePath, csvFilePath, name, ELEMENT)
-{
-}
+EdgePopulation::EdgePopulation(const std::string& h5FilePath,
+                               const std::string& csvFilePath,
+                               const std::string& name)
+    : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
 
 
-std::string EdgePopulation::source() const
-{
+std::string EdgePopulation::source() const {
     HDF5_LOCK_GUARD
     std::string result;
     impl_->h5Root.getDataSet(SOURCE_NODE_ID_DSET).getAttribute(NODE_POPULATION_ATTR).read(result);
@@ -51,8 +48,7 @@ std::string EdgePopulation::source() const
 }
 
 
-std::string EdgePopulation::target() const
-{
+std::string EdgePopulation::target() const {
     HDF5_LOCK_GUARD
     std::string result;
     impl_->h5Root.getDataSet(TARGET_NODE_ID_DSET).getAttribute(NODE_POPULATION_ATTR).read(result);
@@ -60,67 +56,51 @@ std::string EdgePopulation::target() const
 }
 
 
-std::vector<NodeID> EdgePopulation::sourceNodeIDs(const Selection& selection) const
-{
+std::vector<NodeID> EdgePopulation::sourceNodeIDs(const Selection& selection) const {
     HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet(SOURCE_NODE_ID_DSET);
     return _readSelection<NodeID>(dset, selection);
 }
 
 
-std::vector<NodeID> EdgePopulation::targetNodeIDs(const Selection& selection) const
-{
+std::vector<NodeID> EdgePopulation::targetNodeIDs(const Selection& selection) const {
     HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet(TARGET_NODE_ID_DSET);
     return _readSelection<NodeID>(dset, selection);
 }
 
 
-
-Selection EdgePopulation::afferentEdges(const std::vector<NodeID>& target) const
-{
+Selection EdgePopulation::afferentEdges(const std::vector<NodeID>& target) const {
     HDF5_LOCK_GUARD
-    return edge_index::resolve(
-        edge_index::targetIndex(impl_->h5Root),
-        target
-    );
+    return edge_index::resolve(edge_index::targetIndex(impl_->h5Root), target);
 }
 
 
-Selection EdgePopulation::efferentEdges(const std::vector<NodeID>& source) const
-{
+Selection EdgePopulation::efferentEdges(const std::vector<NodeID>& source) const {
     HDF5_LOCK_GUARD
-    return edge_index::resolve(
-        edge_index::sourceIndex(impl_->h5Root),
-        source
-    );
+    return edge_index::resolve(edge_index::sourceIndex(impl_->h5Root), source);
 }
 
 
-Selection EdgePopulation::connectingEdges(const std::vector<NodeID>& source, const std::vector<NodeID>& target) const
-{
+Selection EdgePopulation::connectingEdges(const std::vector<NodeID>& source,
+                                          const std::vector<NodeID>& target) const {
     // TODO optimize: range intersection
     const auto pre = efferentEdges(source).flatten();
     const auto post = afferentEdges(target).flatten();
     assert(std::is_sorted(pre.begin(), pre.end()));  // return result of _resolveIndex is sorted
     assert(std::is_sorted(post.begin(), post.end()));
     Selection::Values result;
-    set_intersection(
-        pre.begin(), pre.end(),
-        post.begin(), post.end(),
-        std::back_inserter(result));
+    set_intersection(pre.begin(), pre.end(), post.begin(), post.end(), std::back_inserter(result));
     return Selection::fromValues(result);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void EdgePopulation::writeIndices(
-    const std::string& h5FilePath, const std::string& population,
-    uint64_t sourceNodeCount,
-    uint64_t targetNodeCount,
-    bool overwrite
-)
-{
+void EdgePopulation::writeIndices(const std::string& h5FilePath,
+                                  const std::string& population,
+                                  uint64_t sourceNodeCount,
+                                  uint64_t targetNodeCount,
+                                  bool overwrite) {
     HDF5_LOCK_GUARD
     HighFive::File h5File(h5FilePath, HighFive::File::ReadWrite);
     auto h5Root = h5File.getGroup(fmt::format("/edges/{}", population));
@@ -136,5 +116,5 @@ template class PopulationStorage<EdgePopulation>;
 
 //--------------------------------------------------------------------------------------------------
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp
