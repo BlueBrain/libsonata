@@ -25,7 +25,7 @@ namespace sonata {
 
 class SONATA_API Selection
 {
-public:
+  public:
     using Value = uint64_t;
     using Values = std::vector<Value>;
     using Range = std::pair<Value, Value>;
@@ -34,7 +34,7 @@ public:
     explicit Selection(Ranges&& ranges);
     explicit Selection(const Ranges& ranges);
 
-    template<typename Iterator>
+    template <typename Iterator>
     static Selection fromValues(Iterator first, Iterator last);
     static Selection fromValues(const Values& values);
 
@@ -46,16 +46,15 @@ public:
 
     bool empty() const;
 
-private:
+  private:
     const Ranges ranges_;
 };
 
-template<typename Iterator>
-Selection Selection::fromValues(Iterator first, Iterator last)
-{
+template <typename Iterator>
+Selection Selection::fromValues(Iterator first, Iterator last) {
     Selection::Ranges ranges;
 
-    Selection::Range range{ 0, 0 };
+    Selection::Range range{0, 0};
     while (first != last) {
         const auto v = *first;
         if (v == range.second) {
@@ -81,7 +80,7 @@ Selection Selection::fromValues(Iterator first, Iterator last)
 
 class SONATA_API Population
 {
-public:
+  public:
     /**
      * Name of the population used for identifying it in circuit composition
      */
@@ -135,7 +134,9 @@ public:
      * @throw if there is no such attribute for the population
      */
     template <typename T>
-    std::vector<T> getAttribute(const std::string& name, const Selection& selection, const T& defaultValue) const;
+    std::vector<T> getAttribute(const std::string& name,
+                                const Selection& selection,
+                                const T& defaultValue) const;
 
     /**
      * Get enumeration values for given attribute and Selection
@@ -164,7 +165,8 @@ public:
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
-    std::string _attributeDataType(const std::string& name, bool translate_enumeration = false) const;
+    std::string _attributeDataType(const std::string& name,
+                                   bool translate_enumeration = false) const;
 
     /**
      * All dynamics attribute names (JSON keys + union of attributes in groups)
@@ -189,7 +191,9 @@ public:
      * @throw if there is no such attribute for the population
      */
     template <typename T>
-    std::vector<T> getDynamicsAttribute(const std::string& name, const Selection& selection, const T& defaultValue) const;
+    std::vector<T> getDynamicsAttribute(const std::string& name,
+                                        const Selection& selection,
+                                        const T& defaultValue) const;
 
     /**
      * Get dynamics attribute data type
@@ -200,10 +204,11 @@ public:
      */
     std::string _dynamicsAttributeDataType(const std::string& name) const;
 
-protected:
-    Population(
-        const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name, const std::string& prefix
-    );
+  protected:
+    Population(const std::string& h5FilePath,
+               const std::string& csvFilePath,
+               const std::string& name,
+               const std::string& prefix);
 
     Population(const Population&) = delete;
 
@@ -216,15 +221,15 @@ protected:
 };
 
 template <>
-std::vector<std::string> Population::getAttribute<std::string>(
-    const std::string& name, const Selection& selection) const;
+std::vector<std::string> Population::getAttribute<std::string>(const std::string& name,
+                                                               const Selection& selection) const;
 
 //--------------------------------------------------------------------------------------------------
 
-template<typename Population>
+template <typename Population>
 class SONATA_API PopulationStorage
 {
-public:
+  public:
     PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath = "");
 
     PopulationStorage(const PopulationStorage&) = delete;
@@ -245,12 +250,12 @@ public:
      */
     std::shared_ptr<Population> openPopulation(const std::string& name) const;
 
-protected:
+  protected:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
 
 //--------------------------------------------------------------------------------------------------
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp

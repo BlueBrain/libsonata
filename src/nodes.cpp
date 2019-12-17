@@ -18,12 +18,10 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
-NodePopulation::NodePopulation(
-    const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name
-)
-    : Population(h5FilePath, csvFilePath, name, ELEMENT)
-{
-}
+NodePopulation::NodePopulation(const std::string& h5FilePath,
+                               const std::string& csvFilePath,
+                               const std::string& name)
+    : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -33,5 +31,5 @@ template class PopulationStorage<NodePopulation>;
 
 //--------------------------------------------------------------------------------------------------
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp

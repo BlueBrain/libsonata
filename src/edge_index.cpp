@@ -13,8 +13,8 @@
 
 #include <cstdint>
 #include <set>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 
 namespace bbp {
@@ -37,8 +37,7 @@ const char* RANGE_TO_EDGE_ID_DSET = "range_to_edge_id";
 }  // unnamed namespace
 
 
-const HighFive::Group sourceIndex(const HighFive::Group& h5Root)
-{
+const HighFive::Group sourceIndex(const HighFive::Group& h5Root) {
     if (!h5Root.exist(SOURCE_INDEX_GROUP)) {
         throw SonataError("No source index group found");
     }
@@ -46,8 +45,7 @@ const HighFive::Group sourceIndex(const HighFive::Group& h5Root)
 }
 
 
-const HighFive::Group targetIndex(const HighFive::Group& h5Root)
-{
+const HighFive::Group targetIndex(const HighFive::Group& h5Root) {
     if (!h5Root.exist(TARGET_INDEX_GROUP)) {
         throw SonataError("No target index group found");
     }
@@ -55,18 +53,17 @@ const HighFive::Group targetIndex(const HighFive::Group& h5Root)
 }
 
 
-Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID)
-{
+Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID) {
     if (nodeID >= indexGroup.getDataSet(NODE_ID_TO_RANGES_DSET).getSpace().getDimensions()[0]) {
-        // Returning empty set for out-of-range node IDs, to be aligned with SYN2 reader implementation
+        // Returning empty set for out-of-range node IDs, to be aligned with SYN2 reader
+        // implementation
         // TODO: throw a SonataError instead
         return Selection({});
     }
 
     RawIndex primaryRange;
-    indexGroup
-        .getDataSet(NODE_ID_TO_RANGES_DSET)
-        .select({ static_cast<size_t>(nodeID), 0 }, { 1, 2 })
+    indexGroup.getDataSet(NODE_ID_TO_RANGES_DSET)
+        .select({static_cast<size_t>(nodeID), 0}, {1, 2})
         .read(primaryRange);
 
     const uint64_t primaryRangeBegin = primaryRange[0][0];
@@ -77,15 +74,15 @@ Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID)
     }
 
     RawIndex secondaryRange;
-    indexGroup
-        .getDataSet(RANGE_TO_EDGE_ID_DSET)
-        .select({ static_cast<size_t>(primaryRangeBegin), 0 }, { static_cast<size_t>(primaryRangeEnd - primaryRangeBegin), 2 })
+    indexGroup.getDataSet(RANGE_TO_EDGE_ID_DSET)
+        .select({static_cast<size_t>(primaryRangeBegin), 0},
+                {static_cast<size_t>(primaryRangeEnd - primaryRangeBegin), 2})
         .read(secondaryRange);
 
     Selection::Ranges ranges;
     ranges.reserve(secondaryRange.size());
 
-    for (const auto& row: secondaryRange) {
+    for (const auto& row : secondaryRange) {
         ranges.emplace_back(row[0], row[1]);
     }
 
@@ -93,8 +90,7 @@ Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID)
 }
 
 
-Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& nodeIDs)
-{
+Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& nodeIDs) {
     if (nodeIDs.size() == 1) {
         return resolve(indexGroup, nodeIDs[0]);
     }
@@ -111,8 +107,7 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
 
 namespace {
 
-std::unordered_map<NodeID, RawIndex> _groupNodeRanges(const std::vector<NodeID>& nodeIDs)
-{
+std::unordered_map<NodeID, RawIndex> _groupNodeRanges(const std::vector<NodeID>& nodeIDs) {
     std::unordered_map<NodeID, RawIndex> result;
 
     if (nodeIDs.empty()) {
@@ -135,32 +130,33 @@ std::unordered_map<NodeID, RawIndex> _groupNodeRanges(const std::vector<NodeID>&
 }
 
 
-std::vector<NodeID> _readNodeIDs(const HighFive::Group& h5Root, const std::string& name)
-{
+std::vector<NodeID> _readNodeIDs(const HighFive::Group& h5Root, const std::string& name) {
     std::vector<NodeID> result;
     h5Root.getDataSet(name).read(result);
     return result;
 }
 
 
-void _writeIndexDataset(const RawIndex& data, const std::string& name, HighFive::Group& h5Group)
-{
+void _writeIndexDataset(const RawIndex& data, const std::string& name, HighFive::Group& h5Group) {
     auto dset = h5Group.createDataSet<uint64_t>(name, HighFive::DataSpace::From(data));
     dset.write(data);
 }
 
 
-void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, uint64_t nodeCount, HighFive::Group& h5Root, const std::string& name)
-{
+void _writeIndexGroup(const std::vector<NodeID>& nodeIDs,
+                      uint64_t nodeCount,
+                      HighFive::Group& h5Root,
+                      const std::string& name) {
     auto indexGroup = h5Root.createGroup(name);
 
     auto nodeToRanges = _groupNodeRanges(nodeIDs);
-    const auto rangeCount = std::accumulate(
-        nodeToRanges.begin(), nodeToRanges.end(), uint64_t(0),
-        [](uint64_t total, decltype(nodeToRanges)::const_reference item) {
-            return total + item.second.size();
-        }
-    );
+    const auto rangeCount =
+        std::accumulate(nodeToRanges.begin(),
+                        nodeToRanges.end(),
+                        uint64_t(0),
+                        [](uint64_t total, decltype(nodeToRanges)::const_reference item) {
+                            return total + item.second.size();
+                        });
 
     RawIndex primaryIndex;
     RawIndex secondaryIndex;
@@ -177,10 +173,7 @@ void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, uint64_t nodeCount, Hi
             auto& ranges = it->second;
             primaryIndex.push_back({offset, offset + ranges.size()});
             offset += ranges.size();
-            std::move(
-                ranges.begin(), ranges.end(),
-                std::back_inserter(secondaryIndex)
-            );
+            std::move(ranges.begin(), ranges.end(), std::back_inserter(secondaryIndex));
         }
     }
 
@@ -188,16 +181,13 @@ void _writeIndexGroup(const std::vector<NodeID>& nodeIDs, uint64_t nodeCount, Hi
     _writeIndexDataset(secondaryIndex, RANGE_TO_EDGE_ID_DSET, indexGroup);
 }
 
-} // unnamed namespace
+}  // unnamed namespace
 
 
-void write(
-    HighFive::Group& h5Root,
-    uint64_t sourceNodeCount,
-    uint64_t targetNodeCount,
-    bool overwrite
-)
-{
+void write(HighFive::Group& h5Root,
+           uint64_t sourceNodeCount,
+           uint64_t targetNodeCount,
+           bool overwrite) {
     if (h5Root.exist(INDEX_GROUP)) {
         if (overwrite) {
             // TODO: remove INDEX_GROUP
@@ -208,27 +198,23 @@ void write(
     }
 
     try {
-        _writeIndexGroup(
-            _readNodeIDs(h5Root, SOURCE_NODE_ID_DSET),
-            sourceNodeCount,
-            h5Root,
-            SOURCE_INDEX_GROUP
-        );
-        _writeIndexGroup(
-            _readNodeIDs(h5Root, TARGET_NODE_ID_DSET),
-            targetNodeCount,
-            h5Root,
-            TARGET_INDEX_GROUP
-        );
-    } catch(...) {
+        _writeIndexGroup(_readNodeIDs(h5Root, SOURCE_NODE_ID_DSET),
+                         sourceNodeCount,
+                         h5Root,
+                         SOURCE_INDEX_GROUP);
+        _writeIndexGroup(_readNodeIDs(h5Root, TARGET_NODE_ID_DSET),
+                         targetNodeCount,
+                         h5Root,
+                         TARGET_INDEX_GROUP);
+    } catch (...) {
         try {
             // TODO: remove INDEX_GROUP
-        } catch(...) {
+        } catch (...) {
         }
         throw;
     }
 }
 
-}
-}
-} // namespace bbp::sonata::edge_index
+}  // namespace edge_index
+}  // namespace sonata
+}  // namespace bbp
