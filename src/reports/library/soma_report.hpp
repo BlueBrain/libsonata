@@ -3,7 +3,8 @@
 namespace bbp {
 namespace sonata {
 
-class SomaReport: public Report {
+class SomaReport: public Report
+{
   public:
     SomaReport(const std::string& reportName, double tstart, double tend, double dt);
 
@@ -11,5 +12,5 @@ class SomaReport: public Report {
     size_t get_total_elements() const noexcept override;
 };
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp

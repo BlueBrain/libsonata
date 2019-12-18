@@ -1,5 +1,5 @@
-#include <iostream>
 #include <bbp/sonata/reports.h>
+#include <iostream>
 #include <reports/library/sonatareport.hpp>
 #include <reports/utils/logger.hpp>
 
@@ -12,7 +12,8 @@ int sonata_clear() {
     return 0;
 }
 
-int sonata_create_report(const char* report_name, double tstart, double tend, double dt, const char* kind) {
+int sonata_create_report(
+    const char* report_name, double tstart, double tend, double dt, const char* kind) {
     try {
         if (!sonata_report.report_exists(report_name)) {
             sonata_report.create_report(report_name, kind, tstart, tend, dt);
@@ -35,7 +36,10 @@ int sonata_add_node(const char* report_name, uint64_t node_id) {
     return 0;
 }
 
-int sonata_add_element(const char* report_name, uint64_t node_id, uint32_t element_id, double* voltage) {
+int sonata_add_element(const char* report_name,
+                       uint64_t node_id,
+                       uint32_t element_id,
+                       double* voltage) {
     if (!sonata_report.report_exists(report_name)) {
         return 0;
     }
@@ -97,7 +101,7 @@ int sonata_flush(double time) {
 }
 
 size_t sonata_set_max_buffer_size_hint(size_t buffer_size) {
-    sonata_report.apply_all(&Report::set_max_buffer_size, buffer_size * /*1024*/1048576);
+    sonata_report.apply_all(&Report::set_max_buffer_size, buffer_size * /*1024*/ 1048576);
     return 0;
 }
 
@@ -118,12 +122,16 @@ int sonata_get_num_reports() {
     return sonata_report.get_num_reports();
 }
 
-void sonata_refresh_pointers(double* (*refresh_function)(double*)) {
-    std::function<double*(double*)> fun(refresh_function); // This conversion is needed as apply_all is a magic template
+void sonata_refresh_pointers(double* (*refresh_function)(double*) ) {
+    std::function<double*(double*)> fun(refresh_function);  // This conversion is needed as
+                                                            // apply_all is a magic template
     sonata_report.apply_all(&Report::refresh_pointers, fun);
 }
 
-void sonata_write_spikes(const double* timestamps, uint64_t size_timestamps, const int* node_ids, uint64_t size_node_ids) {
+void sonata_write_spikes(const double* timestamps,
+                         uint64_t size_timestamps,
+                         const int* node_ids,
+                         uint64_t size_node_ids) {
     const std::vector<double> spike_timestamps(timestamps, timestamps + size_timestamps);
     const std::vector<int> spike_node_ids(node_ids, node_ids + size_node_ids);
     sonata_report.write_spikes(spike_timestamps, spike_node_ids);
@@ -155,7 +163,7 @@ char* sonata_savebuffer(int) {
 void sonata_saveglobal() {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
 }
-void sonata_savestate(void){
+void sonata_savestate(void) {
     logger->trace("Function NOT implemented");
 }
 char* sonata_restoreinit(char* save_file, int* length) {

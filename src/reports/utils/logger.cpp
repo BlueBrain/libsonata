@@ -1,5 +1,5 @@
-#include <memory>
 #include "logger.hpp"
+#include <memory>
 
 /**
  * \brief Logger implementation based on spdlog

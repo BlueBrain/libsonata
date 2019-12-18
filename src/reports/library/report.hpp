@@ -1,20 +1,25 @@
 #pragma once
+#include <map>
 #include <memory>
 #include <string>
-#include <map>
 
-#include <reports/data/sonata_data.hpp>
 #include <reports/data/node.hpp>
+#include <reports/data/sonata_data.hpp>
 
 namespace bbp {
 namespace sonata {
 
-class Report {
+class Report
+{
   public:
     Report(const std::string& report_name, double tstart, double tend, double dt);
     virtual ~Report() = default;
-    int get_num_nodes() const noexcept { return m_nodes->size(); }
-    bool is_empty() const noexcept { return m_nodes->empty(); }
+    int get_num_nodes() const noexcept {
+        return m_nodes->size();
+    }
+    bool is_empty() const noexcept {
+        return m_nodes->empty();
+    }
     /**
      * Allocates the buffers used to hold main
      * report data.
@@ -50,5 +55,5 @@ class Report {
     bool m_report_is_closed;
 };
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp

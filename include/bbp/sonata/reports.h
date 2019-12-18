@@ -21,20 +21,17 @@ extern "C" {
  * @param dt frequency of recordings
  * @param kind type of report (soma, compartment)
  */
-int sonata_create_report(const char* report_name,
-                        double _tstart,
-                        double _tend,
-                        double _dt,
-                        const char* kind);
+int sonata_create_report(
+    const char* report_name, double _tstart, double _tend, double _dt, const char* kind);
 
 int sonata_add_node(const char* report_name, uint64_t node_id);
 /**
  * \brief Add compartment values to an existing node on a report
  */
 int sonata_add_element(const char* report_name,
-                                 uint64_t node_id,
-                                 uint32_t element_id,
-                                 double* voltage);
+                       uint64_t node_id,
+                       uint32_t element_id,
+                       double* voltage);
 /**
  * \brief Setup buffers and create datasets
  */
@@ -53,7 +50,10 @@ void sonata_set_min_steps_to_record(int steps);
 /**
  * \brief Spike arrays to be written to file
  */
-void sonata_write_spikes(const double* spike_timestamps, uint64_t size_timestamps, const int* spike_node_ids, uint64_t size_node_ids);
+void sonata_write_spikes(const double* spike_timestamps,
+                         uint64_t size_timestamps,
+                         const int* spike_node_ids,
+                         uint64_t size_node_ids);
 
 /**
  * \brief Save data of nodeids[] to buffer
@@ -77,7 +77,7 @@ int sonata_get_num_reports();
  */
 int sonata_flush(double time);
 
-void sonata_refresh_pointers(double* (*refresh_function)(double*));
+void sonata_refresh_pointers(double* (*refresh_function)(double*) );
 /**
  * \brief Set a suggested maximum memory size each individual report can use as a buffer
  * @param buffer_size requested maximum memory allocatable by a Report buffer in MBytes
@@ -94,7 +94,7 @@ size_t sonata_set_max_buffer_size_hint(size_t buffer_size);
 size_t sonata_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size);
 
 /*! \brief Clear all the reports
-*/
+ */
 int sonata_clear();
 
 void sonata_set_atomic_step(double step);

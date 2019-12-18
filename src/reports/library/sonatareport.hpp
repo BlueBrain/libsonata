@@ -1,9 +1,9 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
-#include <spdlog/spdlog.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -17,7 +17,8 @@ namespace sonata {
 /**
  *  \brief Contains and manages the reports
  */
-class SonataReport {
+class SonataReport
+{
     using reports_t = std::unordered_map<std::string, std::shared_ptr<Report>>;
 #ifdef HAVE_MPI
     using communicators_t = std::unordered_map<std::string, MPI_Comm>;
@@ -40,10 +41,12 @@ class SonataReport {
     void clear();
     bool is_empty();
 
-    int get_num_reports() const noexcept { return m_reports.size(); }
+    int get_num_reports() const noexcept {
+        return m_reports.size();
+    }
 
-    std::shared_ptr<Report> create_report(const std::string& name, const std::string& king,
-                                          double tstart, double tend, double dt);
+    std::shared_ptr<Report> create_report(
+        const std::string& name, const std::string& king, double tstart, double tend, double dt);
 
     std::shared_ptr<Report> get_report(const std::string& name) const;
 
@@ -52,17 +55,19 @@ class SonataReport {
     void create_communicators();
     void prepare_datasets();
 
-    void write_spikes(const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids);
+    void write_spikes(const std::vector<double>& spike_timestamps,
+                      const std::vector<int>& spike_node_ids);
 
     template <typename T>
     void apply_all(void (Report::*fun)(T), T data) {
-        std::for_each(m_reports.begin(), m_reports.end(),
-                [&](reports_t::value_type arg){((*(arg.second)).*fun)(data);});
+        std::for_each(m_reports.begin(), m_reports.end(), [&](reports_t::value_type arg) {
+            ((*(arg.second)).*fun)(data);
+        });
     }
 
   private:
     reports_t m_reports;
 };
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp

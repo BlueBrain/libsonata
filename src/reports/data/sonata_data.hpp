@@ -2,17 +2,27 @@
 #include <map>
 #include <set>
 
-#include <reports/io/io_writer.hpp>
 #include "node.hpp"
+#include <reports/io/io_writer.hpp>
 
 namespace bbp {
 namespace sonata {
 
-class SonataData {
+class SonataData
+{
     using nodes_t = std::map<uint64_t, std::shared_ptr<Node>>;
+
   public:
-    SonataData(const std::string& report_name, size_t max_buffer_size, int num_steps, double dt, double tstart, double tend, std::shared_ptr<nodes_t> nodes);
-    SonataData(const std::string& report_name, const std::vector<double>& spike_timestamps, const std::vector<int>& spike_node_ids);
+    SonataData(const std::string& report_name,
+               size_t max_buffer_size,
+               int num_steps,
+               double dt,
+               double tstart,
+               double tend,
+               std::shared_ptr<nodes_t> nodes);
+    SonataData(const std::string& report_name,
+               const std::vector<double>& spike_timestamps,
+               const std::vector<int>& spike_node_ids);
 
     void prepare_dataset();
     void write_report_header();
@@ -25,13 +35,25 @@ class SonataData {
     void record_data(double step);
     void update_timestep(double timestep);
 
-    const std::vector<double>& get_report_buffer() const noexcept { return m_report_buffer; }
+    const std::vector<double>& get_report_buffer() const noexcept {
+        return m_report_buffer;
+    }
 
-    const std::vector<uint64_t>& get_node_ids() const noexcept { return m_node_ids; }
-    const std::vector<uint64_t>& get_index_pointers() const noexcept { return m_index_pointers; }
-    const std::vector<uint32_t>& get_element_ids() const noexcept { return m_element_ids; }
-    const std::vector<double>& get_spike_timestamps() const noexcept { return m_spike_timestamps; }
-    const std::vector<int>& get_spike_node_ids() const noexcept { return m_spike_node_ids; }
+    const std::vector<uint64_t>& get_node_ids() const noexcept {
+        return m_node_ids;
+    }
+    const std::vector<uint64_t>& get_index_pointers() const noexcept {
+        return m_index_pointers;
+    }
+    const std::vector<uint32_t>& get_element_ids() const noexcept {
+        return m_element_ids;
+    }
+    const std::vector<double>& get_spike_timestamps() const noexcept {
+        return m_spike_timestamps;
+    }
+    const std::vector<int>& get_spike_node_ids() const noexcept {
+        return m_spike_node_ids;
+    }
 
   private:
     std::string m_report_name;
@@ -61,5 +83,5 @@ class SonataData {
     void prepare_buffer(size_t max_buffer_size);
 };
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp

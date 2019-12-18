@@ -1,22 +1,20 @@
 #include <catch2/catch.hpp>
-#include <spdlog/spdlog.h>
+#include <memory>
 #include <reports/data/node.hpp>
 #include <reports/data/soma_node.hpp>
-#include <memory>
+#include <spdlog/spdlog.h>
 
 using namespace bbp::sonata;
 
-double* square(double* elem)
-{
+double* square(double* elem) {
     *elem *= *elem;
     return elem;
 }
 
-SCENARIO( "Test Node class", "[Node]" ) {
-
-    GIVEN( "An instance of a Node" ) {
+SCENARIO("Test Node class", "[Node]") {
+    GIVEN("An instance of a Node") {
         Node node{1};
-        { // Initial conditions
+        {  // Initial conditions
             REQUIRE(node.get_gid() == 1);
             REQUIRE(node.get_num_elements() == 0);
             REQUIRE(node.get_element_ids().empty());
@@ -31,7 +29,7 @@ SCENARIO( "Test Node class", "[Node]" ) {
         WHEN("We add a element") {
             std::vector<double> elements = {10, 11, 12, 13, 14};
             size_t i = 0;
-            for(auto& element: elements) {
+            for (auto& element : elements) {
                 node.add_element(&element, i);
                 ++i;
             }
@@ -57,7 +55,7 @@ SCENARIO( "Test Node class", "[Node]" ) {
         }
     }
 
-    GIVEN( "An instance of a soma node" ) {
+    GIVEN("An instance of a soma node") {
         SomaNode node{1};
         WHEN("We add one element") {
             double elem1 = 1;
@@ -73,5 +71,4 @@ SCENARIO( "Test Node class", "[Node]" ) {
             }
         }
     }
-
 }

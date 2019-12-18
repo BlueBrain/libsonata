@@ -6,7 +6,6 @@
 #endif
 
 int main(int argc, char* argv[]) {
-
 #ifdef HAVE_MPI
     MPI_Init(nullptr, nullptr);
 #endif
