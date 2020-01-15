@@ -152,6 +152,13 @@ install(TARGETS sonata_shared sonata_static
         DESTINATION lib
 )
 
+install(EXPORT sonata-targets
+        FILE ${PROJECT_NAME}Targets.cmake
+        DESTINATION share/${PROJECT_NAME}/CMake)
+
+export(EXPORT sonata-targets
+       FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+
 install(DIRECTORY ${SONATA_INCLUDE_DIR}/bbp
     DESTINATION include
 )
