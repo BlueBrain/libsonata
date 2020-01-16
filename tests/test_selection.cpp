@@ -6,17 +6,10 @@
 using namespace bbp::sonata;
 
 
-TEST_CASE("Selection", "[base]")
-{
+TEST_CASE("Selection", "[base]") {
     SECTION("range check") {
-        CHECK_THROWS_AS(
-            Selection({{0, 2}, {3, 3}}),
-            SonataError
-        );
-        CHECK_THROWS_AS(
-            Selection({{5, 3}}),
-            SonataError
-        );
+        CHECK_THROWS_AS(Selection({{0, 2}, {3, 3}}), SonataError);
+        CHECK_THROWS_AS(Selection({{5, 3}}), SonataError);
     }
     SECTION("fromValues") {
         const auto selection = Selection::fromValues({1, 3, 4, 1});

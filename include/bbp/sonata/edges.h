@@ -21,14 +21,14 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
-class SONATA_API EdgePopulation : public Population
+class SONATA_API EdgePopulation: public Population
 {
-public:
+  public:
     constexpr static const char* ELEMENT = "edge";
 
-    EdgePopulation(
-        const std::string& h5FilePath, const std::string& csvFilePath, const std::string& name
-    );
+    EdgePopulation(const std::string& h5FilePath,
+                   const std::string& csvFilePath,
+                   const std::string& name);
 
     /**
      * Name of source population extracted from 'source_node_id' dataset
@@ -57,17 +57,17 @@ public:
     /**
      * Find edges connecting two given nodes.
      */
-    Selection connectingEdges(const std::vector<NodeID>& source, const std::vector<NodeID>& target) const;
+    Selection connectingEdges(const std::vector<NodeID>& source,
+                              const std::vector<NodeID>& target) const;
 
     /**
      * Write bidirectional node->edge indices to EdgePopulation HDF5.
      */
-    static void writeIndices(
-        const std::string& h5FilePath, const std::string& population,
-        uint64_t sourceNodeCount,
-        uint64_t targetNodeCount,
-        bool overwrite = false
-    );
+    static void writeIndices(const std::string& h5FilePath,
+                             const std::string& population,
+                             uint64_t sourceNodeCount,
+                             uint64_t targetNodeCount,
+                             bool overwrite = false);
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -76,5 +76,5 @@ using EdgeStorage = PopulationStorage<EdgePopulation>;
 
 //--------------------------------------------------------------------------------------------------
 
-}
-} // namespace bbp::sonata
+}  // namespace sonata
+}  // namespace bbp
