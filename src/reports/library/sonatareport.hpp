@@ -55,7 +55,8 @@ class SonataReport
     void create_communicators();
     void prepare_datasets();
 
-    void write_spikes(const std::vector<double>& spike_timestamps,
+    void write_spikes(const std::string& output_dir,
+                      const std::vector<double>& spike_timestamps,
                       const std::vector<int>& spike_node_ids);
 
     template <typename T>

@@ -183,11 +183,13 @@ int main() {
         change_data(soma_neurons);
     }
     sonata_flush(t);
+    const std::string output_dir = ".";
     // Write the spikes
     sonata_write_spikes(spike_timestamps.data(),
                         spike_timestamps.size(),
                         spike_node_ids.data(),
-                        spike_node_ids.size());
+                        spike_node_ids.size(),
+                        output_dir.data());
 
     if (global_rank == 0) {
         logger->info("Finalizing...");

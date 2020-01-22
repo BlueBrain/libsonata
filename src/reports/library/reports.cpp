@@ -131,10 +131,12 @@ void sonata_refresh_pointers(double* (*refresh_function)(double*) ) {
 void sonata_write_spikes(const double* timestamps,
                          uint64_t size_timestamps,
                          const int* node_ids,
-                         uint64_t size_node_ids) {
+                         uint64_t size_node_ids,
+                         const char* output_dir) {
     const std::vector<double> spike_timestamps(timestamps, timestamps + size_timestamps);
     const std::vector<int> spike_node_ids(node_ids, node_ids + size_node_ids);
-    sonata_report.write_spikes(spike_timestamps, spike_node_ids);
+    const std::string output_directory(output_dir);
+    sonata_report.write_spikes(output_directory, spike_timestamps, spike_node_ids);
 }
 
 // NOT REQUIRED FOR SONATA

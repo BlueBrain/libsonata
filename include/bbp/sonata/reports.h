@@ -53,7 +53,8 @@ void sonata_set_min_steps_to_record(int steps);
 void sonata_write_spikes(const double* spike_timestamps,
                          uint64_t size_timestamps,
                          const int* spike_node_ids,
-                         uint64_t size_node_ids);
+                         uint64_t size_node_ids,
+                         const char* output_dir);
 
 /**
  * \brief Save data of nodeids[] to buffer

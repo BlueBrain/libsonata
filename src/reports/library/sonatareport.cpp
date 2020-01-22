@@ -85,9 +85,11 @@ void SonataReport::prepare_datasets() {
     }
 }
 
-void SonataReport::write_spikes(const std::vector<double>& spike_timestamps,
+void SonataReport::write_spikes(const std::string& output_dir,
+                                const std::vector<double>& spike_timestamps,
                                 const std::vector<int>& spike_node_ids) {
-    SonataData spike_data("spikes", spike_timestamps, spike_node_ids);
+    std::string report_name = output_dir + "/out";
+    SonataData spike_data(report_name, spike_timestamps, spike_node_ids);
     spike_data.write_spikes_header();
     spike_data.close();
 }

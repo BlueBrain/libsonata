@@ -16,7 +16,8 @@ HDF5Writer::HDF5Writer(const std::string& report_name)
                                                                                     plist_id);
 
     // Create hdf5 file named after the report_name
-    m_file = H5Fcreate(report_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
+    const std::string file_name = report_name + ".h5";
+    m_file = H5Fcreate(file_name.data(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
     m_offset[0] = 0;
     m_offset[1] = 0;
 
