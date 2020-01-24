@@ -23,20 +23,25 @@ matrix:
       language: generic
       python: 2.7
 
+addons:
+  homebrew:
+    packages:
+    - hdf5
+  apt:
+    packages:
+    - libhdf5-dev
+
 cache:
   directories:
     - $HOME/.cache/pip
-    - $HOME/Library/Caches/Homebrew
 
 before_install:
   - rm -rf dist *.egg-info && python setup.py sdist
-  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt-get install libhdf5-dev; else brew install hdf5; fi
 
 install: skip
 script:
   - ci/cpp_test.sh
   - ci/python_test.sh
-
 
 deploy:
   on:

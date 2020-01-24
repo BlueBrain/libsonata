@@ -92,6 +92,11 @@ class SONATA_API Population
     uint64_t size() const;
 
     /**
+     * Selection covering all elements
+     */
+    Selection selectAll() const;
+
+    /**
      * All attribute names (CSV columns + required attributes + union of attributes in groups)
      */
     const std::set<std::string>& attributeNames() const;

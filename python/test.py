@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from libsonata import *
+from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -141,6 +141,9 @@ class TestNodePopulation(unittest.TestCase):
             0
         )
 
+    def test_select_all(self):
+        self.assertEqual(self.test_obj.select_all().flat_size, 6)
+
 
 class TestEdgePopulation(unittest.TestCase):
     def setUp(self):
@@ -172,6 +175,9 @@ class TestEdgePopulation(unittest.TestCase):
     def test_connecting_edges(self):
         self.assertEqual(self.test_obj.connecting_edges([1, 2], [1, 2]).ranges, [(0, 4)])
         self.assertEqual(self.test_obj.connecting_edges(1, 1).ranges, [(0, 1)])
+
+    def test_select_all(self):
+        self.assertEqual(self.test_obj.select_all().flat_size, 6)
 
 
 if __name__ == '__main__':

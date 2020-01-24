@@ -73,6 +73,12 @@ TEST_CASE("EdgePopulation", "[edges]") {
 }
 
 
+TEST_CASE("EdgePopulationSelectAll", "[base]") {
+    const EdgePopulation population("./data/edges1.h5", "", "edges-AB");
+    CHECK(population.selectAll().flatSize() == 6);
+}
+
+
 namespace {
 
 // TODO: remove after switching to C++17

@@ -143,6 +143,11 @@ uint64_t Population::size() const {
 }
 
 
+Selection Population::selectAll() const {
+    return Selection({{0, size()}});
+}
+
+
 const std::set<std::string>& Population::attributeNames() const {
     return impl_->attributeNames;
 }
