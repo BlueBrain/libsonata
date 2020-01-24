@@ -71,6 +71,7 @@ else()
     find_package(fmt REQUIRED)
     find_package(Catch2 REQUIRED)
     find_package(HighFive REQUIRED)
+    find_package(nlohmann_json REQUIRED)
 endif()
 
 # =============================================================================
@@ -85,6 +86,7 @@ set(SONATA_SRC
     src/nodes.cpp
     src/population.cpp
     src/report_reader.cpp
+    src/node_sets.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
     )
 
@@ -133,6 +135,7 @@ target_compile_definitions(sonata_shared
 target_link_libraries(sonata_shared
     PRIVATE fmt::fmt-header-only
     PRIVATE HighFive
+    PRIVATE nlohmann_json::nlohmann_json
 )
 
 target_compile_definitions(sonata_static
@@ -141,6 +144,7 @@ target_compile_definitions(sonata_static
 target_include_directories(sonata_static
     PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:nlohmann_json::nlohmann_json,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 # =============================================================================

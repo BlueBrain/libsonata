@@ -4,6 +4,7 @@
 
 #include <bbp/sonata/common.h>
 #include <bbp/sonata/edges.h>
+#include <bbp/sonata/node_sets.h>
 #include <bbp/sonata/nodes.h>
 #include <bbp/sonata/report_reader.h>
 
@@ -120,6 +121,7 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
 }
 
 // create a macro to reduce repetition for docstrings
+#define DOC_NODESETS(x) DOC(bbp, sonata, NodeSets, x)
 #define DOC_SEL(x) DOC(bbp, sonata, Selection, x)
 #define DOC_POP(x) DOC(bbp, sonata, Population, x)
 #define DOC_POP_NODE(x) DOC(bbp, sonata, NodePopulation, x)
@@ -217,7 +219,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             "name"_a,
             "selection"_a,
             "default_value"_a,
-            imbueElementName(DOC_POP(getAttribute_2)).c_str())
+            imbueElementName(DOC_POP(getAttribute)).c_str())
         .def_property_readonly("dynamics_attribute_names",
                                &Population::dynamicsAttributeNames,
                                DOC_POP(dynamicsAttributeNames))
@@ -259,7 +261,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             "name"_a,
             "selection"_a,
             "default_value"_a,
-            imbueElementName(DOC_POP(getDynamicsAttribute_2)).c_str())
+            imbueElementName(DOC_POP(getDynamicsAttribute)).c_str())
         .def(
             "get_enumeration",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
@@ -416,6 +418,13 @@ PYBIND11_MODULE(_libsonata, m) {
             DOC_POP_NODE(matchAttributeValues));
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
+
+    py::class_<NodeSets>(m, "NodeSets", "")
+        .def(py::init<const std::string&>())
+        .def_property_readonly("names", &NodeSets::names, DOC_NODESETS(names))
+        .def("materialize", &NodeSets::materialize, DOC_NODESETS(materialize))
+        .def("toJSON", &NodeSets::toJSON, DOC_NODESETS(toJSON));
+
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")

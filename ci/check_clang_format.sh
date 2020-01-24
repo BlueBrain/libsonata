@@ -18,8 +18,8 @@ source "$VENV/bin/activate"
 set -u
 
 changes=$(git-clang-format 'HEAD~1')
-if [[ $(echo "$changes" | grep -n1 'changed files') ]]; then
+if [[ $(echo "$changes" | grep -n1 'changed files' | grep -v 'extlib') ]]; then
     echo "The following files require changes to pass the current clang-format"
-    echo "$changes"
+    echo "$changes" | grep -v 'extlib'
     exit 1
 fi

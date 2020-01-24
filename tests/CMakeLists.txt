@@ -1,6 +1,7 @@
 set(TESTS_SRC
   main.cpp
   test_edges.cpp
+  test_node_sets.cpp
   test_nodes.cpp
   test_report_reader.cpp
   test_selection.cpp

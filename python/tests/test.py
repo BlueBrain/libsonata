@@ -3,8 +3,13 @@ import unittest
 
 import numpy as np
 
-from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
-from libsonata import SpikeReader, SpikePopulation, SomaReportReader, SomaReportPopulation, ElementReportReader, ElementReportPopulation
+from libsonata import (EdgeStorage, NodeStorage,
+                       Selection, SonataError,
+                       SpikeReader, SpikePopulation,
+                       SomaReportReader, SomaReportPopulation,
+                       ElementReportReader, ElementReportPopulation,
+                       NodeSets,
+                       )
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -331,11 +336,107 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
         with self.assertRaises(SonataError):
             self.test_obj['All'].get(tstart=5.)  # tstart out of range
-        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0], [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9]) # tstart should be <= tstop
+
+        # tstart should be <= tstop
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0],
+                                   [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9])
         # check following calls succeed (no memory destroyed)
-        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0], [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9])
-        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0], [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
-        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstride=4).data[2], [81.0, 81.1, 81.2, 81.3, 81.4, 81.5, 81.6, 81.7, 81.8, 81.9], 1e-6, 0)
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0],
+                                   [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9])
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0],
+                                   [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstride=4).data[2],
+                                   [81.0, 81.1, 81.2, 81.3, 81.4, 81.5, 81.6, 81.7, 81.8, 81.9], 1e-6, 0)
+
+
+class TestNodePopulationFailure(unittest.TestCase):
+    def test_CorrectStructure(self):
+        self.assertRaises(SonataError, NodeSets, "1")
+        self.assertRaises(SonataError, NodeSets, "[1]")
+
+    def test_BasicScalarFailFloat(self):
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "node_id": 1.5 } }')
+
+    def test_BasicScalarFailNegativeNodeIds(self):
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "node_id": -1 } }')
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "node_id": [1, -1] } }')
+
+    def test_BasicScalarFailPopulation(self):
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "population": 1 } }')
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "population": [1, 2] } }')
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "population": ["foo", "bar"] } }')
+
+    def test_FailCompoundWithInt(self):
+        self.assertRaises(SonataError, NodeSets, '{"compound": ["foo", 1] }')
+
+    def test_FaileRecursiveCompound(self):
+        self.assertRaises(SonataError, NodeSets, '{"compound": ["compound"] }')
+
+    def test_MissingBasic(self):
+        self.assertRaises(SonataError, NodeSets, '{"compound": ["missing"] }')
+
+
+class TestNodePopulationNodeSet(unittest.TestCase):
+    def setUp(self):
+        self.population = NodeStorage(os.path.join(PATH, 'nodes1.h5')).open_population('nodes-A')
+
+    def test_BasicScalarInt(self):
+        sel = NodeSets('{ "NodeSet0": { "attr-Y": 21 } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((0, 1),)))
+
+    def test_BasicScalarString(self):
+        sel = NodeSets('{ "NodeSet0": { "attr-Z": ["aa", "cc"] } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((0, 1), (2, 3))))
+
+    def test_BasicScalarEnum(self):
+        sel = NodeSets('{ "NodeSet0": { "E-mapping-good": "C" } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((0, 1), (2, 3), (4, 6),)))
+
+    def test_BasicScalarAnded(self):
+        j = '''{"NodeSet0": {"E-mapping-good": "C",
+                             "attr-Y": [21, 22]
+                            }
+            }'''
+        sel = NodeSets(j).materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((0, 1), )))
+
+    def test_BasicScalarNodeId(self):
+        sel = NodeSets('{ "NodeSet0": { "node_id": [1, 3, 5] } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((1, 2), (3, 4), (5, 6))))
+
+    def test_BasicScalarPopulation(self):
+        sel = NodeSets('{ "NodeSet0": { "population": "nodes-A" } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, self.population.select_all())
+
+        sel = NodeSets('{ "NodeSet0": { "population": "NOT_A_POP" } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection([]))
+
+    def test_NodeSetCompound(self):
+        j = '''{"NodeSet0": { "node_id": [1] },
+                "NodeSet1": { "node_id": [2] },
+                "NodeSetCompound": ["NodeSet0", "NodeSet1", "NodeSet2"],
+                "NodeSet2": { "node_id": [3] }
+        }'''
+        sel = NodeSets(j).materialize("NodeSetCompound", self.population)
+        self.assertEqual(sel, Selection(((1, 4), )))
+
+    def test_NodeSet_toJSON(self):
+         j = '''
+         {"bio_layer45": {
+               "model_type": "biophysical",
+               "location": ["layer4", "layer5"]
+           },
+           "V1_point_prime": {
+               "population": "biophysical",
+               "model_type": "point",
+               "node_id": [1, 2, 3, 5, 7, 9]
+           },
+           "combined": ["bio_layer45", "V1_point_prime"]
+         }'''
+         new = NodeSets(j).toJSON()
+         ns1 = NodeSets(new)
+         self.assertEqual(new, ns1.toJSON())
+
 
 if __name__ == '__main__':
     unittest.main()
