@@ -145,3 +145,8 @@ TEST_CASE("NodePopulationMove", "[base]") {
     NodePopulation pop2 = std::move(population);
     CHECK(pop2.name() == "nodes-A");
 }
+
+TEST_CASE("NodePopulationSelectAll", "[base]") {
+    NodePopulation population("./data/nodes1.h5", "", "nodes-A");
+    CHECK(population.selectAll().flatSize() == 6);
+}
