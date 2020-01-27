@@ -15,16 +15,13 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     : m_report_name(report_name)
     , m_tstart(tstart)
     , m_tend(tend)
-    , m_dt(dt) {
-    m_nodes = std::make_shared<nodes_t>();
+    , m_dt(dt)
+    , m_max_buffer_size(DEFAULT_MAX_BUFFER_SIZE)
+    , m_report_is_closed(false)
+    , m_nodes(std::make_shared<nodes_t>()) {
     // Calculate number of reporting steps
-    m_num_steps = static_cast<int>((tend - tstart) / dt);
-    if (std::fabs(m_num_steps * dt + tstart - tend) > std::numeric_limits<float>::epsilon()) {
-        m_num_steps++;
-    }
-    // Default max buffer size
-    m_max_buffer_size = DEFAULT_MAX_BUFFER_SIZE;
-    m_report_is_closed = false;
+    double sim_steps = (tend - tstart) / dt;
+    m_num_steps = static_cast<int>(std::ceil(sim_steps));
 }
 
 void Report::add_node(uint64_t node_id) {

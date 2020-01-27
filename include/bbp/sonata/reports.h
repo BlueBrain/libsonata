@@ -84,7 +84,7 @@ void sonata_refresh_pointers(double* (*refresh_function)(double*) );
  * @param buffer_size requested maximum memory allocatable by a Report buffer in MBytes
  * @return 0
  */
-size_t sonata_set_max_buffer_size_hint(size_t buffer_size);
+int sonata_set_max_buffer_size_hint(size_t buffer_size);
 
 /**
  * \brief Set a suggested maximum memory size that a specific report can use as a buffer
@@ -92,7 +92,7 @@ size_t sonata_set_max_buffer_size_hint(size_t buffer_size);
  * @param buffer_size requested maximum memory allocatable by a Report buffer in MBytes
  * @return 0
  */
-size_t sonata_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size);
+int sonata_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size);
 
 /*! \brief Clear all the reports
  */

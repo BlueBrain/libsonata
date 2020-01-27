@@ -59,10 +59,10 @@ class SonataReport
                       const std::vector<double>& spike_timestamps,
                       const std::vector<int>& spike_node_ids);
 
-    template <typename T>
-    void apply_all(void (Report::*fun)(T), T data) {
+    template <typename Functor, typename T>
+    void apply_all(const Functor& functor, T data) {
         std::for_each(m_reports.begin(), m_reports.end(), [&](reports_t::value_type arg) {
-            ((*(arg.second)).*fun)(data);
+            functor(arg.second, data);
         });
     }
 

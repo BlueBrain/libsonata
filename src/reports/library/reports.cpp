@@ -20,18 +20,21 @@ int sonata_create_report(
         }
     } catch (const std::exception& err) {
         logger->error(err.what());
+        return -1;
     }
     return 0;
 }
 
 int sonata_add_node(const char* report_name, uint64_t node_id) {
+    if (!sonata_report.report_exists(report_name)) {
+        return -2;
+    }
     try {
-        if (sonata_report.report_exists(report_name)) {
-            auto report = sonata_report.get_report(report_name);
-            report->add_node(node_id);
-        }
+        auto report = sonata_report.get_report(report_name);
+        report->add_node(node_id);
     } catch (const std::exception& err) {
         logger->error(err.what());
+        return -1;
     }
     return 0;
 }
@@ -41,7 +44,7 @@ int sonata_add_element(const char* report_name,
                        uint32_t element_id,
                        double* voltage) {
     if (!sonata_report.report_exists(report_name)) {
-        return 0;
+        return -2;
     }
     try {
         auto report = sonata_report.get_report(report_name);
@@ -49,6 +52,7 @@ int sonata_add_element(const char* report_name,
         node->add_element(voltage, element_id);
     } catch (const std::exception& err) {
         logger->error(err.what());
+        return -1;
     }
     return 0;
 }
@@ -68,7 +72,7 @@ void sonata_set_min_steps_to_record(int steps) {
 
 int sonata_record_node_data(double step, int num_nodes, int* nodeids, const char* report_name) {
     if (sonata_report.is_empty()) {
-        return 0;
+        return -3;
     }
     if (!sonata_report.report_exists(report_name)) {
         return -1;
@@ -81,31 +85,35 @@ int sonata_record_node_data(double step, int num_nodes, int* nodeids, const char
 
 int sonata_record_data(double step) {
     if (sonata_report.is_empty()) {
-        return 0;
+        return -3;
     }
-    sonata_report.apply_all(&Report::record_data, step);
+    auto functor = std::mem_fn<void(double)>(&Report::record_data);
+    sonata_report.apply_all(functor, step);
     return 0;
 }
 
 int sonata_end_iteration(double timestep) {
-    sonata_report.apply_all(&Report::end_iteration, timestep);
+    auto functor = std::mem_fn(&Report::end_iteration);
+    sonata_report.apply_all(functor, timestep);
     return 0;
 }
 
 int sonata_flush(double time) {
     if (sonata_report.is_empty()) {
-        return 0;
+        return -3;
     }
-    sonata_report.apply_all(&Report::flush, time);
+    auto functor = std::mem_fn(&Report::flush);
+    sonata_report.apply_all(functor, time);
     return 0;
 }
 
-size_t sonata_set_max_buffer_size_hint(size_t buffer_size) {
-    sonata_report.apply_all(&Report::set_max_buffer_size, buffer_size * /*1024*/ 1048576);
+int sonata_set_max_buffer_size_hint(size_t buffer_size) {
+    auto functor = std::mem_fn(&Report::set_max_buffer_size);
+    sonata_report.apply_all(functor, buffer_size * /*1024*/ 1048576);
     return 0;
 }
 
-size_t sonata_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size) {
+int sonata_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size) {
     if (!sonata_report.report_exists(report_name)) {
         return -1;
     }
@@ -125,7 +133,8 @@ int sonata_get_num_reports() {
 void sonata_refresh_pointers(double* (*refresh_function)(double*) ) {
     std::function<double*(double*)> fun(refresh_function);  // This conversion is needed as
                                                             // apply_all is a magic template
-    sonata_report.apply_all(&Report::refresh_pointers, fun);
+    auto functor = std::mem_fn(&Report::refresh_pointers);
+    sonata_report.apply_all(functor, fun);
 }
 
 void sonata_write_spikes(const double* timestamps,

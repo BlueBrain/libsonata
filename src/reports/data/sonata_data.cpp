@@ -31,9 +31,9 @@ SonataData::SonataData(const std::string& report_name,
 
 SonataData::SonataData(const std::string& report_name,
                        const std::vector<double>& spike_timestamps,
-                       const std::vector<int>& spike_node_ids) {
-    m_spike_timestamps = spike_timestamps;
-    m_spike_node_ids = spike_node_ids;
+                       const std::vector<int>& spike_node_ids)
+    : m_spike_timestamps(spike_timestamps)
+    , m_spike_node_ids(spike_node_ids) {
     m_io_writer = std::make_unique<HDF5Writer>(report_name);
 }
 
@@ -51,7 +51,7 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
 
     // Calculate the timesteps that fit given the buffer size
     {
-        int max_steps_to_write = max_buffer_size / sizeof(double) / m_total_elements;
+        int max_steps_to_write = max_buffer_size / (sizeof(double) * m_total_elements);
         if (max_steps_to_write < m_num_steps) {  // More step asked that buffer can contains
             if (max_steps_to_write < SonataReport::m_min_steps_to_record) {
                 m_steps_to_write = SonataReport::m_min_steps_to_record;
@@ -144,7 +144,6 @@ void SonataData::record_data(double step) {
             local_position);
     }
     for (auto& kv : *m_nodes) {
-        int current_gid = kv.first;
         kv.second->fill_data(m_report_buffer.begin() + local_position);
         local_position += kv.second->get_num_elements();
     }

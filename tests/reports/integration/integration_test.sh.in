@@ -12,9 +12,9 @@ if [ $exitvalue -ne 0 ]; then
   exit $exitvalue
 fi
 
-h5diff -c compartment_report @CMAKE_CURRENT_SOURCE_DIR@/compartment_report.ref > diff_compartment.dat /report/data 2>&1
-h5diff -c soma_report @CMAKE_CURRENT_SOURCE_DIR@/soma_report.ref > diff_soma.dat /report/data 2>&1
-h5diff -c spikes @CMAKE_CURRENT_SOURCE_DIR@/spikes.ref /spikes/timestamps > diff_spikes.dat 2>&1
+h5diff -c compartment_report.h5 @CMAKE_CURRENT_SOURCE_DIR@/compartment_report.ref > diff_compartment.dat /report/data 2>&1
+h5diff -c soma_report.h5 @CMAKE_CURRENT_SOURCE_DIR@/soma_report.ref > diff_soma.dat /report/data 2>&1
+h5diff -c out.h5 @CMAKE_CURRENT_SOURCE_DIR@/spikes.ref /spikes/timestamps > diff_spikes.dat 2>&1
 
 if [ -s diff_compartment.dat ]
 then

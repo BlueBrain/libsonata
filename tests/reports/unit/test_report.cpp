@@ -7,14 +7,18 @@
 using namespace bbp::sonata;
 
 SCENARIO("Test Report class", "[Report]") {
-    const double tstart = 0;
-    const double tend = 1.0;
-    const double dt = 0.1;
     uint32_t soma_id = 42;
     uint32_t element_id = 142;
     GIVEN("An instance of a soma report") {
+        const double tstart = 0;
+        const double tend = 10.0;
+        const double dt = 0.3;
         std::shared_ptr<Report> soma_report =
             std::make_shared<SomaReport>("somaReport", tstart, tend, dt);
+
+        THEN("Number of steps is 34 (33 + 1)") {
+            REQUIRE(soma_report->get_num_steps() == 34);
+        }
         WHEN("We add a node and a variable to a soma report") {
             soma_report->add_node(1);
             double element_value = 10;
@@ -41,8 +45,14 @@ SCENARIO("Test Report class", "[Report]") {
     }
 
     GIVEN("An instance of a element report") {
+        const double tstart = 0;
+        const double tend = 1.0;
+        const double dt = 0.1;
         std::shared_ptr<Report> element_report =
             std::make_shared<ElementReport>("elementReport", tstart, tend, dt);
+        THEN("Number of steps is 10") {
+            REQUIRE(element_report->get_num_steps() == 10);
+        }
         WHEN("We add 2 nodes") {
             element_report->add_node(1);
             element_report->add_node(2);

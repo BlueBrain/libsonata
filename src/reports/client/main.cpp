@@ -160,10 +160,8 @@ int main() {
         logger->info("Starting the simulation!");
     }
     // Calculate number of steps of the simulation
-    int num_steps = static_cast<int>((tstop - tstart) / dt);
-    if (std::fabs(num_steps * dt + tstart - tstop) > std::numeric_limits<float>::epsilon()) {
-        num_steps++;
-    }
+    double sim_steps = (tstop - tstart) / dt;
+    int num_steps = static_cast<int>(std::ceil(sim_steps));
     double t = 0.0;
     for (int i = 0; i < num_steps; i++) {
         if (global_rank == 0) {

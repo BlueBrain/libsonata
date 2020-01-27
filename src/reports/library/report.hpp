@@ -20,6 +20,9 @@ class Report
     bool is_empty() const noexcept {
         return m_nodes->empty();
     }
+    int get_num_steps() const noexcept {
+        return m_num_steps;
+    }
     /**
      * Allocates the buffers used to hold main
      * report data.
