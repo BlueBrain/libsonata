@@ -1,6 +1,7 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <iterator>
 #include <thread>
 #include <vector>
 
@@ -107,12 +108,11 @@ void change_data(std::vector<Neuron>& neurons) {
 
 void print_data(std::vector<Neuron>& neurons) {
     for (auto& neuron : neurons) {
-        std::cout << "++NEURON node_id: " << neuron.node_id << std::endl;
-        std::cout << "elements:" << std::endl;
-        for (auto& element : neuron.voltages) {
-            std::cout << element << ", ";
-        }
-        std::cout << std::endl << std::endl;
+        std::cout << "++NEURON node_id: " << neuron.node_id << "\nelements:\n";
+        std::copy(neuron.voltages.begin(),
+                  neuron.voltages.end(),
+                  std::ostream_iterator<double>(std::cout, ", "));
+        std::cout << "\n\n";
     }
 }
 

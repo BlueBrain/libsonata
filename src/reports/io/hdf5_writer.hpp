@@ -8,13 +8,14 @@
 class HDF5Writer: public IoWriter
 {
   public:
-    HDF5Writer(const std::string& report_name);
-    ~HDF5Writer() = default;
-    void configure_group(const std::string& group_name);
+    explicit HDF5Writer(const std::string& report_name);
+    void configure_group(const std::string& group_name) override;
     void configure_attribute(const std::string& group_name,
                              const std::string& attribute_name,
-                             const std::string& attribute_value);
-    void configure_dataset(const std::string& dataset_name, int total_steps, int total_elements);
+                             const std::string& attribute_value) override;
+    void configure_dataset(const std::string& dataset_name,
+                           int total_steps,
+                           int total_elements) override;
     void write(const std::vector<double>& buffer,
                int steps_to_write,
                int total_steps,

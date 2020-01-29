@@ -15,9 +15,10 @@ SonataData::SonataData(const std::string& report_name,
                        double dt,
                        double tstart,
                        double tend,
-                       std::shared_ptr<nodes_t> nodes)
+                       const std::shared_ptr<nodes_t>& nodes)
     : m_report_name(report_name)
     , m_num_steps(num_steps)
+    , m_io_writer(std::make_unique<HDF5Writer>(report_name))
     , m_nodes(nodes) {
     prepare_buffer(max_buffer_size);
     m_index_pointers.resize(nodes->size());
@@ -25,17 +26,14 @@ SonataData::SonataData(const std::string& report_name,
     m_reporting_period = static_cast<int>(dt / SonataReport::m_atomic_step);
     m_last_step_recorded = tstart / SonataReport::m_atomic_step;
     m_last_step = tend / SonataReport::m_atomic_step;
-
-    m_io_writer = std::make_unique<HDF5Writer>(report_name);
 }
 
 SonataData::SonataData(const std::string& report_name,
                        const std::vector<double>& spike_timestamps,
                        const std::vector<int>& spike_node_ids)
     : m_spike_timestamps(spike_timestamps)
-    , m_spike_node_ids(spike_node_ids) {
-    m_io_writer = std::make_unique<HDF5Writer>(report_name);
-}
+    , m_spike_node_ids(spike_node_ids)
+    , m_io_writer(std::make_unique<HDF5Writer>(report_name)) {}
 
 void SonataData::prepare_buffer(size_t max_buffer_size) {
     logger->trace("Prepare buffer for {}", m_report_name);
@@ -83,7 +81,7 @@ void SonataData::prepare_buffer(size_t max_buffer_size) {
     }
 }
 
-bool SonataData::is_due_to_report(double step) const {
+bool SonataData::is_due_to_report(double step) const noexcept {
     // Dont record data if current step < tstart
     if (step < m_last_step_recorded) {
         return false;

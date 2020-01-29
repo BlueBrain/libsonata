@@ -29,7 +29,7 @@ bool SonataReport::is_empty() {
     return m_reports.empty();
 }
 
-std::shared_ptr<Report> SonataReport::create_report(
+const std::shared_ptr<Report>& SonataReport::create_report(
     const std::string& name, const std::string& kind, double tstart, double tend, double dt) {
     if (kind == "compartment") {
         m_reports.emplace(name, std::make_shared<ElementReport>(name, tstart, tend, dt));
@@ -48,7 +48,7 @@ std::shared_ptr<Report> SonataReport::create_report(
     return get_report(name);
 }
 
-std::shared_ptr<Report> SonataReport::get_report(const std::string& name) const {
+const std::shared_ptr<Report>& SonataReport::get_report(const std::string& name) const {
     return m_reports.at(name);
 }
 

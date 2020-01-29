@@ -50,6 +50,9 @@ int sonata_add_element(const char* report_name,
         auto report = sonata_report.get_report(report_name);
         auto node = report->get_node(node_id);
         node->add_element(voltage, element_id);
+    } catch (const std::out_of_range& err) {
+        logger->error(err.what());
+        return -3;
     } catch (const std::exception& err) {
         logger->error(err.what());
         return -1;
@@ -138,12 +141,12 @@ void sonata_refresh_pointers(double* (*refresh_function)(double*) ) {
 }
 
 void sonata_write_spikes(const double* timestamps,
-                         uint64_t size_timestamps,
+                         uint64_t num_timestamps,
                          const int* node_ids,
-                         uint64_t size_node_ids,
+                         uint64_t num_node_ids,
                          const char* output_dir) {
-    const std::vector<double> spike_timestamps(timestamps, timestamps + size_timestamps);
-    const std::vector<int> spike_node_ids(node_ids, node_ids + size_node_ids);
+    const std::vector<double> spike_timestamps(timestamps, timestamps + num_timestamps);
+    const std::vector<int> spike_node_ids(node_ids, node_ids + num_node_ids);
     const std::string output_directory(output_dir);
     sonata_report.write_spikes(output_directory, spike_timestamps, spike_node_ids);
 }

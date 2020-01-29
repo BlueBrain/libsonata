@@ -38,13 +38,13 @@ class SONATA_API Selection
     static Selection fromValues(Iterator first, Iterator last);
     static Selection fromValues(const Values& values);
 
-    const Ranges& ranges() const;
+    const Ranges& ranges() const noexcept;
 
     Values flatten() const;
 
-    size_t flatSize() const;
+    size_t flatSize() const noexcept;
 
-    bool empty() const;
+    bool empty() const noexcept;
 
   private:
     const Ranges ranges_;
@@ -87,7 +87,7 @@ class SONATA_API Population
     /**
      * Name of the population used for identifying it in circuit composition
      */
-    std::string name() const;
+    const std::string& name() const noexcept;
 
     /**
      * Total number of elements
@@ -102,7 +102,7 @@ class SONATA_API Population
     /**
      * All attribute names (CSV columns + required attributes + union of attributes in groups)
      */
-    const std::set<std::string>& attributeNames() const;
+    const std::set<std::string>& attributeNames() const noexcept;
 
     /**
      * All attribute names that are explicit enumerations
@@ -110,7 +110,7 @@ class SONATA_API Population
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      */
-    const std::set<std::string>& enumerationNames() const;
+    const std::set<std::string>& enumerationNames() const noexcept;
 
     /**
      * Get attribute values for given Selection

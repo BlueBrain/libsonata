@@ -33,7 +33,8 @@ class Report
 
     virtual void add_node(uint64_t node_id);
     bool node_exists(uint64_t node_id) const;
-    std::shared_ptr<Node> get_node(uint64_t node_id);
+    std::shared_ptr<Node>& get_node(uint64_t node_id);
+    const std::shared_ptr<Node>& get_node(uint64_t node_id) const;
     virtual size_t get_total_elements() const = 0;
 
     virtual void record_data(double step, const std::vector<uint64_t>& node_ids);

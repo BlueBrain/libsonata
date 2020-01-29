@@ -19,7 +19,7 @@ class SonataData
                double dt,
                double tstart,
                double tend,
-               std::shared_ptr<nodes_t> nodes);
+               const std::shared_ptr<nodes_t>& nodes);
     SonataData(const std::string& report_name,
                const std::vector<double>& spike_timestamps,
                const std::vector<int>& spike_node_ids);
@@ -30,7 +30,7 @@ class SonataData
     void write_data();
     void close();
 
-    bool is_due_to_report(double step) const;
+    bool is_due_to_report(double step) const noexcept;
     void record_data(double step, const std::vector<uint64_t>& node_ids);
     void record_data(double step);
     void update_timestep(double timestep);
@@ -77,7 +77,7 @@ class SonataData
     std::vector<int> m_spike_node_ids;
 
     std::set<uint64_t> m_nodes_recorded;
-    std::unique_ptr<IoWriter> m_io_writer;
+    const std::unique_ptr<IoWriter> m_io_writer;
     std::shared_ptr<nodes_t> m_nodes;
 
     void prepare_buffer(size_t max_buffer_size);

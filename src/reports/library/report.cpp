@@ -39,7 +39,11 @@ bool Report::node_exists(uint64_t node_id) const {
     return m_nodes->find(node_id) != m_nodes->end();
 }
 
-std::shared_ptr<Node> Report::get_node(uint64_t node_id) {
+std::shared_ptr<Node>& Report::get_node(uint64_t node_id) {
+    return m_nodes->at(node_id);
+}
+
+const std::shared_ptr<Node>& Report::get_node(uint64_t node_id) const {
     return m_nodes->at(node_id);
 }
 
