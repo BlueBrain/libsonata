@@ -81,6 +81,17 @@ bool Selection::empty() const {
 
 //--------------------------------------------------------------------------------------------------
 
+
+bool operator==(const Selection& lhs, const Selection& rhs) {
+    return lhs.ranges() == rhs.ranges();
+}
+
+
+bool operator!=(const Selection& lhs, const Selection& rhs) {
+    return !(lhs == rhs);
+}
+
+
 namespace {
 
 std::string _getDataType(const HighFive::DataSet& dset, const std::string& name) {

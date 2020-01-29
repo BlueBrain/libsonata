@@ -50,6 +50,9 @@ class SONATA_API Selection
     const Ranges ranges_;
 };
 
+bool SONATA_API operator==(const Selection&, const Selection&);
+bool SONATA_API operator!=(const Selection&, const Selection&);
+
 template <typename Iterator>
 Selection Selection::fromValues(Iterator first, Iterator last) {
     Selection::Ranges ranges;

@@ -34,6 +34,23 @@ class TestSelection(unittest.TestCase):
         self.assertFalse(Selection([]))
         self.assertFalse(Selection(np.array([], dtype=np.uint64)))
 
+    def test_comparison(self):
+        empty = Selection([])
+        range_selection = Selection(((0, 2), (3, 4)))
+        values_selection = Selection([1, 3, 4, 1])
+
+        self.assertEqual(empty, empty)
+        self.assertNotEqual(empty, range_selection)
+        self.assertNotEqual(empty, values_selection)
+
+        self.assertEqual(range_selection, range_selection)
+        self.assertNotEqual(range_selection, values_selection)
+
+        self.assertEqual(values_selection, values_selection)
+
+        values_selection1 = Selection([1, 3, 4, 1])
+        self.assertEqual(values_selection, values_selection1)
+
 
 class TestNodePopulation(unittest.TestCase):
     def setUp(self):
