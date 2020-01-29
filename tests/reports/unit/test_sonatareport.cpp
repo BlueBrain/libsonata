@@ -2,7 +2,8 @@
 
 #include <bbp/sonata/reports.h>
 
-static const char* report_name = "myElementReport";
+static const char* element_report_name = "myElementReport";
+static const char* soma_report_name = "mySomaReport";
 
 SCENARIO("Test SonataReport API", "[sonatareport]") {
     const double tstart = 0;
@@ -12,34 +13,34 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
     uint32_t element_id = 142;
 
     WHEN("We add a new report (element) and node") {
-        sonata_create_report(report_name, tstart, tend, dt, "compartment");
-        sonata_add_node(report_name, 1);
+        sonata_create_report(element_report_name, tstart, tend, dt, "compartment");
+        sonata_add_node(element_report_name, 1);
         THEN("Number of reports is 1") {
             REQUIRE(sonata_get_num_reports() == 1);
         }
     }
 
     WHEN("We add a node to an existing element report") {
-        sonata_create_report(report_name, tstart, tend, dt, "compartment");
-        sonata_add_node(report_name, 2);
+        sonata_create_report(element_report_name, tstart, tend, dt, "compartment");
+        sonata_add_node(element_report_name, 2);
         THEN("Number of reports is still 1") {
             REQUIRE(sonata_get_num_reports() == 1);
         }
     }
 
     WHEN("We add an existing node to an existing element report") {
-        sonata_create_report(report_name, tstart, tend, dt, "compartment");
-        sonata_add_node(report_name, 2);
+        sonata_create_report(element_report_name, tstart, tend, dt, "compartment");
+        sonata_add_node(element_report_name, 2);
         THEN("Number of reports is still 1") {
             REQUIRE(sonata_get_num_reports() == 1);
         }
     }
 
     WHEN("We add a second report (soma), a node and a variable") {
-        sonata_create_report(report_name, tstart, tend, dt, "soma");
-        sonata_add_node(report_name, 1);
+        sonata_create_report(soma_report_name, tstart, tend, dt, "soma");
+        sonata_add_node(soma_report_name, 1);
         double soma_value = 42;
-        sonata_add_element(report_name, 1, element_id, &soma_value);
+        sonata_add_element(soma_report_name, 1, element_id, &soma_value);
         THEN("Number of reports is 2") {
             REQUIRE(sonata_get_num_reports() == 2);
         }
@@ -47,14 +48,15 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
 
     WHEN("We add a second variable to an existing node in a soma report") {
         double soma_value = 24;
-        sonata_add_element(report_name, 1, element_id, &soma_value);
+        sonata_add_element(soma_report_name, 1, element_id, &soma_value);
         THEN("Number of reports is 2") {
             REQUIRE(sonata_get_num_reports() == 2);
         }
     }
 
     WHEN("We add a report of a non existing type") {
-        sonata_create_report(report_name, tstart, tend, dt, "weird");
+        const char* weird_report_name = "myWeirdReport";
+        sonata_create_report(weird_report_name, tstart, tend, dt, "weird");
         THEN("Number of reports is still 2") {
             REQUIRE(sonata_get_num_reports() == 2);
         }
@@ -64,6 +66,7 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
         // 10 nodes
         const std::vector<uint64_t> node_ids{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         std::vector<double> elements{3.45, 563.12, 23.4, 779.2, 42.1};
+        const char* report_name = "elementReport";
 
         sonata_create_report(report_name, tstart, tend, dt, "compartment");
         for (int node_id : node_ids) {
@@ -78,12 +81,10 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
     }
 
     WHEN("We record data") {
-        const int nodeids[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        // const int nodeids[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        double sim_steps = (tend - tstart) / dt;
+        auto num_steps = static_cast<int>(std::ceil(sim_steps));
 
-        auto num_steps = static_cast<int>((tend - tstart) / dt);
-        if (std::fabs(num_steps * dt + tstart - tend) > std::numeric_limits<float>::epsilon()) {
-            num_steps++;
-        }
         sonata_set_atomic_step(dt);
         sonata_setup_communicators();
         sonata_prepare_datasets();

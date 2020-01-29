@@ -27,7 +27,7 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
 void Report::add_node(uint64_t node_id) {
     if (node_exists(node_id)) {
         throw std::runtime_error("Warning: attempted to add node " + std::to_string(node_id) +
-                                 " to the target multiple time on same node. Ignoring.");
+                                 " to the target multiple times on same node. Ignoring.");
     }
 
     // node is new insert it into the map
