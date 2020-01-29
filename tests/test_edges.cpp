@@ -26,17 +26,6 @@ std::ostream& operator<<(std::ostream& oss, const Selection& selection) {
 }  // namespace std
 
 
-namespace bbp {
-namespace sonata {
-
-bool operator==(const Selection& lhs, const Selection& rhs) {
-    return lhs.ranges() == rhs.ranges();
-}
-
-}  // namespace sonata
-}  // namespace bbp
-
-
 TEST_CASE("EdgePopulation", "[edges]") {
     const EdgePopulation population("./data/edges1.h5", "", "edges-AB");
 

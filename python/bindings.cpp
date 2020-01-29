@@ -330,7 +330,11 @@ PYBIND11_MODULE(libsonata, m) {
         .def(
             "__bool__",
             [](const Selection& obj) { return !obj.empty(); },
-            "If EdgeSelection is not empty");
+            "If EdgeSelection is not empty")
+
+        .def("__eq__", &bbp::sonata::operator==, "Compare selection contents are equal")
+
+        .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal");
 
     bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes");
 
