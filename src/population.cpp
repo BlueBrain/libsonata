@@ -49,7 +49,7 @@ Selection Selection::fromValues(const Selection::Values& values) {
 }
 
 
-const Selection::Ranges& Selection::ranges() const noexcept {
+const Selection::Ranges& Selection::ranges() const {
     return ranges_;
 }
 
@@ -66,7 +66,7 @@ Selection::Values Selection::flatten() const {
 }
 
 
-size_t Selection::flatSize() const noexcept {
+size_t Selection::flatSize() const {
     size_t result = 0;
     for (const auto& range : ranges_) {
         result += (range.second - range.first);
@@ -75,7 +75,7 @@ size_t Selection::flatSize() const noexcept {
 }
 
 
-bool Selection::empty() const noexcept {
+bool Selection::empty() const {
     return ranges_.empty();
 }
 
@@ -142,7 +142,7 @@ Population::Population(Population&&) noexcept = default;
 Population::~Population() noexcept = default;
 
 
-const std::string& Population::name() const noexcept {
+std::string Population::name() const {
     return impl_->name;
 }
 
@@ -159,12 +159,12 @@ Selection Population::selectAll() const {
 }
 
 
-const std::set<std::string>& Population::attributeNames() const noexcept {
+const std::set<std::string>& Population::attributeNames() const {
     return impl_->attributeNames;
 }
 
 
-const std::set<std::string>& Population::enumerationNames() const noexcept {
+const std::set<std::string>& Population::enumerationNames() const {
     return impl_->attributeEnumNames;
 }
 

@@ -39,7 +39,7 @@ std::set<std::string> _listChildren(const HighFive::Group& group,
     return result;
 }
 
-std::set<std::string> _listExplicitEnumerations(const HighFive::Group& h5Group,
+std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group,
                                                 const std::set<std::string>& attrs) {
     std::set<std::string> names{};
     const std::set<std::string> enums(_listChildren(h5Group));
