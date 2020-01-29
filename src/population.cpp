@@ -172,7 +172,10 @@ const std::set<std::string>& Population::enumerationNames() const {
 std::vector<std::string> Population::enumerationValues(const std::string& name) const {
     HDF5_LOCK_GUARD
     const auto dset = impl_->getLibraryDataSet(name);
-    return _readSelection<std::string>(dset, Selection({{0, dset.getSpace().getDimensions()[0]}}));
+
+    // Note: can't use select all, because our locks aren't re-entrant
+    const auto selection = Selection({{0, dset.getSpace().getDimensions()[0]}});
+    return _readSelection<std::string>(dset, selection);
 }
 
 

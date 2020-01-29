@@ -68,6 +68,7 @@ if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
 else()
     find_package(fmt REQUIRED)
+    find_package(Catch2 REQUIRED)
     find_package(HighFive REQUIRED)
 endif()
 

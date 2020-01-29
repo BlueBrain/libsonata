@@ -1,4 +1,4 @@
-#include "contrib/catch.hpp"
+#include <catch2/catch.hpp>
 
 #include <bbp/sonata/nodes.h>
 
@@ -149,4 +149,38 @@ TEST_CASE("NodePopulationMove", "[base]") {
 TEST_CASE("NodePopulationSelectAll", "[base]") {
     NodePopulation population("./data/nodes1.h5", "", "nodes-A");
     CHECK(population.selectAll().flatSize() == 6);
+}
+
+TEST_CASE("NodePopulationmatchAttributeValues", "[base]") {
+    NodePopulation population("./data/nodes1.h5", "", "nodes-A");
+
+    SECTION("String") {
+        auto sel = population.matchAttributeValues<std::string>("attr-Z", std::string("bb"));
+        CHECK(sel.flatSize() == 1);
+        CHECK(Selection::fromValues({1}) == sel);
+    }
+
+    SECTION("Enumeration") {
+        auto sel = population.matchAttributeValues("E-mapping-good", std::string("C"));
+        CHECK(sel.flatSize() == 4);
+        CHECK(Selection::fromValues({0, 2, 4, 5}) == sel);
+    }
+}
+
+TEMPLATE_TEST_CASE("NodePopulationmatchAttributeValues",
+                   "Numeric",
+                   float,
+                   double,
+                   int8_t,
+                   uint8_t,
+                   int16_t,
+                   uint16_t,
+                   int32_t,
+                   uint32_t,
+                   int64_t,
+                   uint64_t) {
+    NodePopulation population("./data/nodes1.h5", "", "nodes-A");
+    auto sel = population.matchAttributeValues<TestType>("attr-Y", 23);
+    CHECK(sel.flatSize() == 1);
+    CHECK(Selection::fromValues({2}) == sel);
 }
