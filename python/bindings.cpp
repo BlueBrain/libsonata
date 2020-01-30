@@ -336,7 +336,31 @@ PYBIND11_MODULE(libsonata, m) {
 
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal");
 
-    bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes");
+    bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const std::string& value) {
+                return obj.matchAttributeValues(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            "Return selection where the attribute name has values matching value")
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const int value) {
+                return obj.matchAttributeValues<int>(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            "Return selection where the attribute name has values matching value")
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const double value) {
+                return obj.matchAttributeValues<double>(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            "Return selection where the attribute name has values matching value");
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
 
