@@ -175,10 +175,11 @@ add_subdirectory(tests)
 
 if (ENABLE_COVERAGE)
     include(CodeCoverage)
-    set(COVERAGE_GCOVR_EXCLUDES ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/extlib)
-    setup_target_for_coverage_gcovr_html(
+    set(COVERAGE_LCOV_EXCLUDES '/usr/*' '${PROJECT_SOURCE_DIR}/include/*' '${PROJECT_SOURCE_DIR}/extlib/*')
+    SETUP_TARGET_FOR_COVERAGE_LCOV(
         NAME coverage
         EXECUTABLE ctest
+        DEPENDENCIES unittests
     )
 endif()
 

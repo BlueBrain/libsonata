@@ -96,9 +96,20 @@ TEST_CASE("EdgePopulation::writeIndices", "[edges]") {
 
     try {
         EdgePopulation::writeIndices(dstFilePath, "edges-AB", 4, 4);
-        const EdgePopulation population(dstFilePath, "", "edges-AB");
-        CHECK(population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}}));
-        CHECK(population.efferentEdges({1, 2}) == Selection({{0, 4}}));
+        {
+            const EdgePopulation population(dstFilePath, "", "edges-AB");
+            CHECK(population.afferentEdges({1, 2}) == Selection({{0, 4}, {5, 6}}));
+            CHECK(population.efferentEdges({1, 2}) == Selection({{0, 4}}));
+        }
+
+        CHECK_THROWS_AS(
+            EdgePopulation::writeIndices(dstFilePath, "edges-AB", 4, 4, /* overwrite */ false),
+            SonataError);
+
+        // Not implemented yet
+        CHECK_THROWS_AS(
+            EdgePopulation::writeIndices(dstFilePath, "edges-AB", 4, 4, /* overwrite */ true),
+            SonataError);
     } catch (...) {
         try {
             std::remove(dstFilePath.c_str());

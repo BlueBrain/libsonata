@@ -177,6 +177,7 @@ class TestNodePopulation(unittest.TestCase):
         # float
         self.assertRaises(TypeError, self.test_obj.match_values, "attr-Y", 23.)
 
+
 class TestEdgePopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, 'edges1.h5')
