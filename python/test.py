@@ -51,6 +51,18 @@ class TestSelection(unittest.TestCase):
         values_selection1 = Selection([1, 3, 4, 1])
         self.assertEqual(values_selection, values_selection1)
 
+    def test_union_intersection(self):
+        empty = Selection([])
+        self.assertEqual(empty, empty & empty)
+        self.assertEqual(empty, empty | empty)
+
+        even = Selection(list(range(0, 10, 2)))
+        odd = Selection(list(range(1, 10, 2)))
+        self.assertEqual(empty, empty & even)
+        self.assertEqual(even, empty | even)
+        self.assertEqual(empty, odd & even)
+        self.assertEqual(Selection(list(range(10))), odd | even)
+
 
 class TestNodePopulation(unittest.TestCase):
     def setUp(self):

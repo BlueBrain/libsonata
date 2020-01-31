@@ -12,9 +12,10 @@
 #include "common.h"
 
 #include <cstdint>
-#include <memory>
+#include <memory>  // std::unique_ptr, std::unique_ptr
 #include <set>
 #include <string>
+#include <utility>  // std::move
 #include <vector>
 
 
@@ -38,6 +39,9 @@ class SONATA_API Selection
     static Selection fromValues(Iterator first, Iterator last);
     static Selection fromValues(const Values& values);
 
+    Selection intersection_(const Selection&) const;
+    Selection union_(const Selection&) const;
+
     const Ranges& ranges() const;
 
     Values flatten() const;
@@ -52,6 +56,9 @@ class SONATA_API Selection
 
 bool SONATA_API operator==(const Selection&, const Selection&);
 bool SONATA_API operator!=(const Selection&, const Selection&);
+
+Selection SONATA_API operator&(const Selection&, const Selection&);
+Selection SONATA_API operator|(const Selection&, const Selection&);
 
 template <typename Iterator>
 Selection Selection::fromValues(Iterator first, Iterator last) {

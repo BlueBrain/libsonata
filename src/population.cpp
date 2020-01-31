@@ -7,6 +7,9 @@
  * See top-level LICENSE.txt file for details.
  *************************************************************************/
 
+#include <algorithm>  // std::copy, std::sort, std::max, std::min
+#include <utility>    // std::move
+
 #include "population.hpp"
 #include "hdf5_mutex.hpp"
 
@@ -17,9 +20,9 @@
 namespace bbp {
 namespace sonata {
 
-//--------------------------------------------------------------------------------------------------
-
-namespace {
+namespace detail {
+using Range = Selection::Range;
+using Ranges = Selection::Ranges;
 
 void _checkRanges(const Selection::Ranges& ranges) {
     for (const auto& range : ranges) {
@@ -29,18 +32,40 @@ void _checkRanges(const Selection::Ranges& ranges) {
     }
 }
 
-}  // unnamed namespace
+Ranges _sortAndMerge(const Ranges& ranges) {
+    if (ranges.empty()) {
+        return ranges;
+    }
+    Ranges ret;
+    Ranges sorted(ranges);
+    std::sort(sorted.begin(), sorted.end());
+
+    auto it = sorted.cbegin();
+    ret.push_back(*(it++));
+
+    for (; it != sorted.cend(); ++it) {
+        auto& last = ret[ret.size() - 1].second;
+        if (last < it->first) {
+            ret.push_back(*it);
+        } else {
+            last = std::max(last, it->second);
+        }
+    }
+    return ret;
+}
+
+}  // namespace detail
 
 
 Selection::Selection(Selection::Ranges&& ranges)
     : ranges_(std::move(ranges)) {
-    _checkRanges(ranges_);
+    detail::_checkRanges(ranges_);
 }
 
 
 Selection::Selection(const Selection::Ranges& ranges)
     : ranges_(ranges) {
-    _checkRanges(ranges_);
+    detail::_checkRanges(ranges_);
 }
 
 
@@ -79,6 +104,42 @@ bool Selection::empty() const {
     return ranges_.empty();
 }
 
+Selection Selection::intersection_(const Selection& rhs) const {
+    if (empty() or rhs.empty()) {
+        return Selection({});
+    }
+    Ranges r0 = detail::_sortAndMerge(ranges_);
+    Ranges r1 = detail::_sortAndMerge(rhs.ranges_);
+
+    auto it0 = r0.cbegin();
+    auto it1 = r1.cbegin();
+
+    Ranges ret;
+    while (it0 != r0.cend() && it1 != r1.cend()) {
+        auto start = std::max(it0->first, it1->first);
+        auto end = std::min(it0->second, it1->second);
+        if (start < end) {
+            ret.push_back({start, end});
+        }
+
+        if (it0->second < it1->second) {
+            ++it0;
+        } else {
+            ++it1;
+        }
+    }
+
+    return Selection(std::move(ret));
+}
+
+Selection Selection::union_(const Selection& rhs) const {
+    Ranges ret;
+    std::copy(ranges_.begin(), ranges_.end(), std::back_inserter(ret));
+    std::copy(rhs.ranges_.begin(), rhs.ranges_.end(), std::back_inserter(ret));
+    ret = detail::_sortAndMerge(ret);
+    return Selection(std::move(ret));
+}
+
 //--------------------------------------------------------------------------------------------------
 
 
@@ -89,6 +150,16 @@ bool operator==(const Selection& lhs, const Selection& rhs) {
 
 bool operator!=(const Selection& lhs, const Selection& rhs) {
     return !(lhs == rhs);
+}
+
+
+Selection operator&(const Selection& lhs, const Selection& rhs) {
+    return lhs.intersection_(rhs);
+}
+
+
+Selection operator|(const Selection& lhs, const Selection& rhs) {
+    return lhs.union_(rhs);
 }
 
 

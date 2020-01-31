@@ -11,5 +11,4 @@ target_link_libraries(unittests
     sonata_shared
     Catch2::Catch2
 )
-
 add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
