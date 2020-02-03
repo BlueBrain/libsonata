@@ -17,10 +17,13 @@
 
 # -- Project information -----------------------------------------------------
 
+import pkg_resources
+
 project = 'libsonata'
 copyright = '2020, Blue Brain Project'
 author = 'Blue Brain Project'
-
+version = pkg_resources.get_distribution("libsonata").version
+release = version
 
 # -- General configuration ---------------------------------------------------
 
