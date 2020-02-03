@@ -9,4 +9,6 @@ version: 2
 python:
   install:
     - method: pip
+      package: cmake
+    - method: pip
       path: .
