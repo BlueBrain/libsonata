@@ -6,4 +6,4 @@ dependencies:
   - hdf5
   - cmake
   - pip:
-    - .
+    - ..
