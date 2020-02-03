@@ -6,6 +6,8 @@
 Welcome to libsonata's documentation!
 =====================================
 
+Version is |version|
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
