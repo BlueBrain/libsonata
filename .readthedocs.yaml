@@ -5,9 +5,5 @@
 # Required
 version: 2
 
-# Optionally set the version of Python and requirements required to build your docs
-python:
-  install:
-    - requirements: docs/requirements.txt
-    - method: pip
-      path: .
+conda:
+  environment: docs/environment.yml
