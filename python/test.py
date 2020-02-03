@@ -172,7 +172,7 @@ class TestNodePopulation(unittest.TestCase):
 
         # numeric
         for type_ in (float, int, ):
-            self.assertEqual(self.test_obj.match_values("attr-Y", 23).flatten().tolist(),
+            self.assertEqual(self.test_obj.match_values("attr-Y", type_(23)).flatten().tolist(),
                              [2, ])
 
 class TestEdgePopulation(unittest.TestCase):
