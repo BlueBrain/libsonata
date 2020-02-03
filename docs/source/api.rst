@@ -1,0 +1,5 @@
+libsonata
+=========
+
+.. automodule:: libsonata
+   :members:
