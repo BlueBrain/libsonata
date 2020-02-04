@@ -170,10 +170,12 @@ class TestNodePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj.match_values("E-mapping-good", "C").flatten().tolist(),
                          [0, 2, 4, 5])
 
-        # numeric
-        for type_ in (float, int, ):
-            self.assertEqual(self.test_obj.match_values("attr-Y", type_(23)).flatten().tolist(),
-                             [2, ])
+        # int
+        self.assertEqual(self.test_obj.match_values("attr-Y", 23).flatten().tolist(),
+                         [2, ])
+
+        # float
+        self.assertRaises(TypeError, self.test_obj.match_values, "attr-Y", 23.)
 
 class TestEdgePopulation(unittest.TestCase):
     def setUp(self):

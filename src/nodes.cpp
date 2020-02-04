@@ -47,39 +47,18 @@ Selection _matchAttributeValues(const NodePopulation& population,
                                 T value) {
     return _getMatchingSelection(population.getAttribute<T>(name, population.selectAll()), value);
 }
-
-
-Selection _matchAttributeValues(const NodePopulation& population,
-                                const std::string& name,
-                                std::string value) {
-    // enum attribute, need to look up in the @library
-    if (population.enumerationNames().count(name) > 0) {
-        const auto enum_values = population.enumerationValues(name);
-        const auto pos = std::find(enum_values.begin(), enum_values.end(), value);
-        if (pos == enum_values.end()) {
-            return Selection({});
-        }
-        return _getMatchingSelection<size_t>(
-            population.getEnumeration<size_t>(name, population.selectAll()),
-            pos - enum_values.begin());
-    }
-
-    // normal attribute
-    return _matchAttributeValues<std::string>(population, name, value);
-}
-
 }  // anonymous namespace
 
 template <typename T>
 Selection NodePopulation::matchAttributeValues(const std::string& name, const T value) const {
-    // TODO: need to check if enum
     auto dtype = impl_->getAttributeDataSet(name).getDataType();
     if (dtype == HighFive::AtomicType<int8_t>() || dtype == HighFive::AtomicType<uint8_t>() ||
         dtype == HighFive::AtomicType<int16_t>() || dtype == HighFive::AtomicType<uint16_t>() ||
         dtype == HighFive::AtomicType<int32_t>() || dtype == HighFive::AtomicType<uint32_t>() ||
-        dtype == HighFive::AtomicType<int64_t>() || dtype == HighFive::AtomicType<uint64_t>() ||
-        dtype == HighFive::AtomicType<float>() || dtype == HighFive::AtomicType<double>()) {
+        dtype == HighFive::AtomicType<int64_t>() || dtype == HighFive::AtomicType<uint64_t>()) {
         return _matchAttributeValues(*this, name, value);
+    } else if (dtype == HighFive::AtomicType<float>() || dtype == HighFive::AtomicType<double>()) {
+        throw SonataError("Exact comparison for float/double explicitly not supported");
     } else {
         throw SonataError(
             fmt::format("Unexpected datatype for dataset '{}'", _attributeDataType(name)));
@@ -89,15 +68,30 @@ Selection NodePopulation::matchAttributeValues(const std::string& name, const T 
 template <>
 Selection NodePopulation::matchAttributeValues<std::string>(const std::string& name,
                                                             const std::string value) const {
-    return _matchAttributeValues(*this, name, value);
+    // enum attribute, need to look up in the @library
+    if (enumerationNames().count(name) > 0) {
+        const auto enum_values = enumerationValues(name);
+        const auto pos = std::find(enum_values.begin(), enum_values.end(), value);
+        if (pos == enum_values.end()) {
+            return Selection({});
+        }
+        return _getMatchingSelection<size_t>(getEnumeration<size_t>(name, selectAll()),
+                                             pos - enum_values.begin());
+    }
+
+    auto dtype = impl_->getAttributeDataSet(name).getDataType();
+    if (dtype != HighFive::AtomicType<std::string>()) {
+        throw SonataError("H5 dataset must be a string");
+    }
+    // normal, non-enum, attribute
+    return _matchAttributeValues<std::string>(*this, name, value);
 }
 
 #define INSTANTIATE_TEMPLATE_METHODS(T)                                                 \
     template Selection NodePopulation::matchAttributeValues<T>(const std::string& name, \
                                                                const T value) const;
 
-INSTANTIATE_TEMPLATE_METHODS(float)
-INSTANTIATE_TEMPLATE_METHODS(double)
+/* Note: float/double are PURPOSEFULLY not instantiated */
 
 INSTANTIATE_TEMPLATE_METHODS(int8_t)
 INSTANTIATE_TEMPLATE_METHODS(uint8_t)

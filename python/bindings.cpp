@@ -301,18 +301,6 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
              "name"_a,
              fmt::format("Get {} for a given population name", popClsName).c_str());
 }
-
-template <typename T, typename NodePopulationClass>
-void defMatchValues(NodePopulationClass& nodePopulation) {
-    nodePopulation.def(
-        "match_values",
-        [](NodePopulation& obj, const std::string& name, const T value) {
-            return obj.matchAttributeValues<T>(name, value);
-        },
-        "name"_a,
-        "value"_a,
-        "Return selection where the attribute name has values matching value");
-}
 }  // unnamed namespace
 
 
@@ -346,11 +334,23 @@ PYBIND11_MODULE(libsonata, m) {
 
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal");
 
-    auto node_population = bindPopulationClass<NodePopulation>(
-        m, "NodePopulation", "Collection of nodes with attributes");
-    defMatchValues<int>(node_population);
-    defMatchValues<double>(node_population);
-    defMatchValues<std::string>(node_population);
+    bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const size_t value) {
+                return obj.matchAttributeValues(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            "Return selection where the attribute `name` has values matching the int `value`")
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const std::string& value) {
+                return obj.matchAttributeValues(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            "Return selection where the attribute `name` has values matching the string `value`");
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
 

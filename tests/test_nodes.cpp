@@ -155,9 +155,11 @@ TEST_CASE("NodePopulationmatchAttributeValues", "[base]") {
     NodePopulation population("./data/nodes1.h5", "", "nodes-A");
 
     SECTION("String") {
-        auto sel = population.matchAttributeValues<std::string>("attr-Z", std::string("bb"));
+        auto sel = population.matchAttributeValues<std::string>("attr-Z", "bb");
         CHECK(sel.flatSize() == 1);
         CHECK(Selection::fromValues({1}) == sel);
+
+        CHECK_THROWS_AS(population.matchAttributeValues<std::string>("attr-Y", "bb"), SonataError);
     }
 
     SECTION("Enumeration") {
@@ -165,12 +167,14 @@ TEST_CASE("NodePopulationmatchAttributeValues", "[base]") {
         CHECK(sel.flatSize() == 4);
         CHECK(Selection::fromValues({0, 2, 4, 5}) == sel);
     }
+
+    SECTION("Float attribute") {
+        CHECK_THROWS_AS(population.matchAttributeValues("attr-X", 2), SonataError);
+    }
 }
 
 TEMPLATE_TEST_CASE("NodePopulationmatchAttributeValues",
                    "Numeric",
-                   float,
-                   double,
                    int8_t,
                    uint8_t,
                    int16_t,
