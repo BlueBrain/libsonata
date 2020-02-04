@@ -166,6 +166,7 @@ class SONATA_API Population
      * @throw if there is no such attribute for the population
      */
     std::vector<std::string> enumerationValues(const std::string& name) const;
+
     /**
      * Get attribute data type, optionally translating enumeration types
 

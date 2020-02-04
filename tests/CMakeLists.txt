@@ -7,7 +7,9 @@ set(TESTS_SRC
 
 add_executable(unittests ${TESTS_SRC})
 target_link_libraries(unittests
-    PRIVATE sonata_shared
+    PRIVATE
+    sonata_shared
+    Catch2::Catch2
 )
 
 add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})

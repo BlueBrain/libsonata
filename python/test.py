@@ -161,6 +161,21 @@ class TestNodePopulation(unittest.TestCase):
     def test_select_all(self):
         self.assertEqual(self.test_obj.select_all().flat_size, 6)
 
+    def test_match_values(self):
+        # string
+        self.assertEqual(self.test_obj.match_values("attr-Z", "bb").flatten().tolist(),
+                         [1])
+
+        # enum
+        self.assertEqual(self.test_obj.match_values("E-mapping-good", "C").flatten().tolist(),
+                         [0, 2, 4, 5])
+
+        # int
+        self.assertEqual(self.test_obj.match_values("attr-Y", 23).flatten().tolist(),
+                         [2, ])
+
+        # float
+        self.assertRaises(TypeError, self.test_obj.match_values, "attr-Y", 23.)
 
 class TestEdgePopulation(unittest.TestCase):
     def setUp(self):

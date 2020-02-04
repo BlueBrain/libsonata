@@ -12,7 +12,6 @@
 #include <memory>
 #include <string>
 
-
 namespace py = pybind11;
 
 using namespace pybind11::literals;
@@ -302,7 +301,6 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
              "name"_a,
              fmt::format("Get {} for a given population name", popClsName).c_str());
 }
-
 }  // unnamed namespace
 
 
@@ -336,7 +334,23 @@ PYBIND11_MODULE(libsonata, m) {
 
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal");
 
-    bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes");
+    bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const size_t value) {
+                return obj.matchAttributeValues(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            "Return selection where the attribute `name` has values matching the int `value`")
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const std::string& value) {
+                return obj.matchAttributeValues(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            "Return selection where the attribute `name` has values matching the string `value`");
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
 

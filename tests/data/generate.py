@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import numpy as np
 import h5py
 
@@ -21,7 +22,7 @@ def write_population_one_group(pop, prefix):
 
     attrs = pop.create_group('0')
     attrs.create_dataset('attr-X', data=np.arange(11., 17.), dtype=np.float64)
-    attrs.create_dataset('attr-Y', data=np.arange(21., 27.), dtype=np.int64)
+    attrs.create_dataset('attr-Y', data=np.arange(21, 27), dtype=np.int64)
     attrs.create_dataset('attr-Z', data=[(2 * x).encode('utf-8') for x in 'abcdef'],
                          dtype=string_dtype)
 
@@ -42,8 +43,8 @@ def write_population_one_group(pop, prefix):
     enum_dtype = h5py.special_dtype(enum=('i', {"RED": 0, "GREEN": 1}))
     attrs.create_dataset('A-enum', data=[0, 1], dtype=enum_dtype)
 
-    attrs.create_dataset('E-mapping-good', data=[2, 1 ,2, 0], dtype=np.int64)
-    attrs.create_dataset('E-mapping-bad', data=[2, 3 ,1, 0, -1], dtype=np.int64)
+    attrs.create_dataset('E-mapping-good', data=[2, 1, 2, 0, 2, 2], dtype=np.int64)
+    attrs.create_dataset('E-mapping-bad', data=[2, 3, 1, 0, -1, 2], dtype=np.int64)
 
     mapping = [s.encode('utf-8') for s in ("A", "B", "C")]
     library = attrs.create_group('@library')
@@ -53,7 +54,7 @@ def write_population_one_group(pop, prefix):
 
     dparams = attrs.create_group('dynamics_params')
     dparams.create_dataset('dparam-X', data=np.arange(1011., 1017.), dtype=np.float64)
-    dparams.create_dataset('dparam-Y', data=np.arange(1021., 1027.), dtype=np.int64)
+    dparams.create_dataset('dparam-Y', data=np.arange(1021, 1027), dtype=np.int64)
     dparams.create_dataset('dparam-Z', data=[('d-' + 2 * x).encode('utf-8') for x in 'abcdef'],
                            dtype=string_dtype)
 

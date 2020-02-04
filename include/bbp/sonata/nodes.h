@@ -29,6 +29,23 @@ class SONATA_API NodePopulation: public Population
     NodePopulation(const std::string& h5FilePath,
                    const std::string& csvFilePath,
                    const std::string& name);
+
+    /**
+     * Return selection of where attribute values match value
+     *
+     * As per node_set predicates, value must be one of type:
+     *
+     *  number	H5T_IEEE_*LE, H5T_STD_*LE
+     *  string	H5T_C_S1
+     *  bool	H5T_STD_I8LE
+     *  null	invalid
+     *
+     * @throw if the attribute dtype is not comparable
+     *
+     * Note: This does not match Dynamics_params datasets
+     */
+    template <typename T>
+    Selection matchAttributeValues(const std::string& attribute, const T value) const;
 };
 
 //--------------------------------------------------------------------------------------------------

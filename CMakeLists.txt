@@ -68,6 +68,7 @@ if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
 else()
     find_package(fmt REQUIRED)
+    find_package(Catch2 REQUIRED)
     find_package(HighFive REQUIRED)
 endif()
 
@@ -175,7 +176,7 @@ add_subdirectory(tests)
 if (ENABLE_COVERAGE)
     include(CodeCoverage)
     set(COVERAGE_GCOVR_EXCLUDES ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/extlib)
-    setup_target_for_coverage_gcovr_xml(
+    setup_target_for_coverage_gcovr_html(
         NAME coverage
         EXECUTABLE ctest
     )
