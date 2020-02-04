@@ -10,10 +10,6 @@
 using namespace bbp::sonata;
 
 SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
-    int global_rank, global_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &global_size);
-
     GIVEN("A node map structure") {
         double dt = 1.0;
         double tstart = 0.0;
@@ -80,9 +76,7 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
             THEN("We check the index pointers of the sonata report") {
                 const std::vector<uint64_t> index_pointers = sonata->get_index_pointers();
                 std::vector<uint64_t> compare = {0, 2, 5};
-                if (global_size == 1) {
-                    REQUIRE(index_pointers == compare);
-                }
+                REQUIRE(index_pointers == compare);
             }
         }
         WHEN("We record some other data and prepare the dataset for a small max buffer size") {
@@ -120,16 +114,16 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
             THEN("We check that the spike nodes ids are ordered according to timestamps") {
                 const std::vector<int> node_ids = sonata_spikes->get_spike_node_ids();
                 std::vector<int> compare = {5, 2, 3, 2, 3};
-                if (global_size == 1) {
+                #ifdef HAVE_MPI
                     REQUIRE(node_ids == compare);
-                }
+                #endif
             }
             THEN("We check that the spike timestamps are in order") {
                 const std::vector<double> timestamps = sonata_spikes->get_spike_timestamps();
                 std::vector<double> compare = {0.1, 0.2, 0.3, 0.7, 1.3};
-                if (global_size == 1) {
+                #ifdef HAVE_MPI
                     REQUIRE(timestamps == compare);
-                }
+                #endif
             }
         }
         sonata_spikes->close();

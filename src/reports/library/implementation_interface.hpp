@@ -261,6 +261,7 @@ struct ParallelImplementation {
 
 struct SerialImplementation {
     inline static int init(const std::vector<std::string>& report_names) {
+        logger->info("Initializing SERIAL implementation...");
         return 0;
     };
     inline static void close(){};
@@ -276,7 +277,7 @@ struct SerialImplementation {
     };
     inline static void sort_spikes(std::vector<double>& spikevec_time,
                                    std::vector<int>& spikevec_gid) {
-        logger->info("sort spikes SERIAL");
+        logger->info("No spike sorting (SERIAL implementation)");
     };
 };
 

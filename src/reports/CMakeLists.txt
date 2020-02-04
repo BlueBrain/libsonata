@@ -20,21 +20,38 @@ set(sonatareport_SOURCES
         "utils/logger.cpp"
         "utils/logger.hpp")
 
-set(sonatareport_HEADERS
-        "${SONATA_INCLUDE_DIR}/bbp/sonata/reports.h")
-
 set(client_SOURCES
         "client/main.cpp")
 
-include_directories(${SONATA_INCLUDE_DIR})
-include_directories(${SONATA_SRC_DIR})
 include_directories(SYSTEM ${spdlog_include_directory})
 
-add_library(sonatareport_obj OBJECT ${sonatareport_SOURCES} ${sonatareport_HEADERS})
-set_property(TARGET sonatareport_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
-
 # Shared library
-add_library(sonata_report SHARED $<TARGET_OBJECTS:sonatareport_obj>)
+add_library(sonata_report SHARED ${sonatareport_SOURCES})
+target_include_directories(sonata_report
+        PUBLIC
+        $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${SONATA_SRC_DIR}>
+        $<INSTALL_INTERFACE:include>
+        )
+target_compile_options(sonata_report
+        PRIVATE ${SONATA_COMPILE_OPTIONS}
+        )
+if (ENABLE_COVERAGE)
+    target_compile_options(sonata_report
+            PRIVATE -g -O0 --coverage -fprofile-arcs -ftest-coverage
+            )
+    target_link_libraries(sonata_report
+            PRIVATE gcov
+            )
+endif()
+target_compile_definitions(sonata_report
+        PUBLIC SONATA_DLL
+        PRIVATE SONATA_DLL_EXPORTS
+        )
+set_target_properties(sonata_report
+        PROPERTIES
+        OUTPUT_NAME "sonatareport"
+        )
 target_link_libraries(sonata_report
     PRIVATE ${HDF5_LIBS}
     PRIVATE ${MPI_CXX_LIBRARIES})
@@ -45,16 +62,8 @@ target_link_libraries(client
         PRIVATE sonata_report
         PRIVATE ${MPI_CXX_LIBRARIES})
 
-set_target_properties(sonata_report
-        PROPERTIES
-        OUTPUT_NAME "sonatareport"
-        )
-target_compile_definitions(sonata_report
-        PUBLIC SONATA_DLL
-        PRIVATE SONATA_DLL_EXPORTS
-        )
-
 install(TARGETS sonata_report
     EXPORT sonata-targets
     LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib )
+    ARCHIVE DESTINATION lib
+    )

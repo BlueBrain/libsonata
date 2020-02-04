@@ -81,6 +81,7 @@ endif()
 if (MPI_FOUND)
     if (HDF5_FOUND)
         if (HDF5_IS_PARALLEL)
+            set(HAVE_MPI TRUE)
             # When MPI and HDF5 parallel are found, enable mpi in the report library
             add_definitions(-DHAVE_MPI)
             message(STATUS "Both MPI and HDF5 parallel found, using reporting parallel implementation")

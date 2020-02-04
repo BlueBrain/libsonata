@@ -2,8 +2,20 @@
 
 export OMP_NUM_THREADS=1
 
-# Run the executable
-/usr/bin/mpiexec -n 4  @CMAKE_BINARY_DIR@/src/reports/client
+echo @HAVE_MPI@
+if [ -z "@HAVE_MPI@" ]; then
+  @CMAKE_BINARY_DIR@/src/reports/client
+  ref_soma=@CMAKE_CURRENT_SOURCE_DIR@/soma_report_serial.ref
+  ref_compartment=@CMAKE_CURRENT_SOURCE_DIR@/compartment_report_serial.ref
+  ref_spikes=@CMAKE_CURRENT_SOURCE_DIR@/spikes_serial.ref
+else
+  # Run the executable
+  mpirun -n 4  @CMAKE_BINARY_DIR@/src/reports/client
+  ref_soma=@CMAKE_CURRENT_SOURCE_DIR@/soma_report.ref
+  ref_compartment=@CMAKE_CURRENT_SOURCE_DIR@/compartment_report.ref
+  ref_spikes=@CMAKE_CURRENT_SOURCE_DIR@/spikes.ref
+fi
+
 exitvalue=$?
 
 # Check for error result
@@ -12,9 +24,9 @@ if [ $exitvalue -ne 0 ]; then
   exit $exitvalue
 fi
 
-h5diff -c compartment_report.h5 @CMAKE_CURRENT_SOURCE_DIR@/compartment_report.ref > diff_compartment.dat /report/data 2>&1
-h5diff -c soma_report.h5 @CMAKE_CURRENT_SOURCE_DIR@/soma_report.ref > diff_soma.dat /report/data 2>&1
-h5diff -c out.h5 @CMAKE_CURRENT_SOURCE_DIR@/spikes.ref /spikes/timestamps > diff_spikes.dat 2>&1
+h5diff -c compartment_report.h5 $ref_compartment > diff_compartment.dat /report/data 2>&1
+h5diff -c soma_report.h5 $ref_soma > diff_soma.dat /report/data 2>&1
+h5diff -c out.h5 $ref_spikes /spikes/timestamps > diff_spikes.dat 2>&1
 
 if [ -s diff_compartment.dat ]
 then
