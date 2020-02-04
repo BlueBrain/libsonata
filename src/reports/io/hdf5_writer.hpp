@@ -18,7 +18,6 @@ class HDF5Writer: public IoWriter
                            int total_elements) override;
     void write(const std::vector<double>& buffer,
                int steps_to_write,
-               int total_steps,
                int total_elements) override;
     void write(const std::string& dataset_name, const std::vector<int>& buffer) override;
     void write(const std::string& dataset_name, const std::vector<uint32_t>& buffer) override;

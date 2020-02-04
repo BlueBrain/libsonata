@@ -29,7 +29,7 @@ void HDF5Writer::configure_group(const std::string& group_name) {
     H5Gclose(group);
 }
 
-void HDF5Writer::configure_attribute(const std::string& group_name,
+void HDF5Writer::configure_attribute(const std::string& /*group_name*/,
                                      const std::string& attribute_name,
                                      const std::string& attribute_value) {
     logger->trace("Configuring attribute '{}'", attribute_name);
@@ -65,7 +65,6 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name,
 
 void HDF5Writer::write(const std::vector<double>& buffer,
                        int steps_to_write,
-                       int total_steps,
                        int total_elements) {
     hsize_t count[2];
     count[0] = steps_to_write;

@@ -152,14 +152,14 @@ void sonata_write_spikes(const double* timestamps,
 }
 
 // NOT REQUIRED FOR SONATA
-int sonata_extra_mapping(char* report_name, uint64_t node_id, int num_values, int* values) {
+int sonata_extra_mapping(char*, uint64_t, int, int*) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
     return 0;
 }
-void sonata_set_steps_to_buffer(int steps) {
+void sonata_set_steps_to_buffer(int) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
 }
-void sonata_set_auto_flush(int mode) {
+void sonata_set_auto_flush(int) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
 }
 int sonata_time_data() {
@@ -180,11 +180,11 @@ void sonata_saveglobal() {
 void sonata_savestate(void) {
     logger->trace("Function NOT implemented");
 }
-char* sonata_restoreinit(char* save_file, int* length) {
+char* sonata_restoreinit(char*, int*) {
     logger->trace("Function NOT implemented");
     return nullptr;
 }
-char* sonata_restore(uint64_t node_id, int* piece_count, int* length) {
+char* sonata_restore(uint64_t, int*, int*) {
     logger->trace("Function NOT implemented");
     return nullptr;
 }

@@ -201,7 +201,7 @@ void SonataData::prepare_dataset() {
     if (!m_index_pointers.empty()) {
         m_index_pointers[0] = element_offset;
     }
-    for (int i = 1; i < m_index_pointers.size(); i++) {
+    for (size_t i = 1; i < m_index_pointers.size(); i++) {
         int previous_gid = m_node_ids[i - 1];
         m_index_pointers[i] = m_index_pointers[i - 1] +
                               m_nodes->at(previous_gid)->get_num_elements();
@@ -241,7 +241,7 @@ void SonataData::write_data() {
     if (m_remaining_steps <= 0) {  // Nothing left to write
         return;
     }
-    m_io_writer->write(m_report_buffer, m_current_step, m_num_steps, m_total_elements);
+    m_io_writer->write(m_report_buffer, m_current_step, m_total_elements);
     m_remaining_steps -= m_current_step;
     if (SonataReport::m_rank == 0) {
         logger->debug("Writing timestep data to file {}", m_report_name);

@@ -12,13 +12,13 @@ namespace sonata {
 #define DEFAULT_MAX_BUFFER_SIZE 1024
 
 Report::Report(const std::string& report_name, double tstart, double tend, double dt)
-    : m_report_name(report_name)
+    : m_nodes(std::make_shared<nodes_t>())
+    , m_report_name(report_name)
     , m_tstart(tstart)
     , m_tend(tend)
     , m_dt(dt)
     , m_max_buffer_size(DEFAULT_MAX_BUFFER_SIZE)
-    , m_report_is_closed(false)
-    , m_nodes(std::make_shared<nodes_t>()) {
+    , m_report_is_closed(false) {
     // Calculate number of reporting steps
     double sim_steps = (tend - tstart) / dt;
     m_num_steps = static_cast<int>(std::ceil(sim_steps));
