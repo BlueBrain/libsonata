@@ -102,6 +102,10 @@ INSTANTIATE_TEMPLATE_METHODS(uint32_t)
 INSTANTIATE_TEMPLATE_METHODS(int64_t)
 INSTANTIATE_TEMPLATE_METHODS(uint64_t)
 
+#ifdef __APPLE__
+INSTANTIATE_TEMPLATE_METHODS(size_t)
+#endif
+
 #undef INSTANTIATE_TEMPLATE_METHODS
 
 //--------------------------------------------------------------------------------------------------
