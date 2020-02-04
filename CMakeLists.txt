@@ -69,12 +69,10 @@ find_package(MPI)
 if (MPI_FOUND)
     # With MPI we prefer HDF5 parallel
     set(HDF5_PREFER_PARALLEL "ON")
-    include_directories(${MPI_INCLUDE_PATH})
 endif()
 
 find_package(HDF5)
 if (HDF5_FOUND)
-    include_directories(${HDF5_INCLUDE_DIRS})
     set(HDF5_LIBS ${HDF5_LIBRARIES})
 endif()
 
@@ -169,7 +167,6 @@ target_compile_definitions(sonata_shared
 target_link_libraries(sonata_shared
     PRIVATE fmt::fmt-header-only
     PRIVATE HighFive
-    PRIVATE ${MPI_CXX_LIBRARIES}
 )
 
 target_compile_definitions(sonata_static

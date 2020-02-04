@@ -31,6 +31,8 @@ target_include_directories(sonata_report
         PUBLIC
         $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${SONATA_SRC_DIR}>
+        ${MPI_INCLUDE_PATH}
+        ${HDF5_INCLUDE_DIRS}
         $<INSTALL_INTERFACE:include>
         )
 target_compile_options(sonata_report
