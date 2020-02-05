@@ -78,11 +78,17 @@ TEST_CASE("NodePopulation", "[base]") {
     CHECK(population._attributeDataType("A-uint16") == "uint16_t");
     CHECK(population._attributeDataType("A-uint8") == "uint8_t");
     CHECK(population._attributeDataType("A-string") == "string");
+    CHECK(population._attributeDataType("E-mapping-good", /* translate_enumeration */ true) ==
+          "string");
     CHECK_THROWS_AS(population._attributeDataType("A-enum"), SonataError);
     CHECK_THROWS_AS(population._attributeDataType("no-such-attribute"), SonataError);
 
     CHECK(population.getEnumeration<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) ==
           std::vector<size_t>{2, 2});
+    CHECK_THROWS_AS(population.getEnumeration<size_t>("no-such-enum", Selection({{1, 2}})),
+                    SonataError);
+    CHECK_THROWS_AS(population.getEnumeration<std::string>("E-mapping-good", Selection({{1, 2}})),
+                    SonataError);
 
     CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) ==
           std::vector<size_t>{2, 2});
@@ -90,6 +96,7 @@ TEST_CASE("NodePopulation", "[base]") {
     CHECK(population.getAttribute<std::string>("E-mapping-good", Selection({{0, 1}})) ==
           std::vector<std::string>{"C"});
 
+    CHECK_THROWS_AS(population.enumerationValues("no-such-enum"), SonataError);
     CHECK(population.enumerationValues("E-mapping-good") ==
           std::vector<std::string>{"A", "B", "C"});
 
@@ -163,9 +170,13 @@ TEST_CASE("NodePopulationmatchAttributeValues", "[base]") {
     }
 
     SECTION("Enumeration") {
-        auto sel = population.matchAttributeValues("E-mapping-good", std::string("C"));
-        CHECK(sel.flatSize() == 4);
-        CHECK(Selection::fromValues({0, 2, 4, 5}) == sel);
+        auto sel0 = population.matchAttributeValues("E-mapping-good", std::string("C"));
+        CHECK(sel0.flatSize() == 4);
+        CHECK(Selection::fromValues({0, 2, 4, 5}) == sel0);
+
+        auto sel1 = population.matchAttributeValues("E-mapping-good",
+                                                    std::string("does-not-exist"));
+        CHECK(Selection({}) == sel1);
     }
 
     SECTION("Float attribute") {

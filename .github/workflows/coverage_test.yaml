@@ -1,0 +1,24 @@
+name: coverage-test
+on:
+    push:
+
+jobs:
+    build:
+        name: coverage-test
+        runs-on: ubuntu-18.04
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+            - name: Fetch repository
+              run: git fetch --prune --unshallow
+            - name: Get submodules
+              run: git submodule update --init --force --recursive
+            - name: Install packages
+              run: sudo apt-get install build-essential libhdf5-dev lcov
+            - name: Build and run unittests
+              run: ci/coverage_test.sh
+            - name: Upload Coverage to Coveralls
+              uses: coverallsapp/github-action@master
+              with:
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+                path-to-lcov: build-coverage/coverage.info.cleaned
