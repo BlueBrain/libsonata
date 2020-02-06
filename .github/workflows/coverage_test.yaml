@@ -14,7 +14,7 @@ jobs:
             - name: Get submodules
               run: git submodule update --init --force --recursive
             - name: Install packages
-              run: sudo apt-get install build-essential libhdf5-dev lcov
+              run: sudo apt-get install build-essential libhdf5-dev hdf5-tools lcov
             - name: Build and run unittests
               run: ci/coverage_test.sh
             - name: Upload Coverage to Coveralls

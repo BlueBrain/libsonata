@@ -5,6 +5,11 @@
 static const char* element_report_name = "myElementReport";
 static const char* soma_report_name = "mySomaReport";
 
+double* square_value(double* elem) {
+    *elem *= *elem;
+    return elem;
+}
+
 SCENARIO("Test SonataReport API", "[sonatareport]") {
     const double tstart = 0;
     const double tend = 0.3;
@@ -17,6 +22,9 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
         sonata_add_node(element_report_name, 1);
         THEN("Number of reports is 1") {
             REQUIRE(sonata_get_num_reports() == 1);
+        }
+        THEN("We refresh the pointers") {
+            REQUIRE_NOTHROW(sonata_refresh_pointers(&square_value));
         }
     }
 
@@ -62,6 +70,18 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
         }
     }
 
+    WHEN("We add a node or an element to a non existing report") {
+        const char* weird_report_name = "myWeirdReport";
+        double soma_value = 33;
+        int nodeids[2] = {1, 2};
+        THEN("Number of reports is still 2 and returns error") {
+            REQUIRE(sonata_get_num_reports() == 2);
+            REQUIRE(sonata_add_node(weird_report_name, 1) == -2);
+            REQUIRE(sonata_add_element(weird_report_name, 1, element_id, &soma_value) == -2);
+            REQUIRE(sonata_set_report_max_buffer_size_hint(weird_report_name, 1) == -1);
+            REQUIRE(sonata_record_node_data(1.0, 1, nodeids, weird_report_name) == -1);
+        }
+    }
     WHEN("10 nodes with 5 elements each") {
         // 10 nodes
         const std::vector<uint64_t> node_ids{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -75,6 +95,7 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
                 sonata_add_element(report_name, node_id, element_id, &voltage);
             }
         }
+        sonata_set_report_max_buffer_size_hint(report_name, 1);
         THEN("Number of reports is 3") {
             REQUIRE(sonata_get_num_reports() == 3);
         }
@@ -89,6 +110,8 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
         sonata_setup_communicators();
         sonata_prepare_datasets();
 
+        sonata_set_min_steps_to_record(10);
+
         double t = 0.0;
         for (int i = 0; i < num_steps; i++) {
             // sonata_record_node_data(i, 10, nodeids, report_name);
@@ -100,5 +123,27 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
         THEN("Number of reports is still 3") {
             REQUIRE(sonata_get_num_reports() == 3);
         }
+    }
+
+    WHEN("We clean all reports") {
+        sonata_clear();
+        THEN("Number of reports is 0") {
+            REQUIRE(sonata_get_num_reports() == 0);
+        }
+    }
+
+    WHEN("We call not implemented functions") {
+        const int values[2] = {0, 1};
+        std::string name = "report";
+        REQUIRE(sonata_extra_mapping(name.data(), 1, 2, values) == 0);
+        sonata_set_steps_to_buffer(10);
+        sonata_set_auto_flush(0);
+        REQUIRE(sonata_time_data() == 0);
+        REQUIRE(sonata_saveinit(name.data(), 1, values, values, 1) == nullptr);
+        REQUIRE(sonata_savebuffer(0) == nullptr);
+        sonata_saveglobal();
+        sonata_savestate();
+        REQUIRE(sonata_restoreinit(name.data(), values) == nullptr);
+        REQUIRE(sonata_restore(1, values, values) == nullptr);
     }
 }

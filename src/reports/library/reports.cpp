@@ -73,7 +73,10 @@ void sonata_set_min_steps_to_record(int steps) {
     SonataReport::m_min_steps_to_record = steps;
 }
 
-int sonata_record_node_data(double step, int num_nodes, int* nodeids, const char* report_name) {
+int sonata_record_node_data(double step,
+                            int num_nodes,
+                            const int* nodeids,
+                            const char* report_name) {
     if (sonata_report.is_empty()) {
         return -3;
     }
@@ -116,7 +119,7 @@ int sonata_set_max_buffer_size_hint(size_t buffer_size) {
     return 0;
 }
 
-int sonata_set_report_max_buffer_size_hint(char* report_name, size_t buffer_size) {
+int sonata_set_report_max_buffer_size_hint(const char* report_name, size_t buffer_size) {
     if (!sonata_report.report_exists(report_name)) {
         return -1;
     }
@@ -152,7 +155,7 @@ void sonata_write_spikes(const double* timestamps,
 }
 
 // NOT REQUIRED FOR SONATA
-int sonata_extra_mapping(char*, uint64_t, int, int*) {
+int sonata_extra_mapping(const char*, uint64_t, int, const int*) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
     return 0;
 }
@@ -166,7 +169,7 @@ int sonata_time_data() {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
     return 0;
 }
-char* sonata_saveinit(char*, int, int*, int*, int) {
+char* sonata_saveinit(const char*, int, const int*, const int*, int) {
     logger->trace("Function {} NOT implemented", __FUNCTION__);
     return nullptr;
 }
@@ -180,11 +183,11 @@ void sonata_saveglobal() {
 void sonata_savestate(void) {
     logger->trace("Function NOT implemented");
 }
-char* sonata_restoreinit(char*, int*) {
+char* sonata_restoreinit(const char*, const int*) {
     logger->trace("Function NOT implemented");
     return nullptr;
 }
-char* sonata_restore(uint64_t, int*, int*) {
+char* sonata_restore(uint64_t, const int*, const int*) {
     logger->trace("Function NOT implemented");
     return nullptr;
 }

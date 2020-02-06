@@ -9,13 +9,13 @@ class IoWriter
         : m_report_name(report_name) {}
     virtual ~IoWriter() = default;
     // Not implemented by default, override by hdf5
-    virtual void configure_group(const std::string& /*group_name*/) {}
-    virtual void configure_attribute(const std::string& /*group_name*/,
-                                     const std::string& /*attribute_name*/,
-                                     const std::string& /*attribute_value*/) {}
-    virtual void configure_dataset(const std::string& /*dataset_name*/,
-                                   int /*total_steps*/,
-                                   int /*total_elements*/) {}
+    virtual void configure_group(const std::string& group_name) = 0;
+    virtual void configure_attribute(const std::string& group_name,
+                                     const std::string& attribute_name,
+                                     const std::string& attribute_value) = 0;
+    virtual void configure_dataset(const std::string& dataset_name,
+                                   int total_steps,
+                                   int total_elements) = 0;
     virtual void write(const std::vector<double>& buffer,
                        int steps_to_write,
                        int total_elements) = 0;

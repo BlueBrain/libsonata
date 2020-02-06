@@ -6,6 +6,7 @@
 
 using namespace bbp::sonata;
 
+
 SCENARIO("Test Report class", "[Report]") {
     uint32_t soma_id = 42;
     uint32_t element_id = 142;
@@ -22,7 +23,9 @@ SCENARIO("Test Report class", "[Report]") {
         WHEN("We add a node and a variable to a soma report") {
             soma_report->add_node(1);
             double element_value = 10;
-            soma_report->get_node(1)->add_element(&element_value, soma_id);
+            const std::shared_ptr<Node> node =
+                static_cast<std::shared_ptr<const Report>>(soma_report)->get_node(1);
+            node->add_element(&element_value, soma_id);
             THEN("Number of nodes and elements is 1") {
                 REQUIRE(soma_report->get_num_nodes() == 1);
                 REQUIRE(soma_report->get_total_elements() == 1);
@@ -59,6 +62,13 @@ SCENARIO("Test Report class", "[Report]") {
 
             THEN("Number of nodes is 2") {
                 REQUIRE(element_report->get_num_nodes() == 2);
+            }
+        }
+        WHEN("We add the same node twice") {
+            element_report->add_node(1);
+            REQUIRE_THROWS(element_report->add_node(1));
+            THEN("Number of nodes is 1") {
+                REQUIRE(element_report->get_num_nodes() == 1);
             }
         }
 
