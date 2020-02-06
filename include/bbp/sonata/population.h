@@ -12,7 +12,7 @@
 #include "common.h"
 
 #include <cstdint>
-#include <memory>  // std::unique_ptr, std::unique_ptr
+#include <memory>  // std::shared_ptr, std::unique_ptr
 #include <set>
 #include <string>
 #include <utility>  // std::move
@@ -38,9 +38,6 @@ class SONATA_API Selection
     template <typename Iterator>
     static Selection fromValues(Iterator first, Iterator last);
     static Selection fromValues(const Values& values);
-
-    Selection intersection_(const Selection&) const;
-    Selection union_(const Selection&) const;
 
     const Ranges& ranges() const;
 
