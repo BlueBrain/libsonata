@@ -24,21 +24,24 @@ if [ $exitvalue -ne 0 ]; then
   exit $exitvalue
 fi
 
-h5diff -c compartment_report.h5 $ref_compartment > diff_compartment.dat /report/data 2>&1
-h5diff -c soma_report.h5 $ref_soma > diff_soma.dat /report/data 2>&1
+h5diff -c compartment_report.h5 $ref_compartment /report/data > diff_compartment.dat 2>&1
+h5diff -c soma_report.h5 $ref_soma /report/data > diff_soma.dat 2>&1
 h5diff -c out.h5 $ref_spikes /spikes/timestamps > diff_spikes.dat 2>&1
 
 if [ -s diff_compartment.dat ]
 then
   echo "Compartment results are different, check the file diff_compartment.dat. Test failed!"
+  echo "$(cat diff_compartment.dat)"
   exit 1
 elif [ -s diff_soma.dat ]
 then
   echo "Soma results are different, check the file diff_soma.dat. Test failed!"
+  echo "$(cat diff_soma.dat)"
   exit 1
 elif [ -s diff_spikes.dat ]
 then
   echo "Spike results are different, check the file diff_spikes.dat. Test failed!"
+  echo "$(cat diff_spikes.dat)"
   exit 1
 else
   echo "Results are the same, test passed"

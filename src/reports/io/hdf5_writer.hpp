@@ -1,6 +1,7 @@
 #include <fstream>
 #include <hdf5.h>
 #include <vector>
+#include <array>
 
 #include "h5typemap.hpp"
 #include "io_writer.hpp"

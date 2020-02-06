@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <memory>
 
 #include "sonata_data.hpp"
 #include <reports/io/hdf5_writer.hpp>

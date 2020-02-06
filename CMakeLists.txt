@@ -89,6 +89,8 @@ if (MPI_FOUND)
     endif()
 else()
     if (HDF5_FOUND)
+        # Avoid NOTFOUND error
+        set(MPI_CXX_LIBRARIES "")
         message(STATUS "HDF5 found, Using reporting serial implementation")
     else()
         message(FATAL_ERROR "No MPI or HDF5 found")

@@ -24,32 +24,34 @@ const static double tstop = 0.3;
 
 void generate_spikes(const std::vector<uint64_t>& nodeids,
                      std::vector<double>& spike_timestamps,
-                     std::vector<int>& spike_node_ids) {
-    // Generate 0-100 spikes
-    int num_spikes = std::rand() % 100;
+                     std::vector<int>& spike_node_ids,
+                     int seed,
+                     int max_size) {
+    // Generate 10,30,50,70,90 spikes
+    int num_spikes = (10 + (20 * seed)) % 100;
     spike_timestamps.reserve(num_spikes);
     spike_node_ids.reserve(num_spikes);
     for (int i = 0; i < num_spikes; i++) {
         // timestamp between tstart and tstop
-        double timestamp = tstart + static_cast<double>(std::rand()) /
-                                        (static_cast<double>(RAND_MAX / (tstop - tstart)));
+        double timestamp = tstart + static_cast<double>(0.5 + seed) /
+                                        (static_cast<double>(max_size / (tstop - tstart)));
         // get an index to the nodeids
-        int index = std::rand() % nodeids.size();
+        int index = seed % nodeids.size();
         int gid = nodeids[index];
         spike_timestamps.push_back(timestamp);
         spike_node_ids.push_back(gid);
     }
 }
 
-void generate_elements(Neuron& neuron) {
+void generate_elements(Neuron& neuron, int seed) {
     // 50+-5 elements
-    int num_elements = 50 + ((std::rand() % 10) - 5);
+    int num_elements = 50 + ((seed % 10) - 5);
     if (neuron.kind == "soma") {
         num_elements = 1;
     }
     neuron.voltages.reserve(num_elements);
     for (int j = 0; j < num_elements; j++) {
-        neuron.voltages.push_back(std::rand() % 10);
+        neuron.voltages.push_back(seed % 10);
     }
 }
 
@@ -57,15 +59,12 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons,
                                     const std::string& kind,
                                     int seed) {
     std::vector<uint64_t> nodeids;
-    // Set random seed for reproducibility
-    std::srand(static_cast<unsigned int>(23487 * (seed + 1)));
-
     // Each gid starts with the rank*10 (i.e. rank 5 will have gids: 51, 52, 53...)
     uint64_t nextgid = 1 + seed * 10;
     uint32_t c_id = 0;
 
     // 5+-5 neurons
-    int num_neurons = 5 + ((std::rand() % 10) - 5);
+    int num_neurons = 5 + ((2 + (seed % 10)) - 5);
     nodeids.reserve(num_neurons);
     for (int i = 0; i < num_neurons; i++) {
         Neuron tmp_neuron;
@@ -75,7 +74,7 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons,
         tmp_neuron.node_id = nextgid++;
 
         // element or soma
-        generate_elements(tmp_neuron);
+        generate_elements(tmp_neuron, seed);
         neurons.push_back(tmp_neuron);
     }
     return nodeids;
@@ -119,9 +118,11 @@ void print_data(std::vector<Neuron>& neurons) {
 int main() {
     logger->set_level(spdlog::level::trace);
     int global_rank = 0;
+    int global_size = 1;
 #ifdef HAVE_MPI
     MPI_Init(nullptr, nullptr);
     MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &global_size);
 #endif
     if (global_rank == 0) {
         logger->info("Starting...");
@@ -136,7 +137,7 @@ int main() {
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
     element_nodeids = generate_data(element_neurons, "compartment", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
-    generate_spikes(soma_nodeids, spike_timestamps, spike_node_ids);
+    generate_spikes(soma_nodeids, spike_timestamps, spike_node_ids, global_rank, global_size);
 
     std::vector<int> int_element_nodeids(begin(element_nodeids), end(element_nodeids));
     std::vector<int> int_soma_nodeids(begin(soma_nodeids), end(soma_nodeids));

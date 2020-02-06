@@ -55,17 +55,19 @@ set_target_properties(sonata_report
         OUTPUT_NAME "sonatareport"
         )
 target_link_libraries(sonata_report
-    PRIVATE ${HDF5_LIBS}
-    PRIVATE ${MPI_CXX_LIBRARIES})
+        PRIVATE ${HDF5_LIBS}
+        PRIVATE ${MPI_CXX_LIBRARIES}
+        )
 
 # Coreneuron simulator Client
 add_executable(client ${client_SOURCES})
 target_link_libraries(client
         PRIVATE sonata_report
-        PRIVATE ${MPI_CXX_LIBRARIES})
+        PRIVATE ${MPI_CXX_LIBRARIES}
+        )
 
 install(TARGETS sonata_report
-    EXPORT sonata-targets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
+        EXPORT sonata-targets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        )
