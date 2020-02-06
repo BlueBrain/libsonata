@@ -331,8 +331,9 @@ PYBIND11_MODULE(libsonata, m) {
             "If EdgeSelection is not empty")
 
         .def("__eq__", &bbp::sonata::operator==, "Compare selection contents are equal")
-
-        .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal");
+        .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
+        .def("__or__", &bbp::sonata::operator|, "Union of selections")
+        .def("__and__", &bbp::sonata::operator&, "Intersection of selections");
 
     bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
         .def(

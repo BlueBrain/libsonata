@@ -12,9 +12,10 @@
 #include "common.h"
 
 #include <cstdint>
-#include <memory>
+#include <memory>  // std::shared_ptr, std::unique_ptr
 #include <set>
 #include <string>
+#include <utility>  // std::move
 #include <vector>
 
 
@@ -52,6 +53,9 @@ class SONATA_API Selection
 
 bool SONATA_API operator==(const Selection&, const Selection&);
 bool SONATA_API operator!=(const Selection&, const Selection&);
+
+Selection SONATA_API operator&(const Selection&, const Selection&);
+Selection SONATA_API operator|(const Selection&, const Selection&);
 
 template <typename Iterator>
 Selection Selection::fromValues(Iterator first, Iterator last) {
