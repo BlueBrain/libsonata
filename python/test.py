@@ -66,8 +66,8 @@ class TestSelection(unittest.TestCase):
 
 class TestNodePopulation(unittest.TestCase):
     def setUp(self):
-        path = os.path.join(PATH, 'nodes1.h5')
-        self.test_obj = NodeStorage(path).open_population('nodes-A')
+        self.path = os.path.join(PATH, 'nodes1.h5')
+        self.test_obj = NodeStorage(self.path).open_population('nodes-A')
 
     def test_name(self):
         self.assertEqual(self.test_obj.name, "nodes-A")
@@ -75,6 +75,23 @@ class TestNodePopulation(unittest.TestCase):
     def test_size(self):
         self.assertEqual(self.test_obj.size, 6)
         self.assertEqual(len(self.test_obj), 6)
+
+    def test_node_ids(self):
+        ranges = [[0, 1], [1, 2]]
+        selection = Selection(ranges)
+        self.assertEqual(self.test_obj.node_ids(selection).tolist(), [0, 1])
+        ranges = [[0, 2], [4, 6]]
+        selection = Selection(ranges)
+        self.assertEqual(self.test_obj.node_ids(selection).tolist(), [0, 1, 4, 5])
+
+    def test_node_ids_2(self):
+        testee = NodeStorage(self.path).open_population('nodes-C')
+        ranges = [[0, 1], [1, 2]]
+        selection = Selection(ranges)
+        self.assertEqual(testee.node_ids(selection).tolist(), [1, 2])
+        ranges = [[0, 2], [4, 6]]
+        selection = Selection(ranges)
+        self.assertEqual(testee.node_ids(selection).tolist(), [1, 2, 5, 6])
 
     def test_attribute_names(self):
         self.assertEqual(

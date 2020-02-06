@@ -5,7 +5,7 @@ import numpy as np
 import h5py
 
 
-def write_population_one_group(pop, prefix):
+def write_population_one_group(pop, prefix, write_properties=True):
 
     if sys.version_info[0] == 2:
         vlen_str_type = unicode
@@ -21,6 +21,8 @@ def write_population_one_group(pop, prefix):
     pop.create_dataset('%s_type_id' % prefix, data=np.full(6, -1), dtype=np.int32)
 
     attrs = pop.create_group('0')
+    if not write_properties:
+        return
     attrs.create_dataset('attr-X', data=np.arange(11., 17.), dtype=np.float64)
     attrs.create_dataset('attr-Y', data=np.arange(21, 27), dtype=np.int64)
     attrs.create_dataset('attr-Z', data=[(2 * x).encode('utf-8') for x in 'abcdef'],
@@ -74,7 +76,13 @@ def write_nodes(filepath):
         write_population_two_groups(
             root.create_group('nodes-B')
         )
-
+        pop_c = root.create_group('nodes-C')
+        write_population_one_group(
+            pop_c,
+            prefix='node',
+            write_properties=False
+        )
+        pop_c.create_dataset('node_id', data=np.arange(1, 7), dtype=np.uint64)
 
 def group_ranges(values):
     result = []

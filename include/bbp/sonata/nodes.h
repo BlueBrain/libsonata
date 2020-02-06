@@ -44,6 +44,8 @@ class SONATA_API NodePopulation: public Population
      *
      * Note: This does not match Dynamics_params datasets
      */
+    std::vector<NodeID> nodeIDs(const Selection& selection) const;
+
     template <typename T>
     Selection matchAttributeValues(const std::string& attribute, const T value) const;
 };

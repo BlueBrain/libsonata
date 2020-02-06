@@ -351,7 +351,14 @@ PYBIND11_MODULE(libsonata, m) {
             },
             "name"_a,
             "value"_a,
-            "Return selection where the attribute `name` has values matching the string `value`");
+            "Return selection where the attribute `name` has values matching the string `value`")
+        .def(
+            "node_ids",
+            [](NodePopulation& obj, const Selection& selection) {
+                return asArray(obj.nodeIDs(selection));
+            },
+            "selection"_a,
+            "Return node IDs for given Selection");
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
 

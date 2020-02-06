@@ -20,11 +20,27 @@ namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
 
+namespace {
+
+const char* NODE_ID_DSET = "node_id";
+
+}  // unnamed namespace
+
+
 NodePopulation::NodePopulation(const std::string& h5FilePath,
                                const std::string& csvFilePath,
                                const std::string& name)
     : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
 
+
+std::vector<NodeID> NodePopulation::nodeIDs(const Selection& selection) const {
+    HDF5_LOCK_GUARD
+    if (H5Lexists(impl_->h5Root.getId(), NODE_ID_DSET, H5P_DEFAULT) > 0) {
+        const auto dset = impl_->h5Root.getDataSet(NODE_ID_DSET);
+        return _readSelection<NodeID>(dset, selection);
+    }
+    return selection.flatten();
+}
 
 namespace {
 template <typename T>

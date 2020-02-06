@@ -17,6 +17,7 @@ TEST_CASE("NodePopulation", "[base]") {
 
     REQUIRE(population.size() == 6);
 
+
     REQUIRE(population.attributeNames() == std::set<std::string>{"attr-X",
                                                                  "attr-Y",
                                                                  "attr-Z",
@@ -38,6 +39,9 @@ TEST_CASE("NodePopulation", "[base]") {
     REQUIRE(population.enumerationNames() ==
             std::set<std::string>{"E-mapping-good", "E-mapping-bad"});
 
+
+    CHECK(population.nodeIDs(Selection({{0, 1}, {1, 2}})) == std::vector<NodeID>{0, 1});
+    CHECK(population.nodeIDs(Selection({{0, 2}, {4, 6}})) == std::vector<NodeID>{0, 1, 4, 5});
     CHECK(population.getAttribute<double>("attr-X", Selection({{0, 1}, {5, 6}})) ==
           std::vector<double>{11.0, 16.0});
     CHECK(population.getAttribute<float>("attr-X", Selection({{0, 1}})) ==
@@ -146,6 +150,10 @@ TEST_CASE("NodePopulation", "[base]") {
     CHECK(population._dynamicsAttributeDataType("dparam-Z") == "string");
 }
 
+TEST_CASE("NodePopulationNodeIDs", "[base]") {
+    NodePopulation population("./data/nodes1.h5", "", "nodes-C");
+    CHECK(population.nodeIDs(Selection({{0, 1}, {1, 2}})) == std::vector<NodeID>{1, 2});
+}
 
 TEST_CASE("NodePopulationMove", "[base]") {
     NodePopulation population("./data/nodes1.h5", "", "nodes-A");
