@@ -1,7 +1,7 @@
+#include <array>
 #include <fstream>
 #include <hdf5.h>
 #include <vector>
-#include <array>
 
 #include "h5typemap.hpp"
 #include "io_writer.hpp"
@@ -17,9 +17,7 @@ class HDF5Writer: public IoWriter
     void configure_dataset(const std::string& dataset_name,
                            int total_steps,
                            int total_elements) override;
-    void write(const std::vector<double>& buffer,
-               int steps_to_write,
-               int total_elements) override;
+    void write(const std::vector<double>& buffer, int steps_to_write, int total_elements) override;
     void write(const std::string& dataset_name, const std::vector<int>& buffer) override;
     void write(const std::string& dataset_name, const std::vector<uint32_t>& buffer) override;
     void write(const std::string& dataset_name, const std::vector<uint64_t>& buffer) override;
