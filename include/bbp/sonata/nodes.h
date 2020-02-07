@@ -31,6 +31,11 @@ class SONATA_API NodePopulation: public Population
                    const std::string& name);
 
     /**
+     *Return the node ids from the 'node_id' dataset
+     */
+    std::vector<NodeID> nodeIDs(const Selection& selection) const;
+
+    /**
      * Return selection of where attribute values match value
      *
      * As per node_set predicates, value must be one of type:
@@ -44,8 +49,6 @@ class SONATA_API NodePopulation: public Population
      *
      * Note: This does not match Dynamics_params datasets
      */
-    std::vector<NodeID> nodeIDs(const Selection& selection) const;
-
     template <typename T>
     Selection matchAttributeValues(const std::string& attribute, const T value) const;
 };

@@ -35,7 +35,7 @@ NodePopulation::NodePopulation(const std::string& h5FilePath,
 
 std::vector<NodeID> NodePopulation::nodeIDs(const Selection& selection) const {
     HDF5_LOCK_GUARD
-    if (H5Lexists(impl_->h5Root.getId(), NODE_ID_DSET, H5P_DEFAULT) > 0) {
+    if (impl_->h5Root.exist(NODE_ID_DSET)) {
         const auto dset = impl_->h5Root.getDataSet(NODE_ID_DSET);
         return _readSelection<NodeID>(dset, selection);
     }
