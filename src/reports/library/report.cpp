@@ -9,7 +9,8 @@
 namespace bbp {
 namespace sonata {
 
-#define DEFAULT_MAX_BUFFER_SIZE 1024
+// 4MB
+#define DEFAULT_MAX_BUFFER_SIZE 4194304
 
 Report::Report(const std::string& report_name, double tstart, double tend, double dt)
     : m_nodes(std::make_shared<nodes_t>())

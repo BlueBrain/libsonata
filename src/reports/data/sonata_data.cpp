@@ -242,6 +242,9 @@ void SonataData::write_data() {
     if (m_remaining_steps <= 0) {  // Nothing left to write
         return;
     }
+    if(m_current_step >= m_remaining_steps) {  // Avoid writing out of bounds
+        m_current_step = m_remaining_steps;
+    }
     m_io_writer->write(m_report_buffer, m_current_step, m_total_elements);
     m_remaining_steps -= m_current_step;
     if (SonataReport::m_rank == 0) {
