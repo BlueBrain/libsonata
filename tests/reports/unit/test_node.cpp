@@ -1,7 +1,7 @@
 #include <catch2/catch.hpp>
 #include <memory>
-#include <reports/data/node.hpp>
-#include <reports/data/soma_node.hpp>
+#include <reports/data/node.h>
+#include <reports/data/soma_node.h>
 #include <spdlog/spdlog.h>
 
 using namespace bbp::sonata;
@@ -15,7 +15,7 @@ SCENARIO("Test Node class", "[Node]") {
     GIVEN("An instance of a Node") {
         Node node{1};
         {  // Initial conditions
-            REQUIRE(node.get_gid() == 1);
+            REQUIRE(node.get_node_id() == 1);
             REQUIRE(node.get_num_elements() == 0);
             REQUIRE(node.get_element_ids().empty());
 

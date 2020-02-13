@@ -1,24 +1,24 @@
 #include <algorithm>
 
-#include "node.hpp"
+#include "node.h"
 
 namespace bbp {
 namespace sonata {
 
-Node::Node(uint64_t gid)
-    : m_gid(gid) {}
+Node::Node(uint64_t node_id)
+    : node_id_(node_id) {}
 
 void Node::add_element(double* element_value, uint32_t element_id) {
-    m_elements.push_back(element_value);
-    m_element_ids.push_back(element_id);
+    elements_.push_back(element_value);
+    element_ids_.push_back(element_id);
 }
 
 void Node::fill_data(std::vector<double>::iterator it) {
-    std::transform(m_elements.begin(), m_elements.end(), it, [](auto elem) { return *elem; });
+    std::transform(elements_.begin(), elements_.end(), it, [](auto elem) { return *elem; });
 }
 
 void Node::refresh_pointers(std::function<double*(double*)> refresh_function) {
-    std::transform(m_elements.begin(), m_elements.end(), m_elements.begin(), refresh_function);
+    std::transform(elements_.begin(), elements_.end(), elements_.begin(), refresh_function);
 }
 
 }  // namespace sonata

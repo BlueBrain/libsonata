@@ -1,5 +1,4 @@
 #pragma once
-
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
@@ -9,7 +8,7 @@
 #include <mpi.h>
 #endif
 
-#include "report.hpp"
+#include "report.h"
 
 namespace bbp {
 namespace sonata {
@@ -24,13 +23,13 @@ class SonataReport
     using communicators_t = std::unordered_map<std::string, MPI_Comm>;
 #endif
   public:
-    static double m_atomic_step;
-    static double m_min_steps_to_record;
+    static double atomic_step_;
+    static double min_steps_to_record_;
 #ifdef HAVE_MPI
-    static MPI_Comm m_has_nodes;
-    static communicators_t m_communicators;
+    static MPI_Comm has_nodes_;
+    static communicators_t communicators_;
 #endif
-    static int m_rank;
+    static int rank_;
     static bool first_report;
 
     /**
@@ -42,13 +41,13 @@ class SonataReport
     bool is_empty();
 
     int get_num_reports() const noexcept {
-        return m_reports.size();
+        return reports_.size();
     }
 
-    const std::shared_ptr<Report>& create_report(
+    std::shared_ptr<Report> create_report(
         const std::string& name, const std::string& king, double tstart, double tend, double dt);
 
-    const std::shared_ptr<Report>& get_report(const std::string& name) const;
+    std::shared_ptr<Report> get_report(const std::string& name) const;
 
     bool report_exists(const std::string& name) const;
 
@@ -56,18 +55,19 @@ class SonataReport
     void prepare_datasets();
 
     void write_spikes(const std::string& output_dir,
+                      const std::string& population_name,
                       const std::vector<double>& spike_timestamps,
-                      const std::vector<int>& spike_node_ids);
+                      const std::vector<uint64_t>& spike_node_ids);
 
     template <typename Functor, typename T>
     void apply_all(const Functor& functor, T data) {
-        std::for_each(m_reports.begin(), m_reports.end(), [&](reports_t::value_type arg) {
+        std::for_each(reports_.begin(), reports_.end(), [&](reports_t::value_type arg) {
             functor(arg.second, data);
         });
     }
 
   private:
-    reports_t m_reports;
+    reports_t reports_;
 };
 
 }  // namespace sonata

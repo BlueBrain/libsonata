@@ -10,47 +10,45 @@
 #endif
 
 #include <bbp/sonata/reports.h>
-#include <reports/utils/logger.hpp>
+#include <reports/utils/logger.h>
 
 struct Neuron {
-    int node_id;
+    uint64_t node_id;
     std::string kind;  // soma / element
     std::vector<double> voltages;
 };
 
-const static double dt = 0.1;
-const static double tstart = 0.0;
-const static double tstop = 0.3;
-
 void generate_spikes(const std::vector<uint64_t>& nodeids,
                      std::vector<double>& spike_timestamps,
                      std::vector<int>& spike_node_ids,
+                     double tstart,
+                     double tstop,
                      int seed,
                      int max_size) {
     // Generate 10,30,50,70,90 spikes
-    int num_spikes = (10 + (20 * seed)) % 100;
+    size_t num_spikes = (10 + (20 * seed)) % 100;
     spike_timestamps.reserve(num_spikes);
     spike_node_ids.reserve(num_spikes);
-    for (int i = 0; i < num_spikes; i++) {
+    for (size_t i = 0; i < num_spikes; i++) {
         // timestamp between tstart and tstop
-        double timestamp = tstart + static_cast<double>(0.5 + seed) /
-                                        (static_cast<double>(max_size / (tstop - tstart)));
+        double timestamp = tstart + (0.5 + seed) /
+                                    (max_size / (tstop - tstart));
         // get an index to the nodeids
-        int index = seed % nodeids.size();
-        int gid = nodeids[index];
+        size_t index = seed % nodeids.size();
+        uint32_t node_id = nodeids[index];
         spike_timestamps.push_back(timestamp);
-        spike_node_ids.push_back(gid);
+        spike_node_ids.push_back(node_id);
     }
 }
 
 void generate_elements(Neuron& neuron, int seed) {
     // 50+-5 elements
-    int num_elements = 50 + ((seed % 10) - 5);
+    size_t num_elements = 50 + ((seed % 10) - 5);
     if (neuron.kind == "soma") {
         num_elements = 1;
     }
     neuron.voltages.reserve(num_elements);
-    for (int j = 0; j < num_elements; j++) {
+    for (size_t j = 0; j < num_elements; j++) {
         neuron.voltages.push_back(seed % 10);
     }
 }
@@ -59,19 +57,18 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons,
                                     const std::string& kind,
                                     int seed) {
     std::vector<uint64_t> nodeids;
-    // Each gid starts with the rank*10 (i.e. rank 5 will have gids: 51, 52, 53...)
-    uint64_t nextgid = 1 + seed * 10;
-    uint32_t c_id = 0;
+    // Each nodeid starts with the rank*10 (i.e. rank 5 will have nodeids: 51, 52, 53...)
+    uint64_t next_nodeid = 1 + seed * 10;
 
     // 5+-5 neurons
-    int num_neurons = 5 + ((2 + (seed % 10)) - 5);
+    uint32_t num_neurons = 5 + ((2 + (seed % 10)) - 5);
     nodeids.reserve(num_neurons);
-    for (int i = 0; i < num_neurons; i++) {
+    for (uint32_t i = 0; i < num_neurons; i++) {
         Neuron tmp_neuron;
         tmp_neuron.kind = kind;
 
-        nodeids.push_back(nextgid);
-        tmp_neuron.node_id = nextgid++;
+        nodeids.push_back(next_nodeid);
+        tmp_neuron.node_id = next_nodeid++;
 
         // element or soma
         generate_elements(tmp_neuron, seed);
@@ -80,18 +77,16 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons,
     return nodeids;
 }
 
-void init(const char* report_name, std::vector<Neuron>& neurons, const std::string& kind) {
+void init(const char* report_name, const char* population_name, double tstart, double tstop, double dt, std::vector<Neuron>& neurons, const std::string& kind) {
     // logic for registering soma and element reports with reportinglib
     sonata_create_report(report_name, tstart, tstop, dt, kind.c_str());
     for (auto& neuron : neurons) {
-        sonata_add_node(report_name, neuron.node_id);
-        const int mapping_size = 1;
+        sonata_add_node(report_name, population_name, neuron.node_id);
         int element_id = neuron.node_id * 1000;
-        int mapping[mapping_size] = {element_id};
 
         for (auto& element : neuron.voltages) {
-            sonata_add_element(report_name, neuron.node_id, element_id, &element);
-            mapping[0] = ++element_id;
+            sonata_add_element(report_name, population_name, neuron.node_id, element_id, &element);
+            ++element_id;
         }
     }
 }
@@ -127,6 +122,11 @@ int main() {
     if (global_rank == 0) {
         logger->info("Starting...");
     }
+
+    const double dt = 0.1;
+    const double tstart = 0.0;
+    const double tstop = 0.3;
+
     std::vector<Neuron> element_neurons;
     std::vector<Neuron> soma_neurons;
     std::vector<uint64_t> element_nodeids;
@@ -137,7 +137,7 @@ int main() {
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
     element_nodeids = generate_data(element_neurons, "compartment", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
-    generate_spikes(soma_nodeids, spike_timestamps, spike_node_ids, global_rank, global_size);
+    generate_spikes(soma_nodeids, spike_timestamps, spike_node_ids, tstart, tstop, global_rank, global_size);
 
     std::vector<int> int_element_nodeids(begin(element_nodeids), end(element_nodeids));
     std::vector<int> int_soma_nodeids(begin(soma_nodeids), end(soma_nodeids));
@@ -147,9 +147,10 @@ int main() {
     }
     const char* element_report = "compartment_report";
     const char* soma_report = "soma_report";
+    const char* population_name = "All";
 
-    init(element_report, element_neurons, "compartment");
-    init(soma_report, soma_neurons, "soma");
+    init(element_report, population_name, tstart, tstop, dt, element_neurons, "compartment");
+    init(soma_report, population_name, tstart, tstop, dt, soma_neurons, "soma");
     sonata_set_max_buffer_size_hint(20);
     sonata_set_atomic_step(dt);
 
@@ -175,7 +176,7 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Update timestep on reportinglib
-        sonata_end_iteration(t);
+        sonata_check_and_flush(t);
         t += dt;
         // Change data every timestep
         change_data(element_neurons);
@@ -184,7 +185,8 @@ int main() {
     sonata_flush(t);
     const std::string output_dir = ".";
     // Write the spikes
-    sonata_write_spikes(spike_timestamps.data(),
+    sonata_write_spikes(population_name,
+                        spike_timestamps.data(),
                         spike_timestamps.size(),
                         spike_node_ids.data(),
                         spike_node_ids.size(),
@@ -193,6 +195,8 @@ int main() {
     if (global_rank == 0) {
         logger->info("Finalizing...");
     }
+
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

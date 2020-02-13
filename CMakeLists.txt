@@ -39,6 +39,7 @@ project(sonata VERSION ${SONATA_VERSION})
 option(EXTLIB_FROM_SUBMODULES "Use Git submodules for header-only dependencies" OFF)
 option(SONATA_PYTHON "Build Python extensions" OFF)
 option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
+option(REPORTS_ENABLE_MPI "Enable MPI-based execution for the reporting" OFF)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -65,40 +66,40 @@ endif()
 # Dependencies
 # =============================================================================
 
-find_package(MPI)
-if (MPI_FOUND)
-    # With MPI we prefer HDF5 parallel
-    set(HDF5_PREFER_PARALLEL "ON")
-endif()
+if(REPORTS_ENABLE_MPI)
+    find_package(MPI REQUIRED)
+    if (MPI_FOUND)
+        # With MPI we prefer HDF5 parallel
+        set(HDF5_PREFER_PARALLEL "ON")
+    endif()
 
-find_package(HDF5)
-if (HDF5_FOUND)
-    set(HDF5_LIBS ${HDF5_LIBRARIES})
-endif()
-
-if (MPI_FOUND)
-    if (HDF5_FOUND)
-        if (HDF5_IS_PARALLEL)
-            set(HAVE_MPI TRUE)
-            # When MPI and HDF5 parallel are found, enable mpi in the report library
-            add_definitions(-DHAVE_MPI)
-            message(STATUS "Both MPI and HDF5 parallel found, using reporting parallel implementation")
+    find_package(HDF5)
+    if (MPI_FOUND)
+        if (HDF5_FOUND)
+            if (HDF5_IS_PARALLEL)
+                set(HAVE_MPI TRUE)
+                # When MPI and HDF5 parallel are found, enable mpi in the report library
+                add_definitions(-DHAVE_MPI)
+                message(STATUS "Both MPI and HDF5 parallel found, using reporting parallel implementation")
+            else()
+                message(STATUS "MPI and HDF5 found, but no parallel IO support for HDF5, using reporting serial implementation")
+            endif()
+        endif()
+    else()
+        if (HDF5_FOUND)
+            # Avoid NOTFOUND error
+            set(MPI_CXX_LIBRARIES "")
+            message(STATUS "HDF5 found, Using reporting serial implementation")
         else()
-            message(STATUS "MPI and HDF5 found, but no parallel IO support for HDF5, using reporting serial implementation")
+            message(FATAL_ERROR "No MPI or HDF5 found")
         endif()
     endif()
-else()
-    if (HDF5_FOUND)
-        # Avoid NOTFOUND error
-        set(MPI_CXX_LIBRARIES "")
-        message(STATUS "HDF5 found, Using reporting serial implementation")
-    else()
-        message(FATAL_ERROR "No MPI or HDF5 found")
-    endif()
+
 endif()
 
 if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
+    include(extlib/Catch2/contrib/Catch.cmake)
 else()
     find_package(fmt REQUIRED)
     find_package(HighFive REQUIRED)
@@ -209,7 +210,6 @@ install(EXPORT sonata-targets
 # =============================================================================
 
 enable_testing()
-include(extlib/Catch2/contrib/Catch.cmake)
 add_subdirectory(tests)
 
 if (ENABLE_COVERAGE)
@@ -218,7 +218,7 @@ if (ENABLE_COVERAGE)
     SETUP_TARGET_FOR_COVERAGE_LCOV(
         NAME coverage
         EXECUTABLE ctest
-        DEPENDENCIES unittests unit-tests client
+        DEPENDENCIES unittests reports_unit_tests reports_integration_test
     )
 endif()
 

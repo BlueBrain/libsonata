@@ -13,35 +13,35 @@ extern "C" {
 #endif
 
 
-/*! \brief Add node to existing or new report
- * @param report_name name of the report to be created or added node to
- * @param gid node/cell identifier
- * @param tstart start time of recording for the report
- * @param tend stop time of recording for the report
- * @param dt frequency of recordings
+/*! \brief Create a new report
+ * @param report_name name of the report to be created
+ * @param start_time start time of recording for the report
+ * @param end_time stop time of recording for the report
+ * @param delta_time frequency of recordings
  * @param kind type of report (soma, compartment)
  * @return 0 if operator succeeded, -1 otherwise
  */
 int sonata_create_report(
-    const char* report_name, double _tstart, double _tend, double _dt, const char* kind);
+    const char* report_name, double start_time, double end_time, double delta_time, const char* kind);
 
 /*!
  * \brief Add a node to an existing report
  * \param report_name name of the report
  * \param node_id node identifier
- * \return 0 if operator succeeded, -2 if the report doesn't exist, -1 for other errors.
+ * \return 0 if operator succeeded, -2 if the report doesn't exist, -1 if the node_id already exists.
  */
-int sonata_add_node(const char* report_name, uint64_t node_id);
+int sonata_add_node(const char* report_name, const char* population_name, uint64_t node_id);
 
 /**
- * \brief Add compartment values to an existing node on a report
+ * \brief Add an element value to an existing node on a report
  * \return 0 if operator succeeded, -2 if the report doesn't exist, -3 if the specified node
  * doesn't exist, -1 for other errors.
  */
 int sonata_add_element(const char* report_name,
+                       const char* population_name,
                        uint64_t node_id,
                        uint32_t element_id,
-                       double* voltage);
+                       double* element_value);
 /**
  * \brief Setup buffers and create datasets
  * \return 0
@@ -61,7 +61,8 @@ void sonata_set_min_steps_to_record(int steps);
 /**
  * \brief Spike arrays to be written to file
  */
-void sonata_write_spikes(const double* spike_timestamps,
+void sonata_write_spikes(const char* population_name,
+                         const double* spike_timestamps,
                          uint64_t num_timestamps,
                          const int* spike_node_ids,
                          uint64_t num_node_ids,
@@ -86,7 +87,7 @@ int sonata_record_data(double step);
  * \brief Check status of the recordings/buffers and flush if necessary
  * \return 0
  */
-int sonata_end_iteration(double timestep);
+int sonata_check_and_flush(double timestep);
 
 /**
  * \return number of reports
@@ -98,6 +99,10 @@ int sonata_get_num_reports();
  * \return -3 if there was nothing to flush, 0 otherwise
  */
 int sonata_flush(double time);
+
+/**
+ * \brief Update the element values according to the function provided as argument
+ */
 
 void sonata_refresh_pointers(double* (*refresh_function)(double*) );
 /**
@@ -120,6 +125,9 @@ int sonata_set_report_max_buffer_size_hint(const char* report_name, size_t buffe
  */
 int sonata_clear();
 
+/**
+ * \brief Set the atomic step (used in the simulation). Helps calculating the reporting period.
+ */
 void sonata_set_atomic_step(double step);
 
 // NOT REQUIRED FOR SONATA

@@ -1,6 +1,5 @@
 #pragma once
-
-#include "node.hpp"
+#include "node.h"
 
 namespace bbp {
 namespace sonata {
@@ -8,11 +7,11 @@ namespace sonata {
 class SomaNode: public Node
 {
   public:
-    SomaNode(uint64_t gid);
+    SomaNode(uint64_t node_id);
 
     void add_element(double* element_value, uint32_t element_id) override;
     size_t get_num_elements() const noexcept override {
-        return m_elements.empty() ? 0 : 1;
+        return elements_.empty() ? 0 : 1;
     };
 };
 

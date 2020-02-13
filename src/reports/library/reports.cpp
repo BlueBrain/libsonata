@@ -1,7 +1,7 @@
+#include "../utils/logger.h"
+#include "sonatareport.h"
 #include <bbp/sonata/reports.h>
 #include <iostream>
-#include <reports/library/sonatareport.hpp>
-#include <reports/utils/logger.hpp>
 
 using namespace bbp::sonata;
 
@@ -25,13 +25,13 @@ int sonata_create_report(
     return 0;
 }
 
-int sonata_add_node(const char* report_name, uint64_t node_id) {
+int sonata_add_node(const char* report_name, const char* population_name, uint64_t node_id) {
     if (!sonata_report.report_exists(report_name)) {
         return -2;
     }
     try {
         auto report = sonata_report.get_report(report_name);
-        report->add_node(node_id);
+        report->add_node(population_name, node_id);
     } catch (const std::exception& err) {
         logger->error(err.what());
         return -1;
@@ -40,6 +40,7 @@ int sonata_add_node(const char* report_name, uint64_t node_id) {
 }
 
 int sonata_add_element(const char* report_name,
+                       const char* population_name,
                        uint64_t node_id,
                        uint32_t element_id,
                        double* voltage) {
@@ -48,7 +49,7 @@ int sonata_add_element(const char* report_name,
     }
     try {
         auto report = sonata_report.get_report(report_name);
-        auto node = report->get_node(node_id);
+        auto node = report->get_node(population_name, node_id);
         node->add_element(voltage, element_id);
     } catch (const std::out_of_range& err) {
         logger->error(err.what());
@@ -70,7 +71,7 @@ int sonata_prepare_datasets() {
 }
 
 void sonata_set_min_steps_to_record(int steps) {
-    SonataReport::m_min_steps_to_record = steps;
+    SonataReport::min_steps_to_record_ = steps;
 }
 
 int sonata_record_node_data(double step,
@@ -98,8 +99,8 @@ int sonata_record_data(double step) {
     return 0;
 }
 
-int sonata_end_iteration(double timestep) {
-    auto functor = std::mem_fn(&Report::end_iteration);
+int sonata_check_and_flush(double timestep) {
+    auto functor = std::mem_fn(&Report::check_and_flush);
     sonata_report.apply_all(functor, timestep);
     return 0;
 }
@@ -129,7 +130,7 @@ int sonata_set_report_max_buffer_size_hint(const char* report_name, size_t buffe
 }
 
 void sonata_set_atomic_step(double step) {
-    SonataReport::m_atomic_step = step;
+    SonataReport::atomic_step_ = step;
 }
 
 int sonata_get_num_reports() {
@@ -143,15 +144,17 @@ void sonata_refresh_pointers(double* (*refresh_function)(double*) ) {
     sonata_report.apply_all(functor, fun);
 }
 
-void sonata_write_spikes(const double* timestamps,
+void sonata_write_spikes(const char* population_name,
+                         const double* timestamps,
                          uint64_t num_timestamps,
                          const int* node_ids,
                          uint64_t num_node_ids,
                          const char* output_dir) {
     const std::vector<double> spike_timestamps(timestamps, timestamps + num_timestamps);
-    const std::vector<int> spike_node_ids(node_ids, node_ids + num_node_ids);
+    const std::vector<uint64_t> spike_node_ids(node_ids, node_ids + num_node_ids);
     const std::string output_directory(output_dir);
-    sonata_report.write_spikes(output_directory, spike_timestamps, spike_node_ids);
+    const std::string population(population_name);
+    sonata_report.write_spikes(output_directory, population, spike_timestamps, spike_node_ids);
 }
 
 // NOT REQUIRED FOR SONATA

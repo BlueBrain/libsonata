@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cstdint>
 #include <functional>
 #include <vector>
@@ -10,29 +9,29 @@ namespace sonata {
 class Node
 {
   public:
-    Node(uint64_t gid);
+    Node(uint64_t node_id);
     virtual ~Node() = default;
 
     void fill_data(std::vector<double>::iterator it);
     void refresh_pointers(std::function<double*(double*)> refresh_function);
     virtual void add_element(double* element_value, uint32_t element_id);
 
-    uint64_t get_gid() const noexcept {
-        return m_gid;
+    uint64_t get_node_id() const noexcept {
+        return node_id_;
     }
     virtual size_t get_num_elements() const noexcept {
-        return m_elements.size();
+        return elements_.size();
     }
     const std::vector<uint32_t>& get_element_ids() const noexcept {
-        return m_element_ids;
+        return element_ids_;
     }
 
   private:
-    uint64_t m_gid;
+    uint64_t node_id_;
 
   protected:
-    std::vector<uint32_t> m_element_ids;
-    std::vector<double*> m_elements;
+    std::vector<uint32_t> element_ids_;
+    std::vector<double*> elements_;
 };
 
 }  // namespace sonata
