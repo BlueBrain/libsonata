@@ -9,21 +9,45 @@ git:
 matrix:
   include:
     - os: linux
-      env: GCC_VERSION=7
+      env:
+        - GCC_VERSION=7
+        - cmake_option="-DREPORTS_ENABLE_MPI=ON -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpicxx"
       dist: xenial
       sudo: required
       python: 3.6
     - os: linux
-      env: GCC_VERSION=7
+      env:
+        - GCC_VERSION=7
+        - cmake_options="-DREPORTS_ENABLE_MPI=OFF"
+      dist: xenial
+      sudo: required
+      python: 3.6
+
+    - os: linux
+      env:
+        - GCC_VERSION=7
+        - cmake_option="-DREPORTS_ENABLE_MPI=ON -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpicxx"
+      dist: xenial
+      sudo: required
+      python: 2.7
+    - os: linux
+      env:
+        - GCC_VERSION=7
+        - cmake_option="-DREPORTS_ENABLE_MPI=OFF"
       dist: xenial
       sudo: required
       python: 2.7
 
     - os: osx
+      env:
+        - cmake_option="-DREPORTS_ENABLE_MPI=OFF"
       osx_image: xcode10.3
       language: generic
       python: 3.6
+
     - os: osx
+      env:
+        - cmake_option="-DREPORTS_ENABLE_MPI=OFF"
       osx_image: xcode10.3
       language: generic
       python: 2.7
@@ -36,7 +60,10 @@ addons:
     packages:
       - g++-7
       - libhdf5-dev
+      - libhdf5-mpich-dev
       - hdf5-tools
+      - libmpich-dev
+      - mpich
     sources:
       - ubuntu-toolchain-r-test
 
@@ -52,7 +79,7 @@ before_install:
 
 install: skip
 script:
-  - ci/cpp_test.sh
+  - ci/cpp_test.sh "${cmake_option}"
   - ci/python_test.sh
 
 deploy:

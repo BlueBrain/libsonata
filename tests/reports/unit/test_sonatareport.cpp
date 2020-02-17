@@ -1,6 +1,6 @@
-#include <catch2/catch.hpp>
 #include <array>
 #include <bbp/sonata/reports.h>
+#include <catch2/catch.hpp>
 
 static const char* element_report_name = "myElementReport";
 static const char* soma_report_name = "mySomaReport";
@@ -78,7 +78,8 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
         THEN("Number of reports is still 2 and returns error") {
             REQUIRE(sonata_get_num_reports() == 2);
             REQUIRE(sonata_add_node(weird_report_name, population_name, 1) == -2);
-            REQUIRE(sonata_add_element(weird_report_name, population_name, 1, element_id, &soma_value) == -2);
+            REQUIRE(sonata_add_element(
+                        weird_report_name, population_name, 1, element_id, &soma_value) == -2);
             REQUIRE(sonata_set_report_max_buffer_size_hint(weird_report_name, 1) == -1);
             REQUIRE(sonata_record_node_data(1.0, 1, nodeids, weird_report_name) == -1);
         }
@@ -93,7 +94,8 @@ SCENARIO("Test SonataReport API", "[sonatareport]") {
         for (int node_id : node_ids) {
             sonata_add_node(report_name, population_name, node_id);
             for (auto element_value : elements) {
-                sonata_add_element(report_name, population_name, node_id, element_id, &element_value);
+                sonata_add_element(
+                    report_name, population_name, node_id, element_id, &element_value);
             }
         }
         sonata_set_report_max_buffer_size_hint(report_name, 1);

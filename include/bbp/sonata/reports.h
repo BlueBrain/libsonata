@@ -21,14 +21,18 @@ extern "C" {
  * @param kind type of report (soma, compartment)
  * @return 0 if operator succeeded, -1 otherwise
  */
-int sonata_create_report(
-    const char* report_name, double start_time, double end_time, double delta_time, const char* kind);
+int sonata_create_report(const char* report_name,
+                         double start_time,
+                         double end_time,
+                         double delta_time,
+                         const char* kind);
 
 /*!
  * \brief Add a node to an existing report
  * \param report_name name of the report
  * \param node_id node identifier
- * \return 0 if operator succeeded, -2 if the report doesn't exist, -1 if the node_id already exists.
+ * \return 0 if operator succeeded, -2 if the report doesn't exist, -1 if the node_id already
+ * exists.
  */
 int sonata_add_node(const char* report_name, const char* population_name, uint64_t node_id);
 

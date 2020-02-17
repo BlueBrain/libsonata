@@ -1,5 +1,5 @@
-#include <catch2/catch.hpp>
 #include <array>
+#include <catch2/catch.hpp>
 #include <memory>
 #include <reports/library/element_report.h>
 #include <reports/library/report.h>
@@ -39,7 +39,8 @@ SCENARIO("Test Report class", "[Report]") {
             soma_report->add_node(population_name, 1);
             double element_value = 42;
             soma_report->get_node(population_name, 1)->add_element(&element_value, soma_id);
-            REQUIRE_THROWS(soma_report->get_node(population_name, 1)->add_element(&element_value, soma_id));
+            REQUIRE_THROWS(
+                soma_report->get_node(population_name, 1)->add_element(&element_value, soma_id));
             THEN("Number of nodes and elements is still 1") {
                 REQUIRE(soma_report->get_num_nodes(population_name) == 1);
                 REQUIRE(soma_report->get_total_elements(population_name) == 1);
@@ -87,11 +88,13 @@ SCENARIO("Test Report class", "[Report]") {
 
             std::array<double, 9> elements{1, 20, 300, 4000, 500, 60, 7, 0.8, 9};
             for (auto element_value : elements) {
-                element_report->get_node(population_name, 2)->add_element(&element_value, element_id);
+                element_report->get_node(population_name, 2)
+                    ->add_element(&element_value, element_id);
             }
 
             // Doesn't exists
-            REQUIRE_THROWS(element_report->get_node(population_name, 3)->add_element(&element_value, element_id));
+            REQUIRE_THROWS(element_report->get_node(population_name, 3)
+                               ->add_element(&element_value, element_id));
             THEN("Number of nodes is 2") {
                 REQUIRE(element_report->get_num_nodes(population_name) == 2);
             }

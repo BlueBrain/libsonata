@@ -31,8 +31,7 @@ void generate_spikes(const std::vector<uint64_t>& nodeids,
     spike_node_ids.reserve(num_spikes);
     for (size_t i = 0; i < num_spikes; i++) {
         // timestamp between tstart and tstop
-        double timestamp = tstart + (0.5 + seed) /
-                                    (max_size / (tstop - tstart));
+        double timestamp = tstart + (0.5 + seed) / (max_size / (tstop - tstart));
         // get an index to the nodeids
         size_t index = seed % nodeids.size();
         uint32_t node_id = nodeids[index];
@@ -77,7 +76,13 @@ std::vector<uint64_t> generate_data(std::vector<Neuron>& neurons,
     return nodeids;
 }
 
-void init(const char* report_name, const char* population_name, double tstart, double tstop, double dt, std::vector<Neuron>& neurons, const std::string& kind) {
+void init(const char* report_name,
+          const char* population_name,
+          double tstart,
+          double tstop,
+          double dt,
+          std::vector<Neuron>& neurons,
+          const std::string& kind) {
     // logic for registering soma and element reports with reportinglib
     sonata_create_report(report_name, tstart, tstop, dt, kind.c_str());
     for (auto& neuron : neurons) {
@@ -137,7 +142,8 @@ int main() {
     // Each rank will get different number of nodes (some even 0, so will be idle ranks)
     element_nodeids = generate_data(element_neurons, "compartment", global_rank);
     soma_nodeids = generate_data(soma_neurons, "soma", global_rank);
-    generate_spikes(soma_nodeids, spike_timestamps, spike_node_ids, tstart, tstop, global_rank, global_size);
+    generate_spikes(
+        soma_nodeids, spike_timestamps, spike_node_ids, tstart, tstop, global_rank, global_size);
 
     std::vector<int> int_element_nodeids(begin(element_nodeids), end(element_nodeids));
     std::vector<int> int_soma_nodeids(begin(soma_nodeids), end(soma_nodeids));

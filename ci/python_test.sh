@@ -4,17 +4,17 @@ set -euxo pipefail
 
 VENV=env
 
-pip install virtualenv
+python -m pip install virtualenv --upgrade
 rm -rf "$VENV"
-virtualenv "$VENV"
+virtualenv "$VENV" --python=python3 --seeder=pip
 
 set +u  # ignore errors in virtualenv's activate
 source "$VENV/bin/activate"
 set -u
 
-pip install --upgrade pip
+python -m pip install --upgrade pip
 
 # install
-pip install .
-pip install nose
+python -m pip install .
+python -m pip install nose
 nosetests python

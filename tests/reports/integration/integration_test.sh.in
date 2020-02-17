@@ -10,7 +10,7 @@ if [ -z "@HAVE_MPI@" ]; then
   ref_spikes=@CMAKE_CURRENT_SOURCE_DIR@/spikes_serial.ref
 else
   # Run the executable
-  mpirun -n 4  @CMAKE_CURRENT_BINARY_DIR@/reports_integration_test
+  mpirun -n 4 @CMAKE_CURRENT_BINARY_DIR@/reports_integration_test
   ref_soma=@CMAKE_CURRENT_SOURCE_DIR@/soma_report.ref
   ref_compartment=@CMAKE_CURRENT_SOURCE_DIR@/compartment_report.ref
   ref_spikes=@CMAKE_CURRENT_SOURCE_DIR@/spikes.ref
