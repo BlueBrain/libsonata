@@ -3,9 +3,7 @@
 #include <bbp/sonata/reports.h>
 #include <iostream>
 
-using namespace bbp::sonata;
-
-SonataReport sonata_report;
+bbp::sonata::SonataReport sonata_report;
 
 int sonata_clear() {
     sonata_report.clear();
@@ -71,7 +69,7 @@ int sonata_prepare_datasets() {
 }
 
 void sonata_set_min_steps_to_record(int steps) {
-    SonataReport::min_steps_to_record_ = steps;
+    bbp::sonata::SonataReport::min_steps_to_record_ = steps;
 }
 
 int sonata_record_node_data(double step,
@@ -94,13 +92,13 @@ int sonata_record_data(double step) {
     if (sonata_report.is_empty()) {
         return -3;
     }
-    auto functor = std::mem_fn<void(double)>(&Report::record_data);
+    auto functor = std::mem_fn<void(double)>(&bbp::sonata::Report::record_data);
     sonata_report.apply_all(functor, step);
     return 0;
 }
 
 int sonata_check_and_flush(double timestep) {
-    auto functor = std::mem_fn(&Report::check_and_flush);
+    auto functor = std::mem_fn(&bbp::sonata::Report::check_and_flush);
     sonata_report.apply_all(functor, timestep);
     return 0;
 }
@@ -109,14 +107,14 @@ int sonata_flush(double time) {
     if (sonata_report.is_empty()) {
         return -3;
     }
-    auto functor = std::mem_fn(&Report::flush);
+    auto functor = std::mem_fn(&bbp::sonata::Report::flush);
     sonata_report.apply_all(functor, time);
     return 0;
 }
 
 int sonata_set_max_buffer_size_hint(size_t buffer_size) {
-    auto functor = std::mem_fn(&Report::set_max_buffer_size);
-    sonata_report.apply_all(functor, buffer_size * /*1024*/ 1048576);
+    auto functor = std::mem_fn(&bbp::sonata::Report::set_max_buffer_size);
+    sonata_report.apply_all(functor, buffer_size * 1048576);
     return 0;
 }
 
@@ -130,7 +128,7 @@ int sonata_set_report_max_buffer_size_hint(const char* report_name, size_t buffe
 }
 
 void sonata_set_atomic_step(double step) {
-    SonataReport::atomic_step_ = step;
+    bbp::sonata::SonataReport::atomic_step_ = step;
 }
 
 int sonata_get_num_reports() {
@@ -140,7 +138,7 @@ int sonata_get_num_reports() {
 void sonata_refresh_pointers(double* (*refresh_function)(double*) ) {
     std::function<double*(double*)> fun(refresh_function);  // This conversion is needed as
                                                             // apply_all is a magic template
-    auto functor = std::mem_fn(&Report::refresh_pointers);
+    auto functor = std::mem_fn(&bbp::sonata::Report::refresh_pointers);
     sonata_report.apply_all(functor, fun);
 }
 

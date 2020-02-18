@@ -107,8 +107,6 @@ else()
     find_package(spdlog REQUIRED)
 endif()
 
-set(spdlog_include_directory ${PROJECT_SOURCE_DIR}/extlib/spdlog/include)
-
 # =============================================================================
 # Targets
 # =============================================================================
@@ -130,7 +128,6 @@ configure_file (
 
 add_library(sonata_shared SHARED ${SONATA_SRC})
 add_library(sonata_static STATIC ${SONATA_SRC})
-# Define sonata_report target
 add_subdirectory(src/reports)
 
 foreach(TARGET sonata_shared sonata_static)

@@ -17,14 +17,14 @@ class HDF5Writer
     void configure_attribute(const std::string& group_name,
                              const std::string& attribute_name,
                              const std::string& attribute_value);
-    void configure_dataset(const std::string& dataset_name, int total_steps, int total_elements);
-    void write(const std::vector<double>& buffer, int steps_to_write, int total_elements);
-    void write(const std::string& dataset_name, const std::vector<uint32_t>& buffer);
-    void write(const std::string& dataset_name, const std::vector<uint64_t>& buffer);
-    void write(const std::string& dataset_name, const std::vector<float>& buffer);
-    void write(const std::string& dataset_name, const std::vector<double>& buffer);
+    void configure_dataset(const std::string& dataset_name,
+                           uint32_t total_steps,
+                           uint32_t total_elements);
+    void write_2D(const std::vector<double>& buffer,
+                  uint32_t steps_to_write,
+                  uint32_t total_elements);
     template <typename T>
-    void write_any(const std::string& name, const std::vector<T>& buffer);
+    void write(const std::string& name, const std::vector<T>& buffer);
     void close();
 
   private:

@@ -61,14 +61,14 @@ class SonataData
     std::string report_name_;
     std::string population_name_;
     std::vector<double> report_buffer_;
-    int total_elements_ = 0;
-    int num_steps_ = 0;
-    int steps_to_write_ = 0;
-    int current_step_ = 0;
-    int steps_recorded_ = 0;
-    int last_position_ = 0;
-    int remaining_steps_ = 0;
-    int reporting_period_ = 0;
+    uint32_t total_elements_ = 0;
+    uint32_t num_steps_ = 0;
+    uint32_t steps_to_write_ = 0;
+    uint32_t current_step_ = 0;
+    uint32_t steps_recorded_ = 0;
+    uint32_t last_position_ = 0;
+    uint32_t remaining_steps_ = 0;
+    uint32_t reporting_period_ = 0;
     double last_step_recorded_ = 0.;
     double last_step_ = 0.;
 

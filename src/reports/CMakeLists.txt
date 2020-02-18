@@ -15,7 +15,7 @@ set(sonatareport_SOURCES
 add_library(sonata_report SHARED ${sonatareport_SOURCES})
 target_include_directories(sonata_report
     SYSTEM PRIVATE
-        ${spdlog_include_directory}
+        ${PROJECT_SOURCE_DIR}/extlib/spdlog/include
     PUBLIC
         $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
         ${MPI_INCLUDE_PATH}
@@ -42,6 +42,7 @@ set_target_properties(sonata_report
 )
 target_link_libraries(sonata_report
     PRIVATE HighFive
+    PRIVATE spdlog::spdlog_header_only
     PRIVATE ${MPI_CXX_LIBRARIES}
 )
 

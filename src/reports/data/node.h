@@ -9,8 +9,7 @@ namespace sonata {
 class Node
 {
   public:
-    Node(uint64_t node_id);
-    virtual ~Node() = default;
+    explicit Node(uint64_t node_id);
 
     void fill_data(std::vector<double>::iterator it);
     void refresh_pointers(std::function<double*(double*)> refresh_function);

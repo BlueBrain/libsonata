@@ -8,6 +8,15 @@
 namespace bbp {
 namespace sonata {
 
+template void HDF5Writer::write<uint32_t>(const std::string& dataset_name,
+                                          const std::vector<uint32_t>& buffer);
+template void HDF5Writer::write<uint64_t>(const std::string& dataset_name,
+                                          const std::vector<uint64_t>& buffer);
+template void HDF5Writer::write<float>(const std::string& dataset_name,
+                                       const std::vector<float>& buffer);
+template void HDF5Writer::write<double>(const std::string& dataset_name,
+                                        const std::vector<double>& buffer);
+
 HDF5Writer::HDF5Writer(const std::string& report_name)
     : report_name_(report_name)
     , file_(0)
@@ -57,12 +66,12 @@ void HDF5Writer::configure_attribute(const std::string& group_name,
 }
 
 void HDF5Writer::configure_dataset(const std::string& dataset_name,
-                                   int total_steps,
-                                   int total_elements) {
-    hsize_t dims[2];
+                                   uint32_t total_steps,
+                                   uint32_t total_elements) {
+    std::array<hsize_t, 2> dims;
     dims[0] = total_steps;
     dims[1] = Implementation::get_global_dims(report_name_, total_elements);
-    hid_t data_space = H5Screate_simple(2, dims, nullptr);
+    hid_t data_space = H5Screate_simple(2, dims.data(), nullptr);
     dataset_ = H5Dcreate(file_,
                          dataset_name.c_str(),
                          H5T_IEEE_F32LE,
@@ -76,15 +85,17 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name,
     H5Sclose(data_space);
 }
 
-void HDF5Writer::write(const std::vector<double>& buffer, int steps_to_write, int total_elements) {
-    hsize_t count[2];
+void HDF5Writer::write_2D(const std::vector<double>& buffer,
+                          uint32_t steps_to_write,
+                          uint32_t total_elements) {
+    std::array<hsize_t, 2> count;
     count[0] = steps_to_write;
     count[1] = total_elements;
 
-    hid_t memspace = H5Screate_simple(2, count, nullptr);
+    hid_t memspace = H5Screate_simple(2, count.data(), nullptr);
     hid_t filespace = H5Dget_space(dataset_);
 
-    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset_.data(), nullptr, count, nullptr);
+    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset_.data(), nullptr, count.data(), nullptr);
     /*for(int i=0; i<steps_to_write; i++) {
         if(i==0)
             H5Sselect_hyperslab(space, H5S_SELECT_SET, &offset_[i], NULL, &count[i], NULL);
@@ -98,24 +109,8 @@ void HDF5Writer::write(const std::vector<double>& buffer, int steps_to_write, in
     H5Sclose(memspace);
 }
 
-void HDF5Writer::write(const std::string& dataset_name, const std::vector<uint32_t>& buffer) {
-    write_any(dataset_name, buffer);
-}
-
-void HDF5Writer::write(const std::string& dataset_name, const std::vector<uint64_t>& buffer) {
-    write_any(dataset_name, buffer);
-}
-
-void HDF5Writer::write(const std::string& dataset_name, const std::vector<float>& buffer) {
-    write_any(dataset_name, buffer);
-}
-
-void HDF5Writer::write(const std::string& dataset_name, const std::vector<double>& buffer) {
-    write_any(dataset_name, buffer);
-}
-
 template <typename T>
-void HDF5Writer::write_any(const std::string& dataset_name, const std::vector<T>& buffer) {
+void HDF5Writer::write(const std::string& dataset_name, const std::vector<T>& buffer) {
     hsize_t dims = buffer.size();
     hid_t type = h5typemap::get_h5_type(T(0));
 
