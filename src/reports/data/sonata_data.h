@@ -28,7 +28,7 @@ class SonataData
 
     void prepare_dataset();
     void write_report_header();
-    void write_spikes_header();
+    void write_spikes_header(const std::string& order_by);
     void write_data();
     void close();
 

@@ -23,6 +23,13 @@ HDF5Writer::HDF5Writer(const std::string& report_name)
     offset_[0] = 0;
     offset_[1] = 0;
 
+    // Create enum type for the ordering of the spikes
+    spikes_attr_type_ = H5Tenum_create(H5T_STD_U8LE);
+    uint8_t val;
+    H5Tenum_insert(spikes_attr_type_, "none", (val = 0, &val));
+    H5Tenum_insert(spikes_attr_type_, "by_id", (val = 1, &val));
+    H5Tenum_insert(spikes_attr_type_, "by_time", (val = 2, &val));
+
     H5Pclose(plist_id);
 }
 
@@ -36,12 +43,13 @@ void HDF5Writer::configure_attribute(const std::string& group_name,
                                      const std::string& attribute_value) {
     logger->trace("Configuring attribute '{}' for group name '{}'", attribute_name, group_name);
     hid_t group_id = H5Gopen(file_, group_name.data(), H5P_DEFAULT);
-    hsize_t attr_size = attribute_value.size();
-    hid_t attr_space = H5Screate_simple(1, &attr_size, &attr_size);
+    hid_t attr_space = H5Screate(H5S_SCALAR);
 
     hid_t attr_id = H5Acreate2(
-        group_id, attribute_name.c_str(), H5T_C_S1, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_id, H5T_C_S1, attribute_value.c_str());
+        group_id, attribute_name.c_str(), spikes_attr_type_, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+    uint8_t attr_value;
+    H5Tenum_valueof(spikes_attr_type_, attribute_value.data(), &attr_value);
+    H5Awrite(attr_id, spikes_attr_type_, &attr_value);
 
     H5Aclose(attr_id);
     H5Sclose(attr_space);
@@ -135,6 +143,7 @@ void HDF5Writer::close() {
     if (dataset_) {
         H5Dclose(dataset_);
     }
+    H5Tclose(spikes_attr_type_);
     H5Fclose(file_);
 }
 

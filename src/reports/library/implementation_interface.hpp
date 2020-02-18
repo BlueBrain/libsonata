@@ -37,28 +37,43 @@ struct Implementation {
         return TImpl::get_global_dims(report_name, value);
     }
     static void sort_spikes(std::vector<double>& spikevec_time,
-                            std::vector<uint64_t>& spikevec_gid) {
-        TImpl::sort_spikes(spikevec_time, spikevec_gid);
+                            std::vector<uint64_t>& spikevec_gid,
+                            const std::string& order_by) {
+        TImpl::sort_spikes(spikevec_time, spikevec_gid, order_by);
     }
 };
 
 static void local_spikevec_sort(std::vector<double>& isvect,
                                 std::vector<uint64_t>& isvecg,
                                 std::vector<double>& osvect,
-                                std::vector<uint64_t>& osvecg) {
+                                std::vector<uint64_t>& osvecg,
+                                const std::string& order_by) {
     osvect.resize(isvect.size());
     osvecg.resize(isvecg.size());
     // first build a permutation vector
     std::vector<uint64_t> perm(isvect.size());
     std::iota(perm.begin(), perm.end(), 0);
-    // sort by gid (second predicate first)
-    std::stable_sort(perm.begin(), perm.end(), [&](uint64_t i, uint64_t j) {
-        return isvecg[i] < isvecg[j];
-    });
-    // then sort by time
-    std::stable_sort(perm.begin(), perm.end(), [&](uint64_t i, uint64_t j) {
-        return isvect[i] < isvect[j];
-    });
+
+    if (order_by == "by_id") {
+        // sort by time
+        std::stable_sort(perm.begin(), perm.end(), [&](uint64_t i, uint64_t j) {
+            return isvect[i] < isvect[j];
+        });
+        // then sort by gid
+        std::stable_sort(perm.begin(), perm.end(), [&](uint64_t i, uint64_t j) {
+            return isvecg[i] < isvecg[j];
+        });
+    } else if (order_by == "by_time") {
+        // sort by gid (second predicate first)
+        std::stable_sort(perm.begin(), perm.end(), [&](uint64_t i, uint64_t j) {
+            return isvecg[i] < isvecg[j];
+        });
+        // then sort by time
+        std::stable_sort(perm.begin(), perm.end(), [&](uint64_t i, uint64_t j) {
+            return isvect[i] < isvect[j];
+        });
+    }
+
     // now apply permutation to time and gid output vectors
     std::transform(perm.begin(), perm.end(), osvect.begin(), [&](uint64_t i) { return isvect[i]; });
     std::transform(perm.begin(), perm.end(), osvecg.begin(), [&](uint64_t i) { return isvecg[i]; });
@@ -173,7 +188,8 @@ struct ParallelImplementation {
     };
 
     static void sort_spikes(std::vector<double>& spikevec_time,
-                            std::vector<uint64_t>& spikevec_gid) {
+                            std::vector<uint64_t>& spikevec_gid,
+                            const std::string& order_by) {
         double lmin_time = std::numeric_limits<double>::max();
         double lmax_time = std::numeric_limits<double>::min();
         if (!spikevec_time.empty()) {
@@ -188,7 +204,7 @@ struct ParallelImplementation {
 
         std::vector<double> inTime = spikevec_time;
         std::vector<uint64_t> inGid = spikevec_gid;
-        local_spikevec_sort(inTime, inGid, spikevec_time, spikevec_gid);
+        local_spikevec_sort(inTime, inGid, spikevec_time, spikevec_gid, order_by);
 
         int numprocs;
         MPI_Comm_size(SonataReport::has_nodes_, &numprocs);
@@ -247,7 +263,7 @@ struct ParallelImplementation {
                       MPI_UINT64_T,
                       SonataReport::has_nodes_);
 
-        local_spikevec_sort(svt_buf, svg_buf, spikevec_time, spikevec_gid);
+        local_spikevec_sort(svt_buf, svg_buf, spikevec_time, spikevec_gid, order_by);
     };
 };
 
@@ -270,10 +286,11 @@ struct SerialImplementation {
         return value;
     };
     static void sort_spikes(std::vector<double>& spikevec_time,
-                            std::vector<uint64_t>& spikevec_gid) {
+                            std::vector<uint64_t>& spikevec_gid,
+                            const std::string& order_by) {
         std::vector<double> times(spikevec_time);
         std::vector<uint64_t> gids(spikevec_gid);
-        local_spikevec_sort(times, gids, spikevec_time, spikevec_gid);
+        local_spikevec_sort(times, gids, spikevec_time, spikevec_gid, order_by);
     };
 };
 

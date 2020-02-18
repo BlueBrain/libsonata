@@ -85,10 +85,11 @@ void SonataReport::prepare_datasets() {
 void SonataReport::write_spikes(const std::string& output_dir,
                                 const std::string& population_name,
                                 const std::vector<double>& spike_timestamps,
-                                const std::vector<uint64_t>& spike_node_ids) {
+                                const std::vector<uint64_t>& spike_node_ids,
+                                const std::string& order_by) {
     std::string report_name = output_dir + "/out";
     SonataData spike_data(report_name, population_name, spike_timestamps, spike_node_ids);
-    spike_data.write_spikes_header();
+    spike_data.write_spikes_header(order_by);
     spike_data.close();
 }
 

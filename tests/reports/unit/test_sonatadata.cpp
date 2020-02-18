@@ -121,8 +121,8 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
                                                                                  population_name,
                                                                                  spike_timestamps,
                                                                                  spike_node_ids);
-        WHEN("We write the spikes") {
-            sonata_spikes->write_spikes_header();
+        WHEN("We write the spikes ordered by time") {
+            sonata_spikes->write_spikes_header("by_time");
             THEN("We check that the spike nodes ids are ordered according to timestamps") {
                 const std::vector<uint64_t> node_ids = sonata_spikes->get_spike_node_ids();
                 std::vector<uint64_t> compare = {5, 2, 3, 2, 3};
@@ -132,6 +132,37 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
                 const std::vector<double> timestamps = sonata_spikes->get_spike_timestamps();
                 std::vector<double> compare = {0.1, 0.2, 0.3, 0.7, 1.3};
                 REQUIRE(timestamps == compare);
+            }
+        }
+        WHEN("We write the spikes ordered by id") {
+            sonata_spikes->write_spikes_header("by_id");
+            THEN("We check that the spike node ids are in order") {
+                const std::vector<uint64_t> node_ids = sonata_spikes->get_spike_node_ids();
+                std::vector<uint64_t> compare = {2, 2, 3, 3, 5};
+                REQUIRE(node_ids == compare);
+            }
+            THEN("We check that the spike timestamps are ordered according to node ids") {
+                const std::vector<double> timestamps = sonata_spikes->get_spike_timestamps();
+                std::vector<double> compare = {0.2, 0.7, 0.3, 1.3, 0.1};
+                REQUIRE(timestamps == compare);
+            }
+        }
+        WHEN("We dont order the spikes before writing") {
+            sonata_spikes->write_spikes_header("none");
+            THEN("We check that the spike node ids are unordered") {
+                const std::vector<uint64_t> node_ids = sonata_spikes->get_spike_node_ids();
+                std::vector<uint64_t> compare = {3, 5, 2, 3, 2};
+                REQUIRE(node_ids == compare);
+            }
+            THEN("We check that the spike timestamps are unordered") {
+                const std::vector<double> timestamps = sonata_spikes->get_spike_timestamps();
+                std::vector<double> compare = {0.3, 0.1, 0.2, 1.3, 0.7};
+                REQUIRE(timestamps == compare);
+            }
+        }
+        WHEN("We write the spikes ordered by weird string") {
+            THEN("It throws an exception") {
+                REQUIRE_THROWS(sonata_spikes->write_spikes_header("wrong_order"));
             }
         }
         sonata_spikes->close();

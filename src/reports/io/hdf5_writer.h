@@ -34,6 +34,7 @@ class HDF5Writer
     hid_t dataset_;
     hid_t collective_list_;
     hid_t independent_list_;
+    hid_t spikes_attr_type_;
     std::array<hsize_t, 2> offset_;
 };
 
