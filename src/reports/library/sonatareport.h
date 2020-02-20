@@ -54,10 +54,10 @@ class SonataReport
     void create_communicators();
     void prepare_datasets();
     static void write_spikes(const std::string& output_dir,
-                          const std::string& population_name,
-                          const std::vector<double>& spike_timestamps,
-                          const std::vector<uint64_t>& spike_node_ids,
-                          const std::string& order_by = "by_time");
+                             const std::string& population_name,
+                             const std::vector<double>& spike_timestamps,
+                             const std::vector<uint64_t>& spike_node_ids,
+                             const std::string& order_by = "by_time");
 
     template <typename Functor, typename T>
     void apply_all(const Functor& functor, T data) {

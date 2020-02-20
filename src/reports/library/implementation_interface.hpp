@@ -101,7 +101,7 @@ struct ParallelImplementation {
         MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
         MPI_Comm_size(MPI_COMM_WORLD, &global_size);
 
-        if(global_rank == 0) {
+        if (global_rank == 0) {
             logger->info("Initializing PARALLEL implementation...");
         }
         // Create a first communicator with the ranks with at least 1 report
