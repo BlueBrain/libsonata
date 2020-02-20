@@ -103,7 +103,7 @@ void HDF5Writer::write_2D(const std::vector<double>& buffer,
         H5Sselect_hyperslab(space, H5S_SELECT_OR, &offset_[i], NULL, &count[i], NULL);
     }*/
 
-    H5Dwrite(dataset_, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, buffer.data());
+    H5Dwrite(dataset_, H5T_NATIVE_DOUBLE, memspace, filespace, collective_list_, buffer.data());
     offset_[0] += steps_to_write;
 
     H5Sclose(filespace);

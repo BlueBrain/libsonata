@@ -36,6 +36,9 @@ struct Implementation {
     static hsize_t get_global_dims(const std::string& report_name, hsize_t value) {
         return TImpl::get_global_dims(report_name, value);
     }
+    static uint32_t get_max_steps_to_write(const std::string& report_name, uint32_t value) {
+        return TImpl::get_max_steps_to_write(report_name, value);
+    }
     static void sort_spikes(std::vector<double>& spikevec_time,
                             std::vector<uint64_t>& spikevec_gid,
                             const std::string& order_by) {
@@ -189,6 +192,12 @@ struct ParallelImplementation {
         return global_dims;
     };
 
+    static uint32_t get_max_steps_to_write(const std::string& report_name, uint32_t value) {
+        uint32_t max_steps_to_write = value;
+        MPI_Allreduce(&value, &max_steps_to_write, 1, MPI_UNSIGNED, MPI_MIN, get_Comm(report_name));
+        return max_steps_to_write;
+    };
+
     static void sort_spikes(std::vector<double>& spikevec_time,
                             std::vector<uint64_t>& spikevec_gid,
                             const std::string& order_by) {
@@ -285,6 +294,9 @@ struct SerialImplementation {
         return 0;
     };
     static hsize_t get_global_dims(const std::string& /*report_name*/, hsize_t value) {
+        return value;
+    };
+    static uint32_t get_max_steps_to_write(const std::string& /*report_name*/, uint32_t value) {
         return value;
     };
     static void sort_spikes(std::vector<double>& spikevec_time,
