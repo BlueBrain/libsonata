@@ -22,7 +22,8 @@ HDF5Writer::HDF5Writer(const std::string& report_name)
     , file_(0)
     , dataset_(0)
     , collective_list_(0)
-    , independent_list_(0) {
+    , independent_list_(0)
+    , spikes_attr_type_(0) {
     hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
     std::tie(collective_list_, independent_list_) = Implementation::prepare_write(report_name,
                                                                                   plist_id);
@@ -134,12 +135,19 @@ void HDF5Writer::write(const std::string& dataset_name, const std::vector<T>& bu
 }
 
 void HDF5Writer::close() {
-    // We close the dataset "/data" and the hdf5 file
+    // We close the dataset "/data", the spikes enum type and the hdf5 file
     if (dataset_) {
         H5Dclose(dataset_);
+        dataset_ = 0;
     }
-    H5Tclose(spikes_attr_type_);
-    H5Fclose(file_);
+    if (spikes_attr_type_) {
+        H5Tclose(spikes_attr_type_);
+        spikes_attr_type_ = 0;
+    }
+    if (file_) {
+        H5Fclose(file_);
+        file_ = 0;
+    }
 }
 
 }  // namespace sonata

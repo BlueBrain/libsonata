@@ -13,6 +13,7 @@ class Report
 {
   public:
     Report(const std::string& report_name, double tstart, double tend, double dt);
+    virtual ~Report() = default;
     int get_num_nodes(const std::string& population_name) const {
         return populations_->at(population_name)->size();
     }
@@ -44,7 +45,6 @@ class Report
     void set_max_buffer_size(size_t buffer_size);
 
   protected:
-    using nodes_t = std::map<uint64_t, std::shared_ptr<Node>>;
     using populations_t = std::map<std::string, std::shared_ptr<nodes_t>>;
     std::shared_ptr<populations_t> populations_;
     std::vector<std::shared_ptr<SonataData>> sonata_populations_;

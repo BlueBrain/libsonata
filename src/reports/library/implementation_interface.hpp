@@ -91,7 +91,6 @@ static MPI_Comm get_Comm(const std::string& report_name) {
 
 struct ParallelImplementation {
     static int init(const std::vector<std::string>& report_names) {
-        logger->info("Initializing PARALLEL implementation...");
         // size_t MPI type
         MPI_Datatype mpi_size_type = MPI_UINT64_T;
         if (sizeof(size_t) == 4) {
@@ -102,6 +101,9 @@ struct ParallelImplementation {
         MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
         MPI_Comm_size(MPI_COMM_WORLD, &global_size);
 
+        if(global_rank == 0) {
+            logger->info("Initializing PARALLEL implementation...");
+        }
         // Create a first communicator with the ranks with at least 1 report
         int num_reports = report_names.size();
         MPI_Comm_split(MPI_COMM_WORLD, num_reports == 0, 0, &SonataReport::has_nodes_);

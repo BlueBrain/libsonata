@@ -152,7 +152,7 @@ void sonata_write_spikes(const char* population_name,
     const std::vector<uint64_t> spike_node_ids(node_ids, node_ids + num_node_ids);
     const std::string output_directory(output_dir);
     const std::string population(population_name);
-    sonata_report.write_spikes(output_directory, population, spike_timestamps, spike_node_ids);
+    bbp::sonata::SonataReport::write_spikes(output_directory, population, spike_timestamps, spike_node_ids);
 }
 
 // NOT REQUIRED FOR SONATA

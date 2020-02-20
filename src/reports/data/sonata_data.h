@@ -10,8 +10,6 @@ namespace sonata {
 
 class SonataData
 {
-    using nodes_t = std::map<uint64_t, std::shared_ptr<Node>>;
-
   public:
     SonataData(const std::string& report_name,
                const std::string& population_name,

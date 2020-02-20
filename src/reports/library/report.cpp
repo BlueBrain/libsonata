@@ -9,8 +9,8 @@
 namespace bbp {
 namespace sonata {
 
-// 4MB
-#define DEFAULT_MAX_BUFFER_SIZE 4194304
+// default buffer size of 4MB
+constexpr uint64_t default_max_buffer_size = 4194304;
 
 Report::Report(const std::string& report_name, double tstart, double tend, double dt)
     : populations_(std::make_shared<populations_t>())
@@ -18,7 +18,7 @@ Report::Report(const std::string& report_name, double tstart, double tend, doubl
     , tstart_(tstart)
     , tend_(tend)
     , dt_(dt)
-    , max_buffer_size_(DEFAULT_MAX_BUFFER_SIZE)
+    , max_buffer_size_(default_max_buffer_size)
     , report_is_closed_(false) {
     // Calculate number of reporting steps
     double sim_steps = (tend - tstart) / dt;
