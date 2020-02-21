@@ -5,6 +5,7 @@
 #include <bbp/sonata/common.h>
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
+#include <bbp/sonata/output.h>
 
 #include <fmt/format.h>
 
@@ -442,6 +443,30 @@ PYBIND11_MODULE(libsonata, m) {
                     "Write bidirectional node->edge indices to EdgePopulation HDF5");
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
+
+    py::class_<SpikesReader>(m, "SpikesReader", "Let you read spikes files")
+        .def(py::init<const std::string&, const std::string&>())
+        .def("get",
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(void) const) &
+                 bbp::sonata::SpikesReader::get,
+             "Return all spikes")
+        .def("get",
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(double, double) const) &
+                 bbp::sonata::SpikesReader::get,
+             "Return spikes between 'tstart' and 'tend'",
+             py::arg("tstart"),
+             py::arg("tend"))
+        .def("get",
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(uint64_t) const) &
+                 bbp::sonata::SpikesReader::get,
+             "Return spikes with 'node_id' as node identifier",
+             py::arg("node_id"))
+        .def("get",
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(std::vector<uint64_t>)
+                  const) &
+                 bbp::sonata::SpikesReader::get,
+             "Return spikes with all those node_ids",
+             py::arg("node_ids"));
 
     py::register_exception<SonataError>(m, "SonataError");
 }
