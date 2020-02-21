@@ -48,13 +48,13 @@ class SpikesReader
     class Population
     {
       public:
-        explicit Population(const std::string& filename, const std::string& populationName);
-
         std::vector<std::pair<uint64_t, double>> get() const;
         std::vector<std::pair<uint64_t, double>> get(Selection node_ids) const;
         std::vector<std::pair<uint64_t, double>> get(double tstart, double tend) const;
 
       private:
+        explicit Population(const std::string& filename, const std::string& populationName);
+
         std::vector<uint64_t> node_ids;
         std::vector<double> timestamps;
 
@@ -74,6 +74,8 @@ class SpikesReader
 
             return vec;
         }
+
+        friend SpikesReader;
     };
 
     explicit SpikesReader(const std::string& filename);

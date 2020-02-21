@@ -444,29 +444,32 @@ PYBIND11_MODULE(libsonata, m) {
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
-    py::class_<SpikesReader>(m, "SpikesReader", "Let you read spikes files")
-        .def(py::init<const std::string&, const std::string&>())
+    py::class_<SpikesReader::Population>(m,
+                                         "SpikesReaderPopulation",
+                                         "A population inside a SpikesReader")
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(void) const) &
-                 bbp::sonata::SpikesReader::get,
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(void) const) &
+                 bbp::sonata::SpikesReader::Population::get,
              "Return all spikes")
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(double, double) const) &
-                 bbp::sonata::SpikesReader::get,
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(double, double)
+                  const) &
+                 bbp::sonata::SpikesReader::Population::get,
              "Return spikes between 'tstart' and 'tend'",
              py::arg("tstart"),
              py::arg("tend"))
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(uint64_t) const) &
-                 bbp::sonata::SpikesReader::get,
-             "Return spikes with 'node_id' as node identifier",
-             py::arg("node_id"))
-        .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::*)(std::vector<uint64_t>)
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(Selection)
                   const) &
-                 bbp::sonata::SpikesReader::get,
+                 bbp::sonata::SpikesReader::Population::get,
              "Return spikes with all those node_ids",
              py::arg("node_ids"));
+    py::class_<SpikesReader>(m, "SpikesReader", "Let you read spikes files")
+        .def(py::init<const std::string&>())
+        .def("getPopulationsNames",
+             &SpikesReader::getPopulationsNames,
+             "Get list of all populations")
+        .def("__getitem__", &SpikesReader::operator[]);
 
     py::register_exception<SonataError>(m, "SonataError");
 }
