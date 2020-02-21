@@ -335,6 +335,8 @@ PYBIND11_MODULE(libsonata, m) {
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
         .def("__or__", &bbp::sonata::operator|, "Union of selections")
         .def("__and__", &bbp::sonata::operator&, "Intersection of selections");
+    py::implicitly_convertible<py::list, Selection>();
+    py::implicitly_convertible<py::tuple, Selection>();
 
     bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
         .def(
@@ -456,14 +458,21 @@ PYBIND11_MODULE(libsonata, m) {
                   const) &
                  bbp::sonata::SpikesReader::Population::get,
              "Return spikes between 'tstart' and 'tend'",
-             py::arg("tstart"),
-             py::arg("tend"))
+             "tstart"_a,
+             "tend"_a)
         .def("get",
              (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(Selection)
                   const) &
                  bbp::sonata::SpikesReader::Population::get,
              "Return spikes with all those node_ids",
-             py::arg("node_ids"));
+             "node_ids"_a)
+        .def("__getitem__",
+             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(Selection)
+                  const) &
+                 bbp::sonata::SpikesReader::Population::get,
+             "Return spikes with all those node_ids",
+             "node_ids"_a)
+        ;
     py::class_<SpikesReader>(m, "SpikesReader", "Let you read spikes files")
         .def(py::init<const std::string&>())
         .def("getPopulationsNames",
