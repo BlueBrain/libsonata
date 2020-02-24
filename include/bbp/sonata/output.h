@@ -33,7 +33,7 @@ OutputIt transform_if(InputIt1 first1,
 namespace bbp {
 namespace sonata {
 /**
-  const SpikesReader file(filename);
+  const SpikeReader file(filename);
   auto pops = file.getPopulationNames();
   for (const auto& data: file[pops[0]].get(Selection{12UL, 34UL, 58UL})) {
       uint64_t node_id;
@@ -42,7 +42,7 @@ namespace sonata {
       std::cout << "[" << timestamp << "] " << node_id << std::endl;
   }
 */
-class SpikesReader
+class SONATA_API SpikeReader
 {
   public:
     class Population
@@ -75,10 +75,10 @@ class SpikesReader
             return vec;
         }
 
-        friend SpikesReader;
+        friend SpikeReader;
     };
 
-    explicit SpikesReader(const std::string& filename);
+    explicit SpikeReader(const std::string& filename);
 
     std::vector<std::string> getPopulationsNames() const;
 

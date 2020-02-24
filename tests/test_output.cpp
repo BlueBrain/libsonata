@@ -1,11 +1,11 @@
 #include <catch2/catch.hpp>
 
-#include <bbp/sonata/output.hpp>
+#include <bbp/sonata/output.h>
 
 using namespace bbp::sonata;
 
-TEST_CASE("SpikesReader", "[base]") {
-    const SpikesReader reader("./data/spikes.h5");
+TEST_CASE("SpikeReader", "[base]") {
+    const SpikeReader reader("./data/spikes.h5");
 
     REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "spikes1", "spikes2"});
 

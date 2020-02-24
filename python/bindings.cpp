@@ -446,39 +446,38 @@ PYBIND11_MODULE(libsonata, m) {
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
-    py::class_<SpikesReader::Population>(m,
-                                         "SpikesReaderPopulation",
-                                         "A population inside a SpikesReader")
+    py::class_<SpikeReader::Population>(m,
+                                        "SpikeReaderPopulation",
+                                        "A population inside a SpikeReader")
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(void) const) &
-                 bbp::sonata::SpikesReader::Population::get,
+             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(void) const) &
+                 bbp::sonata::SpikeReader::Population::get,
              "Return all spikes")
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(double, double)
+             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(double, double)
                   const) &
-                 bbp::sonata::SpikesReader::Population::get,
+                 bbp::sonata::SpikeReader::Population::get,
              "Return spikes between 'tstart' and 'tend'",
              "tstart"_a,
              "tend"_a)
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(Selection)
+             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(Selection)
                   const) &
-                 bbp::sonata::SpikesReader::Population::get,
+                 bbp::sonata::SpikeReader::Population::get,
              "Return spikes with all those node_ids",
              "node_ids"_a)
         .def("__getitem__",
-             (std::vector<std::pair<uint64_t, double>>(SpikesReader::Population::*)(Selection)
+             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(Selection)
                   const) &
-                 bbp::sonata::SpikesReader::Population::get,
+                 bbp::sonata::SpikeReader::Population::get,
              "Return spikes with all those node_ids",
-             "node_ids"_a)
-        ;
-    py::class_<SpikesReader>(m, "SpikesReader", "Let you read spikes files")
+             "node_ids"_a);
+    py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init<const std::string&>())
         .def("getPopulationsNames",
-             &SpikesReader::getPopulationsNames,
+             &SpikeReader::getPopulationsNames,
              "Get list of all populations")
-        .def("__getitem__", &SpikesReader::operator[]);
+        .def("__getitem__", &SpikeReader::operator[]);
 
     py::register_exception<SonataError>(m, "SonataError");
 }

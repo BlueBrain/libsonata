@@ -3,7 +3,9 @@ import unittest
 
 import numpy as np
 
-from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
+from libsonata import EdgeStorage, NodeStorage, Selection, SonataError, SpikeReader
+
+from libsonata import SpikeReaderPopulation
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -223,6 +225,28 @@ class TestEdgePopulation(unittest.TestCase):
 
     def test_select_all(self):
         self.assertEqual(self.test_obj.select_all().flat_size, 6)
+
+
+class TestSpikeReaderPopulation(unittest.TestCase):
+    def setUp(self):
+        path = os.path.join(PATH, "spikes.h5")
+        self.test_obj = SpikeReader(path)
+
+    def test_get_all_populations(self):
+        self.assertEqual(self.test_obj.getPopulationsNames(), ['All', 'spikes1', 'spikes2'])
+
+    def test_get_population(self):
+        self.assertTrue(isinstance(self.test_obj['spikes1'], SpikeReaderPopulation))
+
+    def test_get_inexistant_population(self):
+        self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
+
+    def test_get_spikes_from_population(self):
+        self.assertEqual(self.test_obj['spikes2'].get(), [(3, 0.3), (5, 0.1), (2, 0.2), (3, 1.3), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes2'].get(0.2, 1.0), [(3, 0.3), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes2'].get((3,)), [(3, 0.3), (3, 1.3)])
+        self.assertEqual(self.test_obj['spikes2'].get((10,)), [])
+        self.assertEqual(self.test_obj['spikes2'][(5,)], [(5, 0.1)])
 
 
 if __name__ == '__main__':
