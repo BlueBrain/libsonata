@@ -26,29 +26,28 @@ auto SpikeReader::operator[](const std::string& populationName) const -> const P
     return getPopulation(populationName);
 }
 
-std::vector<std::pair<NodeID, double>> SpikeReader::Population::get() const {
-    std::vector<std::pair<NodeID, double>> vec;
+SpikeReader::Population::Spikes SpikeReader::Population::get() const {
+    std::vector<Spike> vec;
 
-    transform(node_ids.begin(),
-              node_ids.end(),
-              timestamps.begin(),
-              std::back_inserter(vec),
-              [](NodeID node_id, double timestamp) {
-                  return std::make_pair(node_id, timestamp);
-              });
+    std::transform(node_ids.begin(),
+                   node_ids.end(),
+                   timestamps.begin(),
+                   std::back_inserter(vec),
+                   [](NodeID node_id, double timestamp) {
+                       return std::make_pair(node_id, timestamp);
+                   });
 
     return vec;
 }
 
-std::vector<std::pair<NodeID, double>> SpikeReader::Population::get(Selection node_ids) const {
+SpikeReader::Population::Spikes SpikeReader::Population::get(Selection node_ids) const {
     auto values = node_ids.flatten();
     return get_if([&values](NodeID node_id_, double) {
         return std::find(values.begin(), values.end(), node_id_) != values.end();
     });
 }
 
-std::vector<std::pair<NodeID, double>> SpikeReader::Population::get(double tstart,
-                                                                      double tend) const {
+SpikeReader::Population::Spikes SpikeReader::Population::get(double tstart, double tend) const {
     return get_if([&tstart, &tend](NodeID, double timestamp) {
         return timestamp > tstart && timestamp < tend;
     });

@@ -48,9 +48,11 @@ class SONATA_API SpikeReader
     class Population
     {
       public:
-        std::vector<std::pair<NodeID, double>> get() const;
-        std::vector<std::pair<NodeID, double>> get(Selection node_ids) const;
-        std::vector<std::pair<NodeID, double>> get(double tstart, double tend) const;
+        using Spike = std::pair<NodeID, double>;
+        using Spikes = std::vector<Spike>;
+        Spikes get() const;
+        Spikes get(Selection node_ids) const;
+        Spikes get(double tstart, double tend) const;
 
       private:
         explicit Population(const std::string& filename, const std::string& populationName);
@@ -59,8 +61,8 @@ class SONATA_API SpikeReader
         std::vector<double> timestamps;
 
         template <class BinaryPredicate>
-        std::vector<std::pair<NodeID, double>> get_if(BinaryPredicate filter) const {
-            std::vector<std::pair<NodeID, double>> vec;
+        Spikes get_if(BinaryPredicate filter) const {
+            Spikes vec;
 
             transform_if(
                 node_ids.begin(),

@@ -242,7 +242,7 @@ class TestSpikeReaderPopulation(unittest.TestCase):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
 
     def test_get_spikes_from_population(self):
-        self.assertEqual(self.test_obj['spikes2'].get(), [(3, 0.3), (5, 0.1), (2, 0.2), (3, 1.3), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes2'].get(), [(5, 0.1), (2, 0.2), (3, 0.3), (2, 0.7), (3, 1.3)])
         self.assertEqual(self.test_obj['spikes2'].get(0.2, 1.0), [(3, 0.3), (2, 0.7)])
         self.assertEqual(self.test_obj['spikes2'].get((3,)), [(3, 0.3), (3, 1.3)])
         self.assertEqual(self.test_obj['spikes2'].get((10,)), [])
