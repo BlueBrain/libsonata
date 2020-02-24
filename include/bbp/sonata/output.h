@@ -36,7 +36,7 @@ namespace sonata {
   const SpikeReader file(filename);
   auto pops = file.getPopulationNames();
   for (const auto& data: file[pops[0]].get(Selection{12UL, 34UL, 58UL})) {
-      uint64_t node_id;
+      NodeID node_id;
       double timestamp;
       std::tie(node_id, timestamp) = data;
       std::cout << "[" << timestamp << "] " << node_id << std::endl;
@@ -48,26 +48,26 @@ class SONATA_API SpikeReader
     class Population
     {
       public:
-        std::vector<std::pair<uint64_t, double>> get() const;
-        std::vector<std::pair<uint64_t, double>> get(Selection node_ids) const;
-        std::vector<std::pair<uint64_t, double>> get(double tstart, double tend) const;
+        std::vector<std::pair<NodeID, double>> get() const;
+        std::vector<std::pair<NodeID, double>> get(Selection node_ids) const;
+        std::vector<std::pair<NodeID, double>> get(double tstart, double tend) const;
 
       private:
         explicit Population(const std::string& filename, const std::string& populationName);
 
-        std::vector<uint64_t> node_ids;
+        std::vector<NodeID> node_ids;
         std::vector<double> timestamps;
 
         template <class BinaryPredicate>
-        std::vector<std::pair<uint64_t, double>> get_if(BinaryPredicate filter) const {
-            std::vector<std::pair<uint64_t, double>> vec;
+        std::vector<std::pair<NodeID, double>> get_if(BinaryPredicate filter) const {
+            std::vector<std::pair<NodeID, double>> vec;
 
             transform_if(
                 node_ids.begin(),
                 node_ids.end(),
                 timestamps.begin(),
                 std::back_inserter(vec),
-                [](uint64_t node_id, double timestamp) {
+                [](NodeID node_id, double timestamp) {
                     return std::make_pair(node_id, timestamp);
                 },
                 filter);
