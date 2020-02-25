@@ -154,7 +154,9 @@ setup(
     name="libsonata",
     description='SONATA files reader',
     author="Blue Brain Project, EPFL",
-    classifiers=[],
+    classifiers=[
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    ],
     ext_modules=[CMakeExtension("libsonata._libsonata")],
     cmdclass=lazy_dict(
         build_ext=CMakeBuild,
