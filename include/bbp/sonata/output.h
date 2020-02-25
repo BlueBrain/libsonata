@@ -48,33 +48,39 @@ class SONATA_API SpikeReader
     class Population
     {
       public:
+        enum class Sorting : char {
+            none = 0,
+            by_id = 1,
+            by_time = 2,
+        };
+
         using Spike = std::pair<NodeID, double>;
         using Spikes = std::vector<Spike>;
         Spikes get() const;
         Spikes get(Selection node_ids) const;
         Spikes get(double tstart, double tend) const;
+        Sorting getSorting() const;
 
       private:
-        explicit Population(const std::string& filename, const std::string& populationName);
+        Population(const std::string& filename, const std::string& populationName);
 
         std::vector<NodeID> node_ids;
         std::vector<double> timestamps;
+        Sorting sorting = Sorting::none;
 
         template <class BinaryPredicate>
         Spikes get_if(BinaryPredicate filter) const {
-            Spikes vec;
+            Spikes spikes;
 
             transform_if(
                 node_ids.begin(),
                 node_ids.end(),
                 timestamps.begin(),
-                std::back_inserter(vec),
-                [](NodeID node_id, double timestamp) {
-                    return std::make_pair(node_id, timestamp);
-                },
+                std::back_inserter(spikes),
+                [](NodeID node_id, double timestamp) { return std::make_pair(node_id, timestamp); },
                 filter);
 
-            return vec;
+            return spikes;
         }
 
         friend SpikeReader;

@@ -4,6 +4,22 @@
 
 namespace H5 = HighFive;
 
+namespace HighFive {
+using namespace bbp::sonata;
+
+H5::EnumType<SpikeReader::Population::Sorting> create_enum_sorting() {
+    return H5::EnumType<SpikeReader::Population::Sorting>(
+        {{"none", SpikeReader::Population::Sorting::none},
+         {"by_id", SpikeReader::Population::Sorting::by_id},
+         {"by_time", SpikeReader::Population::Sorting::by_time}});
+}
+
+template <>
+DataType create_datatype<SpikeReader::Population::Sorting>() {
+    return create_enum_sorting();
+}
+}  // namespace HighFive
+
 namespace bbp {
 namespace sonata {
 SpikeReader::SpikeReader(const std::string& filename)
@@ -27,17 +43,17 @@ auto SpikeReader::operator[](const std::string& populationName) const -> const P
 }
 
 SpikeReader::Population::Spikes SpikeReader::Population::get() const {
-    std::vector<Spike> vec;
+    std::vector<Spike> spikes;
 
     std::transform(node_ids.begin(),
                    node_ids.end(),
                    timestamps.begin(),
-                   std::back_inserter(vec),
+                   std::back_inserter(spikes),
                    [](NodeID node_id, double timestamp) {
                        return std::make_pair(node_id, timestamp);
                    });
 
-    return vec;
+    return spikes;
 }
 
 SpikeReader::Population::Spikes SpikeReader::Population::get(Selection node_ids) const {
@@ -53,6 +69,10 @@ SpikeReader::Population::Spikes SpikeReader::Population::get(double tstart, doub
     });
 }
 
+SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
+    return sorting;
+}
+
 SpikeReader::Population::Population(const std::string& filename,
                                     const std::string& populationName) {
     H5::File file(filename, H5::File::ReadOnly);
@@ -63,6 +83,10 @@ SpikeReader::Population::Population(const std::string& filename,
     timestamps = H5Easy::load<decltype(timestamps)>(file,
                                                     std::string("/spikes/") + populationName +
                                                         "/timestamps");
+    if (file.getGroup(std::string("/spikes/") + populationName).hasAttribute("sorting")) {
+        auto g = file.getGroup(std::string("/spikes/") + populationName);
+        g.getAttribute("sorting").read(sorting);
+    }
 
     if (node_ids.size() != timestamps.size()) {
         throw std::runtime_error(
