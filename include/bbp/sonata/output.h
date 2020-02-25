@@ -24,7 +24,8 @@ OutputIt transform_if(InputIt1 first1,
         if (binary_pred(*first1, *first2)) {
             *d_first++ = binary_op(*first1, *first2);
         }
-        ++first1, ++first2;
+        ++first1;
+        ++first2;
     }
     return d_first;
 }
