@@ -68,25 +68,29 @@ SpikeReader::Population::Population(const std::string& filename,
                                     const std::string& populationName) {
     H5::File file(filename, H5::File::ReadOnly);
     auto pop_path = std::string("/spikes/") + populationName;
+    auto pop = file.getGroup(pop_path);
 
-    auto node_ids = H5Easy::load<std::vector<NodeID>>(file, pop_path + "/node_ids");
-    auto timestamps = H5Easy::load<std::vector<double>>(file, pop_path + "/timestamps");
+    std::vector<Spike::first_type> node_ids;
+    pop.getDataSet("node_ids").read(node_ids);
+
+    std::vector<Spike::second_type> timestamps;
+    pop.getDataSet("timestamps").read(timestamps);
 
     if (node_ids.size() != timestamps.size()) {
         throw std::runtime_error(
-            "In spikes file 'node_ids' and 'timestamps' does not have the same size.");
+            "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
 
     std::transform(node_ids.begin(),
                    node_ids.end(),
                    timestamps.begin(),
                    std::back_inserter(spikes),
-                   [](NodeID node_id, double timestamp) {
+                   [](const Spike::first_type& node_id, const Spike::second_type& timestamp) {
                        return std::make_pair(node_id, timestamp);
                    });
 
-    if (file.getGroup(pop_path).hasAttribute("sorting")) {
-        file.getGroup(pop_path).getAttribute("sorting").read(sorting);
+    if (pop.hasAttribute("sorting")) {
+        pop.getAttribute("sorting").read(sorting);
     }
 }
 
