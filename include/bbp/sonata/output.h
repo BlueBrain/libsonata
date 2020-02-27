@@ -6,7 +6,11 @@
 #include <utility>
 #include <vector>
 
+#include <highfive/H5Easy.hpp>
+
 #include <bbp/sonata/population.h>
+
+namespace H5 = HighFive;
 
 namespace bbp {
 namespace sonata {
@@ -130,6 +134,88 @@ class SONATA_API SpikeReader
 
   private:
     std::string filename_;
+
+    // Lazy loaded population
+    mutable std::map<std::string, Population> populations;
+};
+
+class SONATA_API ReportReader
+{
+  public:
+    class Population
+    {
+      public:
+        std::tuple<double, double, double> getTimes() const {
+            return std::tie(tstart, tstop, tstep);
+        }
+
+        std::string getTimeUnits() const {
+            return time_units;
+        }
+
+        std::string getDataUnits() const {
+            return data_units;
+        }
+
+        bool getSorted() const {
+            return sorted;
+        }
+
+        // Return a vector of datas
+        // Each index is a corresponding node_id from Selection given as argument
+        std::vector<std::vector<float>> get(const Selection& nodes_ids,
+                                            double _tstart = -1,
+                                            double _tstop = -1) const {
+            _tstart = _tstart == -1 ? tstart : _tstart;
+            _tstop = _tstop == -1 ? tstop : _tstop;
+            std::vector<std::vector<float>> ret;
+
+            auto values = nodes_ids.flatten();
+            for (const auto& value : values) {
+                auto it = std::find_if(
+                    nodes_pointers.begin(),
+                    nodes_pointers.end(),
+                    [&value](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
+                        return node_pointer.first == value;
+                    });
+                if (it == nodes_pointers.end())
+                    continue;
+
+                std::vector<float> elems;
+                size_t index_start = (_tstart - tstart) / tstep;
+                size_t index_end = (_tstop - tstart) / tstep;
+                pop_group.getDataSet("data")
+                    .select({index_start, it->second.first},
+                            {index_end - index_start, it->second.second - it->second.first})
+                    .read(elems);
+                ret.push_back(elems);
+            }
+            return ret;
+        }
+
+      private:
+        Population(const H5::File& file, const std::string& populationName);
+
+        std::vector<std::pair<NodeID, std::pair<uint64_t, uint64_t>>> nodes_pointers;
+        H5::Group pop_group;
+        double tstart = 0, tstop, tstep = 1. /* Remove me with valid datafile*/;
+        std::string time_units;
+        std::string data_units;
+        bool sorted = false;
+
+        friend ReportReader;
+    };
+
+    explicit ReportReader(const std::string& filename);
+
+    std::vector<std::string> getPopulationsNames() const;
+
+    const Population& getPopulation(const std::string& populationName) const;
+
+    const Population& operator[](const std::string& populationName) const;
+
+  private:
+    H5::File file;
 
     // Lazy loaded population
     mutable std::map<std::string, Population> populations;

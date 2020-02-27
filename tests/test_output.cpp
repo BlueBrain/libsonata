@@ -13,3 +13,12 @@ TEST_CASE("SpikeReader", "[base]") {
 
     REQUIRE(reader["spikes1"].getSorting() == SpikeReader::Population::Sorting::by_id);
 }
+
+TEST_CASE("ReportReader", "[base]") {
+    const ReportReader reader("./data/soma.h5");
+
+    REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "soma1", "soma2"});
+
+    REQUIRE(reader["All"].get(Selection({{3, 5}}), 2, 5) ==
+            std::vector<std::vector<float>>{{4.2f, 6.2f, 8.2f}, {4.3f, 6.3f, 8.3f}});
+}

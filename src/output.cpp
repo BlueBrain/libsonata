@@ -1,8 +1,4 @@
-#include <highfive/H5Easy.hpp>
-
 #include <bbp/sonata/output.h>
-
-namespace H5 = HighFive;
 
 namespace HighFive {
 using namespace bbp::sonata;
@@ -92,6 +88,55 @@ SpikeReader::Population::Population(const std::string& filename,
     if (pop.hasAttribute("sorting")) {
         pop.getAttribute("sorting").read(sorting);
     }
+}
+
+ReportReader::ReportReader(const std::string& filename)
+    : file(filename, H5::File::ReadOnly) {}
+
+std::vector<std::string> ReportReader::getPopulationsNames() const {
+    return file.getGroup("/report").listObjectNames();
+}
+
+auto ReportReader::getPopulation(const std::string& populationName) const -> const Population& {
+    if (populations.find(populationName) == populations.end()) {
+        populations.emplace(populationName, Population{file, populationName});
+    }
+
+    return populations.at(populationName);
+}
+
+auto ReportReader::operator[](const std::string& populationName) const -> const Population& {
+    return getPopulation(populationName);
+}
+
+ReportReader::Population::Population(const H5::File& file, const std::string& populationName)
+    : pop_group(file.getGroup(std::string("/report/") + populationName)) {
+    {
+        auto mapping_group = pop_group.getGroup("mapping");
+        std::vector<NodeID> node_ids;
+        mapping_group.getDataSet("node_ids").read(node_ids);
+
+        std::vector<uint64_t> index_pointers;
+        mapping_group.getDataSet("index_pointers").read(index_pointers);
+
+        for (size_t i = 0; i < node_ids.size(); ++i) {
+            nodes_pointers.emplace_back(node_ids[i],
+                                        std::make_pair(index_pointers[i], index_pointers[i + 1]));
+        }
+
+        // std::vector<double> times;
+        // mapping_group.getDataSet("time").read(times);
+        // tstart = times[0];
+        // tstop  = times[1];
+        // tstep  = times[2];
+        // mapping_group.getDataSet("time").getAttribute("units").read(time_units);
+
+        if (mapping_group.hasAttribute("sorted")) {
+            mapping_group.getAttribute("sorted").read(sorted);
+        }
+    }
+
+    // pop_group.getDataSet("data").getAttribute("units").read(data_units);
 }
 
 }  // namespace sonata
