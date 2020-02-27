@@ -4,8 +4,10 @@ set -euxo pipefail
 
 VENV=build/venv-python-test
 
-if [[ ! -d $VENV ]]; then
-    python3 -mvenv "$VENV"
+if [[ ! -d "$VENV" ]]; then
+    # We use virtualenv instead of venv for python2 tests
+    pip install virtualenv
+    virtualenv "$VENV"
 fi
 
 set +u  # ignore errors in virtualenv's activate
