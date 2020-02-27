@@ -448,22 +448,28 @@ PYBIND11_MODULE(libsonata, m) {
 
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(void) const) &
+             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(void) const) &
                  SpikeReader::Population::get,
              "Return all spikes")
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(double, double)
-                  const) &
+             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(double, double) const) &
                  SpikeReader::Population::get,
              "Return spikes between 'tstart' and 'tend'",
              "tstart"_a,
              "tend"_a)
         .def("get",
-             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(Selection)
-                  const) &
+             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(const Selection&) const) &
                  SpikeReader::Population::get,
              "Return spikes with all those node_ids",
              "node_ids"_a)
+        .def("get",
+             (SpikeReader::Population::Spikes(
+                 SpikeReader::Population::*)(const Selection&, double, double) const) &
+                 SpikeReader::Population::get,
+             "Return spikes with all those node_ids between 'tstart' and 'tend'",
+             "node_ids"_a,
+             "tstart"_a,
+             "tend"_a)
         .def(
             "sorting",
             [](const SpikeReader::Population& self) {
@@ -477,8 +483,7 @@ PYBIND11_MODULE(libsonata, m) {
             },
             "Return the way data are sorted ('none', 'by_id', 'by_time')")
         .def("__getitem__",
-             (std::vector<std::pair<uint64_t, double>>(SpikeReader::Population::*)(Selection)
-                  const) &
+             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(const Selection&) const) &
                  SpikeReader::Population::get,
              "Return spikes with all those node_ids",
              "node_ids"_a);
