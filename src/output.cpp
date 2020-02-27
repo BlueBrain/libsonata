@@ -81,12 +81,12 @@ SpikeReader::Population::Population(const std::string& filename,
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
 
-    std::transform(node_ids.begin(),
-                   node_ids.end(),
-                   timestamps.begin(),
+    std::transform(std::make_move_iterator(node_ids.begin()),
+                   std::make_move_iterator(node_ids.end()),
+                   std::make_move_iterator(timestamps.begin()),
                    std::back_inserter(spikes),
-                   [](const Spike::first_type& node_id, const Spike::second_type& timestamp) {
-                       return std::make_pair(node_id, timestamp);
+                   [](Spike::first_type&& node_id, Spike::second_type&& timestamp) {
+                       return std::make_pair(std::move(node_id), std::move(timestamp));
                    });
 
     if (pop.hasAttribute("sorting")) {
