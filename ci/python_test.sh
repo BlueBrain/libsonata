@@ -2,10 +2,11 @@
 
 set -euxo pipefail
 
-VENV=env
+VENV=build/venv-python-test
 
-rm -rf "$VENV"
-python3 -m venv "$VENV"
+if [[ ! -d $VENV ]]; then
+    python3 -mvenv "$VENV"
+fi
 
 set +u  # ignore errors in virtualenv's activate
 source "$VENV/bin/activate"
