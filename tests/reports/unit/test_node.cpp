@@ -19,7 +19,7 @@ SCENARIO("Test Node class", "[Node]") {
             REQUIRE(node.get_num_elements() == 0);
             REQUIRE(node.get_element_ids().empty());
 
-            std::vector<double> res;
+            std::vector<float> res;
             node.fill_data(res.begin());
             REQUIRE(res.empty());
 
@@ -41,14 +41,14 @@ SCENARIO("Test Node class", "[Node]") {
                 REQUIRE(node.get_element_ids() == compare);
             }
             THEN("fill_data will return something correct") {
-                std::vector<double> result(5, -1.);
+                std::vector<float> result(5, -1.);
                 node.fill_data(result.begin());
-                REQUIRE(result == elements);
+                REQUIRE(result == std::vector<float>(elements.begin(), elements.end()));
             }
             THEN("refresh_pointers will be call on all elements") {
                 node.refresh_pointers(&square);
-                std::vector<double> compare{100, 121, 144, 169, 196};
-                std::vector<double> result(5, -1);
+                std::vector<float> compare{100, 121, 144, 169, 196};
+                std::vector<float> result(5, -1);
                 node.fill_data(result.begin());
                 REQUIRE(result == compare);
             }

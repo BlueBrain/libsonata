@@ -61,7 +61,7 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
 
             THEN(
                 "The buffer size is the total number of steps times the total number of elements") {
-                // 1024 / sizeof(double) / 11 = 11.6 > 3 (total number of steps)
+                // 1024 / (sizeof(float) * 11) = 23.27 > 3 (total number of steps)
                 // buffer_size = 11 * 3
                 REQUIRE(sonata->get_report_buffer().size() == 33);
             }
@@ -88,7 +88,7 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
             std::shared_ptr<nodes_t> nodes = std::make_shared<nodes_t>(
                 std::initializer_list<nodes_t::value_type>{{1, node}, {2, node2}, {42, node42}});
             int num_steps = 3;
-            size_t max_buffer_size = 256;
+            size_t max_buffer_size = 128;
             std::unique_ptr<SonataData> sonata2 = std::make_unique<SonataData>("test_sonatadata2",
                                                                                population_name,
                                                                                max_buffer_size,
@@ -108,7 +108,7 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
             THEN(
                 "The buffer size is the number of steps to write that fit on the buffer times the "
                 "total elements") {
-                // 256 / sizeof(double) / 11 = 2
+                // 128 / (sizeof(float) * 11) = 2 < 3 (total number of steps)
                 // buffer_size = 11 * 2
                 REQUIRE(sonata2->get_report_buffer().size() == 22);
             }

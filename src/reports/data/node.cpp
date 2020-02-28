@@ -13,8 +13,10 @@ void Node::add_element(double* element_value, uint32_t element_id) {
     element_ids_.push_back(element_id);
 }
 
-void Node::fill_data(std::vector<double>::iterator it) {
-    std::transform(elements_.begin(), elements_.end(), it, [](auto elem) { return *elem; });
+void Node::fill_data(std::vector<float>::iterator it) {
+    std::transform(elements_.begin(), elements_.end(), it, [](auto elem) {
+        return static_cast<float>(*elem);
+    });
 }
 
 void Node::refresh_pointers(std::function<double*(double*)> refresh_function) {

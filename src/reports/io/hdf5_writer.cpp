@@ -48,9 +48,31 @@ void HDF5Writer::configure_group(const std::string& group_name) {
     H5Gclose(group);
 }
 
-void HDF5Writer::configure_attribute(const std::string& group_name,
+void HDF5Writer::configure_attribute(const std::string& dataset_name,
                                      const std::string& attribute_name,
                                      const std::string& attribute_value) {
+    logger->trace("Configuring attribute '{}' for group name '{}' with value {}",
+                  attribute_name,
+                  dataset_name,
+                  attribute_value);
+    hid_t dataset_id = H5Dopen(file_, dataset_name.data(), H5P_DEFAULT);
+    hid_t attr_space = H5Screate(H5S_SCALAR);
+    hid_t type = H5Tcopy(H5T_C_S1);
+    H5Tset_size(type, H5T_VARIABLE);
+    H5Tset_cset(type, H5T_CSET_UTF8);
+    const char* value[] = {attribute_value.data()};
+    hid_t attr_id =
+        H5Acreate2(dataset_id, attribute_name.data(), type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_id, type, value);
+
+    H5Aclose(attr_id);
+    H5Sclose(attr_space);
+    H5Dclose(dataset_id);
+}
+
+void HDF5Writer::configure_enum_attribute(const std::string& group_name,
+                                          const std::string& attribute_name,
+                                          const std::string& attribute_value) {
     logger->trace("Configuring attribute '{}' for group name '{}'", attribute_name, group_name);
     hid_t group_id = H5Gopen(file_, group_name.data(), H5P_DEFAULT);
     hid_t attr_space = H5Screate(H5S_SCALAR);
@@ -86,7 +108,7 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name,
     H5Sclose(data_space);
 }
 
-void HDF5Writer::write_2D(const std::vector<double>& buffer,
+void HDF5Writer::write_2D(const std::vector<float>& buffer,
                           uint32_t steps_to_write,
                           uint32_t total_elements) {
     std::array<hsize_t, 2> count;
@@ -103,7 +125,7 @@ void HDF5Writer::write_2D(const std::vector<double>& buffer,
         H5Sselect_hyperslab(space, H5S_SELECT_OR, &offset_[i], NULL, &count[i], NULL);
     }*/
 
-    H5Dwrite(dataset_, H5T_NATIVE_DOUBLE, memspace, filespace, collective_list_, buffer.data());
+    H5Dwrite(dataset_, H5T_NATIVE_FLOAT, memspace, filespace, collective_list_, buffer.data());
     offset_[0] += steps_to_write;
 
     H5Sclose(filespace);
@@ -130,6 +152,22 @@ void HDF5Writer::write(const std::string& dataset_name, const std::vector<T>& bu
 
     H5Sclose(memspace);
     H5Sclose(filespace);
+    H5Dclose(data_set);
+    H5Sclose(data_space);
+}
+
+void HDF5Writer::write_time(const std::string& dataset_name, const std::array<double, 3>& buffer) {
+    hsize_t dims = buffer.size();
+    hid_t data_space = H5Screate_simple(1, &dims, nullptr);
+    hid_t data_set = H5Dcreate(file_,
+                               dataset_name.c_str(),
+                               H5T_NATIVE_DOUBLE,
+                               data_space,
+                               H5P_DEFAULT,
+                               H5P_DEFAULT,
+                               H5P_DEFAULT);
+
+    H5Dwrite(data_set, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
     H5Dclose(data_set);
     H5Sclose(data_space);
 }
