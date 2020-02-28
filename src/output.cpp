@@ -89,6 +89,83 @@ SpikeReader::Population::Population(const std::string& filename,
         pop.getAttribute("sorting").read(sorting);
     }
 }
+SpikeReader::Population::Spikes SpikeReader::Population::filterNode(
+    const Spikes& spikes, const Selection& node_ids) const {
+    if (sorting == Sorting::by_id) {
+        return filterNodeIDSorted(spikes, node_ids);
+    }
+    return filterNodeIDUnsorted(spikes, node_ids);
+}
+
+SpikeReader::Population::Spikes SpikeReader::Population::filterNodeIDUnsorted(
+    const Spikes& spikes, const Selection& node_ids) const {
+    auto values = node_ids.flatten();
+    Spikes _spikes;
+    std::copy_if(spikes.begin(),
+                 spikes.end(),
+                 std::back_inserter(_spikes),
+                 [&values](const Spike& spike) {
+                     return std::find(values.cbegin(), values.cend(), spike.first) != values.cend();
+                 });
+    return _spikes;
+}
+
+SpikeReader::Population::Spikes SpikeReader::Population::filterNodeIDSorted(
+    const Spikes& spikes, const Selection& node_ids) const {
+    auto values = node_ids.flatten();
+    Spikes _spikes;
+    for (const auto& value : values) {
+        auto range = std::equal_range(spikes.begin(),
+                                      spikes.end(),
+                                      std::make_pair(value, 0.),
+                                      [](const Spike& spike1, const Spike& spike2) {
+                                          return spike1.first < spike2.first;
+                                      });
+        std::copy(range.first, range.second, std::back_inserter(_spikes));
+    }
+    return _spikes;
+}
+
+SpikeReader::Population::Spikes SpikeReader::Population::filterTimestamp(const Spikes& spikes,
+                                                                         double tstart,
+                                                                         double tend) const {
+    if (sorting == Sorting::by_time) {
+        return filterTimestampSorted(spikes, tstart, tend);
+    }
+    return filterTimestampUnsorted(spikes, tstart, tend);
+}
+
+SpikeReader::Population::Spikes SpikeReader::Population::filterTimestampUnsorted(
+    const Spikes& spikes, double tstart, double tend) const {
+    Spikes _spikes;
+    std::copy_if(spikes.begin(),
+                 spikes.end(),
+                 std::back_inserter(_spikes),
+                 [&tstart, &tend](const Spike& spike) {
+                     return spike.second > tstart && spike.second < tend;
+                 });
+    return _spikes;
+}
+
+SpikeReader::Population::Spikes SpikeReader::Population::filterTimestampSorted(const Spikes& spikes,
+                                                                               double tstart,
+                                                                               double tend) const {
+    Spikes _spikes;
+    auto begin = std::lower_bound(spikes.begin(),
+                                  spikes.end(),
+                                  std::make_pair(0UL, tstart),
+                                  [](const Spike& spike1, const Spike& spike2) {
+                                      return spike1.second < spike2.second;
+                                  });
+    auto end = std::upper_bound(spikes.begin(),
+                                spikes.end(),
+                                std::make_pair(0UL, tend),
+                                [](const Spike& spike1, const Spike& spike2) {
+                                    return spike1.second < spike2.second;
+                                });
+    std::copy(begin, end, std::back_inserter(_spikes));
+    return _spikes;
+}
 
 ReportReader::ReportReader(const std::string& filename)
     : file(filename, H5::File::ReadOnly) {}
@@ -124,19 +201,58 @@ ReportReader::Population::Population(const H5::File& file, const std::string& po
                                         std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
 
-        // std::vector<double> times;
-        // mapping_group.getDataSet("time").read(times);
-        // tstart = times[0];
-        // tstop  = times[1];
-        // tstep  = times[2];
-        // mapping_group.getDataSet("time").getAttribute("units").read(time_units);
+        std::vector<double> times;
+        mapping_group.getDataSet("time").read(times);
+        tstart = times[0];
+        tstop = times[1];
+        tstep = times[2];
+        mapping_group.getDataSet("time").getAttribute("units").read(time_units);
 
-        if (mapping_group.hasAttribute("sorted")) {
-            mapping_group.getAttribute("sorted").read(sorted);
+        if (mapping_group.getDataSet("node_ids").hasAttribute("sorted")) {
+            mapping_group.getDataSet("node_ids").getAttribute("sorted").read(sorted);
         }
     }
 
-    // pop_group.getDataSet("data").getAttribute("units").read(data_units);
+    pop_group.getDataSet("data").getAttribute("units").read(data_units);
+}
+
+std::vector<std::vector<float>> ReportReader::Population::get(const Selection& nodes_ids,
+                                                              double _tstart,
+                                                              double _tstop) const {
+    _tstart = _tstart == -1 ? tstart : _tstart;
+    _tstop = _tstop == -1 ? tstop : _tstop;
+    std::vector<std::vector<float>> ret;
+
+    auto values = nodes_ids.flatten();
+    if (values.empty()) {  // Take all nodes in this case
+        std::transform(nodes_pointers.begin(),
+                       nodes_pointers.end(),
+                       std::back_inserter(values),
+                       [](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
+                           return node_pointer.first;
+                       });
+    }
+
+    for (const auto& value : values) {
+        auto it = std::find_if(
+            nodes_pointers.begin(),
+            nodes_pointers.end(),
+            [&value](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
+                return node_pointer.first == value;
+            });
+        if (it == nodes_pointers.end())
+            continue;
+
+        std::vector<float> elems;
+        size_t index_start = (_tstart - tstart) / tstep;
+        size_t index_end = (_tstop - tstart) / tstep;
+        pop_group.getDataSet("data")
+            .select({index_start, it->second.first},
+                    {index_end - index_start, it->second.second - it->second.first})
+            .read(elems);
+        ret.push_back(elems);
+    }
+    return ret;
 }
 
 }  // namespace sonata
