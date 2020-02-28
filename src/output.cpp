@@ -38,22 +38,17 @@ auto SpikeReader::operator[](const std::string& populationName) const -> const P
     return getPopulation(populationName);
 }
 
-SpikeReader::Population::Spikes SpikeReader::Population::get() const {
-    return spikes;
-}
-
-SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& node_ids) const {
-    return filterNode(spikes, node_ids);
-}
-
-SpikeReader::Population::Spikes SpikeReader::Population::get(double tstart, double tend) const {
-    return filterTimestamp(spikes, tstart, tend);
-}
-
 SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& node_ids,
                                                              double tstart,
                                                              double tend) const {
-    return filterNode(filterTimestamp(spikes, tstart, tend), node_ids);
+    auto ret = spikes;
+    if (tstart != -1 || tend != -1) {
+        ret = filterTimestamp(ret, tstart, tend);
+    }
+    if (!node_ids.empty()) {
+        ret = filterNode(ret, node_ids);
+    }
+    return ret;
 }
 
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
@@ -214,6 +209,22 @@ ReportReader::Population::Population(const H5::File& file, const std::string& po
     }
 
     pop_group.getDataSet("data").getAttribute("units").read(data_units);
+}
+
+std::tuple<double, double, double> ReportReader::Population::getTimes() const {
+    return std::tie(tstart, tstop, tstep);
+}
+
+std::string ReportReader::Population::getTimeUnits() const {
+    return time_units;
+}
+
+std::string ReportReader::Population::getDataUnits() const {
+    return data_units;
+}
+
+bool ReportReader::Population::getSorted() const {
+    return sorted;
 }
 
 std::vector<std::vector<float>> ReportReader::Population::get(const Selection& nodes_ids,

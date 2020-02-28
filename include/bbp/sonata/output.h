@@ -38,10 +38,9 @@ class SONATA_API SpikeReader
 
         using Spike = std::pair<NodeID, double>;
         using Spikes = std::vector<Spike>;
-        Spikes get() const;
-        Spikes get(const Selection& node_ids) const;
-        Spikes get(double tstart, double tend) const;
-        Spikes get(const Selection& node_ids, double tstart, double tend) const;
+        Spikes get(const Selection& node_ids = Selection({}),
+                   double tstart = -1,
+                   double tend = -1) const;
         Sorting getSorting() const;
 
       private:
@@ -84,21 +83,10 @@ class SONATA_API ReportReader
     class Population
     {
       public:
-        std::tuple<double, double, double> getTimes() const {
-            return std::tie(tstart, tstop, tstep);
-        }
-
-        std::string getTimeUnits() const {
-            return time_units;
-        }
-
-        std::string getDataUnits() const {
-            return data_units;
-        }
-
-        bool getSorted() const {
-            return sorted;
-        }
+        std::tuple<double, double, double> getTimes() const;
+        std::string getTimeUnits() const;
+        std::string getDataUnits() const;
+        bool getSorted() const;
 
         // Return a vector of datas
         // Each index is a corresponding node_id from Selection given as argument

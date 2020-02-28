@@ -447,25 +447,25 @@ PYBIND11_MODULE(libsonata, m) {
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
+        .def(
+            "get",
+            [](const SpikeReader::Population& self) { return self.get(); },
+            "Return all spikes")
+        .def(
+            "get",
+            [](const SpikeReader::Population& self, double tstart, double tend) {
+                return self.get(Selection({}), tstart, tend);
+            },
+            "Return spikes between 'tstart' and 'tend'",
+            "tstart"_a,
+            "tend"_a)
+        .def(
+            "get",
+            [](const SpikeReader::Population& self, Selection sel) { return self.get(sel); },
+            "Return spikes with all those node_ids",
+            "node_ids"_a)
         .def("get",
-             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(void) const) &
-                 SpikeReader::Population::get,
-             "Return all spikes")
-        .def("get",
-             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(double, double) const) &
-                 SpikeReader::Population::get,
-             "Return spikes between 'tstart' and 'tend'",
-             "tstart"_a,
-             "tend"_a)
-        .def("get",
-             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(const Selection&) const) &
-                 SpikeReader::Population::get,
-             "Return spikes with all those node_ids",
-             "node_ids"_a)
-        .def("get",
-             (SpikeReader::Population::Spikes(
-                 SpikeReader::Population::*)(const Selection&, double, double) const) &
-                 SpikeReader::Population::get,
+             &SpikeReader::Population::get,
              "Return spikes with all those node_ids between 'tstart' and 'tend'",
              "node_ids"_a,
              "tstart"_a,
@@ -481,12 +481,7 @@ PYBIND11_MODULE(libsonata, m) {
                 if (s == SpikeReader::Population::Sorting::by_time)
                     return "by_time";
             },
-            "Return the way data are sorted ('none', 'by_id', 'by_time')")
-        .def("__getitem__",
-             (SpikeReader::Population::Spikes(SpikeReader::Population::*)(const Selection&) const) &
-                 SpikeReader::Population::get,
-             "Return spikes with all those node_ids",
-             "node_ids"_a);
+            "Return the way data are sorted ('none', 'by_id', 'by_time')");
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init<const std::string&>())
         .def("getPopulationsNames",
