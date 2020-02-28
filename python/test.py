@@ -241,7 +241,9 @@ class TestSpikePopulation(unittest.TestCase):
 
     def test_get_spikes_from_population(self):
         self.assertEqual(self.test_obj['All'].get(), [(5, 0.1), (2, 0.2), (3, 0.3), (2, 0.7), (3, 1.3)])
-        self.assertEqual(self.test_obj['spikes2'].get(0.2, 1.0), [(3, 0.3), (2, 0.7)])
+        self.assertEqual(self.test_obj['All'].get(0.2, 1.0), [(2, 0.2), (3, 0.3), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes2'].get(0.2, 1.0), [(3, 0.3), (2, 0.2), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes1'].get((3,)), [(3, 0.3), (3, 1.3)])
         self.assertEqual(self.test_obj['spikes2'].get((3,)), [(3, 0.3), (3, 1.3)])
         self.assertEqual(self.test_obj['spikes2'].get((10,)), [])
         self.assertEqual(self.test_obj['spikes2'].get((2,), 0., 0.5), [(2, 0.2)])

@@ -42,11 +42,11 @@ SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& no
                                                              double tstart,
                                                              double tend) const {
     auto ret = spikes;
-    if (tstart != -1 || tend != -1) {
-        ret = filterTimestamp(ret, tstart, tend);
+    if (tstart != -1 && tend != -1) {
+        filterTimestamp(ret, tstart, tend);
     }
     if (!node_ids.empty()) {
-        ret = filterNode(ret, node_ids);
+        filterNode(ret, node_ids);
     }
     return ret;
 }
@@ -84,68 +84,64 @@ SpikeReader::Population::Population(const std::string& filename,
         pop.getAttribute("sorting").read(sorting);
     }
 }
-SpikeReader::Population::Spikes SpikeReader::Population::filterNode(
-    const Spikes& spikes, const Selection& node_ids) const {
+void SpikeReader::Population::filterNode(Spikes& spikes, const Selection& node_ids) const {
     if (sorting == Sorting::by_id) {
-        return filterNodeIDSorted(spikes, node_ids);
+        filterNodeIDSorted(spikes, node_ids);
     }
-    return filterNodeIDUnsorted(spikes, node_ids);
+    filterNodeIDUnsorted(spikes, node_ids);
 }
 
-SpikeReader::Population::Spikes SpikeReader::Population::filterNodeIDUnsorted(
-    const Spikes& spikes, const Selection& node_ids) const {
+void SpikeReader::Population::filterNodeIDUnsorted(Spikes& spikes,
+                                                   const Selection& node_ids) const {
     auto values = node_ids.flatten();
-    Spikes _spikes;
-    std::copy_if(spikes.begin(),
-                 spikes.end(),
-                 std::back_inserter(_spikes),
-                 [&values](const Spike& spike) {
-                     return std::find(values.cbegin(), values.cend(), spike.first) != values.cend();
-                 });
-    return _spikes;
+    auto new_end = std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
+        return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
+    });
+    spikes.erase(new_end, spikes.end());
 }
 
-SpikeReader::Population::Spikes SpikeReader::Population::filterNodeIDSorted(
-    const Spikes& spikes, const Selection& node_ids) const {
-    auto values = node_ids.flatten();
+void SpikeReader::Population::filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) const {
     Spikes _spikes;
-    for (const auto& value : values) {
-        auto range = std::equal_range(spikes.begin(),
+    for (const auto& range : node_ids.ranges()) {
+        auto begin = std::lower_bound(spikes.begin(),
                                       spikes.end(),
-                                      std::make_pair(value, 0.),
+                                      std::make_pair(range.first, 0.),
                                       [](const Spike& spike1, const Spike& spike2) {
                                           return spike1.first < spike2.first;
                                       });
-        std::copy(range.first, range.second, std::back_inserter(_spikes));
+        auto end = std::upper_bound(spikes.begin(),
+                                    spikes.end(),
+                                    std::make_pair(range.second, 0.),
+                                    [](const Spike& spike1, const Spike& spike2) {
+                                        return spike1.first < spike2.first;
+                                    });
+
+        std::move(begin, end, std::back_inserter(_spikes));
+        spikes.erase(begin, end);  // have to erase, because otherwise it is no more sorted
     }
-    return _spikes;
+    spikes = std::move(_spikes);
 }
 
-SpikeReader::Population::Spikes SpikeReader::Population::filterTimestamp(const Spikes& spikes,
-                                                                         double tstart,
-                                                                         double tend) const {
+void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, double tend) const {
     if (sorting == Sorting::by_time) {
-        return filterTimestampSorted(spikes, tstart, tend);
+        filterTimestampSorted(spikes, tstart, tend);
     }
-    return filterTimestampUnsorted(spikes, tstart, tend);
+    filterTimestampUnsorted(spikes, tstart, tend);
 }
 
-SpikeReader::Population::Spikes SpikeReader::Population::filterTimestampUnsorted(
-    const Spikes& spikes, double tstart, double tend) const {
-    Spikes _spikes;
-    std::copy_if(spikes.begin(),
-                 spikes.end(),
-                 std::back_inserter(_spikes),
-                 [&tstart, &tend](const Spike& spike) {
-                     return spike.second > tstart && spike.second < tend;
-                 });
-    return _spikes;
+void SpikeReader::Population::filterTimestampUnsorted(Spikes& spikes,
+                                                      double tstart,
+                                                      double tend) const {
+    auto new_end =
+        std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tend](const Spike& spike) {
+            return spike.second < tstart || spike.second >= tend;
+        });
+    spikes.erase(new_end, spikes.end());
 }
 
-SpikeReader::Population::Spikes SpikeReader::Population::filterTimestampSorted(const Spikes& spikes,
-                                                                               double tstart,
-                                                                               double tend) const {
-    Spikes _spikes;
+void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
+                                                    double tstart,
+                                                    double tend) const {
     auto begin = std::lower_bound(spikes.begin(),
                                   spikes.end(),
                                   std::make_pair(0UL, tstart),
@@ -158,8 +154,8 @@ SpikeReader::Population::Spikes SpikeReader::Population::filterTimestampSorted(c
                                 [](const Spike& spike1, const Spike& spike2) {
                                     return spike1.second < spike2.second;
                                 });
-    std::copy(begin, end, std::back_inserter(_spikes));
-    return _spikes;
+    spikes.erase(end, spikes.end());
+    spikes.erase(spikes.begin(), begin);
 }
 
 ReportReader::ReportReader(const std::string& filename)

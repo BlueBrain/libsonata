@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include <highfive/H5Easy.hpp>
+#include <highfive/H5File.hpp>
 
 #include <bbp/sonata/population.h>
 
@@ -50,14 +50,16 @@ class SONATA_API SpikeReader
         Sorting sorting = Sorting::none;
 
         // Helpers to filter by node_ids
-        Spikes filterNode(const Spikes& spikes, const Selection& node_ids) const;
-        Spikes filterNodeIDUnsorted(const Spikes& spikes, const Selection& node_ids) const;
-        Spikes filterNodeIDSorted(const Spikes& spikes, const Selection& node_ids) const;
+        // Filter in place
+        void filterNode(Spikes& spikes, const Selection& node_ids) const;
+        void filterNodeIDUnsorted(Spikes& spikes, const Selection& node_ids) const;
+        void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) const;
 
         // Helpers to filter by timestamps
-        Spikes filterTimestamp(const Spikes& spikes, double tstart, double tend) const;
-        Spikes filterTimestampUnsorted(const Spikes& spikes, double tstart, double tend) const;
-        Spikes filterTimestampSorted(const Spikes& spikes, double tstart, double tend) const;
+        // Filter in place
+        void filterTimestamp(Spikes& spikes, double tstart, double tend) const;
+        void filterTimestampUnsorted(Spikes& spikes, double tstart, double tend) const;
+        void filterTimestampSorted(Spikes& spikes, double tstart, double tend) const;
 
         friend SpikeReader;
     };
