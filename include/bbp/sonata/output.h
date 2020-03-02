@@ -92,7 +92,7 @@ class SONATA_API ReportReader
 
         // Return a vector of datas
         // Each index is a corresponding node_id from Selection given as argument
-        std::vector<std::vector<float>> get(const Selection& nodes_ids,
+        std::vector<std::vector<float>> get(const Selection& nodes_ids = Selection({}),
                                             double _tstart = -1,
                                             double _tstop = -1) const;
 

@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from libsonata import EdgeStorage, NodeStorage, Selection, SonataError, SpikeReader, SpikePopulation
+from libsonata import EdgeStorage, NodeStorage, Selection, SonataError, SpikeReader, SpikePopulation, ReportReader, ReportPopulation
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -251,6 +251,22 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['spikes1'].sorting(), "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting(), "none")
 
+
+class TestReportPopulation(unittest.TestCase):
+    def setUp(self):
+        path = os.path.join(PATH, "somas.h5")
+        self.test_obj = ReportReader(path)
+
+    def test_get_all_population(self):
+        self.assertEqual(self.test_obj.getPopulationsNames(), ['All', 'soma1', 'soma2'])
+
+    def test_get_population(self):
+        self.assertTrue(isinstance(self.test_obj['All'], ReportPopulation))
+
+    def test_get_inexistant_population(self):
+        self.assertEqual(RuntimeError, self.test_obj.__getitem__, "foobar")
+
+    def test_get_reports_from_population(self):
 
 if __name__ == '__main__':
     unittest.main()

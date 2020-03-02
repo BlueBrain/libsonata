@@ -489,5 +489,53 @@ PYBIND11_MODULE(libsonata, m) {
              "Get list of all populations")
         .def("__getitem__", &SpikeReader::operator[]);
 
+    py::class_<ReportReader::Population>(m, "ReportPopulation", "A population inside a ReportReader")
+        .def(
+            "get",
+            [](const ReportReader::Population& self) { return self.get(); },
+            "Return all reports")
+        .def(
+            "get",
+            [](const ReportReader::Population& self, double tstart, double tend) {
+                return self.get(Selection({}), tstart, tend);
+            },
+            "Return reports between 'tstart' and 'tend'",
+            "tstart"_a,
+            "tend"_a)
+        .def(
+            "get",
+            [](const ReportReader::Population& self, Selection sel) { return self.get(sel); },
+            "Return reports with all those node_ids",
+            "node_ids"_a)
+        .def("get",
+             &ReportReader::Population::get,
+             "Return reports with all those node_ids between 'tstart' and 'tend'",
+             "node_ids"_a,
+             "tstart"_a,
+             "tend"_a)
+        .def(
+            "sorted",
+            &ReportReader::Population::getSorted,
+            "Return if data are sorted")
+        .def(
+                "times",
+                &ReportReader::Population::getTimes,
+                "Return (tstart, tend, tstep) of the population")
+        .def(
+                "timeUnits",
+                &ReportReader::Population::getTimeUnits,
+                "Return the unit of the times")
+        .def(
+                "dataUnits",
+                &ReportReader::Population::getDataUnits,
+                "Return the unit of data");
+    py::class_<ReportReader>(m, "ReportReader", "Used to read spike files")
+        .def(py::init<const std::string&>())
+        .def("getPopulationsNames",
+             &ReportReader::getPopulationsNames,
+             "Get list of all populations")
+        .def("__getitem__", &ReportReader::operator[]);
+
+
     py::register_exception<SonataError>(m, "SonataError");
 }
