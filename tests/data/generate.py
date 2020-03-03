@@ -138,12 +138,12 @@ def write_soma_report(filepath):
     index_pointers = np.arange(0, 20)
     element_ids = np.zeros(20)
     times = (0.0, 1.0, 0.1)
+    data = [node_ids + j*0.1 for j in range(10)]
     string_dtype = h5py.special_dtype(vlen=get_vlen_str_type())
     with h5py.File(filepath, 'w') as h5f:
         root = h5f.create_group('report')
         gpop_all = h5f.create_group('/report/' + population_names[0])
-        d1 = np.arange(0.0, 20, 0.1).reshape(10, -1)
-        ddata = gpop_all.create_dataset('data', data=d1, dtype=np.float32)
+        ddata = gpop_all.create_dataset('data', data=data, dtype=np.float32)
         ddata.attrs.create('units', data="mV", dtype=string_dtype)
         gmapping = h5f.create_group('/report/' + population_names[0] + '/mapping')
 
