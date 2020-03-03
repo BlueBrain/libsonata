@@ -446,6 +446,9 @@ PYBIND11_MODULE(libsonata, m) {
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
+    py::class_<DataFrame>(m, "DataFrame", "Something easily convertible to pandas dataframe")
+        .def_readonly("data", &DataFrame::data)
+        .def_readonly("index", &DataFrame::index);
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
         .def(
             "get",
@@ -518,17 +521,17 @@ PYBIND11_MODULE(libsonata, m) {
             &ReportReader::Population::getSorted,
             "Return if data are sorted")
         .def(
-                "times",
-                &ReportReader::Population::getTimes,
-                "Return (tstart, tend, tstep) of the population")
+             "times",
+             &ReportReader::Population::getTimes,
+             "Return (tstart, tend, tstep) of the population")
         .def(
-                "timeUnits",
-                &ReportReader::Population::getTimeUnits,
-                "Return the unit of the times")
+             "timeUnits",
+             &ReportReader::Population::getTimeUnits,
+             "Return the unit of the times")
         .def(
-                "dataUnits",
-                &ReportReader::Population::getDataUnits,
-                "Return the unit of data");
+             "dataUnits",
+             &ReportReader::Population::getDataUnits,
+             "Return the unit of data");
     py::class_<ReportReader>(m, "ReportReader", "Used to read spike files")
         .def(py::init<const std::string&>())
         .def("getPopulationsNames",

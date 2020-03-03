@@ -14,6 +14,12 @@ namespace H5 = HighFive;
 
 namespace bbp {
 namespace sonata {
+
+struct SONATA_API DataFrame {
+    std::map<NodeID, std::vector<float>> data;
+    std::vector<float> index;
+};
+
 /**
   const SpikeReader file(filename);
   auto pops = file.getPopulationNames();
@@ -40,7 +46,7 @@ class SONATA_API SpikeReader
         using Spikes = std::vector<Spike>;
         Spikes get(const Selection& node_ids = Selection({}),
                    double tstart = -1,
-                   double tend = -1) const;
+                   double tstop = -1) const;
         Sorting getSorting() const;
 
       private:
@@ -57,9 +63,9 @@ class SONATA_API SpikeReader
 
         // Helpers to filter by timestamps
         // Filter in place
-        void filterTimestamp(Spikes& spikes, double tstart, double tend) const;
-        void filterTimestampUnsorted(Spikes& spikes, double tstart, double tend) const;
-        void filterTimestampSorted(Spikes& spikes, double tstart, double tend) const;
+        void filterTimestamp(Spikes& spikes, double tstart, double tstop) const;
+        void filterTimestampUnsorted(Spikes& spikes, double tstart, double tstop) const;
+        void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) const;
 
         friend SpikeReader;
     };
@@ -92,9 +98,9 @@ class SONATA_API ReportReader
 
         // Return a vector of datas
         // Each index is a corresponding node_id from Selection given as argument
-        std::vector<std::vector<float>> get(const Selection& nodes_ids = Selection({}),
-                                            double _tstart = -1,
-                                            double _tstop = -1) const;
+        DataFrame get(const Selection& nodes_ids = Selection({}),
+                      double _tstart = -1,
+                      double _tstop = -1) const;
 
       private:
         Population(const H5::File& file, const std::string& populationName);
@@ -104,7 +110,7 @@ class SONATA_API ReportReader
         double tstart, tstop, tstep;
         std::string time_units;
         std::string data_units;
-        bool sorted = false;
+        bool nodes_ids_sorted = false;
 
         friend ReportReader;
     };

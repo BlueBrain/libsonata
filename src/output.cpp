@@ -40,11 +40,11 @@ auto SpikeReader::operator[](const std::string& populationName) const -> const P
 
 SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& node_ids,
                                                              double tstart,
-                                                             double tend) const {
+                                                             double tstop) const {
     auto ret = spikes;
-    if (tstart != -1 && tend != -1) {
-        filterTimestamp(ret, tstart, tend);
-    }
+    tstart = tstart == -1 ? 0 : tstart;
+    tstop = tstop == -1 ? 99999 : tstop; //FIXME
+    filterTimestamp(ret, tstart, tstop);
     if (!node_ids.empty()) {
         filterNode(ret, node_ids);
     }
@@ -122,26 +122,26 @@ void SpikeReader::Population::filterNodeIDSorted(Spikes& spikes, const Selection
     spikes = std::move(_spikes);
 }
 
-void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, double tend) const {
+void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, double tstop) const {
     if (sorting == Sorting::by_time) {
-        filterTimestampSorted(spikes, tstart, tend);
+        filterTimestampSorted(spikes, tstart, tstop);
     }
-    filterTimestampUnsorted(spikes, tstart, tend);
+    filterTimestampUnsorted(spikes, tstart, tstop);
 }
 
 void SpikeReader::Population::filterTimestampUnsorted(Spikes& spikes,
                                                       double tstart,
-                                                      double tend) const {
+                                                      double tstop) const {
     auto new_end =
-        std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tend](const Spike& spike) {
-            return spike.second < tstart || spike.second >= tend;
+        std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tstop](const Spike& spike) {
+            return spike.second < tstart || spike.second >= tstop;
         });
     spikes.erase(new_end, spikes.end());
 }
 
 void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
                                                     double tstart,
-                                                    double tend) const {
+                                                    double tstop) const {
     auto begin = std::lower_bound(spikes.begin(),
                                   spikes.end(),
                                   std::make_pair(0UL, tstart),
@@ -150,7 +150,7 @@ void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
                                   });
     auto end = std::upper_bound(spikes.begin(),
                                 spikes.end(),
-                                std::make_pair(0UL, tend),
+                                std::make_pair(0UL, tstop),
                                 [](const Spike& spike1, const Spike& spike2) {
                                     return spike1.second < spike2.second;
                                 });
@@ -200,7 +200,7 @@ ReportReader::Population::Population(const H5::File& file, const std::string& po
         mapping_group.getDataSet("time").getAttribute("units").read(time_units);
 
         if (mapping_group.getDataSet("node_ids").hasAttribute("sorted")) {
-            mapping_group.getDataSet("node_ids").getAttribute("sorted").read(sorted);
+            mapping_group.getDataSet("node_ids").getAttribute("sorted").read(nodes_ids_sorted);
         }
     }
 
@@ -220,27 +220,46 @@ std::string ReportReader::Population::getDataUnits() const {
 }
 
 bool ReportReader::Population::getSorted() const {
-    return sorted;
+    return nodes_ids_sorted;
 }
 
-std::vector<std::vector<float>> ReportReader::Population::get(const Selection& nodes_ids,
-                                                              double _tstart,
-                                                              double _tstop) const {
+DataFrame ReportReader::Population::get(const Selection& nodes_ids,
+                                        double _tstart,
+                                        double _tstop) const {
     _tstart = _tstart == -1 ? tstart : _tstart;
+    _tstart = _tstart < tstart ? tstart : _tstart;
     _tstop = _tstop == -1 ? tstop : _tstop;
-    std::vector<std::vector<float>> ret;
+    _tstop = _tstop > tstop ? tstop : _tstop;
+    size_t index_start = (_tstart - tstart) / tstep;
+    _tstart = index_start * tstep;
+    size_t index_stop = (_tstop - tstart) / tstep;
+    _tstop = index_stop * tstep;
 
-    auto values = nodes_ids.flatten();
-    if (values.empty()) {  // Take all nodes in this case
+    DataFrame ret;
+    for (auto t = _tstart; t < _tstop && std::abs(t - _tstop) > std::numeric_limits<double>::epsilon(); t += tstep) {
+        ret.index.push_back(t);
+    }
+
+    // Simplify selection
+    // We should remove duplicates
+    // And when we can work with ranges let's sort them
+    // auto nodes_ids_ = Selection::fromValues(nodes_ids.flatten().sort());
+    auto nodes_ids_ = nodes_ids;
+
+    if (nodes_ids.empty()) { // Take all nodes in this case
+        Selection::Values values;
         std::transform(nodes_pointers.begin(),
                        nodes_pointers.end(),
                        std::back_inserter(values),
                        [](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
                            return node_pointer.first;
                        });
+        nodes_ids_ = Selection::fromValues(values);
     }
 
-    for (const auto& value : values) {
+    // It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
+    // TODO: specialized this function for sorted nodes_ids
+    for (const auto& value: nodes_ids_.flatten()) {
         auto it = std::find_if(
             nodes_pointers.begin(),
             nodes_pointers.end(),
@@ -250,14 +269,17 @@ std::vector<std::vector<float>> ReportReader::Population::get(const Selection& n
         if (it == nodes_pointers.end())
             continue;
 
-        std::vector<float> elems;
-        size_t index_start = (_tstart - tstart) / tstep;
-        size_t index_end = (_tstop - tstart) / tstep;
+        // elems are by timestamp and by Nodes_id
+        std::vector<std::vector<float>> elems;
+        std::vector<float> elems_by_node;
         pop_group.getDataSet("data")
             .select({index_start, it->second.first},
-                    {index_end - index_start, it->second.second - it->second.first})
+                    {index_stop - index_start, 1})
             .read(elems);
-        ret.push_back(elems);
+        for (auto& elem: elems) {
+            elems_by_node.push_back(elem[0]);
+        }
+        ret.data.insert({value, std::move(elems_by_node)});
     }
     return ret;
 }

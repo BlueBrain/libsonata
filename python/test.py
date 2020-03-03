@@ -251,6 +251,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['spikes1'].sorting(), "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting(), "none")
 
+import pandas
 
 class TestReportPopulation(unittest.TestCase):
     def setUp(self):
@@ -264,9 +265,19 @@ class TestReportPopulation(unittest.TestCase):
         self.assertTrue(isinstance(self.test_obj['All'], ReportPopulation))
 
     def test_get_inexistant_population(self):
-        self.assertEqual(RuntimeError, self.test_obj.__getitem__, "foobar")
+        self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
 
     def test_get_reports_from_population(self):
+        self.assertEqual(self.test_obj['All'].times(), (0., 1., 0.1))
+        self.assertEqual(self.test_obj['All'].timeUnits(), 'ms')
+        self.assertEqual(self.test_obj['All'].dataUnits(), 'mV')
+        self.assertTrue(self.test_obj['All'].sorted())
+        #self.assertEqual(len(self.test_obj['All'].get()), 200)
+        #self.assertEqual(self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tend=1.0).data, [0.8, 0.9])
+        sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tend=1.0)
+        d = pandas.DataFrame(data=sel.data, index=sel.index)
+        print(d)
+
 
 if __name__ == '__main__':
     unittest.main()
