@@ -492,7 +492,9 @@ PYBIND11_MODULE(libsonata, m) {
              "Get list of all populations")
         .def("__getitem__", &SpikeReader::operator[]);
 
-    py::class_<ReportReader::Population>(m, "ReportPopulation", "A population inside a ReportReader")
+    py::class_<ReportReader::Population>(m,
+                                         "ReportPopulation",
+                                         "A population inside a ReportReader")
         .def(
             "get",
             [](const ReportReader::Population& self) { return self.get(); },
@@ -516,22 +518,12 @@ PYBIND11_MODULE(libsonata, m) {
              "node_ids"_a,
              "tstart"_a,
              "tend"_a)
-        .def(
-            "sorted",
-            &ReportReader::Population::getSorted,
-            "Return if data are sorted")
-        .def(
-             "times",
+        .def("sorted", &ReportReader::Population::getSorted, "Return if data are sorted")
+        .def("times",
              &ReportReader::Population::getTimes,
              "Return (tstart, tend, tstep) of the population")
-        .def(
-             "timeUnits",
-             &ReportReader::Population::getTimeUnits,
-             "Return the unit of the times")
-        .def(
-             "dataUnits",
-             &ReportReader::Population::getDataUnits,
-             "Return the unit of data");
+        .def("timeUnits", &ReportReader::Population::getTimeUnits, "Return the unit of the times")
+        .def("dataUnits", &ReportReader::Population::getDataUnits, "Return the unit of data");
     py::class_<ReportReader>(m, "ReportReader", "Used to read spike files")
         .def(py::init<const std::string&>())
         .def("getPopulationsNames",

@@ -43,7 +43,7 @@ SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& no
                                                              double tstop) const {
     auto ret = spikes;
     tstart = tstart == -1 ? 0 : tstart;
-    tstop = tstop == -1 ? 99999 : tstop; //FIXME
+    tstop = tstop == -1 ? 99999 : tstop;  // FIXME
     filterTimestamp(ret, tstart, tstop);
     if (!node_ids.empty()) {
         filterNode(ret, node_ids);
@@ -187,10 +187,13 @@ ReportReader::Population::Population(const H5::File& file, const std::string& po
         std::vector<uint64_t> index_pointers;
         mapping_group.getDataSet("index_pointers").read(index_pointers);
 
-        for (size_t i = 0; i < node_ids.size(); ++i) {
+        for (size_t i = 0; i < node_ids.size() - 1; ++i) {
             nodes_pointers.emplace_back(node_ids[i],
                                         std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
+        auto size = pop_group.getDataSet("data").getDimensions();
+        nodes_pointers.emplace_back(node_ids.back(),
+                                    std::make_pair(index_pointers.back(), size[1]));
 
         std::vector<double> times;
         mapping_group.getDataSet("time").read(times);
@@ -236,7 +239,9 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
     _tstop = index_stop * tstep;
 
     DataFrame ret;
-    for (auto t = _tstart; t < _tstop && std::abs(t - _tstop) > std::numeric_limits<double>::epsilon(); t += tstep) {
+    for (auto t = _tstart;
+         t < _tstop && std::abs(t - _tstop) > std::numeric_limits<double>::epsilon();
+         t += tstep) {
         ret.index.push_back(t);
     }
 
@@ -246,7 +251,7 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
     // auto nodes_ids_ = Selection::fromValues(nodes_ids.flatten().sort());
     auto nodes_ids_ = nodes_ids;
 
-    if (nodes_ids.empty()) { // Take all nodes in this case
+    if (nodes_ids.empty()) {  // Take all nodes in this case
         Selection::Values values;
         std::transform(nodes_pointers.begin(),
                        nodes_pointers.end(),
@@ -259,7 +264,7 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
 
     // It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
     // TODO: specialized this function for sorted nodes_ids
-    for (const auto& value: nodes_ids_.flatten()) {
+    for (const auto& value : nodes_ids_.flatten()) {
         auto it = std::find_if(
             nodes_pointers.begin(),
             nodes_pointers.end(),
@@ -274,9 +279,9 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
         std::vector<float> elems_by_node;
         pop_group.getDataSet("data")
             .select({index_start, it->second.first},
-                    {index_stop - index_start, 1})
+                    {index_stop - index_start, it->second.second - it->second.first})
             .read(elems);
-        for (auto& elem: elems) {
+        for (auto& elem : elems) {
             elems_by_node.push_back(elem[0]);
         }
         ret.data.insert({value, std::move(elems_by_node)});
