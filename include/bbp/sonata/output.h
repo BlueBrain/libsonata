@@ -16,7 +16,8 @@ namespace bbp {
 namespace sonata {
 
 struct SONATA_API DataFrame {
-    std::map<NodeID, std::vector<float>> data;
+    using DataType = std::map<NodeID, std::vector<float>>;
+    DataType data;
     std::vector<float> index;
 };
 

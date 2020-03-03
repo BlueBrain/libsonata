@@ -27,6 +27,6 @@ TEST_CASE("ReportReader", "[base]") {
 
     REQUIRE(reader["All"].getSorted());
 
-    REQUIRE(reader["All"].get(Selection({{3, 5}}), 0.2, 0.5) ==
-            std::vector<std::vector<float>>{{4.2f, 6.2f, 8.2f}, {4.3f, 6.3f, 8.3f}});
+    REQUIRE(reader["All"].get(Selection({{3, 5}}), 0.2, 0.5).data ==
+            DataFrame::DataType{{3, {3.2, 3.3, 3.4}}, {4, {4.2f, 4.3f, 4.4f}}});
 }
