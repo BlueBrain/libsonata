@@ -141,3 +141,7 @@ Population handling for `EdgeStorage` is analogous to `NodeStorage`:
 >>> selection = population.efferent_edges([1, 2, 3])
 >>> selection = population.connecting_edges([1, 2, 3], [4, 5, 6])
 ```
+
+# Acknowledgements
+
+This project/research has received funding from the European Union’s Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreement No. 785907 (Human Brain Project SGA2).
