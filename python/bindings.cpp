@@ -456,12 +456,12 @@ PYBIND11_MODULE(libsonata, m) {
             "Return all spikes")
         .def(
             "get",
-            [](const SpikeReader::Population& self, double tstart, double tend) {
-                return self.get(Selection({}), tstart, tend);
+            [](const SpikeReader::Population& self, double tstart, double tstop) {
+                return self.get(Selection({}), tstart, tstop);
             },
-            "Return spikes between 'tstart' and 'tend'",
+            "Return spikes between 'tstart' and 'tstop'",
             "tstart"_a,
-            "tend"_a)
+            "tstop"_a)
         .def(
             "get",
             [](const SpikeReader::Population& self, Selection sel) { return self.get(sel); },
@@ -469,11 +469,11 @@ PYBIND11_MODULE(libsonata, m) {
             "node_ids"_a)
         .def("get",
              &SpikeReader::Population::get,
-             "Return spikes with all those node_ids between 'tstart' and 'tend'",
+             "Return spikes with all those node_ids between 'tstart' and 'tstop'",
              "node_ids"_a,
              "tstart"_a,
-             "tend"_a)
-        .def(
+             "tstop"_a)
+        .def_property_readonly(
             "sorting",
             [](const SpikeReader::Population& self) {
                 auto s = self.getSorting();
@@ -487,7 +487,7 @@ PYBIND11_MODULE(libsonata, m) {
             "Return the way data are sorted ('none', 'by_id', 'by_time')");
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init<const std::string&>())
-        .def("getPopulationsNames",
+        .def("get_populations_names",
              &SpikeReader::getPopulationsNames,
              "Get list of all populations")
         .def("__getitem__", &SpikeReader::operator[]);
@@ -501,12 +501,12 @@ PYBIND11_MODULE(libsonata, m) {
             "Return all reports")
         .def(
             "get",
-            [](const ReportReader::Population& self, double tstart, double tend) {
-                return self.get(Selection({}), tstart, tend);
+            [](const ReportReader::Population& self, double tstart, double tstop) {
+                return self.get(Selection({}), tstart, tstop);
             },
-            "Return reports between 'tstart' and 'tend'",
+            "Return reports between 'tstart' and 'tstop'",
             "tstart"_a,
-            "tend"_a)
+            "tstop"_a)
         .def(
             "get",
             [](const ReportReader::Population& self, Selection sel) { return self.get(sel); },
@@ -514,19 +514,25 @@ PYBIND11_MODULE(libsonata, m) {
             "node_ids"_a)
         .def("get",
              &ReportReader::Population::get,
-             "Return reports with all those node_ids between 'tstart' and 'tend'",
+             "Return reports with all those node_ids between 'tstart' and 'tstop'",
              "node_ids"_a,
              "tstart"_a,
-             "tend"_a)
-        .def("sorted", &ReportReader::Population::getSorted, "Return if data are sorted")
+             "tstop"_a)
+        .def_property_readonly("sorted",
+                               &ReportReader::Population::getSorted,
+                               "Return if data are sorted")
         .def("times",
              &ReportReader::Population::getTimes,
-             "Return (tstart, tend, tstep) of the population")
-        .def("timeUnits", &ReportReader::Population::getTimeUnits, "Return the unit of the times")
-        .def("dataUnits", &ReportReader::Population::getDataUnits, "Return the unit of data");
+             "Return (tstart, tstop, tstep) of the population")
+        .def_property_readonly("time_units",
+                               &ReportReader::Population::getTimeUnits,
+                               "Return the unit of the times")
+        .def_property_readonly("data_units",
+                               &ReportReader::Population::getDataUnits,
+                               "Return the unit of data");
     py::class_<ReportReader>(m, "ReportReader", "Used to read spike files")
         .def(py::init<const std::string&>())
-        .def("getPopulationsNames",
+        .def("get_populations_names",
              &ReportReader::getPopulationsNames,
              "Get list of all populations")
         .def("__getitem__", &ReportReader::operator[]);

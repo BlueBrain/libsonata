@@ -231,7 +231,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.test_obj = SpikeReader(path)
 
     def test_get_all_populations(self):
-        self.assertEqual(self.test_obj.getPopulationsNames(), ['All', 'spikes1', 'spikes2'])
+        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'spikes1', 'spikes2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['spikes1'], SpikePopulation))
@@ -247,11 +247,9 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['spikes2'].get((3,)), [(3, 0.3), (3, 1.3)])
         self.assertEqual(self.test_obj['spikes2'].get((10,)), [])
         self.assertEqual(self.test_obj['spikes2'].get((2,), 0., 0.5), [(2, 0.2)])
-        self.assertEqual(self.test_obj['All'].sorting(), "by_time")
-        self.assertEqual(self.test_obj['spikes1'].sorting(), "by_id")
-        self.assertEqual(self.test_obj['spikes2'].sorting(), "none")
-
-import pandas
+        self.assertEqual(self.test_obj['All'].sorting, "by_time")
+        self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
+        self.assertEqual(self.test_obj['spikes2'].sorting, "none")
 
 class TestReportPopulation(unittest.TestCase):
     def setUp(self):
@@ -259,7 +257,7 @@ class TestReportPopulation(unittest.TestCase):
         self.test_obj = ReportReader(path)
 
     def test_get_all_population(self):
-        self.assertEqual(self.test_obj.getPopulationsNames(), ['All', 'soma1', 'soma2'])
+        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'soma1', 'soma2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['All'], ReportPopulation))
@@ -269,14 +267,12 @@ class TestReportPopulation(unittest.TestCase):
 
     def test_get_reports_from_population(self):
         self.assertEqual(self.test_obj['All'].times(), (0., 1., 0.1))
-        self.assertEqual(self.test_obj['All'].timeUnits(), 'ms')
-        self.assertEqual(self.test_obj['All'].dataUnits(), 'mV')
-        self.assertTrue(self.test_obj['All'].sorted())
-        #self.assertEqual(len(self.test_obj['All'].get()), 200)
-        #self.assertEqual(self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tend=1.0).data, [0.8, 0.9])
-        sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tend=1.0)
-        d = pandas.DataFrame(data=sel.data, index=sel.index)
-        print(d)
+        self.assertEqual(self.test_obj['All'].time_units, 'ms')
+        self.assertEqual(self.test_obj['All'].data_units, 'mV')
+        self.assertTrue(self.test_obj['All'].sorted)
+        self.assertEqual(len(self.test_obj['All'].get()), 200)
+        sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
+        len(sel.index)
 
 
 if __name__ == '__main__':

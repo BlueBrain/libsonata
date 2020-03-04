@@ -1,20 +1,14 @@
 #include <bbp/sonata/output.h>
 
-namespace HighFive {
-using namespace bbp::sonata;
-
-H5::EnumType<SpikeReader::Population::Sorting> create_enum_sorting() {
+H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
+    using namespace bbp::sonata;
     return H5::EnumType<SpikeReader::Population::Sorting>(
         {{"none", SpikeReader::Population::Sorting::none},
          {"by_id", SpikeReader::Population::Sorting::by_id},
          {"by_time", SpikeReader::Population::Sorting::by_time}});
 }
 
-template <>
-DataType create_datatype<SpikeReader::Population::Sorting>() {
-    return create_enum_sorting();
-}
-}  // namespace HighFive
+HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enum_sorting)
 
 namespace bbp {
 namespace sonata {
@@ -27,11 +21,11 @@ std::vector<std::string> SpikeReader::getPopulationsNames() const {
 }
 
 auto SpikeReader::getPopulation(const std::string& populationName) const -> const Population& {
-    if (populations.find(populationName) == populations.end()) {
-        populations.emplace(populationName, Population{filename_, populationName});
+    if (populations_.find(populationName) == populations_.end()) {
+        populations_.emplace(populationName, Population{filename_, populationName});
     }
 
-    return populations.at(populationName);
+    return populations_.at(populationName);
 }
 
 auto SpikeReader::operator[](const std::string& populationName) const -> const Population& {
@@ -41,7 +35,7 @@ auto SpikeReader::operator[](const std::string& populationName) const -> const P
 SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& node_ids,
                                                              double tstart,
                                                              double tstop) const {
-    auto ret = spikes;
+    auto ret = spikes_;
     tstart = tstart == -1 ? 0 : tstart;
     tstop = tstop == -1 ? 99999 : tstop;  // FIXME
     filterTimestamp(ret, tstart, tstop);
@@ -52,7 +46,7 @@ SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& no
 }
 
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
-    return sorting;
+    return sorting_;
 }
 
 SpikeReader::Population::Population(const std::string& filename,
@@ -75,17 +69,17 @@ SpikeReader::Population::Population(const std::string& filename,
     std::transform(std::make_move_iterator(node_ids.begin()),
                    std::make_move_iterator(node_ids.end()),
                    std::make_move_iterator(timestamps.begin()),
-                   std::back_inserter(spikes),
+                   std::back_inserter(spikes_),
                    [](Spike::first_type&& node_id, Spike::second_type&& timestamp) {
                        return std::make_pair(std::move(node_id), std::move(timestamp));
                    });
 
     if (pop.hasAttribute("sorting")) {
-        pop.getAttribute("sorting").read(sorting);
+        pop.getAttribute("sorting").read(sorting_);
     }
 }
 void SpikeReader::Population::filterNode(Spikes& spikes, const Selection& node_ids) const {
-    if (sorting == Sorting::by_id) {
+    if (sorting_ == Sorting::by_id) {
         filterNodeIDSorted(spikes, node_ids);
     }
     filterNodeIDUnsorted(spikes, node_ids);
@@ -123,7 +117,7 @@ void SpikeReader::Population::filterNodeIDSorted(Spikes& spikes, const Selection
 }
 
 void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, double tstop) const {
-    if (sorting == Sorting::by_time) {
+    if (sorting_ == Sorting::by_time) {
         filterTimestampSorted(spikes, tstart, tstop);
     }
     filterTimestampUnsorted(spikes, tstart, tstop);
@@ -159,18 +153,18 @@ void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
 }
 
 ReportReader::ReportReader(const std::string& filename)
-    : file(filename, H5::File::ReadOnly) {}
+    : file_(filename, H5::File::ReadOnly) {}
 
 std::vector<std::string> ReportReader::getPopulationsNames() const {
-    return file.getGroup("/report").listObjectNames();
+    return file_.getGroup("/report").listObjectNames();
 }
 
 auto ReportReader::getPopulation(const std::string& populationName) const -> const Population& {
-    if (populations.find(populationName) == populations.end()) {
-        populations.emplace(populationName, Population{file, populationName});
+    if (populations_.find(populationName) == populations_.end()) {
+        populations_.emplace(populationName, Population{file_, populationName});
     }
 
-    return populations.at(populationName);
+    return populations_.at(populationName);
 }
 
 auto ReportReader::operator[](const std::string& populationName) const -> const Population& {
@@ -178,9 +172,9 @@ auto ReportReader::operator[](const std::string& populationName) const -> const 
 }
 
 ReportReader::Population::Population(const H5::File& file, const std::string& populationName)
-    : pop_group(file.getGroup(std::string("/report/") + populationName)) {
+    : pop_group_(file.getGroup(std::string("/report/") + populationName)) {
     {
-        auto mapping_group = pop_group.getGroup("mapping");
+        auto mapping_group = pop_group_.getGroup("mapping");
         std::vector<NodeID> node_ids;
         mapping_group.getDataSet("node_ids").read(node_ids);
 
@@ -188,60 +182,61 @@ ReportReader::Population::Population(const H5::File& file, const std::string& po
         mapping_group.getDataSet("index_pointers").read(index_pointers);
 
         for (size_t i = 0; i < node_ids.size() - 1; ++i) {
-            nodes_pointers.emplace_back(node_ids[i],
-                                        std::make_pair(index_pointers[i], index_pointers[i + 1]));
+            nodes_pointers_.emplace_back(node_ids[i],
+                                         std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
-        auto size = pop_group.getDataSet("data").getDimensions();
-        nodes_pointers.emplace_back(node_ids.back(),
-                                    std::make_pair(index_pointers.back(), size[1]));
+        auto size = pop_group_.getDataSet("data").getDimensions();
+        nodes_pointers_.emplace_back(node_ids.back(),
+                                     std::make_pair(index_pointers.back(), size[1]));
 
-        std::vector<double> times;
-        mapping_group.getDataSet("time").read(times);
-        tstart = times[0];
-        tstop = times[1];
-        tstep = times[2];
-        mapping_group.getDataSet("time").getAttribute("units").read(time_units);
+        {  // Get times
+            std::vector<double> times;
+            mapping_group.getDataSet("time").read(times);
+            tstart_ = times[0];
+            tstop_ = times[1];
+            tstep_ = times[2];
+            mapping_group.getDataSet("time").getAttribute("units").read(time_units_);
+        }
 
         if (mapping_group.getDataSet("node_ids").hasAttribute("sorted")) {
-            mapping_group.getDataSet("node_ids").getAttribute("sorted").read(nodes_ids_sorted);
+            mapping_group.getDataSet("node_ids").getAttribute("sorted").read(nodes_ids_sorted_);
         }
     }
 
-    pop_group.getDataSet("data").getAttribute("units").read(data_units);
+    pop_group_.getDataSet("data").getAttribute("units").read(data_units_);
 }
 
 std::tuple<double, double, double> ReportReader::Population::getTimes() const {
-    return std::tie(tstart, tstop, tstep);
+    return std::tie(tstart_, tstop_, tstep_);
 }
 
 std::string ReportReader::Population::getTimeUnits() const {
-    return time_units;
+    return time_units_;
 }
 
 std::string ReportReader::Population::getDataUnits() const {
-    return data_units;
+    return data_units_;
 }
 
 bool ReportReader::Population::getSorted() const {
-    return nodes_ids_sorted;
+    return nodes_ids_sorted_;
 }
 
 DataFrame ReportReader::Population::get(const Selection& nodes_ids,
-                                        double _tstart,
-                                        double _tstop) const {
-    _tstart = _tstart == -1 ? tstart : _tstart;
-    _tstart = _tstart < tstart ? tstart : _tstart;
-    _tstop = _tstop == -1 ? tstop : _tstop;
-    _tstop = _tstop > tstop ? tstop : _tstop;
-    size_t index_start = (_tstart - tstart) / tstep;
-    _tstart = index_start * tstep;
-    size_t index_stop = (_tstop - tstart) / tstep;
-    _tstop = index_stop * tstep;
+                                        double tstart,
+                                        double tstop) const {
+    tstart = tstart < tstart_ ? tstart_ : tstart;
+    tstart = tstart > tstop_ ? tstart_ : tstart;
+    tstop = tstop < tstart_ ? tstop_ : tstop;
+    tstop = tstop > tstop_ ? tstop_ : tstop;
+    size_t index_start = (tstart - tstart_) / tstep_;
+    tstart = index_start * tstep_;
+    size_t index_stop = (tstop - tstart_) / tstep_;
+    tstop = index_stop * tstep_;
 
     DataFrame ret;
-    for (auto t = _tstart;
-         t < _tstop && std::abs(t - _tstop) > std::numeric_limits<double>::epsilon();
-         t += tstep) {
+    for (auto t = tstart; t < tstop && std::abs(t - tstop) > std::numeric_limits<double>::epsilon();
+         t += tstep_) {
         ret.index.push_back(t);
     }
 
@@ -253,8 +248,8 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
 
     if (nodes_ids.empty()) {  // Take all nodes in this case
         Selection::Values values;
-        std::transform(nodes_pointers.begin(),
-                       nodes_pointers.end(),
+        std::transform(nodes_pointers_.begin(),
+                       nodes_pointers_.end(),
                        std::back_inserter(values),
                        [](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
                            return node_pointer.first;
@@ -266,25 +261,33 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
     // TODO: specialized this function for sorted nodes_ids
     for (const auto& value : nodes_ids_.flatten()) {
         auto it = std::find_if(
-            nodes_pointers.begin(),
-            nodes_pointers.end(),
+            nodes_pointers_.begin(),
+            nodes_pointers_.end(),
             [&value](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
                 return node_pointer.first == value;
             });
-        if (it == nodes_pointers.end())
+        if (it == nodes_pointers_.end())
             continue;
 
         // elems are by timestamp and by Nodes_id
         std::vector<std::vector<float>> elems;
-        std::vector<float> elems_by_node;
-        pop_group.getDataSet("data")
+        pop_group_.getDataSet("data")
             .select({index_start, it->second.first},
                     {index_stop - index_start, it->second.second - it->second.first})
             .read(elems);
-        for (auto& elem : elems) {
-            elems_by_node.push_back(elem[0]);
+
+        std::vector<uint32_t> element_ids;
+        pop_group_.getGroup("mapping")
+            .getDataSet("element_ids")
+            .select({it->second.first}, {it->second.second - it->second.first})
+            .read(element_ids);
+        for (size_t i = 0; i < element_ids.size(); ++i) {
+            std::vector<float> elems_by_node;
+            for (auto& elem : elems) {
+                elems_by_node.push_back(elem[i]);
+            }
+            ret.data.insert({{value, element_ids[i]}, std::move(elems_by_node)});
         }
-        ret.data.insert({value, std::move(elems_by_node)});
     }
     return ret;
 }

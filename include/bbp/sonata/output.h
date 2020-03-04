@@ -16,9 +16,10 @@ namespace bbp {
 namespace sonata {
 
 struct SONATA_API DataFrame {
-    using DataType = std::map<NodeID, std::vector<float>>;
+    using KeyType = std::pair<NodeID, uint32_t>;
+    using DataType = std::map<KeyType, std::vector<float>>;
+    std::vector<double> index;
     DataType data;
-    std::vector<float> index;
 };
 
 /**
@@ -53,8 +54,8 @@ class SONATA_API SpikeReader
       private:
         Population(const std::string& filename, const std::string& populationName);
 
-        Spikes spikes;
-        Sorting sorting = Sorting::none;
+        Spikes spikes_;
+        Sorting sorting_ = Sorting::none;
 
         // Helpers to filter by node_ids
         // Filter in place
@@ -83,7 +84,7 @@ class SONATA_API SpikeReader
     std::string filename_;
 
     // Lazy loaded population
-    mutable std::map<std::string, Population> populations;
+    mutable std::map<std::string, Population> populations_;
 };
 
 class SONATA_API ReportReader
@@ -106,12 +107,12 @@ class SONATA_API ReportReader
       private:
         Population(const H5::File& file, const std::string& populationName);
 
-        std::vector<std::pair<NodeID, std::pair<uint64_t, uint64_t>>> nodes_pointers;
-        H5::Group pop_group;
-        double tstart, tstop, tstep;
-        std::string time_units;
-        std::string data_units;
-        bool nodes_ids_sorted = false;
+        std::vector<std::pair<NodeID, std::pair<uint64_t, uint64_t>>> nodes_pointers_;
+        H5::Group pop_group_;
+        double tstart_, tstop_, tstep_;
+        std::string time_units_;
+        std::string data_units_;
+        bool nodes_ids_sorted_ = false;
 
         friend ReportReader;
     };
@@ -125,10 +126,10 @@ class SONATA_API ReportReader
     const Population& operator[](const std::string& populationName) const;
 
   private:
-    H5::File file;
+    H5::File file_;
 
     // Lazy loaded population
-    mutable std::map<std::string, Population> populations;
+    mutable std::map<std::string, Population> populations_;
 };
 
 }  // namespace sonata
