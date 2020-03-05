@@ -135,7 +135,7 @@ def write_edges(filepath):
 def write_soma_report(filepath):
     population_names = ['All', 'soma1', 'soma2']
     node_ids = np.arange(1, 21)
-    index_pointers = np.arange(0, 20)
+    index_pointers = np.arange(0, 21)
     element_ids = np.zeros(20)
     times = (0.0, 1.0, 0.1)
     data = [node_ids + j*0.1 for j in range(10)]
@@ -161,7 +161,7 @@ def write_soma_report(filepath):
 def write_element_report(filepath):
     population_names = ['All', 'element1', 'element42']
     node_ids = np.arange(1, 21)
-    index_pointers = np.arange(0, 100, 5)
+    index_pointers = np.arange(0, 105, 5)
     element_ids = np.arange(100)
     times = (0.0, 4.0, 0.2)
     string_dtype = h5py.special_dtype(vlen=get_vlen_str_type())
