@@ -8,6 +8,12 @@ H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting(
          {"by_time", SpikeReader::Population::Sorting::by_time}});
 }
 
+// Put value inside range
+template <typename T>
+T clamp(std::pair<T, T> range, T value) {
+    return value >= range.first ? value <= range.second ? value : range.second : range.first;
+}
+
 HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enum_sorting)
 
 namespace bbp {
@@ -36,12 +42,18 @@ SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& no
                                                              double tstart,
                                                              double tstop) const {
     auto ret = spikes_;
-    tstart = tstart == -1 ? 0 : tstart;
-    tstop = tstop == -1 ? 99999 : tstop;  // FIXME
+
+    tstart = tstart < 0 ? tstart_ : tstart;
+    tstart = clamp({tstart_, tstop_}, tstart);
+    tstop = tstop < 0 ? tstop_ : tstop;
+    tstop = clamp({tstart_, tstop_}, tstop);
+
     filterTimestamp(ret, tstart, tstop);
+
     if (!node_ids.empty()) {
         filterNode(ret, node_ids);
     }
+
     return ret;
 }
 
@@ -77,12 +89,21 @@ SpikeReader::Population::Population(const std::string& filename,
     if (pop.hasAttribute("sorting")) {
         pop.getAttribute("sorting").read(sorting_);
     }
+
+    if (sorting_ == Sorting::by_time) {
+        tstart_ = timestamps.front();
+        tstop_ = timestamps.back();
+    } else {
+        tstart_ = *min_element(timestamps.cbegin(), timestamps.cend());
+        tstop_ = *max_element(timestamps.cbegin(), timestamps.cend());
+    }
 }
 void SpikeReader::Population::filterNode(Spikes& spikes, const Selection& node_ids) const {
     if (sorting_ == Sorting::by_id) {
         filterNodeIDSorted(spikes, node_ids);
+    } else {
+        filterNodeIDUnsorted(spikes, node_ids);
     }
-    filterNodeIDUnsorted(spikes, node_ids);
 }
 
 void SpikeReader::Population::filterNodeIDUnsorted(Spikes& spikes,
@@ -119,8 +140,9 @@ void SpikeReader::Population::filterNodeIDSorted(Spikes& spikes, const Selection
 void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, double tstop) const {
     if (sorting_ == Sorting::by_time) {
         filterTimestampSorted(spikes, tstart, tstop);
+    } else {
+        filterTimestampUnsorted(spikes, tstart, tstop);
     }
-    filterTimestampUnsorted(spikes, tstart, tstop);
 }
 
 void SpikeReader::Population::filterTimestampUnsorted(Spikes& spikes,
@@ -128,7 +150,7 @@ void SpikeReader::Population::filterTimestampUnsorted(Spikes& spikes,
                                                       double tstop) const {
     auto new_end =
         std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tstop](const Spike& spike) {
-            return spike.second < tstart || spike.second >= tstop;
+            return spike.second < tstart || spike.second > tstop;
         });
     spikes.erase(new_end, spikes.end());
 }
@@ -136,12 +158,6 @@ void SpikeReader::Population::filterTimestampUnsorted(Spikes& spikes,
 void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
                                                     double tstart,
                                                     double tstop) const {
-    auto begin = std::lower_bound(spikes.begin(),
-                                  spikes.end(),
-                                  std::make_pair(0UL, tstart),
-                                  [](const Spike& spike1, const Spike& spike2) {
-                                      return spike1.second < spike2.second;
-                                  });
     auto end = std::upper_bound(spikes.begin(),
                                 spikes.end(),
                                 std::make_pair(0UL, tstop),
@@ -149,6 +165,12 @@ void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
                                     return spike1.second < spike2.second;
                                 });
     spikes.erase(end, spikes.end());
+    auto begin = std::lower_bound(spikes.begin(),
+                                  spikes.end(),
+                                  std::make_pair(0UL, tstart),
+                                  [](const Spike& spike1, const Spike& spike2) {
+                                      return spike1.second < spike2.second;
+                                  });
     spikes.erase(spikes.begin(), begin);
 }
 
@@ -186,13 +208,10 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
         std::vector<uint64_t> index_pointers;
         mapping_group.getDataSet("index_pointers").read(index_pointers);
 
-        for (size_t i = 0; i < node_ids.size() - 1; ++i) {
+        for (size_t i = 0; i < node_ids.size(); ++i) {
             nodes_pointers_.emplace_back(node_ids[i],
                                          std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
-        auto size = pop_group_.getDataSet("data").getDimensions();
-        nodes_pointers_.emplace_back(node_ids.back(),
-                                     std::make_pair(index_pointers.back(), size[1]));
 
         {  // Get times
             std::vector<double> times;
@@ -254,10 +273,10 @@ template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
                                               double tstart,
                                               double tstop) const {
-    tstart = tstart < tstart_ ? tstart_ : tstart;
-    tstart = tstart > tstop_ ? tstart_ : tstart;
-    tstop = tstop < tstart_ ? tstop_ : tstop;
-    tstop = tstop > tstop_ ? tstop_ : tstop;
+    tstart = tstart < 0 ? tstart_ : tstart;
+    tstart = clamp({tstart_, tstop_}, tstart);
+    tstop = tstop < 0 ? tstop_ : tstop;
+    tstop = clamp({tstart_, tstop_}, tstop);
     size_t index_start = (tstart - tstart_) / tstep_;
     tstart = index_start * tstep_;
     size_t index_stop = (tstop - tstart_) / tstep_;
@@ -295,8 +314,9 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
             [&value](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
                 return node_pointer.first == value;
             });
-        if (it == nodes_pointers_.end())
+        if (it == nodes_pointers_.end()) {
             continue;
+        }
 
         // elems are by timestamp and by Nodes_id
         std::vector<std::vector<float>> elems;

@@ -57,6 +57,8 @@ class SONATA_API SpikeReader
 
         Spikes spikes_;
         Sorting sorting_ = Sorting::none;
+        // Use for clamping of user values
+        double tstart_, tstop_;
 
         // Helpers to filter by node_ids
         // Filter in place

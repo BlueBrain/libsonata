@@ -10,8 +10,14 @@ TEST_CASE("SpikeReader", "[base]") {
     REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "spikes1", "spikes2"});
 
     REQUIRE(reader["All"].get(Selection({{3,4}})) == std::vector<std::pair<uint64_t, double>>{{3UL, 0.3}, {3UL, 1.3}});
+    REQUIRE(reader["spikes1"].get(Selection({{3, 4}})) ==
+            std::vector<std::pair<uint64_t, double>>{{3UL, 0.3}, {3UL, 1.3}});
+    REQUIRE(reader["spikes2"].get(Selection({{3, 4}})) ==
+            std::vector<std::pair<uint64_t, double>>{{3UL, 0.3}, {3UL, 1.3}});
 
+    REQUIRE(reader["All"].getSorting() == SpikeReader::Population::Sorting::by_time);
     REQUIRE(reader["spikes1"].getSorting() == SpikeReader::Population::Sorting::by_id);
+    REQUIRE(reader["spikes2"].getSorting() == SpikeReader::Population::Sorting::none);
 }
 
 TEST_CASE("ReportReader", "[base]") {

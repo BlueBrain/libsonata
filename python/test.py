@@ -271,9 +271,9 @@ class TestReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get().data), 20) # Number of nodes
+        self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of nodes
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
-        self.assertEqual(len(sel.index), 2) # Number of timestamp (0.8 and 0.9)
+        self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
 
 
 if __name__ == '__main__':
