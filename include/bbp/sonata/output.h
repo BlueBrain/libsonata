@@ -15,8 +15,9 @@ namespace H5 = HighFive;
 namespace bbp {
 namespace sonata {
 
+// KeyType will be NodeID for somas report and pair<NodeID, uint32_t> for compartments report
+template <typename KeyType>
 struct SONATA_API DataFrame {
-    using KeyType = std::pair<NodeID, uint32_t>;
     using DataType = std::map<KeyType, std::vector<float>>;
     std::vector<double> index;
     DataType data;
@@ -87,6 +88,7 @@ class SONATA_API SpikeReader
     mutable std::map<std::string, Population> populations_;
 };
 
+template <typename KeyType>
 class SONATA_API ReportReader
 {
   public:
@@ -98,11 +100,9 @@ class SONATA_API ReportReader
         std::string getDataUnits() const;
         bool getSorted() const;
 
-        // Return a vector of datas
-        // Each index is a corresponding node_id from Selection given as argument
-        DataFrame get(const Selection& nodes_ids = Selection({}),
-                      double _tstart = -1,
-                      double _tstop = -1) const;
+        DataFrame<KeyType> get(const Selection& nodes_ids = Selection({}),
+                               double _tstart = -1,
+                               double _tstop = -1) const;
 
       private:
         Population(const H5::File& file, const std::string& populationName);
@@ -131,6 +131,9 @@ class SONATA_API ReportReader
     // Lazy loaded population
     mutable std::map<std::string, Population> populations_;
 };
+
+using SomasReportReader = ReportReader<NodeID>;
+using CompartmentsReportReader = ReportReader<std::pair<NodeID, uint32_t>>;
 
 }  // namespace sonata
 }  // namespace bbp

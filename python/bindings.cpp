@@ -304,6 +304,61 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
 }
 }  // unnamed namespace
 
+template <typename ReportType, typename KeyType>
+void bindReportReader(py::module& m, const std::string& prefix) {
+    py::class_<DataFrame<KeyType>>(m,
+                                   (prefix + "DataFrame").c_str(),
+                                   "Something easily convertible to pandas dataframe")
+        .def_readonly("data", &DataFrame<KeyType>::data)
+        .def_readonly("index", &DataFrame<KeyType>::index);
+    py::class_<typename ReportType::Population>(m,
+                                                (prefix + "ReportPopulation").c_str(),
+                                                "A population inside a ReportReader")
+        .def(
+            "get",
+            [](const typename ReportType::Population& self) { return self.get(); },
+            "Return all reports")
+        .def(
+            "get",
+            [](const typename ReportType::Population& self, double tstart, double tstop) {
+                return self.get(Selection({}), tstart, tstop);
+            },
+            "Return reports between 'tstart' and 'tstop'",
+            "tstart"_a,
+            "tstop"_a)
+        .def(
+            "get",
+            [](const typename ReportType::Population& self, Selection sel) {
+                return self.get(sel);
+            },
+            "Return reports with all those node_ids",
+            "node_ids"_a)
+        .def("get",
+             &ReportType::Population::get,
+             "Return reports with all those node_ids between 'tstart' and 'tstop'",
+             "node_ids"_a,
+             "tstart"_a,
+             "tstop"_a)
+        .def_property_readonly("sorted",
+                               &ReportType::Population::getSorted,
+                               "Return if data are sorted")
+        .def_property_readonly("times",
+                               &ReportType::Population::getTimes,
+                               "Return (tstart, tstop, tstep) of the population")
+        .def_property_readonly("time_units",
+                               &ReportType::Population::getTimeUnits,
+                               "Return the unit of the times")
+        .def_property_readonly("data_units",
+                               &ReportType::Population::getDataUnits,
+                               "Return the unit of data");
+    py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
+        .def(py::init<const std::string&>())
+        .def("get_populations_names",
+             &ReportType::getPopulationsNames,
+             "Get list of all populations")
+        .def("__getitem__", &ReportType::operator[]);
+}
+
 
 PYBIND11_MODULE(libsonata, m) {
     py::class_<Selection>(m,
@@ -446,9 +501,6 @@ PYBIND11_MODULE(libsonata, m) {
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
-    py::class_<DataFrame>(m, "DataFrame", "Something easily convertible to pandas dataframe")
-        .def_readonly("data", &DataFrame::data)
-        .def_readonly("index", &DataFrame::index);
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
         .def(
             "get",
@@ -492,51 +544,8 @@ PYBIND11_MODULE(libsonata, m) {
              "Get list of all populations")
         .def("__getitem__", &SpikeReader::operator[]);
 
-    py::class_<ReportReader::Population>(m,
-                                         "ReportPopulation",
-                                         "A population inside a ReportReader")
-        .def(
-            "get",
-            [](const ReportReader::Population& self) { return self.get(); },
-            "Return all reports")
-        .def(
-            "get",
-            [](const ReportReader::Population& self, double tstart, double tstop) {
-                return self.get(Selection({}), tstart, tstop);
-            },
-            "Return reports between 'tstart' and 'tstop'",
-            "tstart"_a,
-            "tstop"_a)
-        .def(
-            "get",
-            [](const ReportReader::Population& self, Selection sel) { return self.get(sel); },
-            "Return reports with all those node_ids",
-            "node_ids"_a)
-        .def("get",
-             &ReportReader::Population::get,
-             "Return reports with all those node_ids between 'tstart' and 'tstop'",
-             "node_ids"_a,
-             "tstart"_a,
-             "tstop"_a)
-        .def_property_readonly("sorted",
-                               &ReportReader::Population::getSorted,
-                               "Return if data are sorted")
-        .def("times",
-             &ReportReader::Population::getTimes,
-             "Return (tstart, tstop, tstep) of the population")
-        .def_property_readonly("time_units",
-                               &ReportReader::Population::getTimeUnits,
-                               "Return the unit of the times")
-        .def_property_readonly("data_units",
-                               &ReportReader::Population::getDataUnits,
-                               "Return the unit of data");
-    py::class_<ReportReader>(m, "ReportReader", "Used to read spike files")
-        .def(py::init<const std::string&>())
-        .def("get_populations_names",
-             &ReportReader::getPopulationsNames,
-             "Get list of all populations")
-        .def("__getitem__", &ReportReader::operator[]);
-
+    bindReportReader<SomasReportReader, NodeID>(m, "Somas");
+    bindReportReader<CompartmentsReportReader, std::pair<NodeID, uint32_t>>(m, "Compartments");
 
     py::register_exception<SonataError>(m, "SonataError");
 }

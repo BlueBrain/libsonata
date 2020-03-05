@@ -152,14 +152,17 @@ void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
     spikes.erase(spikes.begin(), begin);
 }
 
-ReportReader::ReportReader(const std::string& filename)
+template <typename T>
+ReportReader<T>::ReportReader(const std::string& filename)
     : file_(filename, H5::File::ReadOnly) {}
 
-std::vector<std::string> ReportReader::getPopulationsNames() const {
+template <typename T>
+std::vector<std::string> ReportReader<T>::getPopulationsNames() const {
     return file_.getGroup("/report").listObjectNames();
 }
 
-auto ReportReader::getPopulation(const std::string& populationName) const -> const Population& {
+template <typename T>
+auto ReportReader<T>::getPopulation(const std::string& populationName) const -> const Population& {
     if (populations_.find(populationName) == populations_.end()) {
         populations_.emplace(populationName, Population{file_, populationName});
     }
@@ -167,11 +170,13 @@ auto ReportReader::getPopulation(const std::string& populationName) const -> con
     return populations_.at(populationName);
 }
 
-auto ReportReader::operator[](const std::string& populationName) const -> const Population& {
+template <typename T>
+auto ReportReader<T>::operator[](const std::string& populationName) const -> const Population& {
     return getPopulation(populationName);
 }
 
-ReportReader::Population::Population(const H5::File& file, const std::string& populationName)
+template <typename T>
+ReportReader<T>::Population::Population(const H5::File& file, const std::string& populationName)
     : pop_group_(file.getGroup(std::string("/report/") + populationName)) {
     {
         auto mapping_group = pop_group_.getGroup("mapping");
@@ -206,25 +211,49 @@ ReportReader::Population::Population(const H5::File& file, const std::string& po
     pop_group_.getDataSet("data").getAttribute("units").read(data_units_);
 }
 
-std::tuple<double, double, double> ReportReader::Population::getTimes() const {
+template <typename T>
+std::tuple<double, double, double> ReportReader<T>::Population::getTimes() const {
     return std::tie(tstart_, tstop_, tstep_);
 }
 
-std::string ReportReader::Population::getTimeUnits() const {
+template <typename T>
+std::string ReportReader<T>::Population::getTimeUnits() const {
     return time_units_;
 }
 
-std::string ReportReader::Population::getDataUnits() const {
+template <typename T>
+std::string ReportReader<T>::Population::getDataUnits() const {
     return data_units_;
 }
 
-bool ReportReader::Population::getSorted() const {
+template <typename T>
+bool ReportReader<T>::Population::getSorted() const {
     return nodes_ids_sorted_;
 }
 
-DataFrame ReportReader::Population::get(const Selection& nodes_ids,
-                                        double tstart,
-                                        double tstop) const {
+template <typename T>
+std::pair<T, std::vector<float>> make_value(NodeID node_id,
+                                            uint32_t compartment_id,
+                                            std::vector<float> values);
+
+template <>
+std::pair<NodeID, std::vector<float>> make_value(NodeID node_id,
+                                                 uint32_t /* compartment_id */,
+                                                 std::vector<float> values) {
+    return {node_id, values};
+}
+
+template <>
+std::pair<std::pair<NodeID, uint32_t>, std::vector<float>> make_value(NodeID node_id,
+                                                                      uint32_t compartment_id,
+                                                                      std::vector<float> values) {
+    return {{node_id, compartment_id}, values};
+}
+
+template <typename T>
+DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
+                                              double tstart,
+                                              double tstop) const {
     tstart = tstart < tstart_ ? tstart_ : tstart;
     tstart = tstart > tstop_ ? tstart_ : tstart;
     tstop = tstop < tstart_ ? tstop_ : tstop;
@@ -234,7 +263,7 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
     size_t index_stop = (tstop - tstart_) / tstep_;
     tstop = index_stop * tstep_;
 
-    DataFrame ret;
+    DataFrame<T> ret;
     for (auto t = tstart; t < tstop && std::abs(t - tstop) > std::numeric_limits<double>::epsilon();
          t += tstep_) {
         ret.index.push_back(t);
@@ -286,11 +315,13 @@ DataFrame ReportReader::Population::get(const Selection& nodes_ids,
             for (auto& elem : elems) {
                 elems_by_node.push_back(elem[i]);
             }
-            ret.data.insert({{value, element_ids[i]}, std::move(elems_by_node)});
+            ret.data.insert(make_value<T>(value, element_ids[i], std::move(elems_by_node)));
         }
     }
     return ret;
 }
 
+template class ReportReader<NodeID>;
+template class ReportReader<std::pair<NodeID, uint32_t>>;
 }  // namespace sonata
 }  // namespace bbp

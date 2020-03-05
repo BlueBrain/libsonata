@@ -3,7 +3,8 @@ import unittest
 
 import numpy as np
 
-from libsonata import EdgeStorage, NodeStorage, Selection, SonataError, SpikeReader, SpikePopulation, ReportReader, ReportPopulation
+from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
+from libsonata import SpikeReader, SpikePopulation, SomasReportReader, SomasReportPopulation, CompartmentsReportReader, CompartmentsReportPopulation
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -254,25 +255,25 @@ class TestSpikePopulation(unittest.TestCase):
 class TestReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "somas.h5")
-        self.test_obj = ReportReader(path)
+        self.test_obj = SomasReportReader(path)
 
     def test_get_all_population(self):
         self.assertEqual(self.test_obj.get_populations_names(), ['All', 'soma1', 'soma2'])
 
     def test_get_population(self):
-        self.assertTrue(isinstance(self.test_obj['All'], ReportPopulation))
+        self.assertTrue(isinstance(self.test_obj['All'], SomasReportPopulation))
 
     def test_get_inexistant_population(self):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
 
     def test_get_reports_from_population(self):
-        self.assertEqual(self.test_obj['All'].times(), (0., 1., 0.1))
+        self.assertEqual(self.test_obj['All'].times, (0., 1., 0.1))
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get()), 200)
+        self.assertEqual(len(self.test_obj['All'].get().data), 20) # Number of nodes
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
-        len(sel.index)
+        self.assertEqual(len(sel.index), 2) # Number of timestamp (0.8 and 0.9)
 
 
 if __name__ == '__main__':

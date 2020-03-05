@@ -15,7 +15,7 @@ TEST_CASE("SpikeReader", "[base]") {
 }
 
 TEST_CASE("ReportReader", "[base]") {
-    const ReportReader reader("./data/somas.h5");
+    const SomasReportReader reader("./data/somas.h5");
 
     REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "soma1", "soma2"});
 
@@ -28,5 +28,5 @@ TEST_CASE("ReportReader", "[base]") {
     REQUIRE(reader["All"].getSorted());
 
     REQUIRE(reader["All"].get(Selection({{3, 5}}), 0.2, 0.5).data ==
-            DataFrame::DataType{{{3, 0}, {3.2, 3.3, 3.4}}, {{4, 0}, {4.2f, 4.3f, 4.4f}}});
+            DataFrame<NodeID>::DataType{{3, {3.2, 3.3, 3.4}}, {4, {4.2f, 4.3f, 4.4f}}});
 }
