@@ -80,7 +80,7 @@ SCENARIO("Test SonataData class", "[SonataData][IOWriter]") {
 
             THEN("We check the index pointers of the sonata report") {
                 const std::vector<uint64_t> index_pointers = sonata->get_index_pointers();
-                std::vector<uint64_t> compare = {0, 2, 5};
+                std::vector<uint64_t> compare = {0, 2, 5, 11};
                 REQUIRE(index_pointers == compare);
             }
         }

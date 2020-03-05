@@ -23,7 +23,7 @@ SonataData::SonataData(const std::string& report_name,
     , hdf5_writer_(std::make_unique<HDF5Writer>(report_name))
     , nodes_(nodes) {
     prepare_buffer(max_buffer_size);
-    index_pointers_.resize(nodes->size());
+    index_pointers_.resize(nodes->size() + 1);
     time_ = {tstart, tend, dt};
 
     reporting_period_ = static_cast<int>(dt / SonataReport::atomic_step_);

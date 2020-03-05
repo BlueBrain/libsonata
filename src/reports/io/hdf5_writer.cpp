@@ -173,7 +173,7 @@ void HDF5Writer::write_time(const std::string& dataset_name, const std::array<do
 }
 
 void HDF5Writer::close() {
-    // We close the dataset "/data", the spikes enum type and the hdf5 file
+    // We close the dataset "/data", the spike enum type and the hdf5 file
     if (dataset_) {
         H5Dclose(dataset_);
         dataset_ = 0;
