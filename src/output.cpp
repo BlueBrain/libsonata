@@ -334,7 +334,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
     auto nodes_ids_ = nodes_ids;
 
     if (nodes_ids.empty()) {  // Take all nodes in this case
-        Selection::Values values = nodes_pointers_;
+        Selection::Values values;
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
                        std::back_inserter(values),
