@@ -252,7 +252,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting, "none")
 
-class TestReportPopulation(unittest.TestCase):
+class TestSomasReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "somas.h5")
         self.test_obj = SomasReportReader(path)
@@ -274,6 +274,29 @@ class TestReportPopulation(unittest.TestCase):
         self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of nodes
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
         self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
+
+class TestCompartmentsReportPopulation(unittest.TestCase):
+    def setUp(self):
+        path = os.path.join(PATH, "elements.h5")
+        self.test_obj = CompartmentsReportReader(path)
+
+    def test_get_all_population(self):
+        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'element1', 'element42'])
+
+    def test_get_population(self):
+        self.assertTrue(isinstance(self.test_obj['All'], CompartmentsReportPopulation))
+
+    def test_get_inexistant_population(self):
+        self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
+
+    def test_get_reports_from_population(self):
+        self.assertEqual(self.test_obj['All'].times, (0., 4., 0.2))
+        self.assertEqual(self.test_obj['All'].time_units, 'ms')
+        self.assertEqual(self.test_obj['All'].data_units, 'mV')
+        self.assertTrue(self.test_obj['All'].sorted)
+        self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of compartments
+        sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
+        self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
 
 
 if __name__ == '__main__':

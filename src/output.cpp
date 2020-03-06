@@ -1,5 +1,7 @@
 #include <bbp/sonata/output.h>
 
+#define EPSILON 1e-6
+
 H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
     using namespace bbp::sonata;
     return H5::EnumType<SpikeReader::Population::Sorting>(
@@ -11,7 +13,7 @@ H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting(
 // Put value inside range
 template <typename T>
 T clamp(std::pair<T, T> range, T value) {
-    return value >= range.first ? value <= range.second ? value : range.second : range.first;
+    return value > range.first - EPSILON ? value < range.second + EPSILON ? value : range.second : range.first;
 }
 
 HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enum_sorting)
@@ -220,6 +222,10 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
             tstop_ = times[1];
             tstep_ = times[2];
             mapping_group.getDataSet("time").getAttribute("units").read(time_units_);
+            size_t i = 0;
+            for (double t = tstart_; t < tstop_ - EPSILON; t += tstep_) {
+                times_index_.push_back({i++, t});
+            }
         }
 
         if (mapping_group.getDataSet("node_ids").hasAttribute("sorted")) {
@@ -272,22 +278,51 @@ std::pair<std::pair<NodeID, uint32_t>, std::vector<float>> make_value(NodeID nod
 }
 
 template <typename T>
+std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, double tstop) const {
+    std::pair<size_t, size_t> indexes;
+    if (tstart < 0 - EPSILON) { // Default value
+        indexes.first = times_index_.front().first;
+    } else if (tstart > times_index_.back().second + EPSILON) {  // tstart is after the end of the range
+        indexes.first = times_index_.back().first;
+    } else {
+        for (const auto& time_index: times_index_) {
+            if (tstart < time_index.second + EPSILON) {
+                indexes.first = time_index.first;
+                break;
+            }
+        }
+    }
+    if (tstop < 0 - EPSILON) {  // Default value
+        indexes.second = times_index_.back().first;
+    } else if (tstop < times_index_.front().second - EPSILON) {  // tstop is before the beginning of the range
+        indexes.second = times_index_.front().first;
+    } else {
+        for (auto it = times_index_.crbegin(); it != times_index_.crend(); ++it) {
+            const auto& time_index = *it;
+            if (tstop > time_index.second - EPSILON) {
+                indexes.second = time_index.first;
+                break;
+            }
+        }
+    }
+
+    if (indexes.first > indexes.second) {
+        indexes.second = indexes.first;
+    }
+
+    return indexes;
+}
+
+template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
                                               double tstart,
                                               double tstop) const {
-    tstart = tstart < 0 ? tstart_ : tstart;
-    tstart = clamp({tstart_, tstop_}, tstart);
-    tstop = tstop < 0 ? tstop_ : tstop;
-    tstop = clamp({tstart_, tstop_}, tstop);
-    size_t index_start = (tstart - tstart_) / tstep_;
-    tstart = index_start * tstep_;
-    size_t index_stop = (tstop - tstart_) / tstep_;
-    tstop = index_stop * tstep_;
+    size_t index_start = 0, index_stop = 0;
+    std::tie(index_start, index_stop) = getIndex(tstart, tstop);
 
     DataFrame<T> ret;
-    for (auto t = tstart; t < tstop && std::abs(t - tstop) > std::numeric_limits<double>::epsilon();
-         t += tstep_) {
-        ret.index.push_back(t);
+    for (size_t i = index_start; i <= index_stop; ++i) {
+        ret.index.push_back(times_index_[i].second);
     }
 
     // Simplify selection
@@ -309,7 +344,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
 
     // It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
     // TODO: specialized this function for sorted nodes_ids
-    for (const auto& value : nodes_ids_.flatten()) {
+    for (const auto& value: nodes_ids_.flatten()) {
         auto it = std::find_if(
             nodes_pointers_.begin(),
             nodes_pointers_.end(),
@@ -324,7 +359,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
         std::vector<std::vector<float>> elems;
         pop_group_.getDataSet("data")
             .select({index_start, it->second.first},
-                    {index_stop - index_start, it->second.second - it->second.first})
+                    {index_stop - index_start + 1, it->second.second - it->second.first})
             .read(elems);
 
         std::vector<uint32_t> element_ids;
