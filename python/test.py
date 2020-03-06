@@ -297,6 +297,10 @@ class TestElementsReportPopulation(unittest.TestCase):
         self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of elements
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
         self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
+        sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
+        self.assertEqual(len(sel.data), 0)
+        sel = self.test_obj['All'].get(tstart=3., tstop=3.)
+        self.assertEqual(len(sel.data), 100)
 
 
 if __name__ == '__main__':

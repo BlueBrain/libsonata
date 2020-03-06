@@ -10,12 +10,6 @@ H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting(
          {"by_time", SpikeReader::Population::Sorting::by_time}});
 }
 
-// Put value inside range
-template <typename T>
-T clamp(std::pair<T, T> range, T value) {
-    return value > range.first - EPSILON ? value < range.second + EPSILON ? value : range.second : range.first;
-}
-
 HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enum_sorting)
 
 namespace bbp {
@@ -43,13 +37,13 @@ auto SpikeReader::operator[](const std::string& populationName) const -> const P
 SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& node_ids,
                                                              double tstart,
                                                              double tstop) const {
-    auto ret = spikes_;
-
     tstart = tstart < 0 ? tstart_ : tstart;
-    tstart = clamp({tstart_, tstop_}, tstart);
     tstop = tstop < 0 ? tstop_ : tstop;
-    tstop = clamp({tstart_, tstop_}, tstop);
+    if (tstart > tstop_ + EPSILON || tstop < tstart_ - EPSILON || tstop < tstart) {
+        return SpikeReader::Population::Spikes{};
+    }
 
+    auto ret = spikes_;
     filterTimestamp(ret, tstart, tstop);
 
     if (!node_ids.empty()) {
@@ -152,7 +146,7 @@ void SpikeReader::Population::filterTimestampUnsorted(Spikes& spikes,
                                                       double tstop) const {
     auto new_end =
         std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tstop](const Spike& spike) {
-            return spike.second < tstart || spike.second > tstop;
+            return (spike.second < tstart - EPSILON) || (spike.second > tstop + EPSILON);
         });
     spikes.erase(new_end, spikes.end());
 }
@@ -162,14 +156,14 @@ void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
                                                     double tstop) const {
     auto end = std::upper_bound(spikes.begin(),
                                 spikes.end(),
-                                std::make_pair(0UL, tstop),
+                                std::make_pair(0UL, tstop + EPSILON),
                                 [](const Spike& spike1, const Spike& spike2) {
                                     return spike1.second < spike2.second;
                                 });
     spikes.erase(end, spikes.end());
     auto begin = std::lower_bound(spikes.begin(),
                                   spikes.end(),
-                                  std::make_pair(0UL, tstart),
+                                  std::make_pair(0UL, tstart - EPSILON),
                                   [](const Spike& spike1, const Spike& spike2) {
                                       return spike1.second < spike2.second;
                                   });
@@ -283,7 +277,9 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, d
     if (tstart < 0 - EPSILON) { // Default value
         indexes.first = times_index_.front().first;
     } else if (tstart > times_index_.back().second + EPSILON) {  // tstart is after the end of the range
-        indexes.first = times_index_.back().first;
+        indexes.first = 1;
+        indexes.second = 0;
+        return indexes;
     } else {
         for (const auto& time_index: times_index_) {
             if (tstart < time_index.second + EPSILON) {
@@ -295,7 +291,9 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, d
     if (tstop < 0 - EPSILON) {  // Default value
         indexes.second = times_index_.back().first;
     } else if (tstop < times_index_.front().second - EPSILON) {  // tstop is before the beginning of the range
-        indexes.second = times_index_.front().first;
+        indexes.first = 1;
+        indexes.second = 0;
+        return indexes;
     } else {
         for (auto it = times_index_.crbegin(); it != times_index_.crend(); ++it) {
             const auto& time_index = *it;
@@ -317,10 +315,14 @@ template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
                                               double tstart,
                                               double tstop) const {
+    DataFrame<T> ret;
+
     size_t index_start = 0, index_stop = 0;
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
+    if (index_start > index_stop) {
+        return ret;
+    }
 
-    DataFrame<T> ret;
     for (size_t i = index_start; i <= index_stop; ++i) {
         ret.index.push_back(times_index_[i].second);
     }
