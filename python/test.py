@@ -276,7 +276,7 @@ class TestSomasReportPopulation(unittest.TestCase):
         self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of nodes
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
         self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
-        self.assertEqual(sel.data.keys(), [13, 14])
+        self.assertEqual(list(sel.data.keys()), [13, 14])
 
 class TestElementsReportPopulation(unittest.TestCase):
     def setUp(self):
