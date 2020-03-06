@@ -33,6 +33,7 @@ TEST_CASE("ReportReader", "[base]") {
 
     REQUIRE(reader["All"].getSorted());
 
-    REQUIRE(reader["All"].get(Selection({{3, 5}}), 0.2, 0.5).data ==
-            DataFrame<NodeID>::DataType{{3, {3.2, 3.3, 3.4}}, {4, {4.2f, 4.3f, 4.4f}}});
+    REQUIRE(
+        reader["All"].get(Selection({{3, 5}}), 0.2, 0.5).data ==
+        DataFrame<NodeID>::DataType{{3, {3.2f, 3.3f, 3.4f, 3.5f}}, {4, {4.2f, 4.3f, 4.4f, 4.5f}}});
 }
