@@ -2,9 +2,9 @@
  * Copyright (C) 2018-2019 Blue Brain Project
  *
  * This file is part of 'libsonata', distributed under the terms
- * of the GNU Lesser General Public License.
+ * of the GNU Lesser General Public License version 3.
  *
- * See top-level LICENSE.txt file for details.
+ * See top-level COPYING.LESSER and COPYING files for details.
  *************************************************************************/
 
 #include "edge_index.h"

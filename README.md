@@ -145,3 +145,8 @@ Population handling for `EdgeStorage` is analogous to `NodeStorage`:
 # Acknowledgements
 
 This project/research has received funding from the European Union’s Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreement No. 785907 (Human Brain Project SGA2).
+
+# License
+
+libsonata is distributed under the terms of the GNU Lesser General Public License version 3.
+Refer to `COPYING.LESSER` and `COPYING` files for details.
