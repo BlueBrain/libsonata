@@ -260,21 +260,21 @@ bool ReportReader<T>::Population::getSorted() const {
 
 template <typename T>
 std::pair<T, std::vector<float>> make_value(NodeID node_id,
-                                            uint32_t compartment_id,
+                                            uint32_t element_id,
                                             std::vector<float> values);
 
 template <>
 std::pair<NodeID, std::vector<float>> make_value(NodeID node_id,
-                                                 uint32_t /* compartment_id */,
+                                                 uint32_t /* element_id */,
                                                  std::vector<float> values) {
     return {node_id, values};
 }
 
 template <>
 std::pair<std::pair<NodeID, uint32_t>, std::vector<float>> make_value(NodeID node_id,
-                                                                      uint32_t compartment_id,
+                                                                      uint32_t element_id,
                                                                       std::vector<float> values) {
-    return {{node_id, compartment_id}, values};
+    return {{node_id, element_id}, values};
 }
 
 template <typename T>

@@ -545,7 +545,7 @@ PYBIND11_MODULE(libsonata, m) {
         .def("__getitem__", &SpikeReader::operator[]);
 
     bindReportReader<SomasReportReader, NodeID>(m, "Somas");
-    bindReportReader<CompartmentsReportReader, std::pair<NodeID, uint32_t>>(m, "Compartments");
+    bindReportReader<ElementsReportReader, std::pair<NodeID, uint32_t>>(m, "Elements");
 
     py::register_exception<SonataError>(m, "SonataError");
 }

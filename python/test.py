@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
-from libsonata import SpikeReader, SpikePopulation, SomasReportReader, SomasReportPopulation, CompartmentsReportReader, CompartmentsReportPopulation
+from libsonata import SpikeReader, SpikePopulation, SomasReportReader, SomasReportPopulation, ElementsReportReader, ElementsReportPopulation
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -275,16 +275,16 @@ class TestSomasReportPopulation(unittest.TestCase):
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
         self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
 
-class TestCompartmentsReportPopulation(unittest.TestCase):
+class TestElementsReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "elements.h5")
-        self.test_obj = CompartmentsReportReader(path)
+        self.test_obj = ElementsReportReader(path)
 
     def test_get_all_population(self):
         self.assertEqual(self.test_obj.get_populations_names(), ['All', 'element1', 'element42'])
 
     def test_get_population(self):
-        self.assertTrue(isinstance(self.test_obj['All'], CompartmentsReportPopulation))
+        self.assertTrue(isinstance(self.test_obj['All'], ElementsReportPopulation))
 
     def test_get_inexistant_population(self):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
@@ -294,7 +294,7 @@ class TestCompartmentsReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of compartments
+        self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of elements
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
         self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
 
