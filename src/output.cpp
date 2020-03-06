@@ -223,7 +223,9 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
         }
 
         if (mapping_group.getDataSet("node_ids").hasAttribute("sorted")) {
-            mapping_group.getDataSet("node_ids").getAttribute("sorted").read(nodes_ids_sorted_);
+            uint8_t sorted;
+            mapping_group.getDataSet("node_ids").getAttribute("sorted").read(sorted);
+            nodes_ids_sorted_ = sorted != 0;
         }
     }
 
