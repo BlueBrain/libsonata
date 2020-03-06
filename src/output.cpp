@@ -122,7 +122,7 @@ void SpikeReader::Population::filterNodeIDSorted(Spikes& spikes, const Selection
                                       });
         auto end = std::upper_bound(spikes.begin(),
                                     spikes.end(),
-                                    std::make_pair(range.second, 0.),
+                                    std::make_pair(range.second - 1, 0.),
                                     [](const Spike& spike1, const Spike& spike2) {
                                         return spike1.first < spike2.first;
                                     });
