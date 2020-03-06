@@ -346,7 +346,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
 
     // FIXME: It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
     // TODO: specialized this function for sorted nodes_ids?
-    for (const auto& node_id: nodes_ids_.flatten()) {
+    for (const auto& node_id : nodes_ids_.flatten()) {
         auto it = std::find_if(
             nodes_pointers_.begin(),
             nodes_pointers_.end(),
@@ -371,7 +371,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
             .read(element_ids);
         for (size_t i = 0; i < element_ids.size(); ++i) {
             std::vector<float> data_by_node;
-            for (auto& datum: data) {
+            for (auto& datum : data) {
                 data_by_node.push_back(datum[i]);
             }
             dataFrame.data.insert(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
