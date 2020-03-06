@@ -315,16 +315,16 @@ template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
                                               double tstart,
                                               double tstop) const {
-    DataFrame<T> ret;
+    DataFrame<T> dataFrame;
 
     size_t index_start = 0, index_stop = 0;
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
     if (index_start > index_stop) {
-        return ret;
+        return dataFrame;
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
-        ret.index.push_back(times_index_[i].second);
+        dataFrame.index.push_back(times_index_[i].second);
     }
 
     // Simplify selection
@@ -334,7 +334,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
     auto nodes_ids_ = nodes_ids;
 
     if (nodes_ids.empty()) {  // Take all nodes in this case
-        Selection::Values values;
+        Selection::Values values = nodes_pointers_;
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
                        std::back_inserter(values),
@@ -344,25 +344,25 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
         nodes_ids_ = Selection::fromValues(values);
     }
 
-    // It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
-    // TODO: specialized this function for sorted nodes_ids
-    for (const auto& value: nodes_ids_.flatten()) {
+    // FIXME: It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
+    // TODO: specialized this function for sorted nodes_ids?
+    for (const auto& node_id: nodes_ids_.flatten()) {
         auto it = std::find_if(
             nodes_pointers_.begin(),
             nodes_pointers_.end(),
-            [&value](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
-                return node_pointer.first == value;
+            [&node_id](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
+                return node_pointer.first == node_id;
             });
         if (it == nodes_pointers_.end()) {
             continue;
         }
 
         // elems are by timestamp and by Nodes_id
-        std::vector<std::vector<float>> elems;
+        std::vector<std::vector<float>> data;
         pop_group_.getDataSet("data")
             .select({index_start, it->second.first},
                     {index_stop - index_start + 1, it->second.second - it->second.first})
-            .read(elems);
+            .read(data);
 
         std::vector<uint32_t> element_ids;
         pop_group_.getGroup("mapping")
@@ -370,14 +370,14 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
             .select({it->second.first}, {it->second.second - it->second.first})
             .read(element_ids);
         for (size_t i = 0; i < element_ids.size(); ++i) {
-            std::vector<float> elems_by_node;
-            for (auto& elem : elems) {
-                elems_by_node.push_back(elem[i]);
+            std::vector<float> data_by_node;
+            for (auto& datum: data) {
+                data_by_node.push_back(datum[i]);
             }
-            ret.data.insert(make_value<T>(value, element_ids[i], std::move(elems_by_node)));
+            dataFrame.data.insert(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
         }
     }
-    return ret;
+    return dataFrame;
 }
 
 template class ReportReader<NodeID>;
