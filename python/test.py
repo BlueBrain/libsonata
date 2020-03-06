@@ -299,7 +299,10 @@ class TestElementsReportPopulation(unittest.TestCase):
         self.assertTrue(self.test_obj['All'].sorted)
         self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of elements
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
-        self.assertEqual(sel.data.keys(), [(14, 66), (14, 69), (14, 68), (13, 60), (14, 67), (14, 65), (13, 61), (13, 62), (13, 63), (13, 64)])
+        keys = list(sel.data.keys())
+        keys.sort()
+        self.assertEqual(keys, [(13, 60), (13, 61), (13, 62), (13, 63), (13, 64), (14, 65), (14, 66), (14, 67), (14, 68), (14, 69)])
+
         self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
         sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
         self.assertEqual(len(sel.data), 0)
