@@ -15,7 +15,7 @@ namespace H5 = HighFive;
 namespace bbp {
 namespace sonata {
 
-// KeyType will be NodeID for somas report and pair<NodeID, uint32_t> for elemets report
+// KeyType will be NodeID for somas report and pair<NodeID, uint32_t> for elements report
 template <typename KeyType>
 struct SONATA_API DataFrame {
     using DataType = std::map<KeyType, std::vector<float>>;
@@ -79,7 +79,7 @@ class SONATA_API SpikeReader
 
     std::vector<std::string> getPopulationsNames() const;
 
-    const Population& getPopulation(const std::string& populationName) const;
+    const Population& openPopulation(const std::string& populationName) const;
 
     const Population& operator[](const std::string& populationName) const;
 
@@ -125,7 +125,7 @@ class SONATA_API ReportReader
 
     std::vector<std::string> getPopulationsNames() const;
 
-    const Population& getPopulation(const std::string& populationName) const;
+    const Population& openPopulation(const std::string& populationName) const;
 
     const Population& operator[](const std::string& populationName) const;
 

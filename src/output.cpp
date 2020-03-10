@@ -22,7 +22,7 @@ std::vector<std::string> SpikeReader::getPopulationsNames() const {
     return file.getGroup("/spikes").listObjectNames();
 }
 
-auto SpikeReader::getPopulation(const std::string& populationName) const -> const Population& {
+auto SpikeReader::openPopulation(const std::string& populationName) const -> const Population& {
     if (populations_.find(populationName) == populations_.end()) {
         populations_.emplace(populationName, Population{filename_, populationName});
     }
@@ -31,7 +31,7 @@ auto SpikeReader::getPopulation(const std::string& populationName) const -> cons
 }
 
 auto SpikeReader::operator[](const std::string& populationName) const -> const Population& {
-    return getPopulation(populationName);
+    return openPopulation(populationName);
 }
 
 SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& node_ids,
@@ -43,14 +43,14 @@ SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& no
         return SpikeReader::Population::Spikes{};
     }
 
-    auto ret = spikes_;
-    filterTimestamp(ret, tstart, tstop);
+    auto spikes = spikes_;
+    filterTimestamp(spikes, tstart, tstop);
 
     if (!node_ids.empty()) {
-        filterNode(ret, node_ids);
+        filterNode(spikes, node_ids);
     }
 
-    return ret;
+    return spikes;
 }
 
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
@@ -180,7 +180,7 @@ std::vector<std::string> ReportReader<T>::getPopulationsNames() const {
 }
 
 template <typename T>
-auto ReportReader<T>::getPopulation(const std::string& populationName) const -> const Population& {
+auto ReportReader<T>::openPopulation(const std::string& populationName) const -> const Population& {
     if (populations_.find(populationName) == populations_.end()) {
         populations_.emplace(populationName, Population{file_, populationName});
     }
@@ -190,7 +190,7 @@ auto ReportReader<T>::getPopulation(const std::string& populationName) const -> 
 
 template <typename T>
 auto ReportReader<T>::operator[](const std::string& populationName) const -> const Population& {
-    return getPopulation(populationName);
+    return openPopulation(populationName);
 }
 
 template <typename T>
@@ -315,16 +315,16 @@ template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
                                               double tstart,
                                               double tstop) const {
-    DataFrame<T> dataFrame;
+    DataFrame<T> data_frame;
 
     size_t index_start = 0, index_stop = 0;
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
     if (index_start > index_stop) {
-        return dataFrame;
+        return data_frame;
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
-        dataFrame.index.push_back(times_index_[i].second);
+        data_frame.index.push_back(times_index_[i].second);
     }
 
     // Simplify selection
@@ -371,13 +371,14 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
             .read(element_ids);
         for (size_t i = 0; i < element_ids.size(); ++i) {
             std::vector<float> data_by_node;
+            data_by_node.reserve(data.size());
             for (auto& datum : data) {
                 data_by_node.push_back(datum[i]);
             }
-            dataFrame.data.insert(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
+            data_frame.data.insert(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
         }
     }
-    return dataFrame;
+    return data_frame;
 }
 
 template class ReportReader<NodeID>;

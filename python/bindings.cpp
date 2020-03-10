@@ -529,12 +529,11 @@ PYBIND11_MODULE(libsonata, m) {
             "sorting",
             [](const SpikeReader::Population& self) {
                 auto s = self.getSorting();
-                if (s == SpikeReader::Population::Sorting::none)
-                    return "none";
                 if (s == SpikeReader::Population::Sorting::by_id)
                     return "by_id";
                 if (s == SpikeReader::Population::Sorting::by_time)
                     return "by_time";
+                return "none";
             },
             "Return the way data are sorted ('none', 'by_id', 'by_time')");
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
