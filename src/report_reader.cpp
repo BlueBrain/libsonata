@@ -1,9 +1,9 @@
-#include <bbp/sonata/output.h>
+#include <bbp/sonata/report_reader.h>
 
-#define EPSILON 1e-6
+constexpr double EPSILON = 1e-6;
 
 H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
-    using namespace bbp::sonata;
+    using bbp::sonata::SpikeReader;
     return H5::EnumType<SpikeReader::Population::Sorting>(
         {{"none", SpikeReader::Population::Sorting::none},
          {"by_id", SpikeReader::Population::Sorting::by_id},
@@ -12,8 +12,91 @@ H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting(
 
 HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enum_sorting)
 
+namespace {
+
+using bbp::sonata::NodeID;
+using bbp::sonata::Selection;
+using bbp::sonata::Spike;
+using bbp::sonata::Spikes;
+
+void filterNodeIDUnsorted(Spikes& spikes, const Selection& node_ids) {
+    auto values = node_ids.flatten();
+    auto new_end = std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
+        return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
+    });
+    spikes.erase(new_end, spikes.end());
+}
+
+void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) {
+    Spikes _spikes;
+    for (const auto& range : node_ids.ranges()) {
+        auto begin = std::lower_bound(spikes.begin(),
+                                      spikes.end(),
+                                      std::make_pair(range.first, 0.),
+                                      [](const Spike& spike1, const Spike& spike2) {
+                                          return spike1.first < spike2.first;
+                                      });
+        auto end = std::upper_bound(spikes.begin(),
+                                    spikes.end(),
+                                    std::make_pair(range.second - 1, 0.),
+                                    [](const Spike& spike1, const Spike& spike2) {
+                                        return spike1.first < spike2.first;
+                                    });
+
+        std::move(begin, end, std::back_inserter(_spikes));
+        spikes.erase(begin, end);  // have to erase, because otherwise it is no more sorted
+    }
+    spikes = std::move(_spikes);
+}
+
+void filterTimestampUnsorted(Spikes& spikes, double tstart, double tstop) {
+    auto new_end =
+        std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tstop](const Spike& spike) {
+            return (spike.second < tstart - EPSILON) || (spike.second > tstop + EPSILON);
+        });
+    spikes.erase(new_end, spikes.end());
+}
+
+void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
+    auto end = std::upper_bound(spikes.begin(),
+                                spikes.end(),
+                                std::make_pair(0UL, tstop + EPSILON),
+                                [](const Spike& spike1, const Spike& spike2) {
+                                    return spike1.second < spike2.second;
+                                });
+    spikes.erase(end, spikes.end());
+    auto begin = std::lower_bound(spikes.begin(),
+                                  spikes.end(),
+                                  std::make_pair(0UL, tstart - EPSILON),
+                                  [](const Spike& spike1, const Spike& spike2) {
+                                      return spike1.second < spike2.second;
+                                  });
+    spikes.erase(spikes.begin(), begin);
+}
+
+template <typename T>
+std::pair<T, std::vector<float>> make_value(NodeID node_id,
+                                            uint32_t element_id,
+                                            const std::vector<float>& values);
+
+template <>
+std::pair<NodeID, std::vector<float>> make_value(NodeID node_id,
+                                                 uint32_t /* element_id */,
+                                                 const std::vector<float>& values) {
+    return {node_id, values};
+}
+
+template <>
+std::pair<std::pair<NodeID, uint32_t>, std::vector<float>> make_value(
+    NodeID node_id, uint32_t element_id, const std::vector<float>& values) {
+    return {{node_id, element_id}, values};
+}
+
+}  // anonymous namespace
+
 namespace bbp {
 namespace sonata {
+
 SpikeReader::SpikeReader(const std::string& filename)
     : filename_(filename) {}
 
@@ -30,17 +113,11 @@ auto SpikeReader::openPopulation(const std::string& populationName) const -> con
     return populations_.at(populationName);
 }
 
-auto SpikeReader::operator[](const std::string& populationName) const -> const Population& {
-    return openPopulation(populationName);
-}
-
-SpikeReader::Population::Spikes SpikeReader::Population::get(const Selection& node_ids,
-                                                             double tstart,
-                                                             double tstop) const {
+Spikes SpikeReader::Population::get(const Selection& node_ids, double tstart, double tstop) const {
     tstart = tstart < 0 ? tstart_ : tstart;
     tstop = tstop < 0 ? tstop_ : tstop;
     if (tstart > tstop_ + EPSILON || tstop < tstart_ - EPSILON || tstop < tstart) {
-        return SpikeReader::Population::Spikes{};
+        return Spikes{};
     }
 
     auto spikes = spikes_;
@@ -94,6 +171,7 @@ SpikeReader::Population::Population(const std::string& filename,
         tstop_ = *max_element(timestamps.cbegin(), timestamps.cend());
     }
 }
+
 void SpikeReader::Population::filterNode(Spikes& spikes, const Selection& node_ids) const {
     if (sorting_ == Sorting::by_id) {
         filterNodeIDSorted(spikes, node_ids);
@@ -102,72 +180,12 @@ void SpikeReader::Population::filterNode(Spikes& spikes, const Selection& node_i
     }
 }
 
-void SpikeReader::Population::filterNodeIDUnsorted(Spikes& spikes,
-                                                   const Selection& node_ids) const {
-    auto values = node_ids.flatten();
-    auto new_end = std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
-        return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
-    });
-    spikes.erase(new_end, spikes.end());
-}
-
-void SpikeReader::Population::filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) const {
-    Spikes _spikes;
-    for (const auto& range : node_ids.ranges()) {
-        auto begin = std::lower_bound(spikes.begin(),
-                                      spikes.end(),
-                                      std::make_pair(range.first, 0.),
-                                      [](const Spike& spike1, const Spike& spike2) {
-                                          return spike1.first < spike2.first;
-                                      });
-        auto end = std::upper_bound(spikes.begin(),
-                                    spikes.end(),
-                                    std::make_pair(range.second - 1, 0.),
-                                    [](const Spike& spike1, const Spike& spike2) {
-                                        return spike1.first < spike2.first;
-                                    });
-
-        std::move(begin, end, std::back_inserter(_spikes));
-        spikes.erase(begin, end);  // have to erase, because otherwise it is no more sorted
-    }
-    spikes = std::move(_spikes);
-}
-
 void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, double tstop) const {
     if (sorting_ == Sorting::by_time) {
         filterTimestampSorted(spikes, tstart, tstop);
     } else {
         filterTimestampUnsorted(spikes, tstart, tstop);
     }
-}
-
-void SpikeReader::Population::filterTimestampUnsorted(Spikes& spikes,
-                                                      double tstart,
-                                                      double tstop) const {
-    auto new_end =
-        std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tstop](const Spike& spike) {
-            return (spike.second < tstart - EPSILON) || (spike.second > tstop + EPSILON);
-        });
-    spikes.erase(new_end, spikes.end());
-}
-
-void SpikeReader::Population::filterTimestampSorted(Spikes& spikes,
-                                                    double tstart,
-                                                    double tstop) const {
-    auto end = std::upper_bound(spikes.begin(),
-                                spikes.end(),
-                                std::make_pair(0UL, tstop + EPSILON),
-                                [](const Spike& spike1, const Spike& spike2) {
-                                    return spike1.second < spike2.second;
-                                });
-    spikes.erase(end, spikes.end());
-    auto begin = std::lower_bound(spikes.begin(),
-                                  spikes.end(),
-                                  std::make_pair(0UL, tstart - EPSILON),
-                                  [](const Spike& spike1, const Spike& spike2) {
-                                      return spike1.second < spike2.second;
-                                  });
-    spikes.erase(spikes.begin(), begin);
 }
 
 template <typename T>
@@ -186,11 +204,6 @@ auto ReportReader<T>::openPopulation(const std::string& populationName) const ->
     }
 
     return populations_.at(populationName);
-}
-
-template <typename T>
-auto ReportReader<T>::operator[](const std::string& populationName) const -> const Population& {
-    return openPopulation(populationName);
 }
 
 template <typename T>
@@ -253,35 +266,16 @@ bool ReportReader<T>::Population::getSorted() const {
 }
 
 template <typename T>
-std::pair<T, std::vector<float>> make_value(NodeID node_id,
-                                            uint32_t element_id,
-                                            std::vector<float> values);
-
-template <>
-std::pair<NodeID, std::vector<float>> make_value(NodeID node_id,
-                                                 uint32_t /* element_id */,
-                                                 std::vector<float> values) {
-    return {node_id, values};
-}
-
-template <>
-std::pair<std::pair<NodeID, uint32_t>, std::vector<float>> make_value(NodeID node_id,
-                                                                      uint32_t element_id,
-                                                                      std::vector<float> values) {
-    return {{node_id, element_id}, values};
-}
-
-template <typename T>
 std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, double tstop) const {
     std::pair<size_t, size_t> indexes;
-    if (tstart < 0 - EPSILON) { // Default value
+    if (tstart < 0 - EPSILON) {  // Default value
         indexes.first = times_index_.front().first;
-    } else if (tstart > times_index_.back().second + EPSILON) {  // tstart is after the end of the range
+    } else if (tstart > times_index_.back().second + EPSILON) {  // tstart is after end of range
         indexes.first = 1;
         indexes.second = 0;
         return indexes;
     } else {
-        for (const auto& time_index: times_index_) {
+        for (const auto& time_index : times_index_) {
             if (tstart < time_index.second + EPSILON) {
                 indexes.first = time_index.first;
                 break;
@@ -290,7 +284,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, d
     }
     if (tstop < 0 - EPSILON) {  // Default value
         indexes.second = times_index_.back().first;
-    } else if (tstop < times_index_.front().second - EPSILON) {  // tstop is before the beginning of the range
+    } else if (tstop < times_index_.front().second - EPSILON) {  // tstop is before start of range
         indexes.first = 1;
         indexes.second = 0;
         return indexes;
@@ -317,7 +311,9 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
                                               double tstop) const {
     DataFrame<T> data_frame;
 
-    size_t index_start = 0, index_stop = 0;
+    size_t index_start = 0;
+    size_t index_stop = 0;
+
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
     if (index_start > index_stop) {
         return data_frame;
@@ -383,5 +379,6 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
 
 template class ReportReader<NodeID>;
 template class ReportReader<std::pair<NodeID, uint32_t>>;
+
 }  // namespace sonata
 }  // namespace bbp

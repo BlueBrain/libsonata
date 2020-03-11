@@ -5,7 +5,7 @@
 #include <bbp/sonata/common.h>
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
-#include <bbp/sonata/output.h>
+#include <bbp/sonata/report_reader.h>
 
 #include <fmt/format.h>
 
@@ -356,7 +356,7 @@ void bindReportReader(py::module& m, const std::string& prefix) {
         .def("get_populations_names",
              &ReportType::getPopulationsNames,
              "Get list of all populations")
-        .def("__getitem__", &ReportType::operator[]);
+        .def("__getitem__", &ReportType::openPopulation);
 }
 
 
@@ -541,7 +541,7 @@ PYBIND11_MODULE(libsonata, m) {
         .def("get_populations_names",
              &SpikeReader::getPopulationsNames,
              "Get list of all populations")
-        .def("__getitem__", &SpikeReader::operator[]);
+        .def("__getitem__", &SpikeReader::openPopulation);
 
     bindReportReader<SomasReportReader, NodeID>(m, "Somas");
     bindReportReader<ElementsReportReader, std::pair<NodeID, uint32_t>>(m, "Elements");

@@ -23,10 +23,13 @@ struct SONATA_API DataFrame {
     DataType data;
 };
 
+using Spike = std::pair<NodeID, double>;
+using Spikes = std::vector<Spike>;
+
 /**
   const SpikeReader file(filename);
   auto pops = file.getPopulationNames();
-  for (const auto& data: file[pops[0]].get(Selection{12UL, 34UL, 58UL})) {
+  for (const auto& data: file[pops.openPopulation(0).get(Selection{12UL, 34UL, 58UL})) {
       NodeID node_id;
       double timestamp;
       std::tie(node_id, timestamp) = data;
@@ -45,8 +48,6 @@ class SONATA_API SpikeReader
             by_time = 2,
         };
 
-        using Spike = std::pair<NodeID, double>;
-        using Spikes = std::vector<Spike>;
         Spikes get(const Selection& node_ids = Selection({}),
                    double tstart = -1,
                    double tstop = -1) const;
@@ -60,17 +61,8 @@ class SONATA_API SpikeReader
         // Use for clamping of user values
         double tstart_, tstop_;
 
-        // Helpers to filter by node_ids
-        // Filter in place
         void filterNode(Spikes& spikes, const Selection& node_ids) const;
-        void filterNodeIDUnsorted(Spikes& spikes, const Selection& node_ids) const;
-        void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) const;
-
-        // Helpers to filter by timestamps
-        // Filter in place
         void filterTimestamp(Spikes& spikes, double tstart, double tstop) const;
-        void filterTimestampUnsorted(Spikes& spikes, double tstart, double tstop) const;
-        void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) const;
 
         friend SpikeReader;
     };
@@ -80,8 +72,6 @@ class SONATA_API SpikeReader
     std::vector<std::string> getPopulationsNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;
-
-    const Population& operator[](const std::string& populationName) const;
 
   private:
     std::string filename_;
@@ -126,8 +116,6 @@ class SONATA_API ReportReader
     std::vector<std::string> getPopulationsNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;
-
-    const Population& operator[](const std::string& populationName) const;
 
   private:
     H5::File file_;
