@@ -48,7 +48,7 @@ class SONATA_API Selection
     bool empty() const;
 
   private:
-    Ranges ranges_;
+    const Ranges ranges_;
 };
 
 bool SONATA_API operator==(const Selection&, const Selection&);

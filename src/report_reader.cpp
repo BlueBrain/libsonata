@@ -306,7 +306,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, d
 }
 
 template <typename T>
-DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
+DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
                                               double tstart,
                                               double tstop) const {
     DataFrame<T> data_frame;
@@ -327,22 +327,22 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& nodes_ids,
     // We should remove duplicates
     // And when we can work with ranges let's sort them
     // auto nodes_ids_ = Selection::fromValues(nodes_ids.flatten().sort());
-    auto nodes_ids_ = nodes_ids;
+    Selection::Values node_ids;
 
-    if (nodes_ids.empty()) {  // Take all nodes in this case
-        Selection::Values values;
+    if (selection.empty()) {  // Take all nodes in this case
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
-                       std::back_inserter(values),
+                       std::back_inserter(node_ids),
                        [](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
                            return node_pointer.first;
                        });
-        nodes_ids_ = Selection::fromValues(values);
+    } else {
+        node_ids = selection.flatten();
     }
 
     // FIXME: It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
     // TODO: specialized this function for sorted nodes_ids?
-    for (const auto& node_id : nodes_ids_.flatten()) {
+    for (const auto& node_id : node_ids) {
         auto it = std::find_if(
             nodes_pointers_.begin(),
             nodes_pointers_.end(),
