@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 
 from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
+from libsonata import SpikeReader, SpikePopulation, SomasReportReader, SomasReportPopulation, ElementsReportReader, ElementsReportPopulation
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -223,6 +224,90 @@ class TestEdgePopulation(unittest.TestCase):
 
     def test_select_all(self):
         self.assertEqual(self.test_obj.select_all().flat_size, 6)
+
+
+class TestSpikePopulation(unittest.TestCase):
+    def setUp(self):
+        path = os.path.join(PATH, "spikes.h5")
+        self.test_obj = SpikeReader(path)
+
+    def test_get_all_populations(self):
+        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'spikes1', 'spikes2'])
+
+    def test_get_population(self):
+        self.assertTrue(isinstance(self.test_obj['spikes1'], SpikePopulation))
+
+    def test_get_inexistant_population(self):
+        self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
+
+    def test_get_spikes_from_population(self):
+        self.assertEqual(self.test_obj['All'].get(), [(5, 0.1), (2, 0.2), (3, 0.3), (2, 0.7), (3, 1.3)])
+        self.assertEqual(self.test_obj['All'].get(0.2, 1.0), [(2, 0.2), (3, 0.3), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes2'].get(0.2, 1.0), [(3, 0.3), (2, 0.2), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes1'].get((3,)), [(3, 0.3), (3, 1.3)])
+        self.assertEqual(self.test_obj['spikes2'].get((3,)), [(3, 0.3), (3, 1.3)])
+        self.assertEqual(self.test_obj['spikes2'].get((10,)), [])
+        self.assertEqual(self.test_obj['spikes2'].get((2,), 0., 0.5), [(2, 0.2)])
+        self.assertEqual(self.test_obj['spikes1'].get((2, 5)), [(2, 0.2), (2, 0.7), (5, 0.1)])
+        self.assertEqual(self.test_obj['spikes2'].get((2, 5)), [(5, 0.1), (2, 0.2), (2, 0.7)])
+        self.assertEqual(self.test_obj['All'].sorting, "by_time")
+        self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
+        self.assertEqual(self.test_obj['spikes2'].sorting, "none")
+
+class TestSomasReportPopulation(unittest.TestCase):
+    def setUp(self):
+        path = os.path.join(PATH, "somas.h5")
+        self.test_obj = SomasReportReader(path)
+
+    def test_get_all_population(self):
+        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'soma1', 'soma2'])
+
+    def test_get_population(self):
+        self.assertTrue(isinstance(self.test_obj['All'], SomasReportPopulation))
+
+    def test_get_inexistant_population(self):
+        self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
+
+    def test_get_reports_from_population(self):
+        self.assertEqual(self.test_obj['All'].times, (0., 1., 0.1))
+        self.assertEqual(self.test_obj['All'].time_units, 'ms')
+        self.assertEqual(self.test_obj['All'].data_units, 'mV')
+        self.assertTrue(self.test_obj['All'].sorted)
+        self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of nodes
+        sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
+        self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
+        self.assertEqual(list(sel.data.keys()), [13, 14])
+
+class TestElementsReportPopulation(unittest.TestCase):
+    def setUp(self):
+        path = os.path.join(PATH, "elements.h5")
+        self.test_obj = ElementsReportReader(path)
+
+    def test_get_all_population(self):
+        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'element1', 'element42'])
+
+    def test_get_population(self):
+        self.assertTrue(isinstance(self.test_obj['All'], ElementsReportPopulation))
+
+    def test_get_inexistant_population(self):
+        self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
+
+    def test_get_reports_from_population(self):
+        self.assertEqual(self.test_obj['All'].times, (0., 4., 0.2))
+        self.assertEqual(self.test_obj['All'].time_units, 'ms')
+        self.assertEqual(self.test_obj['All'].data_units, 'mV')
+        self.assertTrue(self.test_obj['All'].sorted)
+        self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of elements
+        sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
+        keys = list(sel.data.keys())
+        keys.sort()
+        self.assertEqual(keys, [(13, 60), (13, 61), (13, 62), (13, 63), (13, 64), (14, 65), (14, 66), (14, 67), (14, 68), (14, 69)])
+
+        self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
+        sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
+        self.assertEqual(len(sel.data), 0)
+        sel = self.test_obj['All'].get(tstart=3., tstop=3.)
+        self.assertEqual(len(sel.data), 100)
 
 
 if __name__ == '__main__':

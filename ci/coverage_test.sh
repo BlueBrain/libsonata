@@ -4,14 +4,13 @@
 
 set -euxo pipefail
 
-BUILD_DIR=build-coverage
+BUILD_DIR=build/build-coverage
 
-rm -rf $BUILD_DIR
-mkdir -p $BUILD_DIR
-cd $BUILD_DIR
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
 cmake                           \
     -DCMAKE_BUILD_TYPE=Debug    \
     -DEXTLIB_FROM_SUBMODULES=ON \
-    ..
-make -j2
-make coverage
+    ../..
+make -j all coverage

@@ -5,13 +5,13 @@
 
 set -euxo pipefail
 
-rm -rf build
-mkdir build
-cd build
+BUILD_DIR=build/build-cpp-test
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
 cmake                           \
     -DCMAKE_BUILD_TYPE=Release  \
     -DEXTLIB_FROM_SUBMODULES=ON \
     -DSONATA_CXX_WARNINGS=ON    \
-    ..
-make -j2
-make test
+    ../..
+make -j all test

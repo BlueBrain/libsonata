@@ -4,17 +4,17 @@ import sys
 import numpy as np
 import h5py
 
-
-def write_population_one_group(pop, prefix):
-
+def get_vlen_str_type():
     if sys.version_info[0] == 2:
         vlen_str_type = unicode
     elif sys.version_info[0] == 3:
         vlen_str_type = str
     else:
         raise 'Only python2/3 supported'
+    return vlen_str_type
 
-    string_dtype = h5py.special_dtype(vlen=vlen_str_type)
+def write_population_one_group(pop, prefix):
+    string_dtype = h5py.special_dtype(vlen=get_vlen_str_type())
 
     pop.create_dataset('%s_group_id' % prefix, data=np.zeros(6), dtype=np.uint8)
     pop.create_dataset('%s_group_index' % prefix, data=np.arange(6), dtype=np.uint16)
@@ -132,6 +132,89 @@ def write_edges(filepath):
         )
 
 
+def write_soma_report(filepath):
+    population_names = ['All', 'soma1', 'soma2']
+    node_ids = np.arange(1, 21)
+    index_pointers = np.arange(0, 21)
+    element_ids = np.zeros(20)
+    times = (0.0, 1.0, 0.1)
+    data = [node_ids + j*0.1 for j in range(10)]
+    string_dtype = h5py.special_dtype(vlen=get_vlen_str_type())
+    with h5py.File(filepath, 'w') as h5f:
+        root = h5f.create_group('report')
+        gpop_all = h5f.create_group('/report/' + population_names[0])
+        ddata = gpop_all.create_dataset('data', data=data, dtype=np.float32)
+        ddata.attrs.create('units', data="mV", dtype=string_dtype)
+        gmapping = h5f.create_group('/report/' + population_names[0] + '/mapping')
+
+        dnodes = gmapping.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
+        dnodes.attrs.create('sorted', data=True, dtype=np.uint8)
+        gmapping.create_dataset('index_pointers', data=index_pointers, dtype=np.uint64)
+        gmapping.create_dataset('element_ids', data=element_ids, dtype=np.uint32)
+        dtimes = gmapping.create_dataset('time', data=times, dtype=np.double)
+        dtimes.attrs.create('units', data="ms", dtype=string_dtype)
+
+        gpop_soma1 = h5f.create_group('/report/' + population_names[1])
+        gpop_soma2 = h5f.create_group('/report/' + population_names[2])
+
+
+def write_element_report(filepath):
+    population_names = ['All', 'element1', 'element42']
+    node_ids = np.arange(1, 21)
+    index_pointers = np.arange(0, 105, 5)
+    element_ids = np.arange(100)
+    times = (0.0, 4.0, 0.2)
+    string_dtype = h5py.special_dtype(vlen=get_vlen_str_type())
+    with h5py.File(filepath, 'w') as h5f:
+        root = h5f.create_group('report')
+        gpop_all = h5f.create_group('/report/' + population_names[0])
+        d1 = np.arange(0.0, 200, 0.1).reshape(20, -1)
+        ddata = gpop_all.create_dataset('data', data=d1, dtype=np.float32)
+        ddata.attrs.create('units', data="mV", dtype=string_dtype)
+        gmapping = h5f.create_group('/report/' + population_names[0] + '/mapping')
+
+        dnodes = gmapping.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
+        dnodes.attrs.create('sorted', data=True, dtype=np.uint8)
+        gmapping.create_dataset('index_pointers', data=index_pointers, dtype=np.uint64)
+        gmapping.create_dataset('element_ids', data=element_ids, dtype=np.uint32)
+        dtimes = gmapping.create_dataset('time', data=times, dtype=np.double)
+        dtimes.attrs.create('units', data="ms", dtype=string_dtype)
+
+        gpop_soma1 = h5f.create_group('/report/' + population_names[1])
+        gpop_soma2 = h5f.create_group('/report/' + population_names[2])
+
+def write_spikes(filepath):
+    population_names = ['All', 'spikes1', 'spikes2']
+    timestamps_base = (0.3, 0.1, 0.2, 1.3, 0.7)
+    node_ids_base = (3, 5, 2, 3, 2)
+
+    sorting_type = h5py.enum_dtype({"none": 0, "by_id": 1, "by_time": 2})
+    string_dtype = h5py.special_dtype(vlen=get_vlen_str_type())
+
+    with h5py.File(filepath, 'w') as h5f:
+        root = h5f.create_group('spikes')
+        gpop_all = h5f.create_group('/spikes/' + population_names[0])
+        gpop_all.attrs.create('sorting', data=2, dtype=sorting_type)
+        timestamps, node_ids = zip(*sorted(zip(timestamps_base, node_ids_base)))
+        set = gpop_all.create_dataset('timestamps', data=timestamps, dtype=np.double)
+        gpop_all.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
+
+        gpop_spikes1 = h5f.create_group('/spikes/' + population_names[1])
+        gpop_spikes1.attrs.create('sorting', data=1, dtype=sorting_type)
+        node_ids, timestamps = zip(*sorted(zip(node_ids_base, timestamps_base)))
+        gpop_spikes1.create_dataset('timestamps', data=timestamps, dtype=np.double)
+        gpop_spikes1.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
+
+        gpop_spikes2 = h5f.create_group('/spikes/' + population_names[2])
+        gpop_spikes2.attrs.create('sorting', data=0, dtype=sorting_type)
+        dtimestamps = gpop_spikes2.create_dataset('timestamps', data=timestamps_base, dtype=np.double)
+        dtimestamps.attrs.create('units', data="ms", dtype=string_dtype)
+        gpop_spikes2.create_dataset('node_ids', data=node_ids_base, dtype=np.uint64)
+
+
 if __name__ == '__main__':
     write_nodes('nodes1.h5')
     write_edges('edges1.h5')
+    write_spikes('spikes.h5')
+    write_soma_report('somas.h5')
+    write_element_report('elements.h5')

@@ -5,13 +5,11 @@
 
 set -euo pipefail
 
-VENV=venv-clang-format
+VENV=build/venv-clang-format
 CLANG_FORMAT_VERSION=9.0.0
 
 if [[ ! -d $VENV ]]; then
     python3 -mvenv "$VENV"
-    # pinned to 19.3.1 b/c of: https://github.com/pypa/pip/issues/7629
-    "$VENV/bin/pip" install --upgrade 'pip==19.3.1'
     "$VENV/bin/pip" install clang-format=="$CLANG_FORMAT_VERSION"
 fi
 

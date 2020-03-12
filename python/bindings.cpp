@@ -5,6 +5,7 @@
 #include <bbp/sonata/common.h>
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
+#include <bbp/sonata/report_reader.h>
 
 #include <fmt/format.h>
 
@@ -303,6 +304,61 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
 }
 }  // unnamed namespace
 
+template <typename ReportType, typename KeyType>
+void bindReportReader(py::module& m, const std::string& prefix) {
+    py::class_<DataFrame<KeyType>>(m,
+                                   (prefix + "DataFrame").c_str(),
+                                   "Something easily convertible to pandas dataframe")
+        .def_readonly("data", &DataFrame<KeyType>::data)
+        .def_readonly("index", &DataFrame<KeyType>::index);
+    py::class_<typename ReportType::Population>(m,
+                                                (prefix + "ReportPopulation").c_str(),
+                                                "A population inside a ReportReader")
+        .def(
+            "get",
+            [](const typename ReportType::Population& self) { return self.get(); },
+            "Return all reports")
+        .def(
+            "get",
+            [](const typename ReportType::Population& self, double tstart, double tstop) {
+                return self.get(Selection({}), tstart, tstop);
+            },
+            "Return reports between 'tstart' and 'tstop'",
+            "tstart"_a,
+            "tstop"_a)
+        .def(
+            "get",
+            [](const typename ReportType::Population& self, Selection sel) {
+                return self.get(sel);
+            },
+            "Return reports with all those node_ids",
+            "node_ids"_a)
+        .def("get",
+             &ReportType::Population::get,
+             "Return reports with all those node_ids between 'tstart' and 'tstop'",
+             "node_ids"_a,
+             "tstart"_a,
+             "tstop"_a)
+        .def_property_readonly("sorted",
+                               &ReportType::Population::getSorted,
+                               "Return if data are sorted")
+        .def_property_readonly("times",
+                               &ReportType::Population::getTimes,
+                               "Return (tstart, tstop, tstep) of the population")
+        .def_property_readonly("time_units",
+                               &ReportType::Population::getTimeUnits,
+                               "Return the unit of the times")
+        .def_property_readonly("data_units",
+                               &ReportType::Population::getDataUnits,
+                               "Return the unit of data");
+    py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
+        .def(py::init<const std::string&>())
+        .def("get_populations_names",
+             &ReportType::getPopulationsNames,
+             "Get list of all populations")
+        .def("__getitem__", &ReportType::openPopulation);
+}
+
 
 PYBIND11_MODULE(libsonata, m) {
     py::class_<Selection>(m,
@@ -334,6 +390,8 @@ PYBIND11_MODULE(libsonata, m) {
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
         .def("__or__", &bbp::sonata::operator|, "Union of selections")
         .def("__and__", &bbp::sonata::operator&, "Intersection of selections");
+    py::implicitly_convertible<py::list, Selection>();
+    py::implicitly_convertible<py::tuple, Selection>();
 
     bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
         .def(
@@ -442,6 +500,51 @@ PYBIND11_MODULE(libsonata, m) {
                     "Write bidirectional node->edge indices to EdgePopulation HDF5");
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
+
+    py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
+        .def(
+            "get",
+            [](const SpikeReader::Population& self) { return self.get(); },
+            "Return all spikes")
+        .def(
+            "get",
+            [](const SpikeReader::Population& self, double tstart, double tstop) {
+                return self.get(Selection({}), tstart, tstop);
+            },
+            "Return spikes between 'tstart' and 'tstop'",
+            "tstart"_a,
+            "tstop"_a)
+        .def(
+            "get",
+            [](const SpikeReader::Population& self, Selection sel) { return self.get(sel); },
+            "Return spikes with all those node_ids",
+            "node_ids"_a)
+        .def("get",
+             &SpikeReader::Population::get,
+             "Return spikes with all those node_ids between 'tstart' and 'tstop'",
+             "node_ids"_a,
+             "tstart"_a,
+             "tstop"_a)
+        .def_property_readonly(
+            "sorting",
+            [](const SpikeReader::Population& self) {
+                auto s = self.getSorting();
+                if (s == SpikeReader::Population::Sorting::by_id)
+                    return "by_id";
+                if (s == SpikeReader::Population::Sorting::by_time)
+                    return "by_time";
+                return "none";
+            },
+            "Return the way data are sorted ('none', 'by_id', 'by_time')");
+    py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
+        .def(py::init<const std::string&>())
+        .def("get_populations_names",
+             &SpikeReader::getPopulationsNames,
+             "Get list of all populations")
+        .def("__getitem__", &SpikeReader::openPopulation);
+
+    bindReportReader<SomasReportReader, NodeID>(m, "Somas");
+    bindReportReader<ElementsReportReader, std::pair<NodeID, uint32_t>>(m, "Elements");
 
     py::register_exception<SonataError>(m, "SonataError");
 }

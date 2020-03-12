@@ -2,11 +2,13 @@
 
 set -euxo pipefail
 
-VENV=env
+VENV=build/venv-python-test
 
-pip install virtualenv
-rm -rf "$VENV"
-virtualenv "$VENV"
+if [[ ! -d "$VENV" ]]; then
+    # We use virtualenv instead of venv for python2 tests
+    pip install virtualenv
+    virtualenv "$VENV"
+fi
 
 set +u  # ignore errors in virtualenv's activate
 source "$VENV/bin/activate"
