@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-VENV=build/venv-python-test
+VENV=$(pwd)/build/venv-python-test/
 
 if [[ ! -d "$VENV" ]]; then
     # We use virtualenv instead of venv for python2 tests
@@ -10,13 +10,14 @@ if [[ ! -d "$VENV" ]]; then
     virtualenv "$VENV"
 fi
 
-set +u  # ignore errors in virtualenv's activate
-source "$VENV/bin/activate"
-set -u
+BIN=$VENV/bin/
 
-pip install --upgrade pip
+$BIN/pip -v install --upgrade pip setuptools wheel
 
 # install
-pip install .
-pip install nose
-nosetests python
+$BIN/pip -v install --force .
+$BIN/pip install nose
+
+# prevent the $REPO_ROOT/libsonata/ directory from interfering with the tests
+cd python
+$BIN/nosetests -s -v
