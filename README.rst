@@ -170,6 +170,193 @@ EdgePopulation
    >>> selection = population.connecting_edges([1, 2, 3], [4, 5, 6])
 
 
+Reports
+~~~~~~~
+
+SpikeReader
++++++++++++
+
+.. code-block:: pycon
+
+   >>> import libsonata
+
+   >>> spikes = libsonata.SpikeReader('path/to/H5/file')
+
+   # list populations
+   >>> spikes.get_populations_names()
+
+   # open population
+   >>> population = spikes['<name>']
+
+
+SpikePopulation
++++++++++++++++
+
+.. code-block:: pycon
+
+   # get all spikes [(node_id, timestep)]
+   >>> population.get()
+   [(5, 0.1), (2, 0.2), (3, 0.3), (2, 0.7), (3, 1.3)]
+
+   # get all spikes betwen tstart and tstop
+   >>> population.get(tstart=0.2, tstop=1.0)
+   [(2, 0.2), (3, 0.3), (2, 0.7)]
+
+   # get spikes attribute sorting (by_time, by_id, none)
+   >>> population.sorting
+   'by_time'
+
+   Pandas can be used to create a dataframe and get a better representation of the data
+
+.. code-block:: pycon
+   >>> import pandas
+
+   data = population.get()
+   df = pandas.DataFrame(data=data, columns=['ids', 'times']).set_index('times')
+   print(df)
+          ids
+   times
+   0.1      5
+   0.2      2
+   0.3      3
+   0.7      2
+   1.3      3
+
+
+SomaReportReader
+++++++++++++++++
+
+.. code-block:: pycon
+
+   >>> somas = libsonata.SomaReportReader('path/to/H5/file')
+
+   # list populations
+   >>> somas.get_populations_names()
+
+   # open population
+   >>> population_somas = somas['<name>']
+
+
+SomaReportPopulation
+++++++++++++++++++++
+
+.. code-block:: pycon
+
+   # get times (tstart, tstop, dt)
+   >>> population_somas.times
+   (0.0, 1.0, 0.1)
+
+   # get unit attributes
+   >>> population_somas.time_units
+   'ms'
+   >>> population_somas.data_units
+   'mV'
+
+   # node_ids sorted?
+   >>> population_somas.sorted
+   True
+
+   # get a list of all node ids in the selected population
+   >>> population_somas.get_node_ids()
+   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+   # get the DataFrame of the node_id values for the timesteps between tstart and tstop
+   >>> data_frame = population_somas.get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
+
+   # get the data values
+   >>> data_frame.data
+   [[13.8, 14.8], [13.9, 14.9]]
+
+   # get the list of timesteps
+   >>> data_frame.times
+   [0.8, 0.9]
+
+   # get the list of node ids
+   >>> data_frame.ids
+   [13, 14]
+
+
+Once again, pandas can be used to create a dataframe using the data, ids and times lists
+
+.. code-block:: pycon
+
+   >>> import pandas
+
+   df = pandas.DataFrame(data_frame.data, columns=data_frame.ids, index=data_frame.times)
+   print(df)
+          13    14
+   0.8  13.8  14.8
+   0.9  13.9  14.9
+
+
+ElementReportReader
++++++++++++++++++++
+
+.. code-block:: pycon
+
+   >>> elements = libsonata.ElementReportReader('path/to/H5/file')
+
+   # list populations
+   >>> elements.get_populations_names()
+
+   # open population
+   >>> population_elements = elements['<name>']
+
+
+ElementReportPopulation
++++++++++++++++++++++++
+
+.. code-block:: pycon
+
+   # get times (tstart, tstop, dt)
+   >>> population_elements.times
+   (0.0, 4.0, 0.2)
+
+   >>> population_elements.get_node_ids()
+   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+   # get the DataFrame of the node_id values for the timesteps between tstart and tstop
+   >>> data_frame = population_elements.get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
+
+   # get the data values (list of list of floats with data[time_index][element_index])
+   >>> data_frame.data
+   [[46.0, 46.1, 46.2, 46.3, 46.4, 46.5, 46.6, 46.7, 46.8, 46.9], [56.0, 56.1, 56.2, 56.3, 56.4, 56.5, 56.6, 56.7, 56.8, 56.9]]
+
+   # get the list of timesteps
+   >>> data_frame.times
+   [0.8, 1.0]
+
+   # get the list of (node id, element_id)
+   >>> data_frame.ids
+   [(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)]
+
+
+The same way than with spikes and soma reports, pandas can be used to get a better representation of the data
+
+.. code-block:: pycon
+
+   >>> import pandas
+
+   df = pandas.DataFrame(data_frame.data, columns=pandas.MultiIndex.from_tuples(data_frame.ids), index=data_frame.times)
+   print(df)
+          13                            14
+          30    30    31    31    32    32    33    33    34    34
+   0.8  46.0  46.1  46.2  46.3  46.4  46.5  46.6  46.7  46.8  46.9
+   1.0  56.0  56.1  56.2  56.3  56.4  56.5  56.6  56.7  56.8  56.9
+
+For big datasets, using numpy arrays could greatly improve the performance
+
+.. code-block:: pycon
+
+   >>> import numpy
+
+   np_data = numpy.asarray(data_frame.data)
+   np_ids = numpy.asarray(data_frame.ids).T
+   np_times = numpy.asarray(data_frame.times)
+
+   df = pandas.DataFrame(np_data, columns=pandas.MultiIndex.from_arrays(np_ids), index=np_times)
+
+
 Acknowledgements
 ----------------
 
