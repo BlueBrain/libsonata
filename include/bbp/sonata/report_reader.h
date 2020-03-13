@@ -124,8 +124,8 @@ class SONATA_API ReportReader
     mutable std::map<std::string, Population> populations_;
 };
 
-using SomasReportReader = ReportReader<NodeID>;
-using ElementsReportReader = ReportReader<std::pair<NodeID, uint32_t>>;
+using SomaReportReader = ReportReader<NodeID>;
+using ElementReportReader = ReportReader<std::pair<NodeID, uint32_t>>;
 
 }  // namespace sonata
 }  // namespace bbp
