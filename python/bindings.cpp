@@ -360,7 +360,7 @@ void bindReportReader(py::module& m, const std::string& prefix) {
 }
 
 
-PYBIND11_MODULE(libsonata, m) {
+PYBIND11_MODULE(_libsonata, m) {
     py::class_<Selection>(m,
                           "Selection",
                           "ID sequence in the form convenient for querying attributes")

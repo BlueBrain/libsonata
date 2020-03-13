@@ -9,7 +9,7 @@ endif()
 pybind11_add_module(sonata_python SYSTEM bindings.cpp)
 
 set_target_properties(sonata_python PROPERTIES
-    OUTPUT_NAME "libsonata"
+    OUTPUT_NAME "_libsonata"
 )
 
 target_link_libraries(sonata_python

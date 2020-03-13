@@ -156,7 +156,7 @@ setup(
     author="BlueBrain Project, EPFL",
     author_email="bbp-ou-nse@groupes.epfl.ch",
     classifiers=[],
-    ext_modules=[CMakeExtension("libsonata")],
+    ext_modules=[CMakeExtension("libsonata._libsonata")],
     cmdclass=lazy_dict(
         build_ext=CMakeBuild,
         test_ext=CMakeBuild,
@@ -166,5 +166,9 @@ setup(
     zip_safe=False,
     setup_requires=setup_requires,
     install_requires=install_requires,
-    use_scm_version=True,
+    use_scm_version={"local_scheme": "no-local-version",
+                     },
+    package_dir={"": "python"},
+    packages=['libsonata',
+              ],
 )
