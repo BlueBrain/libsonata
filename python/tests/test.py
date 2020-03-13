@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
-from libsonata import SpikeReader, SpikePopulation, SomasReportReader, SomasReportPopulation, ElementsReportReader, ElementsReportPopulation
+from libsonata import SpikeReader, SpikePopulation, SomaReportReader, SomaReportPopulation, ElementReportReader, ElementReportPopulation
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -254,16 +254,16 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting, "none")
 
-class TestSomasReportPopulation(unittest.TestCase):
+class TestSomaReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "somas.h5")
-        self.test_obj = SomasReportReader(path)
+        self.test_obj = SomaReportReader(path)
 
     def test_get_all_population(self):
         self.assertEqual(self.test_obj.get_populations_names(), ['All', 'soma1', 'soma2'])
 
     def test_get_population(self):
-        self.assertTrue(isinstance(self.test_obj['All'], SomasReportPopulation))
+        self.assertTrue(isinstance(self.test_obj['All'], SomaReportPopulation))
 
     def test_get_inexistant_population(self):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
@@ -278,16 +278,16 @@ class TestSomasReportPopulation(unittest.TestCase):
         self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
         self.assertEqual(list(sel.data.keys()), [13, 14])
 
-class TestElementsReportPopulation(unittest.TestCase):
+class TestElementReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "elements.h5")
-        self.test_obj = ElementsReportReader(path)
+        self.test_obj = ElementReportReader(path)
 
     def test_get_all_population(self):
         self.assertEqual(self.test_obj.get_populations_names(), ['All', 'element1', 'element42'])
 
     def test_get_population(self):
-        self.assertTrue(isinstance(self.test_obj['All'], ElementsReportPopulation))
+        self.assertTrue(isinstance(self.test_obj['All'], ElementReportPopulation))
 
     def test_get_inexistant_population(self):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')

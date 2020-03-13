@@ -24,7 +24,7 @@ TEST_CASE("SpikeReader", "[base]") {
 }
 
 TEST_CASE("ReportReader", "[base]") {
-    const SomasReportReader reader("./data/somas.h5");
+    const SomaReportReader reader("./data/somas.h5");
 
     REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "soma1", "soma2"});
 
