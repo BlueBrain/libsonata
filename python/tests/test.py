@@ -8,7 +8,7 @@ from libsonata import SpikeReader, SpikePopulation, SomasReportReader, SomasRepo
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
-PATH = os.path.join(PATH, '../tests/data')
+PATH = os.path.join(PATH, '../../tests/data')
 
 
 class TestSelection(unittest.TestCase):
