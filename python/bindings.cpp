@@ -543,8 +543,8 @@ PYBIND11_MODULE(_libsonata, m) {
              "Get list of all populations")
         .def("__getitem__", &SpikeReader::openPopulation);
 
-    bindReportReader<SomaReportReader, NodeID>(m, "Somas");
-    bindReportReader<ElementReportReader, std::pair<NodeID, uint32_t>>(m, "Elements");
+    bindReportReader<SomaReportReader, NodeID>(m, "Soma");
+    bindReportReader<ElementReportReader, std::pair<NodeID, uint32_t>>(m, "Element");
 
     py::register_exception<SonataError>(m, "SonataError");
 }
