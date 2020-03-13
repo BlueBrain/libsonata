@@ -168,6 +168,7 @@ setup(
     install_requires=install_requires,
     use_scm_version={"local_scheme": "no-local-version",
                      },
+    package_dir={"": "python"},
     packages=['libsonata',
               ],
 )

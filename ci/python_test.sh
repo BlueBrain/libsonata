@@ -18,6 +18,4 @@ $BIN/pip -v install --upgrade pip setuptools wheel
 $BIN/pip -v install --force .
 $BIN/pip install nose
 
-# prevent the $REPO_ROOT/libsonata/ directory from interfering with the tests
-cd python
 $BIN/nosetests -s -v
