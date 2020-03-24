@@ -153,8 +153,7 @@ if sys.version_info[0] == 3:
 setup(
     name="libsonata",
     description='SONATA files reader',
-    author="BlueBrain Project, EPFL",
-    author_email="bbp-ou-nse@groupes.epfl.ch",
+    author="Blue Brain Project",
     classifiers=[],
     ext_modules=[CMakeExtension("libsonata._libsonata")],
     cmdclass=lazy_dict(
