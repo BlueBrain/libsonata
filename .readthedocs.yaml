@@ -11,3 +11,7 @@ submodules:
 
 conda:
   environment: docs/environment.yml
+
+python:
+  install:
+    - requirements: docs/requirements_docs.txt
