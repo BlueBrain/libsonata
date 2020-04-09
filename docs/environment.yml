@@ -1,10 +1,10 @@
-name: stats2
+name: libsonata
 channels:
-  - javascript
+  - defaults
 dependencies:
   - python=3.6
   - hdf5
   - cmake
   - pip:
-    - ..
     - sphinx-bluebrain-theme
+    - ..
