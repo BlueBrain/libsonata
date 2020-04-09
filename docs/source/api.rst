@@ -1,5 +1,5 @@
-libsonata
-=========
+Python API
+==========
 
 .. automodule:: libsonata
    :members:

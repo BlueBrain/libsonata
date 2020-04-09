@@ -20,8 +20,7 @@
 import pkg_resources
 
 project = 'libsonata'
-copyright = '2020, Blue Brain Project'
-author = 'Blue Brain Project'
+author = 'Blue Brain Project, EPFL'
 version = pkg_resources.get_distribution("libsonata").version
 release = version
 
@@ -48,8 +47,9 @@ master_doc = "index"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-# html_theme = 'alabaster'
+html_theme = 'sphinx-bluebrain-theme'
+html_title = 'libsonata'
+html_show_sourcelink = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
