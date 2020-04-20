@@ -18,3 +18,5 @@ target_link_libraries(sonata_python
     PRIVATE fmt::fmt-header-only
     PRIVATE pybind11::module
 )
+
+add_test(NAME pytest COMMAND python tests/test.py WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
