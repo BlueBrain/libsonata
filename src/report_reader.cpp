@@ -114,6 +114,10 @@ auto SpikeReader::openPopulation(const std::string& populationName) const -> con
 }
 
 Spikes SpikeReader::Population::get(const Selection& node_ids, double tstart, double tstop) const {
+    if (node_ids.empty()) {
+        return {};
+    }
+
     tstart = tstart < 0 ? tstart_ : tstart;
     tstop = tstop < 0 ? tstop_ : tstop;
     if (tstart > tstop_ + EPSILON || tstop < tstart_ - EPSILON || tstop < tstart) {
@@ -123,9 +127,7 @@ Spikes SpikeReader::Population::get(const Selection& node_ids, double tstart, do
     auto spikes = spikes_;
     filterTimestamp(spikes, tstart, tstop);
 
-    if (!node_ids.empty()) {
-        filterNode(spikes, node_ids);
-    }
+    filterNode(spikes, node_ids);
 
     return spikes;
 }

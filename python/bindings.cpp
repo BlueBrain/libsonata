@@ -390,8 +390,6 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
         .def("__or__", &bbp::sonata::operator|, "Union of selections")
         .def("__and__", &bbp::sonata::operator&, "Intersection of selections");
-    py::implicitly_convertible<py::list, Selection>();
-    py::implicitly_convertible<py::tuple, Selection>();
 
     bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
         .def(
