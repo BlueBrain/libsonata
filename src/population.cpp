@@ -124,7 +124,7 @@ Selection::Selection(const Selection::Values& values) {
 
 
 Selection Selection::fromValues(const Selection::Values& values) {
-    return fromValues(values.begin(), values.end());
+    return Selection(values);
 }
 
 
