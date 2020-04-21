@@ -11,6 +11,9 @@ TEST_CASE("Selection", "[base]") {
         CHECK_THROWS_AS(Selection({{0, 2}, {3, 3}}), SonataError);
         CHECK_THROWS_AS(Selection({{5, 3}}), SonataError);
     }
+    SECTION("CTORWithValues") {
+        CHECK(Selection{1, 3, 4, 1}.ranges() == Selection::Ranges{{1, 2}, {3, 5}, {1, 2}});
+    }
     SECTION("fromValues") {
         const auto selection = Selection::fromValues({1, 3, 4, 1});
         CHECK(selection.ranges() == Selection::Ranges{{1, 2}, {3, 5}, {1, 2}});
