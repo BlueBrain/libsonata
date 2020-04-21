@@ -104,6 +104,25 @@ Selection::Selection(const Selection::Ranges& ranges)
 }
 
 
+Selection::Selection(const Selection::Values& values) {
+    Selection::Range range{0, 0};
+    for (const auto& value : values) {
+        if (value == range.second) {
+            ++range.second;
+        } else {
+            if (range.first < range.second) {
+                ranges_.push_back(range);
+            }
+            range.first = v;
+            range.second = v + 1;
+        }
+    }
+    if (range.first < range.second) {
+        ranges_.push_back(range);
+    }
+}
+
+
 Selection Selection::fromValues(const Selection::Values& values) {
     return fromValues(values.begin(), values.end());
 }

@@ -34,6 +34,7 @@ class SONATA_API Selection
 
     explicit Selection(Ranges&& ranges);
     explicit Selection(const Ranges& ranges);
+    explicit Selection(const Values& values);
 
     template <typename Iterator>
     static Selection fromValues(Iterator first, Iterator last);
