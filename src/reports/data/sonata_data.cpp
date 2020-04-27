@@ -23,7 +23,7 @@ SonataData::SonataData(const std::string& report_name,
     , hdf5_writer_(std::make_unique<HDF5Writer>(report_name))
     , nodes_(nodes) {
     prepare_buffer(max_buffer_size);
-    index_pointers_.resize(nodes->size() + 1);
+    index_pointers_.resize(nodes->size());
     time_ = {tstart, tend, dt};
 
     reporting_period_ = static_cast<int>(dt / SonataReport::atomic_step_);
@@ -206,6 +206,11 @@ void SonataData::prepare_dataset() {
     logger->trace("Total elements are: {} and element offset is: {}",
                   total_elements_,
                   element_offset);
+
+    int last_rank = Implementation::get_last_rank(report_name_, SonataReport::rank_);
+    if(SonataReport::rank_ == last_rank) {
+        index_pointers_.resize(nodes_->size() + 1);
+    }
 
     // Prepare index pointers
     if (!index_pointers_.empty()) {

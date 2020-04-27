@@ -33,6 +33,9 @@ struct Implementation {
     static hsize_t get_offset(const std::string& report_name, hsize_t value) {
         return TImpl::get_offset(report_name, value);
     }
+    static int get_last_rank(const std::string& report_name, int value) {
+        return TImpl::get_last_rank(report_name, value);
+    }
     static hsize_t get_global_dims(const std::string& report_name, hsize_t value) {
         return TImpl::get_global_dims(report_name, value);
     }
@@ -186,6 +189,12 @@ struct ParallelImplementation {
         return offset;
     };
 
+    static int get_last_rank(const std::string& report_name, int value) {
+        int last_rank = 0;
+        MPI_Allreduce(&value, &last_rank, 1, MPI_INT, MPI_MAX, get_Comm(report_name));
+        return last_rank;
+    }
+
     static hsize_t get_global_dims(const std::string& report_name, hsize_t value) {
         hsize_t global_dims = value;
         MPI_Allreduce(&value, &global_dims, 1, MPI_UNSIGNED_LONG, MPI_SUM, get_Comm(report_name));
@@ -291,6 +300,9 @@ struct SerialImplementation {
         return std::make_tuple(H5Pcreate(H5P_DATASET_XFER), H5Pcreate(H5P_DATASET_XFER));
     }
     static hsize_t get_offset(const std::string& /*report_name*/, hsize_t /*value*/) {
+        return 0;
+    };
+    static int get_last_rank(const std::string& /*report_name*/, hsize_t /*value*/) {
         return 0;
     };
     static hsize_t get_global_dims(const std::string& /*report_name*/, hsize_t value) {
