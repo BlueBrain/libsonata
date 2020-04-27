@@ -13,3 +13,4 @@ A python and C++ interface to the SONATA format.
 
    Home <self>
    api
+   cpp
