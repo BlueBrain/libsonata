@@ -18,6 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 import pkg_resources
+import subprocess
 
 project = 'libsonata'
 author = 'Blue Brain Project, EPFL'
@@ -57,3 +58,10 @@ autodoc_default_options = {"members": True, "imported-members": True}
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
+
+def doxygen_build(app):
+    """Build the doxygen output for inclusion in the sphinx docs."""
+    subprocess.call(["doxygen", os.path.join(app.sourcedir, "Doxyfile")], cwd=app.buildir)
+
+def setup(app):
+    app.connect('build-inited', doxygen_build)
