@@ -208,7 +208,7 @@ void SonataData::prepare_dataset() {
                   element_offset);
 
     int last_rank = Implementation::get_last_rank(report_name_, SonataReport::rank_);
-    if(SonataReport::rank_ == last_rank) {
+    if (SonataReport::rank_ == last_rank) {
         index_pointers_.resize(nodes_->size() + 1);
     }
 
