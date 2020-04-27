@@ -6,5 +6,6 @@ dependencies:
   - hdf5
   - cmake
   - pip:
+    - sphinx<3.0.0
     - sphinx-bluebrain-theme
     - ..[docs]
