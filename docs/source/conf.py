@@ -17,6 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
+import os
 import pkg_resources
 import subprocess
 
@@ -61,7 +62,7 @@ autodoc_default_options = {"members": True, "imported-members": True}
 
 def doxygen_build(app):
     """Build the doxygen output for inclusion in the sphinx docs."""
-    subprocess.call(["doxygen", os.path.join(app.sourcedir, "Doxyfile")], cwd=app.buildir)
+    subprocess.call(["doxygen", "Doxyfile"], cwd=app.srcdir)
 
 def setup(app):
-    app.connect('build-inited', doxygen_build)
+    app.connect('builder-inited', doxygen_build)
