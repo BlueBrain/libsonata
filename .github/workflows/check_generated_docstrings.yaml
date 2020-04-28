@@ -12,6 +12,6 @@ jobs:
           with:
             submodules: recursive
         - name: Install packages
-          run: sudo apt-get update && sudo apt-get install python3-venv
+          run: sudo apt-get update && sudo apt-get install python3-venv && sudo apt-get install clang
         - name: check_generated_docstrings
           run: ci/check_generated_docstrings.sh
