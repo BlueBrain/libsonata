@@ -166,8 +166,9 @@ class SONATA_API Population
     /**
      * Get all allowed attribute enumeration values
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @throw if there is no such attribute for the population
+     * \param name is a string to allow attributes not defined in spec
+     *
+     * \throw if there is no such attribute for the population
      */
     std::vector<std::string> enumerationValues(const std::string& name) const;
 

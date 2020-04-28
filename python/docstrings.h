@@ -1,4 +1,3 @@
-/* clang-format off */
 /*
   This file contains docstrings for the Python bindings.
   Do not edit! These were automatically extracted by mkdoc.py
@@ -117,8 +116,11 @@ NATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes)doc";
 static const char *__doc_bbp_sonata_Population_enumerationValues =
 R"doc(Get all allowed attribute enumeration values
 
-@param name is a string to allow attributes not defined in spec @throw
-if there is no such attribute for the population)doc";
+Parameter ``name``:
+    is a string to allow attributes not defined in spec
+
+Throws:
+    if there is no such attribute for the population)doc";
 
 static const char *__doc_bbp_sonata_Population_getAttribute =
 R"doc(Get attribute values for given Selection

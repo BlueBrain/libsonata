@@ -7,6 +7,8 @@
 #include <bbp/sonata/nodes.h>
 #include <bbp/sonata/report_reader.h>
 
+#include "docstrings.h"
+
 #include <fmt/format.h>
 
 #include <cstdint>
@@ -107,6 +109,8 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
     return asArray(obj.getDynamicsAttribute<T>(name, selection, defaultValue.cast<T>()));
 }
 
+// create a macro to reduce repetition for docstrings
+#define DOC_POP(x) DOC(bbp, sonata, Population, x)
 
 // Emulating generic lambdas in pre-C++14
 #define DISPATCH_TYPE(dtype, func, ...)                               \
@@ -168,7 +172,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
         .def("enumeration_values",
              &Population::enumerationValues,
              py::arg("name"),
-             "Get all allowed enumeration values for a given attribute name")
+             DOC_POP(enumerationValues))
         .def(
             "get_attribute",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
