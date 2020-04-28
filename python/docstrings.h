@@ -1,3 +1,4 @@
+/* clang-format off */
 /*
   This file contains docstrings for the Python bindings.
   Do not edit! These were automatically extracted by mkdoc.py
