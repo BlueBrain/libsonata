@@ -125,9 +125,9 @@ class SONATA_API Population
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @throw if there is no such attribute for the population
-     * @throw if the attribute is not defined for _any_ element from the selection
+     * \param name is a string to allow attributes not defined in spec
+     * \throw if there is no such attribute for the population
+     * \throw if the attribute is not defined for _any_ element from the selection
      */
     template <typename T>
     std::vector<T> getAttribute(const std::string& name, const Selection& selection) const;
@@ -141,9 +141,9 @@ class SONATA_API Population
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @param default is a value to use for groups w/o given attribute
-     * @throw if there is no such attribute for the population
+     * \param name is a string to allow attributes not defined in spec
+     * \param default is a value to use for groups w/o given attribute
+     * \throw if there is no such attribute for the population
      */
     template <typename T>
     std::vector<T> getAttribute(const std::string& name,
@@ -156,9 +156,9 @@ class SONATA_API Population
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
-     * @param name is a string to allow enumeration attributes not defined in spec
-     * @throw if there is no such attribute for the population
-     * @throw if the attribute is not defined for _any_ element from the selection
+     * \param name is a string to allow enumeration attributes not defined in spec
+     * \throw if there is no such attribute for the population
+     * \throw if the attribute is not defined for _any_ element from the selection
      */
     template <typename T>
     std::vector<T> getEnumeration(const std::string& name, const Selection& selection) const;
@@ -175,7 +175,7 @@ class SONATA_API Population
     /**
      * Get attribute data type, optionally translating enumeration types
 
-     * @internal
+     * \internal
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
@@ -190,9 +190,9 @@ class SONATA_API Population
     /**
      * Get dynamics attribute values for given Selection
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @throw if there is no such attribute for the population
-     * @throw if the attribute is not defined for _any_ edge from the edge selection
+     * \param name is a string to allow attributes not defined in spec
+     * \throw if there is no such attribute for the population
+     * \throw if the attribute is not defined for _any_ edge from the edge selection
      */
     template <typename T>
     std::vector<T> getDynamicsAttribute(const std::string& name, const Selection& selection) const;
@@ -200,9 +200,9 @@ class SONATA_API Population
     /**
      * Get dynamics attribute values for given Selection
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @param default is a value to use for edge groups w/o given attribute
-     * @throw if there is no such attribute for the population
+     * \param name is a string to allow attributes not defined in spec
+     * \param default is a value to use for edge groups w/o given attribute
+     * \throw if there is no such attribute for the population
      */
     template <typename T>
     std::vector<T> getDynamicsAttribute(const std::string& name,
@@ -212,7 +212,7 @@ class SONATA_API Population
     /**
      * Get dynamics attribute data type
 
-     * @internal
+     * \internal
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
@@ -260,7 +260,7 @@ class SONATA_API PopulationStorage
 
     /**
      * Open specific population.
-     * @throw if no population with such a name exists
+     * \throw if no population with such a name exists
      */
     std::shared_ptr<Population> openPopulation(const std::string& name) const;
 

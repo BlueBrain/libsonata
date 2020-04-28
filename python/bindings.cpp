@@ -159,10 +159,10 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             imbueElementName("Total number of {elem}s in the population").c_str())
         .def_property_readonly("attribute_names",
                                &Population::attributeNames,
-                               "Set of attribute names")
+                               DOC_POP(attributeNames))
         .def_property_readonly("enumeration_names",
                                &Population::enumerationNames,
-                               "Set of enumeration names")
+                               DOC_POP(enumerationNames))
         .def("__len__",
              &Population::size,
              imbueElementName("Get the total number of {elem}s in the population").c_str())
@@ -215,7 +215,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                 .c_str())
         .def_property_readonly("dynamics_attribute_names",
                                &Population::dynamicsAttributeNames,
-                               "Set of dynamics attribute names")
+                               DOC_POP(dynamicsAttributeNames))
         .def(
             "get_dynamics_attribute",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
