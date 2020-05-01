@@ -277,7 +277,7 @@ template <typename Storage>
 py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const char* popClsName) {
     return py::class_<Storage>(m,
                                clsName,
-                               fmt::format("Collection of {}`s stored in H5 file (+ optional CSV)",
+                               fmt::format("Collection of {}'s stored in H5 file (+ optional CSV)",
                                            popClsName)
                                    .c_str())
         .def(py::init<const std::string&, const std::string&>(),
