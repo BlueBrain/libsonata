@@ -126,6 +126,7 @@ class SONATA_API Population
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
      * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the attribute values from
      * \throw if there is no such attribute for the population
      * \throw if the attribute is not defined for _any_ element from the selection
      */
@@ -142,6 +143,7 @@ class SONATA_API Population
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
      * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the attribute values from
      * \param default is a value to use for {element}s without the given attribute
      * \throw if there is no such attribute for the population
      */
@@ -157,6 +159,7 @@ class SONATA_API Population
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
      * \param name is a string to allow enumeration attributes not defined in spec
+     * \param selection is a selection to retrieve the enumeration values from
      * \throw if there is no such attribute for the population
      * \throw if the attribute is not defined for _any_ element from the selection
      */
@@ -201,6 +204,7 @@ class SONATA_API Population
      * Get dynamics attribute values for given {element} Selection
      *
      * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the dynamics attribute values from
      * \param default is a value to use for {element}s without the given attribute
      * \throw if there is no such attribute for the population
      */

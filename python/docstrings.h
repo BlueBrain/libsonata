@@ -136,6 +136,9 @@ NATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
 Parameter ``name``:
     is a string to allow attributes not defined in spec
 
+Parameter ``selection``:
+    is a selection to retrieve the attribute values from
+
 Throws:
     if there is no such attribute for the population
 
@@ -154,6 +157,9 @@ NATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
 
 Parameter ``name``:
     is a string to allow attributes not defined in spec
+
+Parameter ``selection``:
+    is a selection to retrieve the attribute values from
 
 Parameter ``default``:
     is a value to use for {element}s without the given attribute
@@ -180,6 +186,9 @@ R"doc(Get dynamics attribute values for given {element} Selection
 Parameter ``name``:
     is a string to allow attributes not defined in spec
 
+Parameter ``selection``:
+    is a selection to retrieve the dynamics attribute values from
+
 Parameter ``default``:
     is a value to use for {element}s without the given attribute
 
@@ -194,6 +203,9 @@ NATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
 
 Parameter ``name``:
     is a string to allow enumeration attributes not defined in spec
+
+Parameter ``selection``:
+    is a selection to retrieve the enumeration values from
 
 Throws:
     if there is no such attribute for the population
