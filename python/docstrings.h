@@ -173,6 +173,9 @@ R"doc(Get dynamics attribute values for given {element} Selection
 Parameter ``name``:
     is a string to allow attributes not defined in spec
 
+Parameter ``selection``:
+    is a selection to retrieve the dynamics attribute values from
+
 Throws:
     if there is no such attribute for the population
 

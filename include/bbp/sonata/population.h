@@ -194,6 +194,7 @@ class SONATA_API Population
      * Get dynamics attribute values for given {element} Selection
      *
      * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the dynamics attribute values from
      * \throw if there is no such attribute for the population
      * \throw if the attribute is not defined for _any_ edge from the edge selection
      */
