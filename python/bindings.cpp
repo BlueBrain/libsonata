@@ -152,11 +152,11 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
     };
     return py::class_<Population, std::shared_ptr<Population>>(m, clsName, docString)
         .def(py::init<const std::string&, const std::string&, const std::string&>())
-        .def_property_readonly("name", &Population::name, "Population name")
+        .def_property_readonly("name", &Population::name, DOC_POP(name))
         .def_property_readonly(
             "size",
             &Population::size,
-            imbueElementName("Total number of {elem}s in the population").c_str())
+            imbueElementName(DOC_POP(size)).c_str())
         .def_property_readonly("attribute_names",
                                &Population::attributeNames,
                                DOC_POP(attributeNames))
@@ -165,10 +165,10 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                                DOC_POP(enumerationNames))
         .def("__len__",
              &Population::size,
-             imbueElementName("Get the total number of {elem}s in the population").c_str())
+             imbueElementName(DOC_POP(size)).c_str())
         .def("select_all",
              &Population::selectAll,
-             imbueElementName("Get selection of all {elem}s in the population").c_str())
+             imbueElementName(DOC_POP(selectAll)).c_str())
         .def("enumeration_values",
              &Population::enumerationValues,
              py::arg("name"),
@@ -182,9 +182,8 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             py::arg("name"),
             py::arg(imbueElementName("{elem}_id").c_str()),
-            imbueElementName("Get attribute value for a given {elem}.\n"
-                             "Raises an exception if attribute is not defined for this {elem}.")
-                .c_str())
+            imbueElementName("Get attribute value for a given {element}.\n"
+                             "See below for details.").c_str())
         .def(
             "get_attribute",
             [](Population& obj, const std::string& name, const Selection& selection) {
@@ -193,9 +192,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             "name"_a,
             "selection"_a,
-            imbueElementName("Get attribute values for a given {elem} selection.\n"
-                             "Raises an exception if attribute is not defined for some {elem}s.")
-                .c_str())
+            imbueElementName(DOC_POP(getAttribute)).c_str())
         .def(
             "get_attribute",
             [](Population& obj,
@@ -209,10 +206,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             "name"_a,
             "selection"_a,
             "default_value"_a,
-            imbueElementName("Get attribute values for a given {elem} selection.\n"
-                             "Use default value for {elem}s where attribute is not defined\n"
-                             "(it should still be one of population attributes).")
-                .c_str())
+            imbueElementName(DOC_POP(getAttribute_2)).c_str())
         .def_property_readonly("dynamics_attribute_names",
                                &Population::dynamicsAttributeNames,
                                DOC_POP(dynamicsAttributeNames))

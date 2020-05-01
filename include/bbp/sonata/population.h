@@ -117,7 +117,7 @@ class SONATA_API Population
     const std::set<std::string>& enumerationNames() const;
 
     /**
-     * Get attribute values for given Selection
+     * Get attribute values for given {element} Selection
      *
      * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
@@ -133,7 +133,7 @@ class SONATA_API Population
     std::vector<T> getAttribute(const std::string& name, const Selection& selection) const;
 
     /**
-     * Get attribute values for given Selection
+     * Get attribute values for given {element} Selection
      *
      * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
