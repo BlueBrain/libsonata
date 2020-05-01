@@ -74,10 +74,12 @@ static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage_3 = R"do
 static const char *__doc_bbp_sonata_PopulationStorage_impl = R"doc()doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage_openPopulation =
-R"doc(Open specific population. @throw if no population with such a name
-exists)doc";
+R"doc(Open specific population.
 
-static const char *__doc_bbp_sonata_PopulationStorage_populationNames = R"doc(List all populations.)doc";
+Throws:
+    if no population with such a name exists)doc";
+
+static const char *__doc_bbp_sonata_PopulationStorage_populationNames = R"doc(Set of all population names.)doc";
 
 static const char *__doc_bbp_sonata_Population_Impl = R"doc()doc";
 
@@ -90,7 +92,7 @@ static const char *__doc_bbp_sonata_Population_Population_3 = R"doc()doc";
 static const char *__doc_bbp_sonata_Population_attributeDataType =
 R"doc(Get attribute data type, optionally translating enumeration types
 
-@internal It is a helper method for dynamic languages bindings; and is
+\internal It is a helper method for dynamic languages bindings; and is
 not intended for use in the ordinary client C++ code.)doc";
 
 static const char *__doc_bbp_sonata_Population_attributeNames =
@@ -100,7 +102,7 @@ attributes in groups))doc";
 static const char *__doc_bbp_sonata_Population_dynamicsAttributeDataType =
 R"doc(Get dynamics attribute data type
 
-@internal It is a helper method for dynamic languages bindings; and is
+\internal It is a helper method for dynamic languages bindings; and is
 not intended for use in the ordinary client C++ code.)doc";
 
 static const char *__doc_bbp_sonata_Population_dynamicsAttributeNames =
@@ -123,7 +125,7 @@ Throws:
     if there is no such attribute for the population)doc";
 
 static const char *__doc_bbp_sonata_Population_getAttribute =
-R"doc(Get attribute values for given Selection
+R"doc(Get attribute values for given {element} Selection
 
 If string values are requested and the attribute is a explicit
 enumeration, values will be resolved to strings.
@@ -131,12 +133,18 @@ enumeration, values will be resolved to strings.
 See also: https://github.com/AllenInstitute/sonata/blob/master/docs/SO
 NATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
 
-@param name is a string to allow attributes not defined in spec @throw
-if there is no such attribute for the population @throw if the
-attribute is not defined for _any_ element from the selection)doc";
+Parameter ``name``:
+    is a string to allow attributes not defined in spec
+
+Throws:
+    if there is no such attribute for the population
+
+Throws:
+    if the attribute is not defined for _any_ element from the
+    selection)doc";
 
 static const char *__doc_bbp_sonata_Population_getAttribute_2 =
-R"doc(Get attribute values for given Selection
+R"doc(Get attribute values for given {element} Selection
 
 If string values are requested and the attribute is a explicit
 enumeration, values will be resolved to strings.
@@ -144,33 +152,55 @@ enumeration, values will be resolved to strings.
 See also: https://github.com/AllenInstitute/sonata/blob/master/docs/SO
 NATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
 
-@param name is a string to allow attributes not defined in spec @param
-default is a value to use for groups w/o given attribute @throw if
-there is no such attribute for the population)doc";
+Parameter ``name``:
+    is a string to allow attributes not defined in spec
+
+Parameter ``default``:
+    is a value to use for {element}s without the given attribute
+
+Throws:
+    if there is no such attribute for the population)doc";
 
 static const char *__doc_bbp_sonata_Population_getDynamicsAttribute =
-R"doc(Get dynamics attribute values for given Selection
+R"doc(Get dynamics attribute values for given {element} Selection
 
-@param name is a string to allow attributes not defined in spec @throw
-if there is no such attribute for the population @throw if the
-attribute is not defined for _any_ edge from the edge selection)doc";
+Parameter ``name``:
+    is a string to allow attributes not defined in spec
+
+Throws:
+    if there is no such attribute for the population
+
+Throws:
+    if the attribute is not defined for _any_ edge from the edge
+    selection)doc";
 
 static const char *__doc_bbp_sonata_Population_getDynamicsAttribute_2 =
-R"doc(Get dynamics attribute values for given Selection
+R"doc(Get dynamics attribute values for given {element} Selection
 
-@param name is a string to allow attributes not defined in spec @param
-default is a value to use for edge groups w/o given attribute @throw
-if there is no such attribute for the population)doc";
+Parameter ``name``:
+    is a string to allow attributes not defined in spec
+
+Parameter ``default``:
+    is a value to use for {element}s without the given attribute
+
+Throws:
+    if there is no such attribute for the population)doc";
 
 static const char *__doc_bbp_sonata_Population_getEnumeration =
-R"doc(Get enumeration values for given attribute and Selection
+R"doc(Get enumeration values for given attribute and {element} Selection
 
 See also: https://github.com/AllenInstitute/sonata/blob/master/docs/SO
 NATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
 
-@param name is a string to allow enumeration attributes not defined in
-spec @throw if there is no such attribute for the population @throw if
-the attribute is not defined for _any_ element from the selection)doc";
+Parameter ``name``:
+    is a string to allow enumeration attributes not defined in spec
+
+Throws:
+    if there is no such attribute for the population
+
+Throws:
+    if the attribute is not defined for _any_ element from the
+    selection)doc";
 
 static const char *__doc_bbp_sonata_Population_impl = R"doc()doc";
 

@@ -142,7 +142,7 @@ class SONATA_API Population
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
      * \param name is a string to allow attributes not defined in spec
-     * \param default is a value to use for groups w/o given attribute
+     * \param default is a value to use for {element}s without the given attribute
      * \throw if there is no such attribute for the population
      */
     template <typename T>
@@ -151,7 +151,7 @@ class SONATA_API Population
                                 const T& defaultValue) const;
 
     /**
-     * Get enumeration values for given attribute and Selection
+     * Get enumeration values for given attribute and {element} Selection
      *
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
@@ -188,7 +188,7 @@ class SONATA_API Population
     const std::set<std::string>& dynamicsAttributeNames() const;
 
     /**
-     * Get dynamics attribute values for given Selection
+     * Get dynamics attribute values for given {element} Selection
      *
      * \param name is a string to allow attributes not defined in spec
      * \throw if there is no such attribute for the population
@@ -198,10 +198,10 @@ class SONATA_API Population
     std::vector<T> getDynamicsAttribute(const std::string& name, const Selection& selection) const;
 
     /**
-     * Get dynamics attribute values for given Selection
+     * Get dynamics attribute values for given {element} Selection
      *
      * \param name is a string to allow attributes not defined in spec
-     * \param default is a value to use for edge groups w/o given attribute
+     * \param default is a value to use for {element}s without the given attribute
      * \throw if there is no such attribute for the population
      */
     template <typename T>
@@ -253,8 +253,7 @@ class SONATA_API PopulationStorage
     ~PopulationStorage() noexcept;
 
     /**
-     * List all populations.
-     *
+     * Set of all population names.
      */
     std::set<std::string> populationNames() const;
 

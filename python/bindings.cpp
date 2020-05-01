@@ -111,6 +111,7 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
 
 // create a macro to reduce repetition for docstrings
 #define DOC_POP(x) DOC(bbp, sonata, Population, x)
+#define DOC_POP_STOR(x) DOC(bbp, sonata, PopulationStorage, x)
 
 // Emulating generic lambdas in pre-C++14
 #define DISPATCH_TYPE(dtype, func, ...)                               \
@@ -148,7 +149,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
     m.attr("version") = version();
 
     const auto imbueElementName = [](const char* msg) {
-        return fmt::format(msg, fmt::arg("elem", Population::ELEMENT));
+        return fmt::format(msg, fmt::arg("element", Population::ELEMENT));
     };
     return py::class_<Population, std::shared_ptr<Population>>(m, clsName, docString)
         .def(py::init<const std::string&, const std::string&, const std::string&>())
@@ -181,7 +182,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                 DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
             },
             py::arg("name"),
-            py::arg(imbueElementName("{elem}_id").c_str()),
+            py::arg(imbueElementName("{element}_id").c_str()),
             imbueElementName("Get attribute value for a given {element}.\n"
                              "See below for details.").c_str())
         .def(
@@ -218,10 +219,9 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                 DISPATCH_TYPE(dtype, getDynamicsAttribute, obj, name, selection);
             },
             py::arg("name"),
-            py::arg(imbueElementName("{elem}_id").c_str()),
-            imbueElementName("Get dynamics attribute value for a given {elem}.\n"
-                             "Raises an exception if attribute is not defined for this {elem}.")
-                .c_str())
+            py::arg(imbueElementName("{element}_id").c_str()),
+            imbueElementName("Get dynamics attribute value for a given {element}.\n"
+                             "See below for details.").c_str())
         .def(
             "get_dynamics_attribute",
             [](Population& obj, const std::string& name, const Selection& selection) {
@@ -230,9 +230,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             "name"_a,
             "selection"_a,
-            imbueElementName("Get dynamics attribute values for a given {elem} selection.\n"
-                             "Raises an exception if attribute is not defined for some {elem}s.")
-                .c_str())
+            imbueElementName(DOC_POP(getDynamicsAttribute)).c_str())
         .def(
             "get_dynamics_attribute",
             [](Population& obj,
@@ -250,10 +248,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             "name"_a,
             "selection"_a,
             "default_value"_a,
-            imbueElementName("Get dynamics attribute values for a given {elem} selection.\n"
-                             "Use default value for {elem}s where attribute is not defined\n"
-                             "(it should still be one of population attributes).")
-                .c_str())
+            imbueElementName(DOC_POP(getDynamicsAttribute_2)).c_str())
         .def(
             "get_enumeration",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
@@ -262,11 +257,10 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                 DISPATCH_TYPE(dtype, getEnumerationVector, obj, name, selection);
             },
             "name"_a,
-            py::arg(imbueElementName("{elem}_id").c_str()),
+            py::arg(imbueElementName("{element}_id").c_str()),
             imbueElementName(
-                "Get enumeration values for a given {elem} selection.\n"
-                "Raises an exception if the enumeration is not defined for some {elem}s.")
-                .c_str())
+                "Get enumeration values for a given {element}.\n"
+                "See below for details.").c_str())
         .def(
             "get_enumeration",
             [](Population& obj, const std::string& name, const Selection& selection) {
@@ -275,10 +269,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             "name"_a,
             "selection"_a,
-            imbueElementName(
-                "Get enumeration values for a given {elem} selection.\n"
-                "Raises an exception if the enumeration is not defined for some {elem}s.")
-                .c_str());
+            imbueElementName(DOC_POP(enumerationValues)).c_str());
 }
 
 
@@ -294,7 +285,7 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
              "csv_filepath"_a = "")
         .def_property_readonly("population_names",
                                &Storage::populationNames,
-                               "Set of population names")
+                               DOC_POP_STOR(populationNames))
         .def("open_population",
              &Storage::openPopulation,
              "name"_a,
