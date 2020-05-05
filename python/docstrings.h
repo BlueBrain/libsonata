@@ -61,7 +61,7 @@ Note: This does not match Dynamics_params datasets)doc";
 
 static const char *__doc_bbp_sonata_Population = R"doc()doc";
 
-static const char *__doc_bbp_sonata_PopulationStorage = R"doc()doc";
+static const char *__doc_bbp_sonata_PopulationStorage = R"doc(Collection of {PopulationClass}s stored in a H5 file and optional CSV.)doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage_Impl = R"doc()doc";
 
@@ -74,12 +74,15 @@ static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage_3 = R"do
 static const char *__doc_bbp_sonata_PopulationStorage_impl = R"doc()doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage_openPopulation =
-R"doc(Open specific population.
+R"doc(Open a specific {PopulationClass} by name
+
+Parameter ``name``:
+    the name of the population to open
 
 Throws:
     if no population with such a name exists)doc";
 
-static const char *__doc_bbp_sonata_PopulationStorage_populationNames = R"doc(Set of all population names.)doc";
+static const char *__doc_bbp_sonata_PopulationStorage_populationNames = R"doc(Set of all {PopulationClass} names)doc";
 
 static const char *__doc_bbp_sonata_Population_Impl = R"doc()doc";
 

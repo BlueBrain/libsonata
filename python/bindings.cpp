@@ -275,21 +275,22 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
 
 template <typename Storage>
 py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const char* popClsName) {
+    const auto imbuePopulationClassName = [popClsName](const char* msg) {
+        return fmt::format(msg, fmt::arg("PopulationClass", popClsName));
+    };
     return py::class_<Storage>(m,
                                clsName,
-                               fmt::format("Collection of {}'s stored in H5 file (+ optional CSV)",
-                                           popClsName)
-                                   .c_str())
+                               imbuePopulationClassName(DOC(bbp, sonata, PopulationStorage)).c_str())
         .def(py::init<const std::string&, const std::string&>(),
              "h5_filepath"_a,
              "csv_filepath"_a = "")
         .def_property_readonly("population_names",
                                &Storage::populationNames,
-                               DOC_POP_STOR(populationNames))
+                               imbuePopulationClassName(DOC_POP_STOR(populationNames)).c_str())
         .def("open_population",
              &Storage::openPopulation,
              "name"_a,
-             fmt::format("Get {} for a given population name", popClsName).c_str());
+             imbuePopulationClassName(DOC_POP_STOR(openPopulation)).c_str());
 }
 }  // unnamed namespace
 

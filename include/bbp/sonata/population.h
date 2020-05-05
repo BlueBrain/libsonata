@@ -245,6 +245,9 @@ std::vector<std::string> Population::getAttribute<std::string>(const std::string
 
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * Collection of {PopulationClass}s stored in a H5 file and optional CSV.
+ */
 template <typename Population>
 class SONATA_API PopulationStorage
 {
@@ -258,12 +261,13 @@ class SONATA_API PopulationStorage
     ~PopulationStorage() noexcept;
 
     /**
-     * Set of all population names.
+     * Set of all {PopulationClass} names
      */
     std::set<std::string> populationNames() const;
 
     /**
-     * Open specific population.
+     * Open a specific {PopulationClass} by name
+     * \param name the name of the population to open
      * \throw if no population with such a name exists
      */
     std::shared_ptr<Population> openPopulation(const std::string& name) const;
