@@ -3,7 +3,7 @@ cmake_policy(VERSION 3.3)
 
 if(NOT SONATA_VERSION)
     execute_process(COMMAND git describe --tags
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     RESULT_VARIABLE GIT_VERSION_FAILED
                     OUTPUT_VARIABLE GIT_PKG_VERSION_FULL
                     ERROR_VARIABLE GIT_VERSION_ERROR
