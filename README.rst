@@ -186,4 +186,4 @@ This project/research has received funding from the European Union’s Horizon 2
              :alt: documentation status
 
 .. substitutions
-.. |banner| image:: doc/source/_images/libSonataLogo.jpg
+.. |banner| image:: docs/source/_images/libSonataLogo.jpg
