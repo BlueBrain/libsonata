@@ -166,7 +166,7 @@ setup(
     setup_requires=setup_requires,
     install_requires=install_requires,
     extras_require={
-        'docs': ['sphinx', 'sphinx-bluebrain-theme'],
+        'docs': ['sphinx-bluebrain-theme'],
     },
     use_scm_version={"local_scheme": "no-local-version",
                      },
