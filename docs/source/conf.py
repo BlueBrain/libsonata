@@ -51,6 +51,10 @@ html_theme = "sphinx-bluebrain-theme"
 html_title = "libsonata"
 html_show_sourcelink = False
 html_extra_path = ["doxygen"]
+html_theme_options = {
+    "repo_url": "https://github.com/BlueBrain/libsonata/",
+    "repo_name": "BlueBrain/libsonata"
+}
 
 autodoc_default_options = {"members": True, "imported-members": True}
 autodoc_docstring_signature = True
