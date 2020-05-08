@@ -150,10 +150,17 @@ setup_requires = [
 if sys.version_info[0] == 3:
     setup_requires.append(REQUIRED_NUMPY_VERSION)
 
+with open('README.rst') as f:
+    README = f.read()
+
 setup(
     name="libsonata",
     description='SONATA files reader',
     author="Blue Brain Project, EPFL",
+    long_description=README,
+    long_description_content_type='text/x-rst',
+    license="LGPLv3",
+    url='https://github.com/BlueBrain/libsonata',
     classifiers=[],
     ext_modules=[CMakeExtension("libsonata._libsonata")],
     cmdclass=lazy_dict(
