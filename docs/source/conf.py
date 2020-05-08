@@ -19,7 +19,6 @@
 
 import os
 import pkg_resources
-import shutil
 import subprocess
 
 project = "libsonata"
@@ -51,6 +50,7 @@ master_doc = "index"
 html_theme = "sphinx-bluebrain-theme"
 html_title = "libsonata"
 html_show_sourcelink = False
+html_extra_path = ["doxygen"]
 
 autodoc_default_options = {"members": True, "imported-members": True}
 autodoc_docstring_signature = True
@@ -64,7 +64,6 @@ autodoc_docstring_signature = True
 def doxygen_build(app):
     """Build the doxygen output for inclusion in the sphinx docs."""
     subprocess.call(["doxygen", "Doxyfile"], cwd=app.srcdir)
-    shutil.copytree(os.path.join(app.confdir, "cpp"), os.path.join(app.outdir, "cpp"))
 
 
 def setup(app):
