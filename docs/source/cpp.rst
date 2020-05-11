@@ -1,4 +1,8 @@
 C++ API
 =======
 
-.. iframe:: cpp/annotated.html
+.. toctree::
+   :hidden:
+   :glob:
+
+   cpp/**
