@@ -4,5 +4,5 @@ build
 libsonata.cpython-*.so
 python/__pycache__/
 *.pyc
-venv
+venv/
 cpp/

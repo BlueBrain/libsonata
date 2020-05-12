@@ -179,7 +179,7 @@ This project/research has received funding from the European Union’s Horizon 2
                 :target: https://github.com/BlueBrain/libsonata/blob/master/LICENSE.txt
 
 .. |coverage| image:: https://coveralls.io/repos/github/BlueBrain/libsonata/badge.svg
-   :target: https://coveralls.io/github/BlueBrain/libsonata
+                 :target: https://coveralls.io/github/BlueBrain/libsonata
 
 .. |docs| image:: https://readthedocs.org/projects/libsonata/badge/?version=latest
              :target: https://libsonata.readthedocs.io/
