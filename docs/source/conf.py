@@ -116,10 +116,22 @@ def render_doxygen_pages(app):
         output_file.write_text(page_template.render(**context))
 
 
-
 NUMBERED_LINE_RE = re.compile(r"^([1-9]?\d*)(\. )(.*)$")
 SELF_ARG_RE = re.compile(r"(self[^),]*(?:, )?)")
 FUNCTION_PARTS_RE = re.compile(r"(.*)\((.*)\)")
+
+
+def _format_signature(match):
+    """Apply the correct RST formatting to the signature."""
+
+    sig = "``" + match.group(1) + "``\ ("
+
+    if match.group(2):
+        sig += "*" + match.group(2) + "*"
+
+    sig += "\ )"
+
+    return sig
 
 
 def _process_pybind_docstrings(app, what, name, obj, options, lines):
@@ -148,7 +160,8 @@ def _process_pybind_docstrings(app, what, name, obj, options, lines):
             sig = SELF_ARG_RE.sub("", match.group(3))
 
             # apply formatting
-            sig = FUNCTION_PARTS_RE.sub("``\g<1>``\ (*\g<2>*\ )", sig)
+            sig = FUNCTION_PARTS_RE.sub(_format_signature, sig)
+
             # replace with arrow unicode charater
             sig = sig.replace("->", "\u2192")
 
