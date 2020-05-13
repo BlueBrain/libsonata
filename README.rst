@@ -196,7 +196,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 .. |license| image:: https://img.shields.io/pypi/l/libsonata
-                :target: https://github.com/BlueBrain/libsonata/blob/master/LICENSE.txt
+                :target: https://github.com/BlueBrain/libsonata/blob/master/COPYING.LESSER
 
 .. |coverage| image:: https://coveralls.io/repos/github/BlueBrain/libsonata/badge.svg
                  :target: https://coveralls.io/github/BlueBrain/libsonata
