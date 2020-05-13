@@ -1,0 +1,4 @@
+Python API
+==========
+
+.. automodule:: libsonata
