@@ -1,6 +1,12 @@
 # Changelog
 
-## v0.1.2: Fri Mar 13 2020
+## Development: v0.1.4
+
+### Fixed:
+
+ - Fixed python sdist distribution by disabling test requirements
+
+## v0.1.3: Fri Mar 13 2020
 
 ### Added:
 
