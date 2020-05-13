@@ -18,8 +18,7 @@ source "$VENV/bin/activate"
 set -u
 
 # regenerate the docstrings
-python ./python/pybind11/tools/mkdoc.py ./include/bbp/sonata/*.h -o ./python/docstrings.h
-sed -i '1s;^;/* clang-format off */\n;' ./python/docstrings.h
+python ./python/pybind11/tools/mkdoc.py ./include/bbp/sonata/*.h -o ./python/generated/docstrings.h
 
 # fail if there are diffs in the generated docstrings
-git diff --exit-code -- ./python/docstrings.h
+git diff --exit-code -- ./python/generated/docstrings.h
