@@ -154,22 +154,15 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
     return py::class_<Population, std::shared_ptr<Population>>(m, clsName, docString)
         .def(py::init<const std::string&, const std::string&, const std::string&>())
         .def_property_readonly("name", &Population::name, DOC_POP(name))
-        .def_property_readonly(
-            "size",
-            &Population::size,
-            imbueElementName(DOC_POP(size)).c_str())
+        .def_property_readonly("size", &Population::size, imbueElementName(DOC_POP(size)).c_str())
         .def_property_readonly("attribute_names",
                                &Population::attributeNames,
                                DOC_POP(attributeNames))
         .def_property_readonly("enumeration_names",
                                &Population::enumerationNames,
                                DOC_POP(enumerationNames))
-        .def("__len__",
-             &Population::size,
-             imbueElementName(DOC_POP(size)).c_str())
-        .def("select_all",
-             &Population::selectAll,
-             imbueElementName(DOC_POP(selectAll)).c_str())
+        .def("__len__", &Population::size, imbueElementName(DOC_POP(size)).c_str())
+        .def("select_all", &Population::selectAll, imbueElementName(DOC_POP(selectAll)).c_str())
         .def("enumeration_values",
              &Population::enumerationValues,
              py::arg("name"),
@@ -184,7 +177,8 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             py::arg("name"),
             py::arg(imbueElementName("{element}_id").c_str()),
             imbueElementName("Get attribute value for a given {element}.\n"
-                             "See below for details.").c_str())
+                             "See below for details.")
+                .c_str())
         .def(
             "get_attribute",
             [](Population& obj, const std::string& name, const Selection& selection) {
@@ -221,7 +215,8 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             py::arg("name"),
             py::arg(imbueElementName("{element}_id").c_str()),
             imbueElementName("Get dynamics attribute value for a given {element}.\n"
-                             "See below for details.").c_str())
+                             "See below for details.")
+                .c_str())
         .def(
             "get_dynamics_attribute",
             [](Population& obj, const std::string& name, const Selection& selection) {
@@ -258,9 +253,9 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             "name"_a,
             py::arg(imbueElementName("{element}_id").c_str()),
-            imbueElementName(
-                "Get enumeration values for a given {element}.\n"
-                "See below for details.").c_str())
+            imbueElementName("Get enumeration values for a given {element}.\n"
+                             "See below for details.")
+                .c_str())
         .def(
             "get_enumeration",
             [](Population& obj, const std::string& name, const Selection& selection) {
@@ -278,9 +273,8 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
     const auto imbuePopulationClassName = [popClsName](const char* msg) {
         return fmt::format(msg, fmt::arg("PopulationClass", popClsName));
     };
-    return py::class_<Storage>(m,
-                               clsName,
-                               imbuePopulationClassName(DOC(bbp, sonata, PopulationStorage)).c_str())
+    return py::class_<Storage>(
+               m, clsName, imbuePopulationClassName(DOC(bbp, sonata, PopulationStorage)).c_str())
         .def(py::init<const std::string&, const std::string&>(),
              "h5_filepath"_a,
              "csv_filepath"_a = "")
