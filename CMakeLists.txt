@@ -38,6 +38,7 @@ project(sonata VERSION ${SONATA_VERSION})
 
 option(EXTLIB_FROM_SUBMODULES "Use Git submodules for header-only dependencies" OFF)
 option(SONATA_PYTHON "Build Python extensions" OFF)
+option(SONATA_TESTS "Build tests" ON)
 option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
@@ -171,17 +172,19 @@ install(EXPORT sonata-targets
 # Testing
 # =============================================================================
 
-enable_testing()
-add_subdirectory(tests)
+if (SONATA_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 
-if (ENABLE_COVERAGE)
-    include(CodeCoverage)
-    set(COVERAGE_LCOV_EXCLUDES '/usr/*' '${PROJECT_SOURCE_DIR}/include/*' '${PROJECT_SOURCE_DIR}/extlib/*')
-    SETUP_TARGET_FOR_COVERAGE_LCOV(
-        NAME coverage
-        EXECUTABLE ctest
-        DEPENDENCIES unittests
-    )
+    if (ENABLE_COVERAGE)
+        include(CodeCoverage)
+        set(COVERAGE_LCOV_EXCLUDES '/usr/*' '${PROJECT_SOURCE_DIR}/include/*' '${PROJECT_SOURCE_DIR}/extlib/*')
+        SETUP_TARGET_FOR_COVERAGE_LCOV(
+            NAME coverage
+            EXECUTABLE ctest
+            DEPENDENCIES unittests
+        )
+    endif()
 endif()
 
 # =============================================================================
