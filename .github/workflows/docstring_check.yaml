@@ -1,0 +1,15 @@
+name: docstring-check
+on:
+    push:
+
+jobs:
+  build:
+    name: docstring-check
+    runs-on: ubuntu-18.04
+    steps:
+        - name: Fetch repository
+          uses: actions/checkout@v1
+        - name: Install packages
+          run: sudo apt-get update && sudo apt-get install python3-venv
+        - name: Check docstrings
+          run: ci/check_generated_docstrings.sh
