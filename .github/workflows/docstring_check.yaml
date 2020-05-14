@@ -12,12 +12,12 @@ jobs:
           with:
             submodules: recursive
         - name: Install packages
-          run: sudo apt-get update && sudo apt-get install python3-venv clang-11
+          run: sudo apt-get update && sudo apt-get install python3-venv clang
         - name: Add pybind11 tools to path
           run: echo "::set-env name=PYTHONPATH::/home/runner/work/libsonata/libsonata/python/pybind11/tools"
         - name: Check clang
           run: |
             clang --version
-            dpkg -L clang-11
+            dpkg -L clang
         - name: Check docstrings
           run: ci/check_generated_docstrings.sh
