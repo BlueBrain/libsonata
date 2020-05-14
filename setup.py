@@ -86,6 +86,7 @@ class CMakeBuild(build_ext, object):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
+            "-DSONATA_TESTS={}".format(os.environ.get("SONATA_TESTS", "OFF")),
             "-DEXTLIB_FROM_SUBMODULES=ON",
             "-DSONATA_PYTHON=ON",
             "-DSONATA_VERSION=" + self.distribution.get_version(),

@@ -7,4 +7,7 @@ target_link_libraries(HighFive INTERFACE
     ${HDF5_C_LIBRARIES})
 
 add_subdirectory(fmt)
-add_subdirectory(Catch2)
+
+if (SONATA_TESTS)
+    add_subdirectory(Catch2)
+endif()
