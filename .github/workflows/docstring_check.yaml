@@ -15,5 +15,9 @@ jobs:
           run: sudo apt-get update && sudo apt-get install python3-venv
         - name: Add pybind11 tools to path
           run: echo "::set-env name=PYTHONPATH::/home/runner/work/libsonata/libsonata/python/pybind11/tools"
+        - name: Check clang
+          run: |
+            clang --version
+            dpkg -L clang-9
         - name: Check docstrings
           run: ci/check_generated_docstrings.sh
