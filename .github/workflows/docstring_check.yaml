@@ -14,7 +14,7 @@ jobs:
             nestedSubmodules: true
         - name: Install packages
           run: sudo apt-get update && sudo apt-get install python3-venv
+        - name: Add pybind11 tools to path
+          run: echo "::add-path::./python/pybind/tools"
         - name: Check docstrings
-          run: |
-            echo "::add-path::./python/pybind/tools"
-            ci/check_generated_docstrings.sh
+          run: ci/check_generated_docstrings.sh
