@@ -183,6 +183,8 @@ libsonata is distributed under the terms of the GNU Lesser General Public Licens
 unless noted otherwise, for example, for external dependencies.
 Refer to `COPYING.LESSER` and `COPYING` files for details.
 
+Copyright (C) 2018-2020, Blue Brain Project/EPFL and contributors.
+
 libsonata is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License version 3
 as published by the Free Software Foundation.
