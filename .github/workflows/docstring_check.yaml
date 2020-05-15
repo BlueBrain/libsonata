@@ -15,11 +15,9 @@ jobs:
           run: sudo apt-get update && sudo apt-get install python3-venv libclang1-9
         - name: Add pybind11 tools to path
           run: echo "::set-env name=PYTHONPATH::/home/runner/work/libsonata/libsonata/python/pybind11/tools"
-        - name: Check libclang
+        - name: Set libclang symlink
           run: |
-            echo $PATH
-            ls /usr/lib/
-            ls /usr/lib/clang/
-            ls /usr/lib/x86_64-linux-gnu
+            cd /usr/lib/x86_64-linux-gnu
+            ln -s libclang-9.so.1 libclang.so
         - name: Check docstrings
           run: ci/check_generated_docstrings.sh
