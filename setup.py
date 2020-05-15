@@ -162,7 +162,9 @@ setup(
     long_description_content_type='text/x-rst',
     license="LGPLv3",
     url='https://github.com/BlueBrain/libsonata',
-    classifiers=[],
+    classifiers=[
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    ],
     ext_modules=[CMakeExtension("libsonata._libsonata")],
     cmdclass=lazy_dict(
         build_ext=CMakeBuild,
