@@ -18,6 +18,9 @@ jobs:
         - name: Set libclang symlink
           run: |
             cd /usr/lib/x86_64-linux-gnu
+            # TODO: libclang.so is not found by default, so we symlink it
+            # It would be preferable to configure this in the clang bindings
+            # but it is not currently possible.
             sudo ln -s libclang-9.so.1 libclang.so
         - name: Check docstrings
           run: ci/check_generated_docstrings.sh
