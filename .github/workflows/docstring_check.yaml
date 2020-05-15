@@ -18,6 +18,6 @@ jobs:
         - name: Set libclang symlink
           run: |
             cd /usr/lib/x86_64-linux-gnu
-            ln -s libclang-9.so.1 libclang.so
+            sudo ln -s libclang-9.so.1 libclang.so
         - name: Check docstrings
           run: ci/check_generated_docstrings.sh
