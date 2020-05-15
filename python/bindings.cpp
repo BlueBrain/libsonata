@@ -7,7 +7,7 @@
 #include <bbp/sonata/nodes.h>
 #include <bbp/sonata/report_reader.h>
 
-#include "docstrings.h"
+#include "generated/docstrings.h"
 
 #include <fmt/format.h>
 
