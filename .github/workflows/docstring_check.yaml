@@ -17,6 +17,9 @@ jobs:
           run: echo "::set-env name=PYTHONPATH::/home/runner/work/libsonata/libsonata/python/pybind11/tools"
         - name: Check libclang
           run: |
+            echo $PATH
             ls /usr/lib/
+            ls /usr/lib/clang/
+            ls /usr/lib/x86_64-linux-gnu
         - name: Check docstrings
           run: ci/check_generated_docstrings.sh
