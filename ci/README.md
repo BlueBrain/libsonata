@@ -9,3 +9,4 @@ Scripts related to continuous integration:
     will reformat it if it doesn't satisfy the style guide
 * coverage_test.sh: run the unittest with coverage on, output a text coverage
   report, and lcov compatible outputs
+* ci/python_sdist.sh: upload the sdist files to PyPI
