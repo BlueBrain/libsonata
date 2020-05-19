@@ -9,11 +9,18 @@ if [[ -z "$TRAVIS" ]]; then
     exit -1
 fi
 
+if [[ -z "$TRAVIS" ]]; then
+    exit -1
+fi
+
 env
 
-rm -rf dist
+pip3 install setuptools pip twine
+
 python3 setup.py sdist
-pip install twine
+
+ls -al dist
+
 
 export TWINE_REPOSITORY_URL=https://test.pypi.org/legacy/
 twine upload --verbose -u bbp.opensource -p "$PYPI_PASSWORD" dist/*
