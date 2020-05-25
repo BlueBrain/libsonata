@@ -1,7 +1,7 @@
 language: python
-#branches:
-#  only:
-#    - master
+branches:
+  only:
+    - master
 
 matrix:
   include:
@@ -14,14 +14,14 @@ matrix:
       sudo: required
       python: 2.7
 
-    #- os: osx
-    #  osx_image: xcode10.3
-    #  language: generic
-    #  python: 3.6
-    #- os: osx
-    #  osx_image: xcode10.3
-    #  language: generic
-    #  python: 2.7
+    - os: osx
+      osx_image: xcode10.3
+      language: generic
+      python: 3.6
+    - os: osx
+      osx_image: xcode10.3
+      language: generic
+      python: 2.7
 
 addons:
   homebrew:
@@ -36,14 +36,15 @@ cache:
     - $HOME/.cache/pip
 
 before_install:
-  - rm -rf dist *.egg-info
+    - rm -rf dist *.egg-info
 
 install: skip
 script:
-    #- ci/cpp_test.sh
-    #- ci/python_test.sh
-  - ci/python_sdist.sh
+    - ci/cpp_test.sh
+    - ci/python_test.sh
 
 deploy:
   provider: script
   script: ci/python_sdist.sh
+  on:
+      condition: "$TRAVIS_PYTHON_VERSION == 3.6"
