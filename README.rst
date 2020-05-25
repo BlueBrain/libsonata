@@ -175,8 +175,31 @@ Acknowledgements
 
 This project/research has received funding from the European Union’s Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreement No. 785907 (Human Brain Project SGA2).
 
+
+License
+-------
+
+libsonata is distributed under the terms of the GNU Lesser General Public License version 3,
+unless noted otherwise, for example, for external dependencies.
+Refer to `COPYING.LESSER` and `COPYING` files for details.
+
+Copyright (C) 2018-2020, Blue Brain Project/EPFL and contributors.
+
+libsonata is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License version 3
+as published by the Free Software Foundation.
+
+libsonata is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with libsonata.  If not, see <https://www.gnu.org/licenses/>.
+
+
 .. |license| image:: https://img.shields.io/pypi/l/libsonata
-                :target: https://github.com/BlueBrain/libsonata/blob/master/LICENSE.txt
+                :target: https://github.com/BlueBrain/libsonata/blob/master/COPYING.LESSER
 
 .. |coverage| image:: https://coveralls.io/repos/github/BlueBrain/libsonata/badge.svg
                  :target: https://coveralls.io/github/BlueBrain/libsonata
