@@ -35,9 +35,6 @@ cache:
   directories:
     - $HOME/.cache/pip
 
-before_install:
-    - rm -rf dist *.egg-info
-
 install: skip
 script:
     - ci/cpp_test.sh
@@ -45,6 +42,6 @@ script:
 
 deploy:
   provider: script
-  script: ci/python_sdist.sh
+  script: ci/python_push_sdist.sh
   on:
       condition: "$TRAVIS_PYTHON_VERSION == 3.6"

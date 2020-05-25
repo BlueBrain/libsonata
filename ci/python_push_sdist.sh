@@ -9,12 +9,7 @@ if [[ -z "$TRAVIS" ]]; then
     exit -1
 fi
 
-env
-
 pip install setuptools pip twine
-
 python setup.py sdist
-
 ls -al dist
-
 twine upload --verbose -u bbp.opensource -p "$PYPI_PASSWORD" dist/*
