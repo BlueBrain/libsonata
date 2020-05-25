@@ -23,6 +23,12 @@
 #endif
 
 
+static const char *__doc_bbp_sonata_DataFrame = R"doc()doc";
+
+static const char *__doc_bbp_sonata_DataFrame_data = R"doc()doc";
+
+static const char *__doc_bbp_sonata_DataFrame_index = R"doc()doc";
+
 static const char *__doc_bbp_sonata_EdgePopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation = R"doc()doc";
@@ -228,7 +234,51 @@ static const char *__doc_bbp_sonata_Population_selectAll = R"doc(Selection cover
 
 static const char *__doc_bbp_sonata_Population_size = R"doc(Total number of elements)doc";
 
-static const char *__doc_bbp_sonata_SONATA_API = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_Population = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_data_units = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_get = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getIndex = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getSorted = R"doc(Return true if the data is sorted.)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getTimeUnits = R"doc(Return the unit of time)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getTimes = R"doc(Return (tstart, tstop, tstep) of the population)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_nodes_ids_sorted = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_nodes_pointers = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_pop_group = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_time_units = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_times_index = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_tstart = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_tstep = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_tstop = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_ReportReader = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_file = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_getPopulationsNames = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_openPopulation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_populations = R"doc()doc";
 
 static const char *__doc_bbp_sonata_Selection = R"doc()doc";
 
@@ -253,6 +303,51 @@ static const char *__doc_bbp_sonata_Selection_ranges_2 = R"doc()doc";
 static const char *__doc_bbp_sonata_SonataError = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SonataError_SonataError = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader =
+R"doc(const SpikeReader file(filename); auto pops =
+file.getPopulationNames(); for (const auto& data:
+file[pops.openPopulation(0).get(Selection{12UL, 34UL, 58UL})) { NodeID
+node_id; double timestamp; std::tie(node_id, timestamp) = data;
+std::cout << "[" << timestamp << "] " << node_id << std::endl; })doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_Population = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_Sorting = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_Sorting_by_id = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_Sorting_by_time = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_Sorting_none = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_filterNode = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_filterTimestamp = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_get = R"doc(Return reports for this population.)doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_sorting = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_spikes = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_tstart = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_tstop = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_SpikeReader = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_filename = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_getPopulationsNames = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_openPopulation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_populations = R"doc()doc";
 
 static const char *__doc_bbp_sonata_fromValues = R"doc()doc";
 

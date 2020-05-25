@@ -48,6 +48,9 @@ class SONATA_API SpikeReader
             by_time = 2,
         };
 
+        /**
+         * Return reports for this population.
+         */
         Spikes get(const Selection& node_ids = Selection({}),
                    double tstart = -1,
                    double tstop = -1) const;
@@ -87,9 +90,24 @@ class SONATA_API ReportReader
     class Population
     {
       public:
+        /**
+         * Return (tstart, tstop, tstep) of the population
+         */
         std::tuple<double, double, double> getTimes() const;
+
+        /**
+         * Return the unit of time
+         */
         std::string getTimeUnits() const;
+
+        /**
+         * Return the unit of data.
+         */
         std::string getDataUnits() const;
+
+        /**
+         * Return true if the data is sorted.
+         */
         bool getSorted() const;
 
         DataFrame<KeyType> get(const Selection& nodes_ids = Selection({}),

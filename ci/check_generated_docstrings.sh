@@ -25,7 +25,13 @@ python3 -mvenv "$VENV"
 
 # regenerate the docstrings
 # Note: the path to mkdoc.py (python/pybind11/tools) must be in the PYTHONPATH
-$VENV/bin/python -m mkdoc ./include/bbp/sonata/*.h -o ./python/generated/docstrings.h
+$VENV/bin/python \
+  -m mkdoc ./include/bbp/sonata/*.h \
+  -o ./python/generated/docstrings.h \
+  -Wno-pragma-once-outside-header \
+  -ferror-limit=100000 \
+  -I./extlib/HighFive/include \
+  -I./include
 
 # fail if there are diffs in the generated docstrings
 git diff --exit-code -- ./python/generated/docstrings.h
