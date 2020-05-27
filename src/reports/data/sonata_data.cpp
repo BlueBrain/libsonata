@@ -239,7 +239,9 @@ void SonataData::write_report_header() {
                                     total_elements_);
     hdf5_writer_->configure_attribute(reports_population_group + "/data", "units", "mV");
 
-    hdf5_writer_->write(reports_population_group + "/mapping/node_ids", node_ids_);
+    std::vector<uint64_t> sonata_node_ids(node_ids_);
+    std::transform(std::begin(sonata_node_ids),std::end(sonata_node_ids),std::begin(sonata_node_ids),[](int x){return x-1;});
+    hdf5_writer_->write(reports_population_group + "/mapping/node_ids", sonata_node_ids);
     hdf5_writer_->write(reports_population_group + "/mapping/index_pointers", index_pointers_);
     hdf5_writer_->write(reports_population_group + "/mapping/element_ids", element_ids_);
     hdf5_writer_->write_time(reports_population_group + "/mapping/time", time_);
@@ -262,7 +264,9 @@ void SonataData::write_spikes_header(const std::string& order_by) {
         Implementation::sort_spikes(spike_timestamps_, spike_node_ids_, order_by);
         hdf5_writer_->write(spikes_population_group + "/timestamps", spike_timestamps_);
         hdf5_writer_->configure_attribute(spikes_population_group + "/timestamps", "units", "ms");
-        hdf5_writer_->write(spikes_population_group + "/node_ids", spike_node_ids_);
+        std::vector<uint64_t> sonata_spike_node_ids(spike_node_ids_);
+        std::transform(std::begin(sonata_spike_node_ids),std::end(sonata_spike_node_ids),std::begin(sonata_spike_node_ids),[](int x){return x-1;});
+        hdf5_writer_->write(spikes_population_group + "/node_ids", sonata_spike_node_ids);
     }
 }
 
