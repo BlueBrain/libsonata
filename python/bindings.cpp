@@ -528,7 +528,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def(py::init<const std::string&>())
         .def("get_populations_names",
              &SpikeReader::getPopulationsNames,
-             "Get list of all populations")
+             DOC_SPIKEREADER_POP(getPopulationsNames))
         .def("__getitem__", &SpikeReader::openPopulation);
 
     bindReportReader<SomaReportReader, NodeID>(m, "Soma");
