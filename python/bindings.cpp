@@ -110,8 +110,12 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
 }
 
 // create a macro to reduce repetition for docstrings
+#define DOC_SEL(x) DOC(bbp, sonata, Selection, x)
 #define DOC_POP(x) DOC(bbp, sonata, Population, x)
+#define DOC_POP_NODE(x) DOC(bbp, sonata, NodePopulation, x)
+#define DOC_POP_EDGE(x) DOC(bbp, sonata, EdgePopulation, x)
 #define DOC_POP_STOR(x) DOC(bbp, sonata, PopulationStorage, x)
+#define DOC_SPIKEREADER_POP(x) DOC(bbp, sonata, SpikeReader, Population, x)
 
 // Emulating generic lambdas in pre-C++14
 #define DISPATCH_TYPE(dtype, func, ...)                               \
@@ -325,16 +329,16 @@ void bindReportReader(py::module& m, const std::string& prefix) {
              "tstop"_a)
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
-                               "Return if data are sorted")
+                               DOC_SPIKEREADER_POP(getSorted))
         .def_property_readonly("times",
                                &ReportType::Population::getTimes,
-                               "Return (tstart, tstop, tstep) of the population")
+                               DOC_SPIKEREADER_POP(getTimes))
         .def_property_readonly("time_units",
                                &ReportType::Population::getTimeUnits,
-                               "Return the unit of the times")
+                               DOC_SPIKEREADER_POP(getTimeUnits))
         .def_property_readonly("data_units",
                                &ReportType::Population::getDataUnits,
-                               "Return the unit of data");
+                               DOC_SPIKEREADER_POP(getDataUnits));
     py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
         .def(py::init<const std::string&>())
         .def("get_populations_names",
@@ -357,18 +361,18 @@ PYBIND11_MODULE(_libsonata, m) {
              "Selection from list of IDs")
         .def_property_readonly("ranges",
                                &Selection::ranges,
-                               "Get a list of ranges constituting Selection")
+                               DOC_SEL(ranges))
         .def(
             "flatten",
             [](Selection& obj) { return asArray(obj.flatten()); },
-            "Array of IDs constituting Selection")
+            DOC_SEL(flatten))
         .def_property_readonly("flat_size",
                                &Selection::flatSize,
-                               "Total number of elements constituting Selection")
+                               DOC_SEL(flatSize))
         .def(
             "__bool__",
             [](const Selection& obj) { return !obj.empty(); },
-            "If EdgeSelection is not empty")
+            "True if Selection is not empty")
 
         .def("__eq__", &bbp::sonata::operator==, "Compare selection contents are equal")
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
@@ -399,22 +403,22 @@ PYBIND11_MODULE(_libsonata, m) {
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")
-        .def_property_readonly("source", &EdgePopulation::source, "Source node population")
-        .def_property_readonly("target", &EdgePopulation::target, "Target node population")
+        .def_property_readonly("source", &EdgePopulation::source, DOC_POP_EDGE(source))
+        .def_property_readonly("target", &EdgePopulation::target, DOC_POP_EDGE(target))
         .def(
             "source_node",
             [](EdgePopulation& obj, EdgeID edgeID) {
                 return obj.sourceNodeIDs(Selection::fromValues({edgeID}))[0];
             },
             "edge_id"_a,
-            "Source node ID for given edge")
+            "Source node ID for a given edge")
         .def(
             "source_nodes",
             [](EdgePopulation& obj, const Selection& selection) {
                 return asArray(obj.sourceNodeIDs(selection));
             },
             "selection"_a,
-            "Source node IDs for given Selection")
+            "Source node IDs for given edge Selection")
         .def(
             "target_node",
             [](EdgePopulation& obj, EdgeID edgeID) {
@@ -435,14 +439,14 @@ PYBIND11_MODULE(_libsonata, m) {
                 return obj.afferentEdges(std::vector<NodeID>{target});
             },
             "target"_a,
-            "Find all edges targeting given node")
+            DOC_POP_EDGE(afferentEdges))
         .def(
             "afferent_edges",
             [](EdgePopulation& obj, const std::vector<NodeID>& target) {
                 return obj.afferentEdges(target);
             },
             "target"_a,
-            "Find all edges targeting given nodes")
+            DOC_POP_EDGE(afferentEdges))
         .def(
             "efferent_edges",
             [](EdgePopulation& obj, NodeID source) {
@@ -481,7 +485,7 @@ PYBIND11_MODULE(_libsonata, m) {
                     "source_node_count"_a,
                     "target_node_count"_a,
                     "overwrite"_a = false,
-                    "Write bidirectional node->edge indices to EdgePopulation HDF5");
+                    DOC_POP_EDGE(writeIndices));
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
@@ -519,7 +523,7 @@ PYBIND11_MODULE(_libsonata, m) {
                     return "by_time";
                 return "none";
             },
-            "Return the way data are sorted ('none', 'by_id', 'by_time')");
+            DOC_SPIKEREADER_POP(getSorting));
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init<const std::string&>())
         .def("get_populations_names",

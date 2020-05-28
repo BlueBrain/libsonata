@@ -39,10 +39,19 @@ class SONATA_API Selection
     static Selection fromValues(Iterator first, Iterator last);
     static Selection fromValues(const Values& values);
 
+    /**
+     * Get a list of ranges constituting Selection
+     */
     const Ranges& ranges() const;
 
+    /**
+     * Array of IDs constituting Selection
+     */
     Values flatten() const;
 
+    /**
+     * Total number of elements constituting Selection
+     */
     size_t flatSize() const;
 
     bool empty() const;

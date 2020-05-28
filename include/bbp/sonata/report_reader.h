@@ -54,6 +54,10 @@ class SONATA_API SpikeReader
         Spikes get(const Selection& node_ids = Selection({}),
                    double tstart = -1,
                    double tstop = -1) const;
+
+        /**
+         * Return the way data are sorted ('none', 'by_id', 'by_time')
+         */
         Sorting getSorting() const;
 
       private:
@@ -72,6 +76,9 @@ class SONATA_API SpikeReader
 
     explicit SpikeReader(const std::string& filename);
 
+    /**
+     * Return a list of all population names.
+     */
     std::vector<std::string> getPopulationsNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;
@@ -110,6 +117,11 @@ class SONATA_API ReportReader
          */
         bool getSorted() const;
 
+        /**
+         * \param node_ids limit the report to the given selection.
+         * \param tstart return spikes occurring on or after tstart. tstart=-1 indicates no limit.
+         * \param tstop return spikes occurring on or before tstop. tstop=-1 indicates no limit.
+         */
         DataFrame<KeyType> get(const Selection& nodes_ids = Selection({}),
                                double _tstart = -1,
                                double _tstop = -1) const;
@@ -131,6 +143,9 @@ class SONATA_API ReportReader
 
     explicit ReportReader(const std::string& filename);
 
+    /**
+     * Return a list of all population names.
+     */
     std::vector<std::string> getPopulationsNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;

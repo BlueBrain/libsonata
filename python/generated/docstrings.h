@@ -33,17 +33,17 @@ static const char *__doc_bbp_sonata_EdgePopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation = R"doc()doc";
 
-static const char *__doc_bbp_sonata_EdgePopulation_afferentEdges = R"doc(Find inbound edges for a given node ID.)doc";
+static const char *__doc_bbp_sonata_EdgePopulation_afferentEdges = R"doc(Return inbound edges for given node IDs.)doc";
 
-static const char *__doc_bbp_sonata_EdgePopulation_connectingEdges = R"doc(Find edges connecting two given nodes.)doc";
+static const char *__doc_bbp_sonata_EdgePopulation_connectingEdges = R"doc(Return edges connecting two given nodes.)doc";
 
-static const char *__doc_bbp_sonata_EdgePopulation_efferentEdges = R"doc(Find outbound edges for a given node ID.)doc";
+static const char *__doc_bbp_sonata_EdgePopulation_efferentEdges = R"doc(Return outbound edges for given node IDs.)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_source = R"doc(Name of source population extracted from 'source_node_id' dataset)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_sourceNodeIDs = R"doc()doc";
 
-static const char *__doc_bbp_sonata_EdgePopulation_target = R"doc(Name of target population extracted from 'source_node_id' dataset)doc";
+static const char *__doc_bbp_sonata_EdgePopulation_target = R"doc(Name of target population extracted from 'target_node_id' dataset)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_targetNodeIDs = R"doc()doc";
 
@@ -242,7 +242,17 @@ static const char *__doc_bbp_sonata_ReportReader_Population_Population = R"doc()
 
 static const char *__doc_bbp_sonata_ReportReader_Population_data_units = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_get = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_get =
+R"doc(Parameter ``node_ids``:
+    limit the report to the given selection.
+
+Parameter ``tstart``:
+    return spikes occurring on or after tstart. tstart=-1 indicates no
+    limit.
+
+Parameter ``tstop``:
+    return spikes occurring on or before tstop. tstop=-1 indicates no
+    limit.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
 
@@ -274,7 +284,7 @@ static const char *__doc_bbp_sonata_ReportReader_ReportReader = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_file = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_getPopulationsNames = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_getPopulationsNames = R"doc(Return a list of all population names.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_openPopulation = R"doc()doc";
 
@@ -288,15 +298,15 @@ static const char *__doc_bbp_sonata_Selection_Selection_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_Selection_empty = R"doc()doc";
 
-static const char *__doc_bbp_sonata_Selection_flatSize = R"doc()doc";
+static const char *__doc_bbp_sonata_Selection_flatSize = R"doc(Total number of elements constituting Selection)doc";
 
-static const char *__doc_bbp_sonata_Selection_flatten = R"doc()doc";
+static const char *__doc_bbp_sonata_Selection_flatten = R"doc(Array of IDs constituting Selection)doc";
 
 static const char *__doc_bbp_sonata_Selection_fromValues = R"doc()doc";
 
 static const char *__doc_bbp_sonata_Selection_fromValues_2 = R"doc()doc";
 
-static const char *__doc_bbp_sonata_Selection_ranges = R"doc()doc";
+static const char *__doc_bbp_sonata_Selection_ranges = R"doc(Get a list of ranges constituting Selection)doc";
 
 static const char *__doc_bbp_sonata_Selection_ranges_2 = R"doc()doc";
 
@@ -329,7 +339,7 @@ static const char *__doc_bbp_sonata_SpikeReader_Population_filterTimestamp = R"d
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_get = R"doc(Return reports for this population.)doc";
 
-static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc()doc";
+static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc(Return the way data are sorted ('none', 'by_id', 'by_time'))doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_sorting = R"doc()doc";
 
@@ -343,7 +353,7 @@ static const char *__doc_bbp_sonata_SpikeReader_SpikeReader = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_filename = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SpikeReader_getPopulationsNames = R"doc()doc";
+static const char *__doc_bbp_sonata_SpikeReader_getPopulationsNames = R"doc(Return a list of all population names.)doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_openPopulation = R"doc()doc";
 
