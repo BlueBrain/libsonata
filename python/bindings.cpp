@@ -116,6 +116,8 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
 #define DOC_POP_EDGE(x) DOC(bbp, sonata, EdgePopulation, x)
 #define DOC_POP_STOR(x) DOC(bbp, sonata, PopulationStorage, x)
 #define DOC_SPIKEREADER_POP(x) DOC(bbp, sonata, SpikeReader, Population, x)
+#define DOC_SPIKEREADER(x) DOC(bbp, sonata, SpikeReader, x)
+#define DOC_REPORTREADER_POP(x) DOC(bbp, sonata, ReportReader, Population, x)
 
 // Emulating generic lambdas in pre-C++14
 #define DISPATCH_TYPE(dtype, func, ...)                               \
@@ -329,16 +331,16 @@ void bindReportReader(py::module& m, const std::string& prefix) {
              "tstop"_a)
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
-                               DOC_SPIKEREADER_POP(getSorted))
+                               DOC_REPORTREADER_POP(getSorted))
         .def_property_readonly("times",
                                &ReportType::Population::getTimes,
-                               DOC_SPIKEREADER_POP(getTimes))
+                               DOC_REPORTREADER_POP(getTimes))
         .def_property_readonly("time_units",
                                &ReportType::Population::getTimeUnits,
-                               DOC_SPIKEREADER_POP(getTimeUnits))
+                               DOC_REPORTREADER_POP(getTimeUnits))
         .def_property_readonly("data_units",
                                &ReportType::Population::getDataUnits,
-                               DOC_SPIKEREADER_POP(getDataUnits));
+                               DOC_REPORTREADER_POP(getDataUnits));
     py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
         .def(py::init<const std::string&>())
         .def("get_populations_names",
@@ -528,7 +530,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def(py::init<const std::string&>())
         .def("get_populations_names",
              &SpikeReader::getPopulationsNames,
-             DOC_SPIKEREADER_POP(getPopulationsNames))
+             DOC_SPIKEREADER(getPopulationsNames))
         .def("__getitem__", &SpikeReader::openPopulation);
 
     bindReportReader<SomaReportReader, NodeID>(m, "Soma");
