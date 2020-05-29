@@ -40,8 +40,14 @@ class SONATA_API EdgePopulation: public Population
      */
     std::string target() const;
 
+    /**
+     * Return source node IDs for a given edge selection
+     */
     std::vector<NodeID> sourceNodeIDs(const Selection& selection) const;
 
+    /**
+     * Return target node IDs for a given edge selection
+     */
     std::vector<NodeID> targetNodeIDs(const Selection& selection) const;
 
     /**

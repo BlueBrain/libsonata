@@ -453,14 +453,14 @@ PYBIND11_MODULE(_libsonata, m) {
                 return obj.efferentEdges(std::vector<NodeID>{source});
             },
             "source"_a,
-            "Find all edges originating from given node")
+            DOC_POP_EDGE(efferentEdges))
         .def(
             "efferent_edges",
             [](EdgePopulation& obj, const std::vector<NodeID>& source) {
                 return obj.efferentEdges(source);
             },
             "source"_a,
-            "Find all edges originating from given nodes")
+            DOC_POP_EDGE(efferentEdges))
         .def(
             "connecting_edges",
             [](EdgePopulation& obj, NodeID source, NodeID target) {
@@ -469,7 +469,7 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             "source"_a,
             "target"_a,
-            "Find all edges connecting two given nodes")
+            DOC_POP_EDGE(connectingEdges))
         .def(
             "connecting_edges",
             [](EdgePopulation& obj,
