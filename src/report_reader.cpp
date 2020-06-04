@@ -75,21 +75,16 @@ void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
 }
 
 template <typename T>
-std::pair<T, std::vector<float>> make_value(NodeID node_id,
-                                            uint32_t element_id,
-                                            const std::vector<float>& values);
+T make_key(NodeID node_id, uint32_t element_id);
 
 template <>
-std::pair<NodeID, std::vector<float>> make_value(NodeID node_id,
-                                                 uint32_t /* element_id */,
-                                                 const std::vector<float>& values) {
-    return {node_id, values};
+NodeID make_key(NodeID node_id, uint32_t /* element_id */) {
+    return node_id;
 }
 
 template <>
-std::pair<std::pair<NodeID, uint32_t>, std::vector<float>> make_value(
-    NodeID node_id, uint32_t element_id, const std::vector<float>& values) {
-    return {{node_id, element_id}, values};
+std::pair<NodeID, uint32_t> make_key(NodeID node_id, uint32_t element_id) {
+    return {node_id, element_id};
 }
 
 }  // anonymous namespace
@@ -371,7 +366,8 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             for (auto& datum : data) {
                 data_by_node.push_back(datum[i]);
             }
-            data_frame.data.push_back(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
+            data_frame.data.first.push_back(make_key<T>(node_id, element_ids[i]));
+            data_frame.data.second.push_back(std::move(data_by_node));
         }
     }
     return data_frame;

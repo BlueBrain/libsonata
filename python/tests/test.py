@@ -273,10 +273,11 @@ class TestSomaReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of nodes
+        self.assertEqual(len(self.test_obj['All'].get().data[0]), 20)  # Number of nodes
+        self.assertEqual(len(self.test_obj['All'].get().data[1]), 20)  # should be the same
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
         self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
-        self.assertEqual(list(sel.data.keys()), [13, 14])
+        self.assertEqual(list(sel.data[0]), [13, 14])
 
 class TestElementReportPopulation(unittest.TestCase):
     def setUp(self):
@@ -297,17 +298,18 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of elements
+        self.assertEqual(len(self.test_obj['All'].get().data[0]), 100)  # Number of elements
+        self.assertEqual(len(self.test_obj['All'].get().data[1]), 100)  # Should be the same
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
-        keys = list(sel.data.keys())
+        keys = list(sel.data[0])
         keys.sort()
         self.assertEqual(keys, [(13, 60), (13, 61), (13, 62), (13, 63), (13, 64), (14, 65), (14, 66), (14, 67), (14, 68), (14, 69)])
 
         self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
         sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
-        self.assertEqual(len(sel.data), 0)
+        self.assertEqual(len(sel.data[0]), 0)
         sel = self.test_obj['All'].get(tstart=3., tstop=3.)
-        self.assertEqual(len(sel.data), 100)
+        self.assertEqual(len(sel.data[0]), 100)
 
 
 if __name__ == '__main__':
