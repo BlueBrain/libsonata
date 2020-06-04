@@ -371,7 +371,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             for (auto& datum : data) {
                 data_by_node.push_back(datum[i]);
             }
-            data_frame.data.insert(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
+            data_frame.data.push_back(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
         }
     }
     return data_frame;
