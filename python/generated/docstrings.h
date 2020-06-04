@@ -41,11 +41,11 @@ static const char *__doc_bbp_sonata_EdgePopulation_efferentEdges = R"doc(Return 
 
 static const char *__doc_bbp_sonata_EdgePopulation_source = R"doc(Name of source population extracted from 'source_node_id' dataset)doc";
 
-static const char *__doc_bbp_sonata_EdgePopulation_sourceNodeIDs = R"doc()doc";
+static const char *__doc_bbp_sonata_EdgePopulation_sourceNodeIDs = R"doc(Return source node IDs for a given edge selection)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_target = R"doc(Name of target population extracted from 'target_node_id' dataset)doc";
 
-static const char *__doc_bbp_sonata_EdgePopulation_targetNodeIDs = R"doc()doc";
+static const char *__doc_bbp_sonata_EdgePopulation_targetNodeIDs = R"doc(Return target node IDs for a given edge selection)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_writeIndices = R"doc(Write bidirectional node->edge indices to EdgePopulation HDF5.)doc";
 
@@ -56,14 +56,20 @@ static const char *__doc_bbp_sonata_NodePopulation_NodePopulation = R"doc()doc";
 static const char *__doc_bbp_sonata_NodePopulation_matchAttributeValues =
 R"doc(Return selection of where attribute values match value
 
-As per node_set predicates, value must be one of type:
+As per node_set predicates, ``value`` must be one of type:
 
-number H5T_IEEE_*LE, H5T_STD_*LE string H5T_C_S1 bool H5T_STD_I8LE
-null invalid
+* number H5T_IEEE_*LE, H5T_STD_*LE
 
-@throw if the attribute dtype is not comparable
+* string H5T_C_S1
 
-Note: This does not match Dynamics_params datasets)doc";
+* bool H5T_STD_I8LE
+
+* null invalid
+
+Throws:
+    if the attribute dtype is not comparable
+
+Note: This does not match dynamics_params datasets)doc";
 
 static const char *__doc_bbp_sonata_Population = R"doc()doc";
 

@@ -391,7 +391,7 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             "name"_a,
             "value"_a,
-            "Return selection where the attribute `name` has values matching the int `value`")
+            DOC_POP_NODE(matchAttributeValues))
         .def(
             "match_values",
             [](NodePopulation& obj, const std::string& name, const std::string& value) {
@@ -399,7 +399,7 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             "name"_a,
             "value"_a,
-            "Return selection where the attribute `name` has values matching the string `value`");
+            DOC_POP_NODE(matchAttributeValues));
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
 
@@ -420,7 +420,7 @@ PYBIND11_MODULE(_libsonata, m) {
                 return asArray(obj.sourceNodeIDs(selection));
             },
             "selection"_a,
-            "Source node IDs for given edge Selection")
+            DOC_POP_EDGE(sourceNodeIDs))
         .def(
             "target_node",
             [](EdgePopulation& obj, EdgeID edgeID) {
@@ -434,7 +434,7 @@ PYBIND11_MODULE(_libsonata, m) {
                 return asArray(obj.targetNodeIDs(selection));
             },
             "selection"_a,
-            "Source node IDs for given Selection")
+            DOC_POP_EDGE(targetNodeIDs))
         .def(
             "afferent_edges",
             [](EdgePopulation& obj, NodeID target) {
