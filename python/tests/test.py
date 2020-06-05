@@ -303,7 +303,7 @@ class TestElementReportPopulation(unittest.TestCase):
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
         keys = list(sel.data[0])
         keys.sort()
-        self.assertEqual(keys, [(13, 60), (13, 61), (13, 62), (13, 63), (13, 64), (14, 65), (14, 66), (14, 67), (14, 68), (14, 69)])
+        self.assertEqual(keys, [(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)])
 
         self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
         sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
