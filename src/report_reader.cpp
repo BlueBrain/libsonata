@@ -315,7 +315,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
-        data_frame.index.push_back(times_index_[i].second);
+        data_frame.times.push_back(times_index_[i].second);
     }
 
     // Simplify selection
@@ -366,8 +366,8 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             for (auto& datum : data) {
                 data_by_node.push_back(datum[i]);
             }
-            data_frame.data.first.push_back(make_key<T>(node_id, element_ids[i]));
-            data_frame.data.second.push_back(std::move(data_by_node));
+            data_frame.ids.push_back(make_key<T>(node_id, element_ids[i]));
+            data_frame.data.push_back(std::move(data_by_node));
         }
     }
     return data_frame;

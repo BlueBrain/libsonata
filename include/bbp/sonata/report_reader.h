@@ -18,9 +18,10 @@ namespace sonata {
 // KeyType will be NodeID for somas report and pair<NodeID, uint32_t> for elements report
 template <typename KeyType>
 struct SONATA_API DataFrame {
-    using DataType = std::pair<std::vector<KeyType>, std::vector<std::vector<float>>>;
-    std::vector<double> index;
-    DataType data;
+    using DataType = std::vector<KeyType>;
+    std::vector<double> times;
+    DataType ids;
+    std::vector<std::vector<float>> data;
 };
 
 using Spike = std::pair<NodeID, double>;
