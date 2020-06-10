@@ -335,6 +335,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
         node_ids = selection.flatten();
     }
 
+    data_frame.data.resize(index_stop - index_start + 1);
     // FIXME: It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
     // TODO: specialized this function for sorted nodes_ids?
     for (const auto& node_id : node_ids) {
@@ -354,6 +355,13 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             .select({index_start, it->second.first},
                     {index_stop - index_start + 1, it->second.second - it->second.first})
             .read(data);
+        int index = 0;
+        for (auto& datum : data) {
+            for (auto d : datum) {
+                data_frame.data[index].push_back(d);
+            }
+            ++index;
+        }
 
         std::vector<uint32_t> element_ids;
         pop_group_.getGroup("mapping")
@@ -361,13 +369,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             .select({it->second.first}, {it->second.second - it->second.first})
             .read(element_ids);
         for (size_t i = 0; i < element_ids.size(); ++i) {
-            std::vector<float> data_by_node;
-            data_by_node.reserve(data.size());
-            for (auto& datum : data) {
-                data_by_node.push_back(datum[i]);
-            }
             data_frame.ids.push_back(make_key<T>(node_id, element_ids[i]));
-            data_frame.data.push_back(std::move(data_by_node));
         }
     }
     return data_frame;
