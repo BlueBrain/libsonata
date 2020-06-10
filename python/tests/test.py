@@ -274,7 +274,8 @@ class TestSomaReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
         self.assertEqual(len(self.test_obj['All'].get().ids), 20)  # Number of nodes
-        self.assertEqual(len(self.test_obj['All'].get().data), 20)  # should be the same
+        self.assertEqual(len(self.test_obj['All'].get().times), 10)  # number of times
+        self.assertEqual(len(self.test_obj['All'].get().data), 10)  # should be the same
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
         self.assertEqual(len(sel.times), 2)  # Number of timestamp (0.8 and 0.9)
         self.assertEqual(list(sel.ids), [13, 14])
@@ -298,8 +299,9 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of elements
-        self.assertEqual(len(self.test_obj['All'].get().ids), 100)  # Should be the same
+        self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of times in this range
+        self.assertEqual(len(self.test_obj['All'].get().times), 20)  # Should be the same
+        self.assertEqual(len(self.test_obj['All'].get().ids), 100)
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
         keys = list(sel.ids)
         keys.sort()
