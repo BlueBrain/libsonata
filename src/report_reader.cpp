@@ -355,12 +355,12 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             .select({index_start, it->second.first},
                     {index_stop - index_start + 1, it->second.second - it->second.first})
             .read(data);
-        int index = 0;
-        for (auto& datum : data) {
-            for (auto d : datum) {
-                data_frame.data[index].push_back(d);
+        int timer_index = 0;
+        for (const std::vector<float>& datum : data) {
+            for (float d : datum) {
+                data_frame.data[timer_index].push_back(d);
             }
-            ++index;
+            ++timer_index;
         }
 
         std::vector<uint32_t> element_ids;
