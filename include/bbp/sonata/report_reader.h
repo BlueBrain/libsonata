@@ -21,6 +21,7 @@ struct SONATA_API DataFrame {
     using DataType = std::vector<KeyType>;
     std::vector<double> times;
     DataType ids;
+    // data[times][ids]
     std::vector<std::vector<float>> data;
 };
 
