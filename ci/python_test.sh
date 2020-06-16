@@ -19,3 +19,6 @@ $BIN/pip -v install --force .
 $BIN/pip install nose
 
 $BIN/nosetests -s -v python/tests
+
+python --version
+python setup.py test
