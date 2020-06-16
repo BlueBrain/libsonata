@@ -30,6 +30,7 @@ $VENV/bin/python \
   -o ./python/generated/docstrings.h \
   -Wno-pragma-once-outside-header \
   -ferror-limit=100000 \
+  -I/usr/include/hdf5/serial \
   -I./extlib/HighFive/include \
   -I./include
 
