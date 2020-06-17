@@ -4,7 +4,7 @@
 
 using namespace bbp::sonata;
 
-void testTimes(std::vector<double> vec, double start, double step, int size) {
+void testTimes(const std::vector<double>& vec, double start, double step, int size) {
     REQUIRE(size == vec.size());
     for (int i = 0; i < vec.size(); ++i) {
         REQUIRE(std::abs(vec[i] - (start + step * i)) < std::numeric_limits<double>::epsilon());
@@ -30,7 +30,7 @@ TEST_CASE("SpikeReader", "[base]") {
             SpikeReader::Population::Sorting::none);
 }
 
-TEST_CASE("ReportReader limits", "[base]") {
+TEST_CASE("SomaReportReader limits", "[base]") {
     const SomaReportReader reader("./data/somas.h5");
 
     REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "soma1", "soma2"});
@@ -68,7 +68,7 @@ TEST_CASE("ReportReader limits", "[base]") {
                 {{1.0}, {1.1}, {1.2}, {1.3}, {1.4}, {1.5}, {1.6}, {1.7}, {1.8}, {1.9}}));
 }
 
-TEST_CASE("ReportReader", "[base]") {
+TEST_CASE("SomaReportReader", "[base]") {
     const SomaReportReader reader("./data/somas.h5");
 
     REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "soma1", "soma2"});
@@ -88,4 +88,31 @@ TEST_CASE("ReportReader", "[base]") {
     testTimes(data.times, 0.2, 0.1, 4);
     REQUIRE(data.data == std::vector<std::vector<float>>{
                              {{3.2f, 4.2f}, {3.3f, 4.3f}, {3.4f, 4.4f}, {3.5f, 4.5f}}});
+}
+
+TEST_CASE("ElementReportReader", "[base]") {
+    const ElementReportReader reader("./data/elements.h5");
+
+    REQUIRE(reader.getPopulationsNames() ==
+            std::vector<std::string>{"All", "element1", "element42"});
+
+    auto pop = reader.openPopulation("All");
+
+    REQUIRE(pop.getTimes() == std::make_tuple(0., 4., 0.2));
+
+    REQUIRE(pop.getTimeUnits() == "ms");
+
+    REQUIRE(pop.getDataUnits() == "mV");
+
+    REQUIRE(pop.getSorted());
+
+    auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
+    REQUIRE(data.ids ==
+            DataFrame<std::pair<NodeID, uint32_t>>::DataType{
+                {{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}}});
+    testTimes(data.times, 0.2, 0.2, 2);
+    REQUIRE(data.data ==
+            std::vector<std::vector<float>>{
+                {{11.0f, 11.1f, 11.2f, 11.3f, 11.4f, 11.5f, 11.6f, 11.7f, 11.8f, 11.9f},
+                 {21.0f, 21.1f, 21.2f, 21.3f, 21.4f, 21.5f, 21.6f, 21.7f, 21.8f, 21.9f}}});
 }
