@@ -304,13 +304,15 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
 }
 }  // unnamed namespace
 
-namespace pybind11 { namespace detail {
-    template <typename T>
-    struct type_caster<nonstd::optional<T>> : optional_caster<nonstd::optional<T>> {};
+namespace pybind11 {
+namespace detail {
+template <typename T>
+struct type_caster<nonstd::optional<T>>: optional_caster<nonstd::optional<T>> {};
 
-    template<> struct type_caster<nonstd::nullopt_t>
-        : public void_caster<nonstd::nullopt_t> {};
-}}
+template <>
+struct type_caster<nonstd::nullopt_t>: public void_caster<nonstd::nullopt_t> {};
+}  // namespace detail
+}  // namespace pybind11
 
 template <typename ReportType, typename KeyType>
 void bindReportReader(py::module& m, const std::string& prefix) {
