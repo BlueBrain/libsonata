@@ -225,8 +225,8 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
             tstep_ = times[2];
             mapping_group.getDataSet("time").getAttribute("units").read(time_units_);
             size_t i = 0;
-            for (double t = tstart_; t < tstop_ - EPSILON; t += tstep_) {
-                times_index_.push_back({i++, t});
+            for (double t = tstart_; t < tstop_ - EPSILON; t += tstep_, ++i) {
+                times_index_.emplace_back(i, t);
             }
         }
 
@@ -261,57 +261,49 @@ bool ReportReader<T>::Population::getSorted() const {
 }
 
 template <typename T>
-std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, double tstop) const {
+std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
     std::pair<size_t, size_t> indexes;
-    if (tstart < 0 - EPSILON) {  // Default value
-        indexes.first = times_index_.front().first;
-    } else if (tstart > times_index_.back().second + EPSILON) {  // tstart is after end of range
-        indexes.first = 1;
-        indexes.second = 0;
-        return indexes;
-    } else {
-        for (const auto& time_index : times_index_) {
-            if (tstart < time_index.second + EPSILON) {
-                indexes.first = time_index.first;
-                break;
-            }
-        }
-    }
-    if (tstop < 0 - EPSILON) {  // Default value
-        indexes.second = times_index_.back().first;
-    } else if (tstop < times_index_.front().second - EPSILON) {  // tstop is before start of range
-        indexes.first = 1;
-        indexes.second = 0;
-        return indexes;
-    } else {
-        for (auto it = times_index_.crbegin(); it != times_index_.crend(); ++it) {
-            const auto& time_index = *it;
-            if (tstop > time_index.second - EPSILON) {
-                indexes.second = time_index.first;
-                break;
-            }
-        }
+
+    double start = tstart.value_or(tstart_);
+    double stop = tstop.value_or(tstop_);
+
+    if (start < 0 - EPSILON || stop < 0 - EPSILON) {
+        throw std::runtime_error("Times cannot be negative");
     }
 
-    if (indexes.first > indexes.second) {
-        indexes.second = indexes.first;
+    auto it_start = std::find_if(times_index_.cbegin(), times_index_.cend(),
+                                  [&](const std::pair<size_t, double>& v) {
+                                      return start < v.second + EPSILON;
+                                  });
+    if (it_start == times_index_.end()) {
+        throw std::runtime_error("tstart is after the end of the range");
     }
+    indexes.first = it_start->first;
+
+    auto it_stop = std::find_if(times_index_.crbegin(), times_index_.crend(),
+                                 [&](const std::pair<size_t, double>& v) {
+                                      return stop > v.second - EPSILON;
+                                  });
+    if (it_stop == times_index_.rend()) {
+        throw std::runtime_error("tstop is before the beginning of the range");
+    }
+    indexes.second = it_stop->first;
 
     return indexes;
 }
 
 template <typename T>
-DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
-                                              double tstart,
-                                              double tstop) const {
+DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& selection,
+                                              const nonstd::optional<double>& tstart,
+                                              const nonstd::optional<double>& tstop) const {
     DataFrame<T> data_frame;
 
     size_t index_start = 0;
     size_t index_stop = 0;
 
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
-    if (index_start > index_stop) {
-        return data_frame;
+    if (index_start >= index_stop) {
+        throw std::runtime_error("tstart should be < to tstop");
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
@@ -324,7 +316,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
     // auto nodes_ids_ = Selection::fromValues(nodes_ids.flatten().sort());
     Selection::Values node_ids;
 
-    if (selection.empty()) {  // Take all nodes in this case
+    if (!selection || selection->empty()) {  // Take all nodes in this case
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
                        std::back_inserter(node_ids),
@@ -332,7 +324,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
                            return node_pointer.first;
                        });
     } else {
-        node_ids = selection.flatten();
+        node_ids = selection->flatten();
     }
 
     data_frame.data.resize(index_stop - index_start + 1);

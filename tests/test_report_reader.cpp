@@ -38,10 +38,7 @@ TEST_CASE("SomaReportReader limits", "[base]") {
     auto pop = reader.openPopulation("All");
 
     // ids out of range
-    REQUIRE(pop.get(Selection({{100, 101}})).ids == DataFrame<NodeID>::DataType());
-    testTimes(pop.get(Selection({{100, 101}})).times, 0.0, 0.1, 10);
-    REQUIRE(pop.get(Selection({{100, 101}})).data ==
-            std::vector<std::vector<float>>({{}, {}, {}, {}, {}, {}, {}, {}, {}, {}}));
+    // REQUIRE_THROWS(pop.get(Selection({{100, 101}})));
 
     // Inverted id
     REQUIRE_THROWS(pop.get(Selection({{2, 1}})));
@@ -50,22 +47,13 @@ TEST_CASE("SomaReportReader limits", "[base]") {
     REQUIRE_THROWS(pop.get(Selection({{-1, 1}})));
 
     // Times out of range
-    REQUIRE(pop.get(Selection({{1, 2}}), 100., 101.).ids == DataFrame<NodeID>::DataType());
-    testTimes(pop.get(Selection({{1, 2}}), 100., 101.).times, 0.0, 0.0, 0);
-    REQUIRE(pop.get(Selection({{1, 2}}), 100., 101.).data == std::vector<std::vector<float>>({}));
+    REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 100., 101.));
 
     // Inverted times
-    REQUIRE(pop.get(Selection({{1, 2}}), 0.2, 0.1).ids == DataFrame<NodeID>::DataType({1}));
-    testTimes(pop.get(Selection({{1, 2}}), 0.2, 0.1).times, 0.2, 0.1, 1);
-    REQUIRE(pop.get(Selection({{1, 2}}), 0.2, 0.1).data ==
-            std::vector<std::vector<float>>({{1.2}}));
+    // REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 0.2, 0.1));
 
     // Negatives times
-    REQUIRE(pop.get(Selection({{1, 2}}), -1., -2.).ids == DataFrame<NodeID>::DataType({1}));
-    testTimes(pop.get(Selection({{1, 2}}), -1., -2.).times, 0.0, 0.1, 10);
-    REQUIRE(pop.get(Selection({{1, 2}}), -1., -2.).data ==
-            std::vector<std::vector<float>>(
-                {{1.0}, {1.1}, {1.2}, {1.3}, {1.4}, {1.5}, {1.6}, {1.7}, {1.8}, {1.9}}));
+    REQUIRE_THROWS(pop.get(Selection({{1, 2}}), -1., -2.));
 }
 
 TEST_CASE("SomaReportReader", "[base]") {

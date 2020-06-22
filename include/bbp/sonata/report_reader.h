@@ -9,6 +9,7 @@
 #include <highfive/H5File.hpp>
 
 #include <bbp/sonata/population.h>
+#include <bbp/sonata/optional.hpp>
 
 namespace H5 = HighFive;
 
@@ -94,13 +95,13 @@ class SONATA_API ReportReader
         std::string getDataUnits() const;
         bool getSorted() const;
 
-        DataFrame<KeyType> get(const Selection& nodes_ids = Selection({}),
-                               double _tstart = -1,
-                               double _tstop = -1) const;
+        DataFrame<KeyType> get(const nonstd::optional<Selection>& nodes_ids = nonstd::nullopt,
+                               const nonstd::optional<double>& _tstart = nonstd::nullopt,
+                               const nonstd::optional<double>& _tstop = nonstd::nullopt) const;
 
       private:
         Population(const H5::File& file, const std::string& populationName);
-        std::pair<size_t, size_t> getIndex(double tstart, double tstop) const;
+        std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const;
 
         std::vector<std::pair<NodeID, std::pair<uint64_t, uint64_t>>> nodes_pointers_;
         H5::Group pop_group_;
