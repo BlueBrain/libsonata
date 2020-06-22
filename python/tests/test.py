@@ -308,11 +308,8 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(keys, [(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)])
 
         self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
-        sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
-        self.assertEqual(len(sel.ids), 0)
-        sel = self.test_obj['All'].get(tstart=3., tstop=3.)
-        self.assertEqual(len(sel.ids), 100)
-
+        with self.assertRaises(RuntimeError): self.test_obj['All'].get(tstart=5.)  # tstart out of range
+        with self.assertRaises(RuntimeError): self.test_obj['All'].get(tstart=3., tstop=3.) # tstart should be < tstop
 
 if __name__ == '__main__':
     unittest.main()

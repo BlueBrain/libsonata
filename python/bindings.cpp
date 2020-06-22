@@ -304,6 +304,14 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
 }
 }  // unnamed namespace
 
+namespace pybind11 { namespace detail {
+    template <typename T>
+    struct type_caster<nonstd::optional<T>> : optional_caster<nonstd::optional<T>> {};
+
+    template<> struct type_caster<nonstd::nullopt_t>
+        : public void_caster<nonstd::nullopt_t> {};
+}}
+
 template <typename ReportType, typename KeyType>
 void bindReportReader(py::module& m, const std::string& prefix) {
     py::class_<DataFrame<KeyType>>(m,
@@ -315,31 +323,12 @@ void bindReportReader(py::module& m, const std::string& prefix) {
     py::class_<typename ReportType::Population>(m,
                                                 (prefix + "ReportPopulation").c_str(),
                                                 "A population inside a ReportReader")
-        .def(
-            "get",
-            [](const typename ReportType::Population& self) { return self.get(); },
-            "Return all reports")
-        .def(
-            "get",
-            [](const typename ReportType::Population& self, double tstart, double tstop) {
-                return self.get(Selection({}), tstart, tstop);
-            },
-            "Return reports between 'tstart' and 'tstop'",
-            "tstart"_a,
-            "tstop"_a)
-        .def(
-            "get",
-            [](const typename ReportType::Population& self, Selection sel) {
-                return self.get(sel);
-            },
-            "Return reports with all those node_ids",
-            "node_ids"_a)
         .def("get",
              &ReportType::Population::get,
              "Return reports with all those node_ids between 'tstart' and 'tstop'",
-             "node_ids"_a,
-             "tstart"_a,
-             "tstop"_a)
+             "node_ids"_a = nonstd::nullopt,
+             "tstart"_a = nonstd::nullopt,
+             "tstop"_a = nonstd::nullopt)
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
                                "Return if data are sorted")
