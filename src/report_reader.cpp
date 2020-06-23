@@ -14,7 +14,7 @@ HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enu
 
 namespace {
 
-using bbp::sonata::ElementId;
+using bbp::sonata::ElementID;
 using bbp::sonata::NodeID;
 using bbp::sonata::Selection;
 using bbp::sonata::Spike;
@@ -76,15 +76,15 @@ void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
 }
 
 template <typename T>
-T make_key(NodeID node_id, ElementId element_id);
+T make_key(NodeID node_id, ElementID element_id);
 
 template <>
-NodeID make_key(NodeID node_id, ElementId /* element_id */) {
+NodeID make_key(NodeID node_id, ElementID /* element_id */) {
     return node_id;
 }
 
 template <>
-std::pair<NodeID, ElementId> make_key(NodeID node_id, ElementId element_id) {
+std::pair<NodeID, ElementID> make_key(NodeID node_id, ElementID element_id) {
     return {node_id, element_id};
 }
 
@@ -356,7 +356,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             ++timer_index;
         }
 
-        std::vector<ElementId> element_ids;
+        std::vector<ElementID> element_ids;
         pop_group_.getGroup("mapping")
             .getDataSet("element_ids")
             .select({it->second.first}, {it->second.second - it->second.first})
@@ -369,7 +369,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 }
 
 template class ReportReader<NodeID>;
-template class ReportReader<std::pair<NodeID, ElementId>>;
+template class ReportReader<std::pair<NodeID, ElementID>>;
 
 }  // namespace sonata
 }  // namespace bbp
