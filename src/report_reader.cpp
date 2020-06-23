@@ -14,6 +14,7 @@ HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enu
 
 namespace {
 
+using bbp::sonata::ElementId;
 using bbp::sonata::NodeID;
 using bbp::sonata::Selection;
 using bbp::sonata::Spike;
@@ -75,15 +76,15 @@ void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
 }
 
 template <typename T>
-T make_key(NodeID node_id, uint32_t element_id);
+T make_key(NodeID node_id, ElementId element_id);
 
 template <>
-NodeID make_key(NodeID node_id, uint32_t /* element_id */) {
+NodeID make_key(NodeID node_id, ElementId /* element_id */) {
     return node_id;
 }
 
 template <>
-std::pair<NodeID, uint32_t> make_key(NodeID node_id, uint32_t element_id) {
+std::pair<NodeID, ElementId> make_key(NodeID node_id, ElementId element_id) {
     return {node_id, element_id};
 }
 
@@ -142,7 +143,7 @@ SpikeReader::Population::Population(const std::string& filename,
     pop.getDataSet("timestamps").read(timestamps);
 
     if (node_ids.size() != timestamps.size()) {
-        throw std::runtime_error(
+        throw SonataError(
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
 
@@ -268,7 +269,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::op
     double stop = tstop.value_or(tstop_);
 
     if (start < 0 - EPSILON || stop < 0 - EPSILON) {
-        throw std::runtime_error("Times cannot be negative");
+        throw SonataError("Times cannot be negative");
     }
 
     auto it_start = std::find_if(times_index_.cbegin(), times_index_.cend(),
@@ -276,7 +277,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::op
                                       return start < v.second + EPSILON;
                                   });
     if (it_start == times_index_.end()) {
-        throw std::runtime_error("tstart is after the end of the range");
+        throw SonataError("tstart is after the end of the range");
     }
     indexes.first = it_start->first;
 
@@ -285,7 +286,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::op
                                       return stop > v.second - EPSILON;
                                   });
     if (it_stop == times_index_.rend()) {
-        throw std::runtime_error("tstop is before the beginning of the range");
+        throw SonataError("tstop is before the beginning of the range");
     }
     indexes.second = it_stop->first;
 
@@ -303,7 +304,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
     if (index_start >= index_stop) {
-        throw std::runtime_error("tstart should be < to tstop");
+        throw SonataError("tstart should be < to tstop");
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
@@ -355,7 +356,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             ++timer_index;
         }
 
-        std::vector<uint32_t> element_ids;
+        std::vector<ElementId> element_ids;
         pop_group_.getGroup("mapping")
             .getDataSet("element_ids")
             .select({it->second.first}, {it->second.second - it->second.first})
@@ -368,7 +369,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 }
 
 template class ReportReader<NodeID>;
-template class ReportReader<std::pair<NodeID, uint32_t>>;
+template class ReportReader<std::pair<NodeID, ElementId>>;
 
 }  // namespace sonata
 }  // namespace bbp

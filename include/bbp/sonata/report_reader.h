@@ -16,7 +16,7 @@ namespace H5 = HighFive;
 namespace bbp {
 namespace sonata {
 
-// KeyType will be NodeID for somas report and pair<NodeID, uint32_t> for elements report
+// KeyType will be NodeID for somas report and pair<NodeID, Elementid> for elements report
 template <typename KeyType>
 struct SONATA_API DataFrame {
     using DataType = std::vector<KeyType>;
@@ -127,8 +127,9 @@ class SONATA_API ReportReader
     mutable std::map<std::string, Population> populations_;
 };
 
+using ElementId = uint32_t;
 using SomaReportReader = ReportReader<NodeID>;
-using ElementReportReader = ReportReader<std::pair<NodeID, uint32_t>>;
+using ElementReportReader = ReportReader<std::pair<NodeID, ElementId>>;
 
 }  // namespace sonata
 }  // namespace bbp
