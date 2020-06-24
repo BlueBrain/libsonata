@@ -75,21 +75,16 @@ void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
 }
 
 template <typename T>
-std::pair<T, std::vector<float>> make_value(NodeID node_id,
-                                            uint32_t element_id,
-                                            const std::vector<float>& values);
+T make_key(NodeID node_id, uint32_t element_id);
 
 template <>
-std::pair<NodeID, std::vector<float>> make_value(NodeID node_id,
-                                                 uint32_t /* element_id */,
-                                                 const std::vector<float>& values) {
-    return {node_id, values};
+NodeID make_key(NodeID node_id, uint32_t /* element_id */) {
+    return node_id;
 }
 
 template <>
-std::pair<std::pair<NodeID, uint32_t>, std::vector<float>> make_value(
-    NodeID node_id, uint32_t element_id, const std::vector<float>& values) {
-    return {{node_id, element_id}, values};
+std::pair<NodeID, uint32_t> make_key(NodeID node_id, uint32_t element_id) {
+    return {node_id, element_id};
 }
 
 }  // anonymous namespace
@@ -320,7 +315,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
-        data_frame.index.push_back(times_index_[i].second);
+        data_frame.times.push_back(times_index_[i].second);
     }
 
     // Simplify selection
@@ -340,6 +335,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
         node_ids = selection.flatten();
     }
 
+    data_frame.data.resize(index_stop - index_start + 1);
     // FIXME: It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
     // TODO: specialized this function for sorted nodes_ids?
     for (const auto& node_id : node_ids) {
@@ -359,6 +355,13 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             .select({index_start, it->second.first},
                     {index_stop - index_start + 1, it->second.second - it->second.first})
             .read(data);
+        int timer_index = 0;
+        for (const std::vector<float>& datum : data) {
+            for (float d : datum) {
+                data_frame.data[timer_index].push_back(d);
+            }
+            ++timer_index;
+        }
 
         std::vector<uint32_t> element_ids;
         pop_group_.getGroup("mapping")
@@ -366,12 +369,7 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             .select({it->second.first}, {it->second.second - it->second.first})
             .read(element_ids);
         for (size_t i = 0; i < element_ids.size(); ++i) {
-            std::vector<float> data_by_node;
-            data_by_node.reserve(data.size());
-            for (auto& datum : data) {
-                data_by_node.push_back(datum[i]);
-            }
-            data_frame.data.insert(make_value<T>(node_id, element_ids[i], std::move(data_by_node)));
+            data_frame.ids.push_back(make_key<T>(node_id, element_ids[i]));
         }
     }
     return data_frame;

@@ -273,10 +273,12 @@ class TestSomaReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of nodes
+        self.assertEqual(len(self.test_obj['All'].get().ids), 20)  # Number of nodes
+        self.assertEqual(len(self.test_obj['All'].get().times), 10)  # number of times
+        self.assertEqual(len(self.test_obj['All'].get().data), 10)  # should be the same
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
-        self.assertEqual(len(sel.index), 2)  # Number of timestamp (0.8 and 0.9)
-        self.assertEqual(list(sel.data.keys()), [13, 14])
+        self.assertEqual(len(sel.times), 2)  # Number of timestamp (0.8 and 0.9)
+        self.assertEqual(list(sel.ids), [13, 14])
 
 class TestElementReportPopulation(unittest.TestCase):
     def setUp(self):
@@ -297,17 +299,19 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
-        self.assertEqual(len(self.test_obj['All'].get().data), 100)  # Number of elements
+        self.assertEqual(len(self.test_obj['All'].get().data), 20)  # Number of times in this range
+        self.assertEqual(len(self.test_obj['All'].get().times), 20)  # Should be the same
+        self.assertEqual(len(self.test_obj['All'].get().ids), 100)
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
-        keys = list(sel.data.keys())
+        keys = list(sel.ids)
         keys.sort()
-        self.assertEqual(keys, [(13, 60), (13, 61), (13, 62), (13, 63), (13, 64), (14, 65), (14, 66), (14, 67), (14, 68), (14, 69)])
+        self.assertEqual(keys, [(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)])
 
-        self.assertEqual(len(sel.index), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
+        self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
         sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
-        self.assertEqual(len(sel.data), 0)
+        self.assertEqual(len(sel.ids), 0)
         sel = self.test_obj['All'].get(tstart=3., tstop=3.)
-        self.assertEqual(len(sel.data), 100)
+        self.assertEqual(len(sel.ids), 100)
 
 
 if __name__ == '__main__':

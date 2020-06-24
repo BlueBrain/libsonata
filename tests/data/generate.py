@@ -162,7 +162,8 @@ def write_element_report(filepath):
     population_names = ['All', 'element1', 'element42']
     node_ids = np.arange(1, 21)
     index_pointers = np.arange(0, 105, 5)
-    element_ids = np.arange(100)
+    repeated = np.arange(50)
+    element_ids = np.repeat(repeated, 2)
     times = (0.0, 4.0, 0.2)
     string_dtype = h5py.special_dtype(vlen=get_vlen_str_type())
     with h5py.File(filepath, 'w') as h5f:

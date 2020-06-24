@@ -299,8 +299,9 @@ void bindReportReader(py::module& m, const std::string& prefix) {
     py::class_<DataFrame<KeyType>>(m,
                                    (prefix + "DataFrame").c_str(),
                                    "Something easily convertible to pandas dataframe")
+        .def_readonly("ids", &DataFrame<KeyType>::ids)
         .def_readonly("data", &DataFrame<KeyType>::data)
-        .def_readonly("index", &DataFrame<KeyType>::index);
+        .def_readonly("times", &DataFrame<KeyType>::times);
     py::class_<typename ReportType::Population>(m,
                                                 (prefix + "ReportPopulation").c_str(),
                                                 "A population inside a ReportReader")
