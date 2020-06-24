@@ -294,6 +294,9 @@ class TestElementReportPopulation(unittest.TestCase):
     def test_get_inexistant_population(self):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
 
+    def test_get_nodes_ids(self):
+        self.assertEqual(self.test_obj['All'].get_nodes_ids(), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+
     def test_get_reports_from_population(self):
         self.assertEqual(self.test_obj['All'].times, (0., 4., 0.2))
         self.assertEqual(self.test_obj['All'].time_units, 'ms')

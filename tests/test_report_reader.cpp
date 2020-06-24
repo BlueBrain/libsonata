@@ -71,6 +71,8 @@ TEST_CASE("SomaReportReader", "[base]") {
 
     REQUIRE(pop.getSorted());
 
+    REQUIRE(pop.getNodeIds() == std::vector<NodeID>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20});
+
     auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
     REQUIRE(data.ids == DataFrame<NodeID>::DataType{{3, 4}});
     testTimes(data.times, 0.2, 0.1, 4);

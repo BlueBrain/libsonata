@@ -207,14 +207,13 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
     : pop_group_(file.getGroup(std::string("/report/") + populationName)) {
     {
         auto mapping_group = pop_group_.getGroup("mapping");
-        std::vector<NodeID> node_ids;
-        mapping_group.getDataSet("node_ids").read(node_ids);
+        mapping_group.getDataSet("node_ids").read(nodes_ids_);
 
         std::vector<uint64_t> index_pointers;
         mapping_group.getDataSet("index_pointers").read(index_pointers);
 
-        for (size_t i = 0; i < node_ids.size(); ++i) {
-            nodes_pointers_.emplace_back(node_ids[i],
+        for (size_t i = 0; i < nodes_ids_.size(); ++i) {
+            nodes_pointers_.emplace_back(nodes_ids_[i],
                                          std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
 
@@ -259,6 +258,11 @@ std::string ReportReader<T>::Population::getDataUnits() const {
 template <typename T>
 bool ReportReader<T>::Population::getSorted() const {
     return nodes_ids_sorted_;
+}
+
+template <typename T>
+std::vector<NodeID> ReportReader<T>::Population::getNodesIds() const {
+    return nodes_ids_;
 }
 
 template <typename T>

@@ -16,7 +16,7 @@ namespace H5 = HighFive;
 namespace bbp {
 namespace sonata {
 
-// KeyType will be NodeID for somas report and pair<NodeID, Elementid> for elements report
+// KeyType will be NodeID for somas report and pair<NodeID, ElementID> for elements report
 template <typename KeyType>
 struct SONATA_API DataFrame {
     using DataType = std::vector<KeyType>;
@@ -94,6 +94,7 @@ class SONATA_API ReportReader
         std::string getTimeUnits() const;
         std::string getDataUnits() const;
         bool getSorted() const;
+        std::vector<NodeID> getNodesIds() const;
 
         DataFrame<KeyType> get(const nonstd::optional<Selection>& nodes_ids = nonstd::nullopt,
                                const nonstd::optional<double>& _tstart = nonstd::nullopt,
@@ -105,6 +106,7 @@ class SONATA_API ReportReader
 
         std::vector<std::pair<NodeID, std::pair<uint64_t, uint64_t>>> nodes_pointers_;
         H5::Group pop_group_;
+        std::vector<NodeID> nodes_ids_;
         double tstart_, tstop_, tstep_;
         std::vector<std::pair<size_t, double>> times_index_;
         std::string time_units_;

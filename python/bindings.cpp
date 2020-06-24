@@ -331,6 +331,9 @@ void bindReportReader(py::module& m, const std::string& prefix) {
              "node_ids"_a = nonstd::nullopt,
              "tstart"_a = nonstd::nullopt,
              "tstop"_a = nonstd::nullopt)
+        .def("get_nodes_ids",
+             &ReportType::Population::getNodesIds,
+             "Return the list of nodes ids for this population")
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
                                "Return if data are sorted")
