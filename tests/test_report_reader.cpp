@@ -33,8 +33,6 @@ TEST_CASE("SpikeReader", "[base]") {
 TEST_CASE("SomaReportReader limits", "[base]") {
     const SomaReportReader reader("./data/somas.h5");
 
-    REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "soma1", "soma2"});
-
     auto pop = reader.openPopulation("All");
 
     // ids out of range
@@ -50,7 +48,7 @@ TEST_CASE("SomaReportReader limits", "[base]") {
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 100., 101.));
 
     // Inverted times
-    // REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 0.2, 0.1));
+    REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 0.2, 0.1));
 
     // Negatives times
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), -1., -2.));
@@ -81,6 +79,30 @@ TEST_CASE("SomaReportReader", "[base]") {
                              {{3.2f, 4.2f}, {3.3f, 4.3f}, {3.4f, 4.4f}, {3.5f, 4.5f}}});
 }
 
+TEST_CASE("ElementReportReader limits", "[base]") {
+    const ElementReportReader reader("./data/elements.h5");
+
+    auto pop = reader.openPopulation("All");
+
+    // ids out of range
+    // REQUIRE_THROWS(pop.get(Selection({{100, 101}})));
+
+    // Inverted id
+    REQUIRE_THROWS(pop.get(Selection({{2, 1}})));
+
+    // Negative ids
+    REQUIRE_THROWS(pop.get(Selection({{-1, 1}})));
+
+    // Times out of range
+    REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 100., 101.));
+
+    // Inverted times
+    REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 0.2, 0.1));
+
+    // Negatives times
+    REQUIRE_THROWS(pop.get(Selection({{1, 2}}), -1., -2.));
+}
+
 TEST_CASE("ElementReportReader", "[base]") {
     const ElementReportReader reader("./data/elements.h5");
 
@@ -96,6 +118,9 @@ TEST_CASE("ElementReportReader", "[base]") {
     REQUIRE(pop.getDataUnits() == "mV");
 
     REQUIRE(pop.getSorted());
+
+    REQUIRE(pop.getNodesIds() == std::vector<NodeID>{1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                                     11, 12, 13, 14, 15, 16, 17, 18, 19, 20});
 
     auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
     REQUIRE(data.ids ==
