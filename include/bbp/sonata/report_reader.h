@@ -51,9 +51,9 @@ class SONATA_API SpikeReader
             by_time = 2,
         };
 
-        Spikes get(const Selection& node_ids = Selection({}),
-                   double tstart = -1,
-                   double tstop = -1) const;
+        Spikes get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+                   const nonstd::optional<double>& tstart = nonstd::nullopt,
+                   const nonstd::optional<double>& tstop = nonstd::nullopt) const;
         Sorting getSorting() const;
 
       private:

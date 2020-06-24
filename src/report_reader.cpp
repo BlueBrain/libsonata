@@ -109,18 +109,25 @@ auto SpikeReader::openPopulation(const std::string& populationName) const -> con
     return populations_.at(populationName);
 }
 
-Spikes SpikeReader::Population::get(const Selection& node_ids, double tstart, double tstop) const {
-    tstart = tstart < 0 ? tstart_ : tstart;
-    tstop = tstop < 0 ? tstop_ : tstop;
-    if (tstart > tstop_ + EPSILON || tstop < tstart_ - EPSILON || tstop < tstart) {
-        return Spikes{};
+Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
+                                    const nonstd::optional<double>& tstart,
+                                    const nonstd::optional<double>& tstop) const {
+    double start = tstart.value_or(tstart_);
+    double stop = tstop.value_or(tstop_);
+
+    if (start < 0 - EPSILON || stop < 0 - EPSILON) {
+        throw SonataError("Times cannot be negative");
+    }
+
+    if (start >= stop) {
+        throw SonataError("tstart should be < to tstop");
     }
 
     auto spikes = spikes_;
-    filterTimestamp(spikes, tstart, tstop);
+    filterTimestamp(spikes, start, stop);
 
-    if (!node_ids.empty()) {
-        filterNode(spikes, node_ids);
+    if (node_ids and !node_ids->empty()) {
+        filterNode(spikes, node_ids.value());
     }
 
     return spikes;
