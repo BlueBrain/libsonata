@@ -497,29 +497,12 @@ PYBIND11_MODULE(_libsonata, m) {
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
-        .def(
-            "get",
-            [](const SpikeReader::Population& self) { return self.get(); },
-            "Return all spikes")
-        .def(
-            "get",
-            [](const SpikeReader::Population& self, double tstart, double tstop) {
-                return self.get(Selection({}), tstart, tstop);
-            },
-            "Return spikes between 'tstart' and 'tstop'",
-            "tstart"_a,
-            "tstop"_a)
-        .def(
-            "get",
-            [](const SpikeReader::Population& self, Selection sel) { return self.get(sel); },
-            "Return spikes with all those node_ids",
-            "node_ids"_a)
         .def("get",
              &SpikeReader::Population::get,
              "Return spikes with all those node_ids between 'tstart' and 'tstop'",
-             "node_ids"_a,
-             "tstart"_a,
-             "tstop"_a)
+             "node_ids"_a = nonstd::nullopt,
+             "tstart"_a = nonstd::nullopt,
+             "tstop"_a = nonstd::nullopt)
         .def_property_readonly(
             "sorting",
             [](const SpikeReader::Population& self) {
