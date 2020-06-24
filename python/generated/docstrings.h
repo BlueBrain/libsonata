@@ -27,7 +27,9 @@ static const char *__doc_bbp_sonata_DataFrame = R"doc()doc";
 
 static const char *__doc_bbp_sonata_DataFrame_data = R"doc()doc";
 
-static const char *__doc_bbp_sonata_DataFrame_index = R"doc()doc";
+static const char *__doc_bbp_sonata_DataFrame_ids = R"doc()doc";
+
+static const char *__doc_bbp_sonata_DataFrame_times = R"doc()doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation = R"doc()doc";
 
