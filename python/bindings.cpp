@@ -362,16 +362,10 @@ PYBIND11_MODULE(_libsonata, m) {
              }),
              "values"_a,
              "Selection from list of IDs")
-        .def_property_readonly("ranges",
-                               &Selection::ranges,
-                               DOC_SEL(ranges))
+        .def_property_readonly("ranges", &Selection::ranges, DOC_SEL(ranges))
         .def(
-            "flatten",
-            [](Selection& obj) { return asArray(obj.flatten()); },
-            DOC_SEL(flatten))
-        .def_property_readonly("flat_size",
-                               &Selection::flatSize,
-                               DOC_SEL(flatSize))
+            "flatten", [](Selection& obj) { return asArray(obj.flatten()); }, DOC_SEL(flatten))
+        .def_property_readonly("flat_size", &Selection::flatSize, DOC_SEL(flatSize))
         .def(
             "__bool__",
             [](const Selection& obj) { return !obj.empty(); },
