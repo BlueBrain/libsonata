@@ -1,0 +1,26 @@
+name: docstring-check
+on:
+    push:
+
+jobs:
+  build:
+    name: docstring-check
+    runs-on: ubuntu-18.04
+    steps:
+        - name: Fetch repository
+          uses: actions/checkout@v2.1.0
+          with:
+            submodules: recursive
+        - name: Install packages
+          run: sudo apt-get update && sudo apt-get install build-essential libhdf5-dev python3-venv libclang1-9
+        - name: Add pybind11 tools to path
+          run: echo "::set-env name=PYTHONPATH::/home/runner/work/libsonata/libsonata/python/pybind11/tools"
+        - name: Set libclang symlink
+          run: |
+            cd /usr/lib/x86_64-linux-gnu
+            # TODO: libclang.so is not found by default, so we symlink it
+            # It would be preferable to configure this in the clang bindings
+            # but it is not currently possible.
+            sudo ln -s libclang-9.so.1 libclang.so
+        - name: Check docstrings
+          run: ci/check_generated_docstrings.sh

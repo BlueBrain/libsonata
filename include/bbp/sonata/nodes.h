@@ -33,16 +33,16 @@ class SONATA_API NodePopulation: public Population
     /**
      * Return selection of where attribute values match value
      *
-     * As per node_set predicates, value must be one of type:
+     * As per node_set predicates, <tt>value</tt> must be one of type:
      *
-     *  number	H5T_IEEE_*LE, H5T_STD_*LE
-     *  string	H5T_C_S1
-     *  bool	H5T_STD_I8LE
-     *  null	invalid
+     * <li>number  H5T_IEEE_*LE, H5T_STD_*LE</li>
+     * <li>string  H5T_C_S1</li>
+     * <li>bool    H5T_STD_I8LE</li>
+     * <li>null    invalid</li>
      *
-     * @throw if the attribute dtype is not comparable
+     * \throw if the attribute dtype is not comparable
      *
-     * Note: This does not match Dynamics_params datasets
+     * Note: This does not match dynamics_params datasets
      */
     template <typename T>
     Selection matchAttributeValues(const std::string& attribute, const T value) const;
