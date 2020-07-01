@@ -112,8 +112,8 @@ auto SpikeReader::openPopulation(const std::string& populationName) const -> con
 Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
                                     const nonstd::optional<double>& tstart,
                                     const nonstd::optional<double>& tstop) const {
-    double start = tstart.value_or(tstart_);
-    double stop = tstop.value_or(tstop_);
+    const double start = tstart.value_or(tstart_);
+    const double stop = tstop.value_or(tstop_);
 
     if (start < 0 - EPSILON || stop < 0 - EPSILON) {
         throw SonataError("Times cannot be negative");
@@ -268,7 +268,7 @@ bool ReportReader<T>::Population::getSorted() const {
 }
 
 template <typename T>
-std::vector<NodeID> ReportReader<T>::Population::getNodesIds() const {
+std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
     return nodes_ids_;
 }
 
@@ -325,7 +325,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     // Simplify selection
     // We should remove duplicates
     // And when we can work with ranges let's sort them
-    // auto nodes_ids_ = Selection::fromValues(nodes_ids.flatten().sort());
+    // auto nodes_ids_ = Selection::fromValues(node_ids.flatten().sort());
     Selection::Values node_ids;
 
     if (!selection || selection->empty()) {  // Take all nodes in this case
@@ -340,8 +340,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     }
 
     data_frame.data.resize(index_stop - index_start + 1);
-    // FIXME: It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
-    // TODO: specialized this function for sorted nodes_ids?
+    // FIXME: It will be good to do it for ranges but if node_ids are not sorted it is not easy
+    // TODO: specialized this function for sorted node_ids?
     for (const auto& node_id : node_ids) {
         auto it = std::find_if(
             nodes_pointers_.begin(),

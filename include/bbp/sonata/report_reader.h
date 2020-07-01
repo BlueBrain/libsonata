@@ -94,9 +94,9 @@ class SONATA_API ReportReader
         std::string getTimeUnits() const;
         std::string getDataUnits() const;
         bool getSorted() const;
-        std::vector<NodeID> getNodesIds() const;
+        std::vector<NodeID> getNodeIds() const;
 
-        DataFrame<KeyType> get(const nonstd::optional<Selection>& nodes_ids = nonstd::nullopt,
+        DataFrame<KeyType> get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
                                const nonstd::optional<double>& _tstart = nonstd::nullopt,
                                const nonstd::optional<double>& _tstop = nonstd::nullopt) const;
 
