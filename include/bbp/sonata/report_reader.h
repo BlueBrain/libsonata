@@ -125,20 +125,14 @@ class SONATA_API ReportReader
         bool getSorted() const;
         std::vector<NodeID> getNodeIds() const;
 
-<<<<<<< HEAD
+        /**
+         * \param node_ids limit the report to the given selection.
+         * \param tstart return spikes occurring on or after tstart. tstart=None indicates no limit.
+         * \param tstop return spikes occurring on or before tstop. tstop=None indicates no limit.
+         */
         DataFrame<KeyType> get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
                                const nonstd::optional<double>& _tstart = nonstd::nullopt,
                                const nonstd::optional<double>& _tstop = nonstd::nullopt) const;
-=======
-        /**
-         * \param node_ids limit the report to the given selection.
-         * \param tstart return spikes occurring on or after tstart. tstart=-1 indicates no limit.
-         * \param tstop return spikes occurring on or before tstop. tstop=-1 indicates no limit.
-         */
-        DataFrame<KeyType> get(const Selection& nodes_ids = Selection({}),
-                               double _tstart = -1,
-                               double _tstop = -1) const;
->>>>>>> origin/master
 
       private:
         Population(const H5::File& file, const std::string& populationName);
