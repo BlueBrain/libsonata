@@ -10,8 +10,8 @@
 #include <algorithm>  // std::copy, std::sort, std::max, std::min
 #include <utility>    // std::move
 
-#include "population.hpp"
 #include "hdf5_mutex.hpp"
+#include "population.hpp"
 
 #include <fmt/format.h>
 #include <highfive/H5File.hpp>

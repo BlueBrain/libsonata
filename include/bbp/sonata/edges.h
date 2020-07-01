@@ -36,26 +36,32 @@ class SONATA_API EdgePopulation: public Population
     std::string source() const;
 
     /**
-     * Name of target population extracted from 'source_node_id' dataset
+     * Name of target population extracted from 'target_node_id' dataset
      */
     std::string target() const;
 
+    /**
+     * Return source node IDs for a given edge selection
+     */
     std::vector<NodeID> sourceNodeIDs(const Selection& selection) const;
 
+    /**
+     * Return target node IDs for a given edge selection
+     */
     std::vector<NodeID> targetNodeIDs(const Selection& selection) const;
 
     /**
-     * Find inbound edges for a given node ID.
+     * Return inbound edges for given node IDs.
      */
     Selection afferentEdges(const std::vector<NodeID>& target) const;
 
     /**
-     * Find outbound edges for a given node ID.
+     * Return outbound edges for given node IDs.
      */
     Selection efferentEdges(const std::vector<NodeID>& source) const;
 
     /**
-     * Find edges connecting two given nodes.
+     * Return edges connecting two given nodes.
      */
     Selection connectingEdges(const std::vector<NodeID>& source,
                               const std::vector<NodeID>& target) const;

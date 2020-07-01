@@ -7,6 +7,8 @@
 #include <bbp/sonata/nodes.h>
 #include <bbp/sonata/report_reader.h>
 
+#include "generated/docstrings.h"
+
 #include <fmt/format.h>
 
 #include <cstdint>
@@ -107,6 +109,15 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
     return asArray(obj.getDynamicsAttribute<T>(name, selection, defaultValue.cast<T>()));
 }
 
+// create a macro to reduce repetition for docstrings
+#define DOC_SEL(x) DOC(bbp, sonata, Selection, x)
+#define DOC_POP(x) DOC(bbp, sonata, Population, x)
+#define DOC_POP_NODE(x) DOC(bbp, sonata, NodePopulation, x)
+#define DOC_POP_EDGE(x) DOC(bbp, sonata, EdgePopulation, x)
+#define DOC_POP_STOR(x) DOC(bbp, sonata, PopulationStorage, x)
+#define DOC_SPIKEREADER_POP(x) DOC(bbp, sonata, SpikeReader, Population, x)
+#define DOC_SPIKEREADER(x) DOC(bbp, sonata, SpikeReader, x)
+#define DOC_REPORTREADER_POP(x) DOC(bbp, sonata, ReportReader, Population, x)
 
 // Emulating generic lambdas in pre-C++14
 #define DISPATCH_TYPE(dtype, func, ...)                               \
@@ -144,31 +155,24 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
     m.attr("version") = version();
 
     const auto imbueElementName = [](const char* msg) {
-        return fmt::format(msg, fmt::arg("elem", Population::ELEMENT));
+        return fmt::format(msg, fmt::arg("element", Population::ELEMENT));
     };
     return py::class_<Population, std::shared_ptr<Population>>(m, clsName, docString)
         .def(py::init<const std::string&, const std::string&, const std::string&>())
-        .def_property_readonly("name", &Population::name, "Population name")
-        .def_property_readonly(
-            "size",
-            &Population::size,
-            imbueElementName("Total number of {elem}s in the population").c_str())
+        .def_property_readonly("name", &Population::name, DOC_POP(name))
+        .def_property_readonly("size", &Population::size, imbueElementName(DOC_POP(size)).c_str())
         .def_property_readonly("attribute_names",
                                &Population::attributeNames,
-                               "Set of attribute names")
+                               DOC_POP(attributeNames))
         .def_property_readonly("enumeration_names",
                                &Population::enumerationNames,
-                               "Set of enumeration names")
-        .def("__len__",
-             &Population::size,
-             imbueElementName("Get the total number of {elem}s in the population").c_str())
-        .def("select_all",
-             &Population::selectAll,
-             imbueElementName("Get selection of all {elem}s in the population").c_str())
+                               DOC_POP(enumerationNames))
+        .def("__len__", &Population::size, imbueElementName(DOC_POP(size)).c_str())
+        .def("select_all", &Population::selectAll, imbueElementName(DOC_POP(selectAll)).c_str())
         .def("enumeration_values",
              &Population::enumerationValues,
              py::arg("name"),
-             "Get all allowed enumeration values for a given attribute name")
+             DOC_POP(enumerationValues))
         .def(
             "get_attribute",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
@@ -177,9 +181,9 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                 DISPATCH_TYPE(dtype, getAttribute, obj, name, selection);
             },
             py::arg("name"),
-            py::arg(imbueElementName("{elem}_id").c_str()),
-            imbueElementName("Get attribute value for a given {elem}.\n"
-                             "Raises an exception if attribute is not defined for this {elem}.")
+            py::arg(imbueElementName("{element}_id").c_str()),
+            imbueElementName("Get attribute value for a given {element}.\n"
+                             "See below for details.")
                 .c_str())
         .def(
             "get_attribute",
@@ -189,9 +193,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             "name"_a,
             "selection"_a,
-            imbueElementName("Get attribute values for a given {elem} selection.\n"
-                             "Raises an exception if attribute is not defined for some {elem}s.")
-                .c_str())
+            imbueElementName(DOC_POP(getAttribute)).c_str())
         .def(
             "get_attribute",
             [](Population& obj,
@@ -205,13 +207,10 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             "name"_a,
             "selection"_a,
             "default_value"_a,
-            imbueElementName("Get attribute values for a given {elem} selection.\n"
-                             "Use default value for {elem}s where attribute is not defined\n"
-                             "(it should still be one of population attributes).")
-                .c_str())
+            imbueElementName(DOC_POP(getAttribute_2)).c_str())
         .def_property_readonly("dynamics_attribute_names",
                                &Population::dynamicsAttributeNames,
-                               "Set of dynamics attribute names")
+                               DOC_POP(dynamicsAttributeNames))
         .def(
             "get_dynamics_attribute",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
@@ -220,9 +219,9 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                 DISPATCH_TYPE(dtype, getDynamicsAttribute, obj, name, selection);
             },
             py::arg("name"),
-            py::arg(imbueElementName("{elem}_id").c_str()),
-            imbueElementName("Get dynamics attribute value for a given {elem}.\n"
-                             "Raises an exception if attribute is not defined for this {elem}.")
+            py::arg(imbueElementName("{element}_id").c_str()),
+            imbueElementName("Get dynamics attribute value for a given {element}.\n"
+                             "See below for details.")
                 .c_str())
         .def(
             "get_dynamics_attribute",
@@ -232,9 +231,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             "name"_a,
             "selection"_a,
-            imbueElementName("Get dynamics attribute values for a given {elem} selection.\n"
-                             "Raises an exception if attribute is not defined for some {elem}s.")
-                .c_str())
+            imbueElementName(DOC_POP(getDynamicsAttribute)).c_str())
         .def(
             "get_dynamics_attribute",
             [](Population& obj,
@@ -252,10 +249,7 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             "name"_a,
             "selection"_a,
             "default_value"_a,
-            imbueElementName("Get dynamics attribute values for a given {elem} selection.\n"
-                             "Use default value for {elem}s where attribute is not defined\n"
-                             "(it should still be one of population attributes).")
-                .c_str())
+            imbueElementName(DOC_POP(getDynamicsAttribute_2)).c_str())
         .def(
             "get_enumeration",
             [](Population& obj, const std::string& name, Selection::Value elemID) {
@@ -264,10 +258,9 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
                 DISPATCH_TYPE(dtype, getEnumerationVector, obj, name, selection);
             },
             "name"_a,
-            py::arg(imbueElementName("{elem}_id").c_str()),
-            imbueElementName(
-                "Get enumeration values for a given {elem} selection.\n"
-                "Raises an exception if the enumeration is not defined for some {elem}s.")
+            py::arg(imbueElementName("{element}_id").c_str()),
+            imbueElementName("Get enumeration values for a given {element}.\n"
+                             "See below for details.")
                 .c_str())
         .def(
             "get_enumeration",
@@ -277,30 +270,27 @@ py::class_<Population, std::shared_ptr<Population>> bindPopulationClass(py::modu
             },
             "name"_a,
             "selection"_a,
-            imbueElementName(
-                "Get enumeration values for a given {elem} selection.\n"
-                "Raises an exception if the enumeration is not defined for some {elem}s.")
-                .c_str());
+            imbueElementName(DOC_POP(enumerationValues)).c_str());
 }
 
 
 template <typename Storage>
 py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const char* popClsName) {
-    return py::class_<Storage>(m,
-                               clsName,
-                               fmt::format("Collection of {}`s stored in H5 file (+ optional CSV)",
-                                           popClsName)
-                                   .c_str())
+    const auto imbuePopulationClassName = [popClsName](const char* msg) {
+        return fmt::format(msg, fmt::arg("PopulationClass", popClsName));
+    };
+    return py::class_<Storage>(
+               m, clsName, imbuePopulationClassName(DOC(bbp, sonata, PopulationStorage)).c_str())
         .def(py::init<const std::string&, const std::string&>(),
              "h5_filepath"_a,
              "csv_filepath"_a = "")
         .def_property_readonly("population_names",
                                &Storage::populationNames,
-                               "Set of population names")
+                               imbuePopulationClassName(DOC_POP_STOR(populationNames)).c_str())
         .def("open_population",
              &Storage::openPopulation,
              "name"_a,
-             fmt::format("Get {} for a given population name", popClsName).c_str());
+             imbuePopulationClassName(DOC_POP_STOR(openPopulation)).c_str());
 }
 }  // unnamed namespace
 
@@ -336,16 +326,16 @@ void bindReportReader(py::module& m, const std::string& prefix) {
              "Return the list of nodes ids for this population")
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
-                               "Return if data are sorted")
+                               DOC_REPORTREADER_POP(getSorted))
         .def_property_readonly("times",
                                &ReportType::Population::getTimes,
-                               "Return (tstart, tstop, tstep) of the population")
+                               DOC_REPORTREADER_POP(getTimes))
         .def_property_readonly("time_units",
                                &ReportType::Population::getTimeUnits,
-                               "Return the unit of the times")
+                               DOC_REPORTREADER_POP(getTimeUnits))
         .def_property_readonly("data_units",
                                &ReportType::Population::getDataUnits,
-                               "Return the unit of data");
+                               DOC_REPORTREADER_POP(getDataUnits));
     py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
         .def(py::init<const std::string&>())
         .def("get_populations_names",
@@ -366,20 +356,14 @@ PYBIND11_MODULE(_libsonata, m) {
              }),
              "values"_a,
              "Selection from list of IDs")
-        .def_property_readonly("ranges",
-                               &Selection::ranges,
-                               "Get a list of ranges constituting Selection")
+        .def_property_readonly("ranges", &Selection::ranges, DOC_SEL(ranges))
         .def(
-            "flatten",
-            [](Selection& obj) { return asArray(obj.flatten()); },
-            "Array of IDs constituting Selection")
-        .def_property_readonly("flat_size",
-                               &Selection::flatSize,
-                               "Total number of elements constituting Selection")
+            "flatten", [](Selection& obj) { return asArray(obj.flatten()); }, DOC_SEL(flatten))
+        .def_property_readonly("flat_size", &Selection::flatSize, DOC_SEL(flatSize))
         .def(
             "__bool__",
             [](const Selection& obj) { return !obj.empty(); },
-            "If EdgeSelection is not empty")
+            "True if Selection is not empty")
 
         .def("__eq__", &bbp::sonata::operator==, "Compare selection contents are equal")
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
@@ -396,7 +380,7 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             "name"_a,
             "value"_a,
-            "Return selection where the attribute `name` has values matching the int `value`")
+            DOC_POP_NODE(matchAttributeValues))
         .def(
             "match_values",
             [](NodePopulation& obj, const std::string& name, const std::string& value) {
@@ -404,28 +388,28 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             "name"_a,
             "value"_a,
-            "Return selection where the attribute `name` has values matching the string `value`");
+            DOC_POP_NODE(matchAttributeValues));
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")
-        .def_property_readonly("source", &EdgePopulation::source, "Source node population")
-        .def_property_readonly("target", &EdgePopulation::target, "Target node population")
+        .def_property_readonly("source", &EdgePopulation::source, DOC_POP_EDGE(source))
+        .def_property_readonly("target", &EdgePopulation::target, DOC_POP_EDGE(target))
         .def(
             "source_node",
             [](EdgePopulation& obj, EdgeID edgeID) {
                 return obj.sourceNodeIDs(Selection::fromValues({edgeID}))[0];
             },
             "edge_id"_a,
-            "Source node ID for given edge")
+            "Source node ID for a given edge")
         .def(
             "source_nodes",
             [](EdgePopulation& obj, const Selection& selection) {
                 return asArray(obj.sourceNodeIDs(selection));
             },
             "selection"_a,
-            "Source node IDs for given Selection")
+            DOC_POP_EDGE(sourceNodeIDs))
         .def(
             "target_node",
             [](EdgePopulation& obj, EdgeID edgeID) {
@@ -439,35 +423,35 @@ PYBIND11_MODULE(_libsonata, m) {
                 return asArray(obj.targetNodeIDs(selection));
             },
             "selection"_a,
-            "Source node IDs for given Selection")
+            DOC_POP_EDGE(targetNodeIDs))
         .def(
             "afferent_edges",
             [](EdgePopulation& obj, NodeID target) {
                 return obj.afferentEdges(std::vector<NodeID>{target});
             },
             "target"_a,
-            "Find all edges targeting given node")
+            DOC_POP_EDGE(afferentEdges))
         .def(
             "afferent_edges",
             [](EdgePopulation& obj, const std::vector<NodeID>& target) {
                 return obj.afferentEdges(target);
             },
             "target"_a,
-            "Find all edges targeting given nodes")
+            DOC_POP_EDGE(afferentEdges))
         .def(
             "efferent_edges",
             [](EdgePopulation& obj, NodeID source) {
                 return obj.efferentEdges(std::vector<NodeID>{source});
             },
             "source"_a,
-            "Find all edges originating from given node")
+            DOC_POP_EDGE(efferentEdges))
         .def(
             "efferent_edges",
             [](EdgePopulation& obj, const std::vector<NodeID>& source) {
                 return obj.efferentEdges(source);
             },
             "source"_a,
-            "Find all edges originating from given nodes")
+            DOC_POP_EDGE(efferentEdges))
         .def(
             "connecting_edges",
             [](EdgePopulation& obj, NodeID source, NodeID target) {
@@ -476,7 +460,7 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             "source"_a,
             "target"_a,
-            "Find all edges connecting two given nodes")
+            DOC_POP_EDGE(connectingEdges))
         .def(
             "connecting_edges",
             [](EdgePopulation& obj,
@@ -492,7 +476,7 @@ PYBIND11_MODULE(_libsonata, m) {
                     "source_node_count"_a,
                     "target_node_count"_a,
                     "overwrite"_a = false,
-                    "Write bidirectional node->edge indices to EdgePopulation HDF5");
+                    DOC_POP_EDGE(writeIndices));
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
@@ -513,12 +497,12 @@ PYBIND11_MODULE(_libsonata, m) {
                     return "by_time";
                 return "none";
             },
-            "Return the way data are sorted ('none', 'by_id', 'by_time')");
+            DOC_SPIKEREADER_POP(getSorting));
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init<const std::string&>())
         .def("get_populations_names",
              &SpikeReader::getPopulationsNames,
-             "Get list of all populations")
+             DOC_SPIKEREADER(getPopulationsNames))
         .def("__getitem__", &SpikeReader::openPopulation);
 
     bindReportReader<SomaReportReader, NodeID>(m, "Soma");

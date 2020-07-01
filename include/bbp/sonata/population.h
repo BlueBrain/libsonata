@@ -39,10 +39,19 @@ class SONATA_API Selection
     static Selection fromValues(Iterator first, Iterator last);
     static Selection fromValues(const Values& values);
 
+    /**
+     * Get a list of ranges constituting Selection
+     */
     const Ranges& ranges() const;
 
+    /**
+     * Array of IDs constituting Selection
+     */
     Values flatten() const;
 
+    /**
+     * Total number of elements constituting Selection
+     */
     size_t flatSize() const;
 
     bool empty() const;
@@ -117,7 +126,7 @@ class SONATA_API Population
     const std::set<std::string>& enumerationNames() const;
 
     /**
-     * Get attribute values for given Selection
+     * Get attribute values for given {element} Selection
      *
      * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
@@ -125,15 +134,16 @@ class SONATA_API Population
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @throw if there is no such attribute for the population
-     * @throw if the attribute is not defined for _any_ element from the selection
+     * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the attribute values from
+     * \throw if there is no such attribute for the population
+     * \throw if the attribute is not defined for _any_ element from the selection
      */
     template <typename T>
     std::vector<T> getAttribute(const std::string& name, const Selection& selection) const;
 
     /**
-     * Get attribute values for given Selection
+     * Get attribute values for given {element} Selection
      *
      * If string values are requested and the attribute is a explicit
      * enumeration, values will be resolved to strings.
@@ -141,9 +151,10 @@ class SONATA_API Population
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @param default is a value to use for groups w/o given attribute
-     * @throw if there is no such attribute for the population
+     * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the attribute values from
+     * \param default is a value to use for {element}s without the given attribute
+     * \throw if there is no such attribute for the population
      */
     template <typename T>
     std::vector<T> getAttribute(const std::string& name,
@@ -151,14 +162,15 @@ class SONATA_API Population
                                 const T& defaultValue) const;
 
     /**
-     * Get enumeration values for given attribute and Selection
+     * Get enumeration values for given attribute and {element} Selection
      *
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#nodes---enum-datatypes
      *
-     * @param name is a string to allow enumeration attributes not defined in spec
-     * @throw if there is no such attribute for the population
-     * @throw if the attribute is not defined for _any_ element from the selection
+     * \param name is a string to allow enumeration attributes not defined in spec
+     * \param selection is a selection to retrieve the enumeration values from
+     * \throw if there is no such attribute for the population
+     * \throw if the attribute is not defined for _any_ element from the selection
      */
     template <typename T>
     std::vector<T> getEnumeration(const std::string& name, const Selection& selection) const;
@@ -166,15 +178,16 @@ class SONATA_API Population
     /**
      * Get all allowed attribute enumeration values
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @throw if there is no such attribute for the population
+     * \param name is a string to allow attributes not defined in spec
+     *
+     * \throw if there is no such attribute for the population
      */
     std::vector<std::string> enumerationValues(const std::string& name) const;
 
     /**
      * Get attribute data type, optionally translating enumeration types
 
-     * @internal
+     * \internal
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
@@ -187,21 +200,23 @@ class SONATA_API Population
     const std::set<std::string>& dynamicsAttributeNames() const;
 
     /**
-     * Get dynamics attribute values for given Selection
+     * Get dynamics attribute values for given {element} Selection
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @throw if there is no such attribute for the population
-     * @throw if the attribute is not defined for _any_ edge from the edge selection
+     * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the dynamics attribute values from
+     * \throw if there is no such attribute for the population
+     * \throw if the attribute is not defined for _any_ edge from the edge selection
      */
     template <typename T>
     std::vector<T> getDynamicsAttribute(const std::string& name, const Selection& selection) const;
 
     /**
-     * Get dynamics attribute values for given Selection
+     * Get dynamics attribute values for given {element} Selection
      *
-     * @param name is a string to allow attributes not defined in spec
-     * @param default is a value to use for edge groups w/o given attribute
-     * @throw if there is no such attribute for the population
+     * \param name is a string to allow attributes not defined in spec
+     * \param selection is a selection to retrieve the dynamics attribute values from
+     * \param default is a value to use for {element}s without the given attribute
+     * \throw if there is no such attribute for the population
      */
     template <typename T>
     std::vector<T> getDynamicsAttribute(const std::string& name,
@@ -211,7 +226,7 @@ class SONATA_API Population
     /**
      * Get dynamics attribute data type
 
-     * @internal
+     * \internal
      * It is a helper method for dynamic languages bindings;
      * and is not intended for use in the ordinary client C++ code.
      */
@@ -239,6 +254,9 @@ std::vector<std::string> Population::getAttribute<std::string>(const std::string
 
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * Collection of {PopulationClass}s stored in a H5 file and optional CSV.
+ */
 template <typename Population>
 class SONATA_API PopulationStorage
 {
@@ -252,14 +270,14 @@ class SONATA_API PopulationStorage
     ~PopulationStorage() noexcept;
 
     /**
-     * List all populations.
-     *
+     * Set of all {PopulationClass} names
      */
     std::set<std::string> populationNames() const;
 
     /**
-     * Open specific population.
-     * @throw if no population with such a name exists
+     * Open a specific {PopulationClass} by name
+     * \param name the name of the population to open
+     * \throw if no population with such a name exists
      */
     std::shared_ptr<Population> openPopulation(const std::string& name) const;
 
