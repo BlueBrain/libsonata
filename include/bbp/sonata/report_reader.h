@@ -127,8 +127,8 @@ class SONATA_API ReportReader
          * \param tstop return spikes occurring on or before tstop. tstop=None indicates no limit.
          */
         DataFrame<KeyType> get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
-                               const nonstd::optional<double>& _tstart = nonstd::nullopt,
-                               const nonstd::optional<double>& _tstop = nonstd::nullopt) const;
+                               const nonstd::optional<double>& tstart = nonstd::nullopt,
+                               const nonstd::optional<double>& tstop = nonstd::nullopt) const;
 
       private:
         Population(const H5::File& file, const std::string& populationName);
