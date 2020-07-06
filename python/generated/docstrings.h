@@ -255,22 +255,26 @@ R"doc(Parameter ``node_ids``:
     limit the report to the given selection.
 
 Parameter ``tstart``:
-    return spikes occurring on or after tstart. tstart=-1 indicates no
-    limit.
+    return spikes occurring on or after tstart. tstart=None indicates
+    no limit.
 
 Parameter ``tstop``:
-    return spikes occurring on or before tstop. tstop=-1 indicates no
-    limit.)doc";
+    return spikes occurring on or before tstop. tstop=None indicates
+    no limit.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getIndex = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIds = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getSorted = R"doc(Return true if the data is sorted.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getTimeUnits = R"doc(Return the unit of time)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getTimes = R"doc(Return (tstart, tstop, tstep) of the population)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_nodes_ids = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_nodes_ids_sorted = R"doc()doc";
 
