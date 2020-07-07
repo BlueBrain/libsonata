@@ -376,6 +376,11 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             data_frame.ids.push_back(make_key<T>(node_id, element_ids[i]));
         }
     }
+
+    if (data_frame.ids.empty()) {
+        throw SonataError("Given ids are out of range");
+    }
+
     return data_frame;
 }
 
