@@ -310,9 +310,13 @@ class TestElementReportPopulation(unittest.TestCase):
         keys.sort()
         self.assertEqual(keys, [(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)])
 
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).data), 0)
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).times), 0)
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).ids), 0)
+
         self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
         with self.assertRaises(SonataError): self.test_obj['All'].get(tstart=5.)  # tstart out of range
-        with self.assertRaises(SonataError): self.test_obj['All'].get(tstart=3., tstop=3.) # tstart should be < tstop
+        self.test_obj['All'].get(tstart=3., tstop=3.) # tstart should be < tstop
         np.testing.assert_allclose(np.array(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0]), [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
 
 if __name__ == '__main__':

@@ -314,8 +314,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     size_t index_stop = 0;
 
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
-    if (index_start >= index_stop) {
-        throw SonataError("tstart should be < to tstop");
+    if (index_start > index_stop) {
+        throw SonataError("tstart should be <= to tstop");
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
@@ -328,13 +328,15 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     // auto nodes_ids_ = Selection::fromValues(node_ids.flatten().sort());
     Selection::Values node_ids;
 
-    if (!selection || selection->empty()) {  // Take all nodes in this case
+    if (!selection) {  // Take all nodes in this case
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
                        std::back_inserter(node_ids),
                        [](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
                            return node_pointer.first;
                        });
+    } else if (selection->empty()) {
+        return DataFrame<T>{};
     } else {
         node_ids = selection->flatten();
     }

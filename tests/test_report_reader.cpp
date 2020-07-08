@@ -28,6 +28,8 @@ TEST_CASE("SpikeReader", "[base]") {
             SpikeReader::Population::Sorting::by_id);
     REQUIRE(reader.openPopulation("spikes2").getSorting() ==
             SpikeReader::Population::Sorting::none);
+
+    REQUIRE(reader.openPopulation("All").get(Selection({{5, 6}}), 0.1, 0.1) == std::vector<std::pair<uint64_t, double>>{{5, 0.1}});
 }
 
 TEST_CASE("SomaReportReader limits", "[base]") {
@@ -131,4 +133,8 @@ TEST_CASE("ElementReportReader", "[base]") {
             std::vector<std::vector<float>>{
                 {{11.0f, 11.1f, 11.2f, 11.3f, 11.4f, 11.5f, 11.6f, 11.7f, 11.8f, 11.9f},
                  {21.0f, 21.1f, 21.2f, 21.3f, 21.4f, 21.5f, 21.6f, 21.7f, 21.8f, 21.9f}}});
+
+    // Select only one time
+    REQUIRE(pop.get(Selection({{1, 2}}), 0.6, 0.6).data == std::vector<std::vector<float>>{
+                {{30.0f, 30.1f, 30.2f, 30.3f, 30.4f}}});
 }
