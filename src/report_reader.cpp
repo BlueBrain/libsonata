@@ -119,8 +119,8 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
         throw SonataError("Times cannot be negative");
     }
 
-    if (start >= stop) {
-        throw SonataError("tstart should be < to tstop");
+    if (start > stop) {
+        throw SonataError("tstart should be <= to tstop");
     }
 
     auto spikes = spikes_;
