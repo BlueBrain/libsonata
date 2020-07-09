@@ -39,7 +39,7 @@ TEST_CASE("SomaReportReader limits", "[base]") {
     auto pop = reader.openPopulation("All");
 
     // ids out of range
-    REQUIRE_THROWS(pop.get(Selection({{100, 101}})));
+    REQUIRE(pop.get(Selection({{100, 101}})).ids == DataFrame<NodeID>::DataType{});
 
     // Inverted id
     REQUIRE_THROWS(pop.get(Selection({{2, 1}})));
@@ -88,7 +88,8 @@ TEST_CASE("ElementReportReader limits", "[base]") {
     auto pop = reader.openPopulation("All");
 
     // ids out of range
-    REQUIRE_THROWS(pop.get(Selection({{100, 101}})));
+    REQUIRE(pop.get(Selection({{100, 101}})).ids ==
+            DataFrame<std::pair<NodeID, ElementID>>::DataType{});
 
     // Inverted id
     REQUIRE_THROWS(pop.get(Selection({{2, 1}})));
@@ -127,7 +128,7 @@ TEST_CASE("ElementReportReader", "[base]") {
 
     auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
     REQUIRE(data.ids ==
-            DataFrame<std::pair<NodeID, uint32_t>>::DataType{
+            DataFrame<std::pair<NodeID, ElementID>>::DataType{
                 {{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}}});
     testTimes(data.times, 0.2, 0.2, 2);
     REQUIRE(data.data ==

@@ -22,9 +22,10 @@ using bbp::sonata::Spikes;
 
 void filterNodeIDUnsorted(Spikes& spikes, const Selection& node_ids) {
     const auto values = node_ids.flatten();
-    const auto new_end = std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
-        return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
-    });
+    const auto new_end =
+        std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
+            return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
+        });
     spikes.erase(new_end, spikes.end());
 }
 
@@ -32,17 +33,17 @@ void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) {
     Spikes _spikes;
     for (const auto& range : node_ids.ranges()) {
         const auto begin = std::lower_bound(spikes.begin(),
-                                      spikes.end(),
-                                      std::make_pair(range.first, 0.),
-                                      [](const Spike& spike1, const Spike& spike2) {
-                                          return spike1.first < spike2.first;
-                                      });
+                                            spikes.end(),
+                                            std::make_pair(range.first, 0.),
+                                            [](const Spike& spike1, const Spike& spike2) {
+                                                return spike1.first < spike2.first;
+                                            });
         const auto end = std::upper_bound(spikes.begin(),
-                                    spikes.end(),
-                                    std::make_pair(range.second - 1, 0.),
-                                    [](const Spike& spike1, const Spike& spike2) {
-                                        return spike1.first < spike2.first;
-                                    });
+                                          spikes.end(),
+                                          std::make_pair(range.second - 1, 0.),
+                                          [](const Spike& spike1, const Spike& spike2) {
+                                              return spike1.first < spike2.first;
+                                          });
 
         std::move(begin, end, std::back_inserter(_spikes));
         spikes.erase(begin, end);  // have to erase, because otherwise it is no more sorted
@@ -60,18 +61,18 @@ void filterTimestampUnsorted(Spikes& spikes, double tstart, double tstop) {
 
 void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
     const auto end = std::upper_bound(spikes.begin(),
-                                spikes.end(),
-                                std::make_pair(0UL, tstop + EPSILON),
-                                [](const Spike& spike1, const Spike& spike2) {
-                                    return spike1.second < spike2.second;
-                                });
+                                      spikes.end(),
+                                      std::make_pair(0UL, tstop + EPSILON),
+                                      [](const Spike& spike1, const Spike& spike2) {
+                                          return spike1.second < spike2.second;
+                                      });
     spikes.erase(end, spikes.end());
     const auto begin = std::lower_bound(spikes.begin(),
-                                  spikes.end(),
-                                  std::make_pair(0UL, tstart - EPSILON),
-                                  [](const Spike& spike1, const Spike& spike2) {
-                                      return spike1.second < spike2.second;
-                                  });
+                                        spikes.end(),
+                                        std::make_pair(0UL, tstart - EPSILON),
+                                        [](const Spike& spike1, const Spike& spike2) {
+                                            return spike1.second < spike2.second;
+                                        });
     spikes.erase(spikes.begin(), begin);
 }
 
@@ -287,19 +288,20 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::op
         throw SonataError("Times cannot be negative");
     }
 
-    const auto it_start = std::find_if(times_index_.cbegin(), times_index_.cend(),
-                                  [&](const std::pair<size_t, double>& v) {
-                                      return start < v.second + EPSILON;
-                                  });
+    const auto it_start = std::find_if(times_index_.cbegin(),
+                                       times_index_.cend(),
+                                       [&](const std::pair<size_t, double>& v) {
+                                           return start < v.second + EPSILON;
+                                       });
     if (it_start == times_index_.end()) {
         throw SonataError("tstart is after the end of the range");
     }
     indexes.first = it_start->first;
 
-    const auto it_stop = std::find_if(times_index_.crbegin(), times_index_.crend(),
-                                 [&](const std::pair<size_t, double>& v) {
-                                      return stop > v.second - EPSILON;
-                                  });
+    const auto it_stop =
+        std::find_if(times_index_.crbegin(),
+                     times_index_.crend(),
+                     [&](const std::pair<size_t, double>& v) { return stop > v.second - EPSILON; });
     if (it_stop == times_index_.rend()) {
         throw SonataError("tstop is before the beginning of the range");
     }
@@ -383,8 +385,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         }
     }
 
-    if (data_frame.ids.empty()) {
-        throw SonataError("Given ids are out of range");
+    if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
+        return DataFrame<T>{{}, {}, {}};
     }
 
     return data_frame;
