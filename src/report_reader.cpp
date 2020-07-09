@@ -123,10 +123,14 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
         throw SonataError("tstart should be <= to tstop");
     }
 
+    if (node_ids and node_ids->empty()) {
+        return Spikes{};
+    }
+
     auto spikes = spikes_;
     filterTimestamp(spikes, start, stop);
 
-    if (node_ids and !node_ids->empty()) {
+    if (node_ids) {
         filterNode(spikes, node_ids.value());
     }
 

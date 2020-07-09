@@ -254,6 +254,8 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting, "none")
 
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[])), 0)
+
 class TestSomaReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "somas.h5")
