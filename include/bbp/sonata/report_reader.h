@@ -163,7 +163,6 @@ class SONATA_API ReportReader
     mutable std::map<std::string, Population> populations_;
 };
 
-using ElementID = uint32_t;
 using SomaReportReader = ReportReader<NodeID>;
 using ElementReportReader = ReportReader<std::pair<NodeID, ElementID>>;
 

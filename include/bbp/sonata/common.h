@@ -38,6 +38,7 @@ SONATA_API const std::string version();
 
 using NodeID = uint64_t;
 using EdgeID = uint64_t;
+using ElementID = uint32_t;
 
 class SONATA_API SonataError: public std::runtime_error
 {
