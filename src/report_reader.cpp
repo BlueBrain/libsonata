@@ -336,7 +336,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
                            return node_pointer.first;
                        });
     } else if (selection->empty()) {
-        return DataFrame<T>{};
+        return DataFrame<T>{{}, {}, {}};
     } else {
         node_ids = selection->flatten();
     }
