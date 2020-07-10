@@ -342,16 +342,43 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
                            return node_pointer.first;
                        });
     } else if (selection->empty()) {
-        return DataFrame<T>{{}, {}, {}};
+        return DataFrame<T>{{}, {}, 0, 0, {}};
     } else {
         node_ids = selection->flatten();
     }
 
-    data_frame.data.resize(index_stop - index_start + 1);
+    data_frame.n_cols = index_stop - index_start + 1;
+    data_frame.n_rows = 0;
+    for (const auto& node_id : node_ids) {
+        const auto it = std::find_if(
+            nodes_pointers_.begin(), nodes_pointers_.end(),
+            [&node_id](const std::pair<NodeID, std::pair<NodeID, uint64_t>>& node_pointer) {
+                return node_pointer.first == node_id;
+            });
+        if (it == nodes_pointers_.end()) {
+            continue;
+        }
+
+        std::vector<ElementID> element_ids;
+        pop_group_.getGroup("mapping")
+            .getDataSet("element_ids")
+            .select({it->second.first}, {it->second.second - it->second.first})
+            .read(element_ids);
+        for (const auto& elem: element_ids) {
+            data_frame.ids.push_back(make_key<T>(node_id, elem));
+        }
+        data_frame.n_rows += element_ids.size();
+    }
+    if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
+        return DataFrame<T>{{}, {}, 0, 0, {}};
+    }
+
+    data_frame.data.resize(data_frame.n_cols * data_frame.n_rows);
     // FIXME: It will be good to do it for ranges but if node_ids are not sorted it is not easy
     // TODO: specialized this function for sorted node_ids?
+    int ids_index = 0;
     for (const auto& node_id : node_ids) {
-        auto it = std::find_if(
+        const auto it = std::find_if(
             nodes_pointers_.begin(),
             nodes_pointers_.end(),
             [&node_id](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
@@ -369,24 +396,10 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             .read(data);
         int timer_index = 0;
         for (const std::vector<float>& datum : data) {
-            for (float d : datum) {
-                data_frame.data[timer_index].push_back(d);
-            }
+            std::copy(datum.data(), datum.data() + datum.size(), &data_frame.data[timer_index * data_frame.n_rows + ids_index]);
             ++timer_index;
         }
-
-        std::vector<ElementID> element_ids;
-        pop_group_.getGroup("mapping")
-            .getDataSet("element_ids")
-            .select({it->second.first}, {it->second.second - it->second.first})
-            .read(element_ids);
-        for (size_t i = 0; i < element_ids.size(); ++i) {
-            data_frame.ids.push_back(make_key<T>(node_id, element_ids[i]));
-        }
-    }
-
-    if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
-        return DataFrame<T>{{}, {}, {}};
+        ids_index += data[0].size();
     }
 
     return data_frame;

@@ -51,6 +51,12 @@ py::array asArray(std::vector<std::string>&& values) {
     return py::array(py::dtype("object"), ptr->size(), ptr->data(), freeWhenDone(ptr));
 }
 
+template <typename T>
+py::array asArray(std::vector<T>&& values, ssize_t n_cols, ssize_t n_rows) {
+    auto ptr = new std::vector<T>(std::move(values));
+    return py::array({n_cols, n_rows}, ptr->data(), freeWhenDone(ptr));
+}
+
 
 template <typename T>
 py::object getAttribute(const Population& obj,
@@ -310,7 +316,7 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                    (prefix + "DataFrame").c_str(),
                                    "Something easily convertible to pandas dataframe")
         .def_readonly("ids", &DataFrame<KeyType>::ids)
-        .def_readonly("data", &DataFrame<KeyType>::data)
+        .def_property_readonly("data", [](DataFrame<KeyType>& dframe) { return asArray(std::move(dframe.data), dframe.n_cols, dframe.n_rows); })
         .def_readonly("times", &DataFrame<KeyType>::times);
     py::class_<typename ReportType::Population>(m,
                                                 (prefix + "ReportPopulation").c_str(),

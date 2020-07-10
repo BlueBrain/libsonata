@@ -78,8 +78,7 @@ TEST_CASE("SomaReportReader", "[base]") {
     auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
     REQUIRE(data.ids == DataFrame<NodeID>::DataType{{3, 4}});
     testTimes(data.times, 0.2, 0.1, 4);
-    REQUIRE(data.data == std::vector<std::vector<float>>{
-                             {{3.2f, 4.2f}, {3.3f, 4.3f}, {3.4f, 4.4f}, {3.5f, 4.5f}}});
+    REQUIRE(data.data == std::vector<float>{3.2f, 4.2f, 3.3f, 4.3f, 3.4f, 4.4f, 3.5f, 4.5f});
 }
 
 TEST_CASE("ElementReportReader limits", "[base]") {
@@ -132,11 +131,9 @@ TEST_CASE("ElementReportReader", "[base]") {
                 {{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}}});
     testTimes(data.times, 0.2, 0.2, 2);
     REQUIRE(data.data ==
-            std::vector<std::vector<float>>{
-                {{11.0f, 11.1f, 11.2f, 11.3f, 11.4f, 11.5f, 11.6f, 11.7f, 11.8f, 11.9f},
-                 {21.0f, 21.1f, 21.2f, 21.3f, 21.4f, 21.5f, 21.6f, 21.7f, 21.8f, 21.9f}}});
+            std::vector<float>{11.0f, 11.1f, 11.2f, 11.3f, 11.4f, 11.5f, 11.6f, 11.7f, 11.8f, 11.9f, 21.0f, 21.1f, 21.2f, 21.3f, 21.4f, 21.5f, 21.6f, 21.7f, 21.8f, 21.9f});
 
     // Select only one time
     REQUIRE(pop.get(Selection({{1, 2}}), 0.6, 0.6).data ==
-            std::vector<std::vector<float>>{{{30.0f, 30.1f, 30.2f, 30.3f, 30.4f}}});
+            std::vector<float>{30.0f, 30.1f, 30.2f, 30.3f, 30.4f});
 }
