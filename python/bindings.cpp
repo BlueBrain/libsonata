@@ -316,7 +316,12 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                    (prefix + "DataFrame").c_str(),
                                    "Something easily convertible to pandas dataframe")
         .def_readonly("ids", &DataFrame<KeyType>::ids)
-        .def_property_readonly("data", [](DataFrame<KeyType>& dframe) { return asArray(std::move(dframe.data), dframe.n_cols, dframe.n_rows); })
+        .def_property_readonly("data",
+                               [](DataFrame<KeyType>& dframe) {
+                                   return asArray(std::move(dframe.data),
+                                                  dframe.n_cols,
+                                                  dframe.n_rows);
+                               })
         .def_readonly("times", &DataFrame<KeyType>::times);
     py::class_<typename ReportType::Population>(m,
                                                 (prefix + "ReportPopulation").c_str(),

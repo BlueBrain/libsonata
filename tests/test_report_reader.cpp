@@ -130,8 +130,9 @@ TEST_CASE("ElementReportReader", "[base]") {
             DataFrame<std::pair<NodeID, ElementID>>::DataType{
                 {{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}}});
     testTimes(data.times, 0.2, 0.2, 2);
-    REQUIRE(data.data ==
-            std::vector<float>{11.0f, 11.1f, 11.2f, 11.3f, 11.4f, 11.5f, 11.6f, 11.7f, 11.8f, 11.9f, 21.0f, 21.1f, 21.2f, 21.3f, 21.4f, 21.5f, 21.6f, 21.7f, 21.8f, 21.9f});
+    REQUIRE(data.data == std::vector<float>{11.0f, 11.1f, 11.2f, 11.3f, 11.4f, 11.5f, 11.6f,
+                                            11.7f, 11.8f, 11.9f, 21.0f, 21.1f, 21.2f, 21.3f,
+                                            21.4f, 21.5f, 21.6f, 21.7f, 21.8f, 21.9f});
 
     // Select only one time
     REQUIRE(pop.get(Selection({{1, 2}}), 0.6, 0.6).data ==

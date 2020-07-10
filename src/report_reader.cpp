@@ -351,7 +351,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     data_frame.n_rows = 0;
     for (const auto& node_id : node_ids) {
         const auto it = std::find_if(
-            nodes_pointers_.begin(), nodes_pointers_.end(),
+            nodes_pointers_.begin(),
+            nodes_pointers_.end(),
             [&node_id](const std::pair<NodeID, std::pair<NodeID, uint64_t>>& node_pointer) {
                 return node_pointer.first == node_id;
             });
@@ -364,7 +365,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             .getDataSet("element_ids")
             .select({it->second.first}, {it->second.second - it->second.first})
             .read(element_ids);
-        for (const auto& elem: element_ids) {
+        for (const auto& elem : element_ids) {
             data_frame.ids.push_back(make_key<T>(node_id, elem));
         }
         data_frame.n_rows += element_ids.size();
@@ -396,7 +397,9 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             .read(data);
         int timer_index = 0;
         for (const std::vector<float>& datum : data) {
-            std::copy(datum.data(), datum.data() + datum.size(), &data_frame.data[timer_index * data_frame.n_rows + ids_index]);
+            std::copy(datum.data(),
+                      datum.data() + datum.size(),
+                      &data_frame.data[timer_index * data_frame.n_rows + ids_index]);
             ++timer_index;
         }
         ids_index += data[0].size();
