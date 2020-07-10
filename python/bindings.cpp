@@ -322,7 +322,9 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                                   dframe.n_cols,
                                                   dframe.n_rows);
                                })
-        .def_readonly("times", &DataFrame<KeyType>::times);
+        .def_property_readonly("times", [](DataFrame<KeyType>& dframe) {
+            return asArray(std::move(dframe.times));
+        });
     py::class_<typename ReportType::Population>(m,
                                                 (prefix + "ReportPopulation").c_str(),
                                                 "A population inside a ReportReader")
