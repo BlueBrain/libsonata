@@ -51,10 +51,14 @@ py::array asArray(std::vector<std::string>&& values) {
     return py::array(py::dtype("object"), ptr->size(), ptr->data(), freeWhenDone(ptr));
 }
 
+
+// Return a 2D structure from a flat std::vector
 template <typename T>
-py::array asArray(std::vector<T>&& values, ssize_t n_cols, ssize_t n_rows) {
+py::array asArray(std::vector<T>&& values, ssize_t n_cols) {
+    assert(values.size() % n_cols == 0);
+    const ssize_t n_rows = values.size() / n_cols;
     auto ptr = new std::vector<T>(std::move(values));
-    return py::array({n_cols, n_rows}, ptr->data(), freeWhenDone(ptr));
+    return py::array({n_rows, n_cols}, ptr->data(), freeWhenDone(ptr));
 }
 
 
@@ -316,12 +320,9 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                    (prefix + "DataFrame").c_str(),
                                    "Something easily convertible to pandas dataframe")
         .def_readonly("ids", &DataFrame<KeyType>::ids)
-        .def_property_readonly("data",
-                               [](DataFrame<KeyType>& dframe) {
-                                   return asArray(std::move(dframe.data),
-                                                  dframe.n_cols,
-                                                  dframe.n_rows);
-                               })
+        .def_property_readonly("data", [](DataFrame<KeyType>& dframe) {
+            return asArray(std::move(dframe.data), dframe.ids.size());
+        })
         .def_property_readonly("times", [](DataFrame<KeyType>& dframe) {
             return asArray(std::move(dframe.times));
         });

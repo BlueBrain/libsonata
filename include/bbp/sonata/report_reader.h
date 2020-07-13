@@ -22,8 +22,7 @@ struct SONATA_API DataFrame {
     using DataType = std::vector<KeyType>;
     std::vector<double> times;
     DataType ids;
-    // data[times][ids]
-    size_t n_cols, n_rows;
+    // data[times][ids], flattened. n_cols is ids.size()
     std::vector<float> data;
 };
 
