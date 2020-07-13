@@ -278,7 +278,8 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
+std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
+    const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
     std::pair<size_t, size_t> indexes;
 
     const double start = tstart.value_or(tstart_);
@@ -354,8 +355,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             nodes_pointers_.end(),
             [&node_id](const std::pair<NodeID, std::pair<NodeID, uint64_t>>& node_pointer) {
                 return node_pointer.first == node_id;
-            }
-        );
+            });
         if (it == nodes_pointers_.end()) {
             continue;
         }
