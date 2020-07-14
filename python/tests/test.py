@@ -232,7 +232,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.test_obj = SpikeReader(path)
 
     def test_get_all_populations(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'spikes1', 'spikes2'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'spikes1', 'spikes2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['spikes1'], SpikePopulation))
@@ -262,7 +262,7 @@ class TestSomaReportPopulation(unittest.TestCase):
         self.test_obj = SomaReportReader(path)
 
     def test_get_all_population(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'soma1', 'soma2'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'soma1', 'soma2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['All'], SomaReportPopulation))
@@ -288,7 +288,7 @@ class TestElementReportPopulation(unittest.TestCase):
         self.test_obj = ElementReportReader(path)
 
     def test_get_all_population(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'element1', 'element42'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'element1', 'element42'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['All'], ElementReportPopulation))
@@ -320,8 +320,9 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).ids), 0)
 
         self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
-        with self.assertRaises(SonataError): self.test_obj['All'].get(tstart=5.)  # tstart out of range
-        self.test_obj['All'].get(tstart=3., tstop=3.) # tstart should be < tstop
+        with self.assertRaises(SonataError):
+            self.test_obj['All'].get(tstart=5.)  # tstart out of range
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0], [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9]) # tstart should be <= tstop
         np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0], [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
 
 if __name__ == '__main__':

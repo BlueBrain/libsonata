@@ -14,7 +14,7 @@ void testTimes(const std::vector<double>& vec, double start, double step, int si
 TEST_CASE("SpikeReader", "[base]") {
     const SpikeReader reader("./data/spikes.h5");
 
-    REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "spikes1", "spikes2"});
+    REQUIRE(reader.getPopulationNames() == std::vector<std::string>{"All", "spikes1", "spikes2"});
 
     REQUIRE(reader.openPopulation("All").get(Selection({{3, 4}})) ==
             std::vector<std::pair<uint64_t, double>>{{3UL, 0.3}, {3UL, 1.3}});
@@ -60,7 +60,7 @@ TEST_CASE("SomaReportReader limits", "[base]") {
 TEST_CASE("SomaReportReader", "[base]") {
     const SomaReportReader reader("./data/somas.h5");
 
-    REQUIRE(reader.getPopulationsNames() == std::vector<std::string>{"All", "soma1", "soma2"});
+    REQUIRE(reader.getPopulationNames() == std::vector<std::string>{"All", "soma1", "soma2"});
 
     auto pop = reader.openPopulation("All");
 
@@ -109,7 +109,7 @@ TEST_CASE("ElementReportReader limits", "[base]") {
 TEST_CASE("ElementReportReader", "[base]") {
     const ElementReportReader reader("./data/elements.h5");
 
-    REQUIRE(reader.getPopulationsNames() ==
+    REQUIRE(reader.getPopulationNames() ==
             std::vector<std::string>{"All", "element1", "element42"});
 
     auto pop = reader.openPopulation("All");
