@@ -97,7 +97,7 @@ namespace sonata {
 SpikeReader::SpikeReader(const std::string& filename)
     : filename_(filename) {}
 
-std::vector<std::string> SpikeReader::getPopulationsNames() const {
+std::vector<std::string> SpikeReader::getPopulationNames() const {
     H5::File file(filename_, H5::File::ReadOnly);
     return file.getGroup("/spikes").listObjectNames();
 }
@@ -201,7 +201,7 @@ ReportReader<T>::ReportReader(const std::string& filename)
     : file_(filename, H5::File::ReadOnly) {}
 
 template <typename T>
-std::vector<std::string> ReportReader<T>::getPopulationsNames() const {
+std::vector<std::string> ReportReader<T>::getPopulationNames() const {
     return file_.getGroup("/report").listObjectNames();
 }
 

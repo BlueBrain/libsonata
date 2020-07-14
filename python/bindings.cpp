@@ -338,9 +338,7 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                DOC_REPORTREADER_POP(getDataUnits));
     py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
         .def(py::init<const std::string&>())
-        .def("get_population_names",
-             &ReportType::getPopulationNames,
-             "Get list of all populations")
+        .def("get_population_names", &ReportType::getPopulationNames, "Get list of all populations")
         .def("__getitem__", &ReportType::openPopulation);
 }
 
@@ -364,7 +362,6 @@ PYBIND11_MODULE(_libsonata, m) {
             "__bool__",
             [](const Selection& obj) { return !obj.empty(); },
             "True if Selection is not empty")
-
         .def("__eq__", &bbp::sonata::operator==, "Compare selection contents are equal")
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
         .def("__or__", &bbp::sonata::operator|, "Union of selections")
