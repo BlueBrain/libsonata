@@ -232,7 +232,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.test_obj = SpikeReader(path)
 
     def test_get_all_populations(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'spikes1', 'spikes2'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'spikes1', 'spikes2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['spikes1'], SpikePopulation))
@@ -262,7 +262,7 @@ class TestSomaReportPopulation(unittest.TestCase):
         self.test_obj = SomaReportReader(path)
 
     def test_get_all_population(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'soma1', 'soma2'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'soma1', 'soma2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['All'], SomaReportPopulation))
@@ -288,7 +288,7 @@ class TestElementReportPopulation(unittest.TestCase):
         self.test_obj = ElementReportReader(path)
 
     def test_get_all_population(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'element1', 'element42'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'element1', 'element42'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['All'], ElementReportPopulation))

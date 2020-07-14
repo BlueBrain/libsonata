@@ -82,7 +82,7 @@ class SONATA_API SpikeReader
     /**
      * Return a list of all population names.
      */
-    std::vector<std::string> getPopulationsNames() const;
+    std::vector<std::string> getPopulationNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;
 
@@ -152,7 +152,7 @@ class SONATA_API ReportReader
     /**
      * Return a list of all population names.
      */
-    std::vector<std::string> getPopulationsNames() const;
+    std::vector<std::string> getPopulationNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;
 

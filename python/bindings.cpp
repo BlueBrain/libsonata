@@ -338,8 +338,8 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                DOC_REPORTREADER_POP(getDataUnits));
     py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
         .def(py::init<const std::string&>())
-        .def("get_populations_names",
-             &ReportType::getPopulationsNames,
+        .def("get_population_names",
+             &ReportType::getPopulationNames,
              "Get list of all populations")
         .def("__getitem__", &ReportType::openPopulation);
 }
@@ -500,9 +500,9 @@ PYBIND11_MODULE(_libsonata, m) {
             DOC_SPIKEREADER_POP(getSorting));
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init<const std::string&>())
-        .def("get_populations_names",
-             &SpikeReader::getPopulationsNames,
-             DOC_SPIKEREADER(getPopulationsNames))
+        .def("get_population_names",
+             &SpikeReader::getPopulationNames,
+             DOC_SPIKEREADER(getPopulationNames))
         .def("__getitem__", &SpikeReader::openPopulation);
 
     bindReportReader<SomaReportReader, NodeID>(m, "Soma");

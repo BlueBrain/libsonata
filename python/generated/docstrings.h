@@ -296,7 +296,7 @@ static const char *__doc_bbp_sonata_ReportReader_ReportReader = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_file = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_getPopulationsNames = R"doc(Return a list of all population names.)doc";
+static const char *__doc_bbp_sonata_ReportReader_getPopulationNames = R"doc(Return a list of all population names.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_openPopulation = R"doc()doc";
 
@@ -365,7 +365,7 @@ static const char *__doc_bbp_sonata_SpikeReader_SpikeReader = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_filename = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SpikeReader_getPopulationsNames = R"doc(Return a list of all population names.)doc";
+static const char *__doc_bbp_sonata_SpikeReader_getPopulationNames = R"doc(Return a list of all population names.)doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_openPopulation = R"doc()doc";
 
