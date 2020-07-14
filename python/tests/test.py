@@ -301,6 +301,9 @@ class TestElementReportPopulation(unittest.TestCase):
 
     def test_get_reports_from_population(self):
         self.assertEqual(self.test_obj['All'].times, (0., 4., 0.2))
+        # check following calls succeed (no memory destroyed)
+        self.assertEqual(self.test_obj['All'].times, (0., 4., 0.2))
+
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
@@ -319,7 +322,7 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
         with self.assertRaises(SonataError): self.test_obj['All'].get(tstart=5.)  # tstart out of range
         self.test_obj['All'].get(tstart=3., tstop=3.) # tstart should be < tstop
-        np.testing.assert_allclose(np.array(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0]), [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0], [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
 
 if __name__ == '__main__':
     unittest.main()

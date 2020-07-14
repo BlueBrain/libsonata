@@ -52,16 +52,6 @@ py::array asArray(std::vector<std::string>&& values) {
 }
 
 
-// Return a 2D structure from a flat std::vector
-template <typename T>
-py::array asArray(std::vector<T>&& values, ssize_t n_cols) {
-    assert(values.size() % n_cols == 0);
-    const ssize_t n_rows = values.size() / n_cols;
-    auto ptr = new std::vector<T>(std::move(values));
-    return py::array({n_rows, n_cols}, ptr->data(), freeWhenDone(ptr));
-}
-
-
 // Return a new Numpy array with data owned by another python object
 // This avoids copies, and enables correct reference counting for memory keep-alive
 template <typename DATA_T, typename DIMS_T, typename OWNER_T>
