@@ -278,7 +278,8 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
+std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
+    const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
     std::pair<size_t, size_t> indexes;
 
     const double start = tstart.value_or(tstart_);
@@ -310,6 +311,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(const nonstd::op
     return indexes;
 }
 
+
 template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& selection,
                                               const nonstd::optional<double>& tstart,
@@ -318,8 +320,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     size_t index_start = 0;
     size_t index_stop = 0;
-
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
+
     if (index_start > index_stop) {
         throw SonataError("tstart should be <= to tstop");
     }
@@ -347,11 +349,41 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         node_ids = selection->flatten();
     }
 
-    data_frame.data.resize(index_stop - index_start + 1);
+    for (const auto& node_id : node_ids) {
+        const auto it = std::find_if(
+            nodes_pointers_.begin(),
+            nodes_pointers_.end(),
+            [&node_id](const std::pair<NodeID, std::pair<NodeID, uint64_t>>& node_pointer) {
+                return node_pointer.first == node_id;
+            });
+        if (it == nodes_pointers_.end()) {
+            continue;
+        }
+
+        std::vector<ElementID> element_ids;
+        pop_group_.getGroup("mapping")
+            .getDataSet("element_ids")
+            .select({it->second.first}, {it->second.second - it->second.first})
+            .read(element_ids);
+        for (const auto& elem : element_ids) {
+            data_frame.ids.push_back(make_key<T>(node_id, elem));
+        }
+    }
+    if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
+        return DataFrame<T>{{}, {}, {}};
+    }
+
+    // Fill .data member
+
+    auto n_time_entries = index_stop - index_start + 1;
+    auto n_ids = data_frame.ids.size();
+    data_frame.data.resize(n_time_entries * n_ids);
+
     // FIXME: It will be good to do it for ranges but if node_ids are not sorted it is not easy
     // TODO: specialized this function for sorted node_ids?
+    int ids_index = 0;
     for (const auto& node_id : node_ids) {
-        auto it = std::find_if(
+        const auto it = std::find_if(
             nodes_pointers_.begin(),
             nodes_pointers_.end(),
             [&node_id](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
@@ -367,26 +399,16 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             .select({index_start, it->second.first},
                     {index_stop - index_start + 1, it->second.second - it->second.first})
             .read(data);
+
         int timer_index = 0;
+
         for (const std::vector<float>& datum : data) {
-            for (float d : datum) {
-                data_frame.data[timer_index].push_back(d);
-            }
+            std::copy(datum.data(),
+                      datum.data() + datum.size(),
+                      &data_frame.data[timer_index * n_ids + ids_index]);
             ++timer_index;
         }
-
-        std::vector<ElementID> element_ids;
-        pop_group_.getGroup("mapping")
-            .getDataSet("element_ids")
-            .select({it->second.first}, {it->second.second - it->second.first})
-            .read(element_ids);
-        for (size_t i = 0; i < element_ids.size(); ++i) {
-            data_frame.ids.push_back(make_key<T>(node_id, element_ids[i]));
-        }
-    }
-
-    if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
-        return DataFrame<T>{{}, {}, {}};
+        ids_index += data[0].size();
     }
 
     return data_frame;

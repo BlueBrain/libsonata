@@ -22,8 +22,8 @@ struct SONATA_API DataFrame {
     using DataType = std::vector<KeyType>;
     std::vector<double> times;
     DataType ids;
-    // data[times][ids]
-    std::vector<std::vector<float>> data;
+    // data[times][ids], flattened. n_cols is ids.size()
+    std::vector<float> data;
 };
 
 using Spike = std::pair<NodeID, double>;

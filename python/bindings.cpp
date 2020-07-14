@@ -52,6 +52,16 @@ py::array asArray(std::vector<std::string>&& values) {
 }
 
 
+// Return a new Numpy array with data owned by another python object
+// This avoids copies, and enables correct reference counting for memory keep-alive
+template <typename DATA_T, typename DIMS_T, typename OWNER_T>
+py::array managedMemoryArray(const DATA_T* data, const DIMS_T& dims, const OWNER_T& owner) {
+    const auto& tinfo = py::detail::get_type_info(typeid(OWNER_T));
+    const auto& handle = py::detail::get_object_handle(&owner, tinfo);
+    return py::array(dims, data, handle);
+}
+
+
 template <typename T>
 py::object getAttribute(const Population& obj,
                         const std::string& name,
@@ -304,14 +314,30 @@ struct type_caster<nonstd::nullopt_t>: public void_caster<nonstd::nullopt_t> {};
 }  // namespace detail
 }  // namespace pybind11
 
+
 template <typename ReportType, typename KeyType>
 void bindReportReader(py::module& m, const std::string& prefix) {
     py::class_<DataFrame<KeyType>>(m,
                                    (prefix + "DataFrame").c_str(),
-                                   "Something easily convertible to pandas dataframe")
+                                   "A container of raw reporting data, compatible with Pandas")
         .def_readonly("ids", &DataFrame<KeyType>::ids)
-        .def_readonly("data", &DataFrame<KeyType>::data)
-        .def_readonly("times", &DataFrame<KeyType>::times);
+
+        // .data and .time members are owned by this c++ object. We can't do std::move.
+        // To avoid copies we must declare the owner of the data is the current python
+        // object. Numpy will adjust owner reference count according to returned arrays
+        // clang-format off
+        .def_property_readonly("data", [](const DataFrame<KeyType>& dframe) {
+            std::array<ssize_t, 2> dims {0l, ssize_t(dframe.ids.size())};
+            if (dims[1] > 0) {
+                dims[0] = dframe.data.size() / dims[1];
+            }
+            return managedMemoryArray(dframe.data.data(), dims, dframe);
+        })
+        // clang-format on
+        .def_property_readonly("times", [](DataFrame<KeyType>& dframe) {
+            return managedMemoryArray(dframe.times.data(), dframe.times.size(), dframe);
+        });
+
     py::class_<typename ReportType::Population>(m,
                                                 (prefix + "ReportPopulation").c_str(),
                                                 "A population inside a ReportReader")
