@@ -52,6 +52,16 @@ py::array asArray(std::vector<std::string>&& values) {
 }
 
 
+// Return a new Numpy array with data owned by another python object
+// This avoids copies, and enables correct reference counting for memory keep-alive
+template <typename DATA_T, typename DIMS_T, typename OWNER_T>
+py::array managedMemoryArray(const DATA_T* data, const DIMS_T& dims, const OWNER_T& owner) {
+    const auto& tinfo = py::detail::get_type_info(typeid(OWNER_T));
+    const auto& handle = py::detail::get_object_handle(&owner, tinfo);
+    return py::array(dims, data, handle);
+}
+
+
 template <typename T>
 py::object getAttribute(const Population& obj,
                         const std::string& name,
@@ -294,42 +304,52 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
 }
 }  // unnamed namespace
 
+namespace pybind11 {
+namespace detail {
+template <typename T>
+struct type_caster<nonstd::optional<T>>: optional_caster<nonstd::optional<T>> {};
+
+template <>
+struct type_caster<nonstd::nullopt_t>: public void_caster<nonstd::nullopt_t> {};
+}  // namespace detail
+}  // namespace pybind11
+
+
 template <typename ReportType, typename KeyType>
 void bindReportReader(py::module& m, const std::string& prefix) {
     py::class_<DataFrame<KeyType>>(m,
                                    (prefix + "DataFrame").c_str(),
-                                   "Something easily convertible to pandas dataframe")
+                                   "A container of raw reporting data, compatible with Pandas")
         .def_readonly("ids", &DataFrame<KeyType>::ids)
-        .def_readonly("data", &DataFrame<KeyType>::data)
-        .def_readonly("times", &DataFrame<KeyType>::times);
+
+        // .data and .time members are owned by this c++ object. We can't do std::move.
+        // To avoid copies we must declare the owner of the data is the current python
+        // object. Numpy will adjust owner reference count according to returned arrays
+        // clang-format off
+        .def_property_readonly("data", [](const DataFrame<KeyType>& dframe) {
+            std::array<ssize_t, 2> dims {0l, ssize_t(dframe.ids.size())};
+            if (dims[1] > 0) {
+                dims[0] = dframe.data.size() / dims[1];
+            }
+            return managedMemoryArray(dframe.data.data(), dims, dframe);
+        })
+        // clang-format on
+        .def_property_readonly("times", [](DataFrame<KeyType>& dframe) {
+            return managedMemoryArray(dframe.times.data(), dframe.times.size(), dframe);
+        });
+
     py::class_<typename ReportType::Population>(m,
                                                 (prefix + "ReportPopulation").c_str(),
                                                 "A population inside a ReportReader")
-        .def(
-            "get",
-            [](const typename ReportType::Population& self) { return self.get(); },
-            "Return all reports")
-        .def(
-            "get",
-            [](const typename ReportType::Population& self, double tstart, double tstop) {
-                return self.get(Selection({}), tstart, tstop);
-            },
-            "Return reports between 'tstart' and 'tstop'",
-            "tstart"_a,
-            "tstop"_a)
-        .def(
-            "get",
-            [](const typename ReportType::Population& self, Selection sel) {
-                return self.get(sel);
-            },
-            "Return reports with all those node_ids",
-            "node_ids"_a)
         .def("get",
              &ReportType::Population::get,
              "Return reports with all those node_ids between 'tstart' and 'tstop'",
-             "node_ids"_a,
-             "tstart"_a,
-             "tstop"_a)
+             "node_ids"_a = nonstd::nullopt,
+             "tstart"_a = nonstd::nullopt,
+             "tstop"_a = nonstd::nullopt)
+        .def("get_node_ids",
+             &ReportType::Population::getNodeIds,
+             "Return the list of nodes ids for this population")
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
                                DOC_REPORTREADER_POP(getSorted))
@@ -344,9 +364,7 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                DOC_REPORTREADER_POP(getDataUnits));
     py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
         .def(py::init<const std::string&>())
-        .def("get_populations_names",
-             &ReportType::getPopulationsNames,
-             "Get list of all populations")
+        .def("get_population_names", &ReportType::getPopulationNames, "Get list of all populations")
         .def("__getitem__", &ReportType::openPopulation);
 }
 
@@ -370,7 +388,6 @@ PYBIND11_MODULE(_libsonata, m) {
             "__bool__",
             [](const Selection& obj) { return !obj.empty(); },
             "True if Selection is not empty")
-
         .def("__eq__", &bbp::sonata::operator==, "Compare selection contents are equal")
         .def("__ne__", &bbp::sonata::operator!=, "Compare selection contents are not equal")
         .def("__or__", &bbp::sonata::operator|, "Union of selections")
@@ -487,29 +504,12 @@ PYBIND11_MODULE(_libsonata, m) {
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
-        .def(
-            "get",
-            [](const SpikeReader::Population& self) { return self.get(); },
-            "Return all spikes")
-        .def(
-            "get",
-            [](const SpikeReader::Population& self, double tstart, double tstop) {
-                return self.get(Selection({}), tstart, tstop);
-            },
-            "Return spikes between 'tstart' and 'tstop'",
-            "tstart"_a,
-            "tstop"_a)
-        .def(
-            "get",
-            [](const SpikeReader::Population& self, Selection sel) { return self.get(sel); },
-            "Return spikes with all those node_ids",
-            "node_ids"_a)
         .def("get",
              &SpikeReader::Population::get,
              "Return spikes with all those node_ids between 'tstart' and 'tstop'",
-             "node_ids"_a,
-             "tstart"_a,
-             "tstop"_a)
+             "node_ids"_a = nonstd::nullopt,
+             "tstart"_a = nonstd::nullopt,
+             "tstop"_a = nonstd::nullopt)
         .def_property_readonly(
             "sorting",
             [](const SpikeReader::Population& self) {
@@ -523,9 +523,9 @@ PYBIND11_MODULE(_libsonata, m) {
             DOC_SPIKEREADER_POP(getSorting));
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init<const std::string&>())
-        .def("get_populations_names",
-             &SpikeReader::getPopulationsNames,
-             DOC_SPIKEREADER(getPopulationsNames))
+        .def("get_population_names",
+             &SpikeReader::getPopulationNames,
+             DOC_SPIKEREADER(getPopulationNames))
         .def("__getitem__", &SpikeReader::openPopulation);
 
     bindReportReader<SomaReportReader, NodeID>(m, "Soma");

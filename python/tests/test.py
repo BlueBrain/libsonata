@@ -232,7 +232,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.test_obj = SpikeReader(path)
 
     def test_get_all_populations(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'spikes1', 'spikes2'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'spikes1', 'spikes2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['spikes1'], SpikePopulation))
@@ -242,8 +242,8 @@ class TestSpikePopulation(unittest.TestCase):
 
     def test_get_spikes_from_population(self):
         self.assertEqual(self.test_obj['All'].get(), [(5, 0.1), (2, 0.2), (3, 0.3), (2, 0.7), (3, 1.3)])
-        self.assertEqual(self.test_obj['All'].get(0.2, 1.0), [(2, 0.2), (3, 0.3), (2, 0.7)])
-        self.assertEqual(self.test_obj['spikes2'].get(0.2, 1.0), [(3, 0.3), (2, 0.2), (2, 0.7)])
+        self.assertEqual(self.test_obj['All'].get(tstart=0.2, tstop=1.0), [(2, 0.2), (3, 0.3), (2, 0.7)])
+        self.assertEqual(self.test_obj['spikes2'].get(tstart=0.2, tstop=1.0), [(3, 0.3), (2, 0.2), (2, 0.7)])
         self.assertEqual(self.test_obj['spikes1'].get((3,)), [(3, 0.3), (3, 1.3)])
         self.assertEqual(self.test_obj['spikes2'].get((3,)), [(3, 0.3), (3, 1.3)])
         self.assertEqual(self.test_obj['spikes2'].get((10,)), [])
@@ -254,13 +254,15 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting, "none")
 
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[])), 0)
+
 class TestSomaReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "somas.h5")
         self.test_obj = SomaReportReader(path)
 
     def test_get_all_population(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'soma1', 'soma2'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'soma1', 'soma2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['All'], SomaReportPopulation))
@@ -286,7 +288,7 @@ class TestElementReportPopulation(unittest.TestCase):
         self.test_obj = ElementReportReader(path)
 
     def test_get_all_population(self):
-        self.assertEqual(self.test_obj.get_populations_names(), ['All', 'element1', 'element42'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'element1', 'element42'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['All'], ElementReportPopulation))
@@ -294,8 +296,14 @@ class TestElementReportPopulation(unittest.TestCase):
     def test_get_inexistant_population(self):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
 
+    def test_get_node_ids(self):
+        self.assertEqual(self.test_obj['All'].get_node_ids(), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+
     def test_get_reports_from_population(self):
         self.assertEqual(self.test_obj['All'].times, (0., 4., 0.2))
+        # check following calls succeed (no memory destroyed)
+        self.assertEqual(self.test_obj['All'].times, (0., 4., 0.2))
+
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
         self.assertTrue(self.test_obj['All'].sorted)
@@ -307,12 +315,17 @@ class TestElementReportPopulation(unittest.TestCase):
         keys.sort()
         self.assertEqual(keys, [(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)])
 
-        self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
-        sel = self.test_obj['All'].get(tstart=5., tstop=-1)  # tstart out of range
-        self.assertEqual(len(sel.ids), 0)
-        sel = self.test_obj['All'].get(tstart=3., tstop=3.)
-        self.assertEqual(len(sel.ids), 100)
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).data), 0)
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).times), 0)
+        self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).ids), 0)
 
+        self.assertEqual(len(sel.times), 3)  # Number of timestamp (0.8, 1.0 and 1.2)
+        with self.assertRaises(SonataError):
+            self.test_obj['All'].get(tstart=5.)  # tstart out of range
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0], [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9]) # tstart should be <= tstop
+        # check following calls succeed (no memory destroyed)
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0], [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9])
+        np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0], [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
 
 if __name__ == '__main__':
     unittest.main()

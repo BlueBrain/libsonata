@@ -9,20 +9,21 @@
 #include <highfive/H5File.hpp>
 
 #include <bbp/sonata/population.h>
+#include <bbp/sonata/optional.hpp>
 
 namespace H5 = HighFive;
 
 namespace bbp {
 namespace sonata {
 
-// KeyType will be NodeID for somas report and pair<NodeID, uint32_t> for elements report
+// KeyType will be NodeID for somas report and pair<NodeID, ElementID> for elements report
 template <typename KeyType>
 struct SONATA_API DataFrame {
     using DataType = std::vector<KeyType>;
     std::vector<double> times;
     DataType ids;
-    // data[times][ids]
-    std::vector<std::vector<float>> data;
+    // data[times][ids], flattened. n_cols is ids.size()
+    std::vector<float> data;
 };
 
 using Spike = std::pair<NodeID, double>;
@@ -53,9 +54,9 @@ class SONATA_API SpikeReader
         /**
          * Return reports for this population.
          */
-        Spikes get(const Selection& node_ids = Selection({}),
-                   double tstart = -1,
-                   double tstop = -1) const;
+        Spikes get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+                   const nonstd::optional<double>& tstart = nonstd::nullopt,
+                   const nonstd::optional<double>& tstop = nonstd::nullopt) const;
 
         /**
          * Return the way data are sorted ('none', 'by_id', 'by_time')
@@ -81,7 +82,7 @@ class SONATA_API SpikeReader
     /**
      * Return a list of all population names.
      */
-    std::vector<std::string> getPopulationsNames() const;
+    std::vector<std::string> getPopulationNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;
 
@@ -118,22 +119,25 @@ class SONATA_API ReportReader
          * Return true if the data is sorted.
          */
         bool getSorted() const;
+        std::vector<NodeID> getNodeIds() const;
 
         /**
          * \param node_ids limit the report to the given selection.
-         * \param tstart return spikes occurring on or after tstart. tstart=-1 indicates no limit.
-         * \param tstop return spikes occurring on or before tstop. tstop=-1 indicates no limit.
+         * \param tstart return spikes occurring on or after tstart. tstart=nonstd::nullopt
+         * indicates no limit. \param tstop return spikes occurring on or before tstop.
+         * tstop=nonstd::nullopt indicates no limit.
          */
-        DataFrame<KeyType> get(const Selection& nodes_ids = Selection({}),
-                               double _tstart = -1,
-                               double _tstop = -1) const;
+        DataFrame<KeyType> get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+                               const nonstd::optional<double>& tstart = nonstd::nullopt,
+                               const nonstd::optional<double>& tstop = nonstd::nullopt) const;
 
       private:
         Population(const H5::File& file, const std::string& populationName);
-        std::pair<size_t, size_t> getIndex(double tstart, double tstop) const;
+        std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const;
 
         std::vector<std::pair<NodeID, std::pair<uint64_t, uint64_t>>> nodes_pointers_;
         H5::Group pop_group_;
+        std::vector<NodeID> nodes_ids_;
         double tstart_, tstop_, tstep_;
         std::vector<std::pair<size_t, double>> times_index_;
         std::string time_units_;
@@ -148,7 +152,7 @@ class SONATA_API ReportReader
     /**
      * Return a list of all population names.
      */
-    std::vector<std::string> getPopulationsNames() const;
+    std::vector<std::string> getPopulationNames() const;
 
     const Population& openPopulation(const std::string& populationName) const;
 
@@ -160,7 +164,7 @@ class SONATA_API ReportReader
 };
 
 using SomaReportReader = ReportReader<NodeID>;
-using ElementReportReader = ReportReader<std::pair<NodeID, uint32_t>>;
+using ElementReportReader = ReportReader<std::pair<NodeID, ElementID>>;
 
 }  // namespace sonata
 }  // namespace bbp

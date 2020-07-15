@@ -14,34 +14,36 @@ HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enu
 
 namespace {
 
+using bbp::sonata::ElementID;
 using bbp::sonata::NodeID;
 using bbp::sonata::Selection;
 using bbp::sonata::Spike;
 using bbp::sonata::Spikes;
 
 void filterNodeIDUnsorted(Spikes& spikes, const Selection& node_ids) {
-    auto values = node_ids.flatten();
-    auto new_end = std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
-        return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
-    });
+    const auto values = node_ids.flatten();
+    const auto new_end =
+        std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
+            return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
+        });
     spikes.erase(new_end, spikes.end());
 }
 
 void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) {
     Spikes _spikes;
     for (const auto& range : node_ids.ranges()) {
-        auto begin = std::lower_bound(spikes.begin(),
-                                      spikes.end(),
-                                      std::make_pair(range.first, 0.),
-                                      [](const Spike& spike1, const Spike& spike2) {
-                                          return spike1.first < spike2.first;
-                                      });
-        auto end = std::upper_bound(spikes.begin(),
-                                    spikes.end(),
-                                    std::make_pair(range.second - 1, 0.),
-                                    [](const Spike& spike1, const Spike& spike2) {
-                                        return spike1.first < spike2.first;
-                                    });
+        const auto begin = std::lower_bound(spikes.begin(),
+                                            spikes.end(),
+                                            std::make_pair(range.first, 0.),
+                                            [](const Spike& spike1, const Spike& spike2) {
+                                                return spike1.first < spike2.first;
+                                            });
+        const auto end = std::upper_bound(spikes.begin(),
+                                          spikes.end(),
+                                          std::make_pair(range.second - 1, 0.),
+                                          [](const Spike& spike1, const Spike& spike2) {
+                                              return spike1.first < spike2.first;
+                                          });
 
         std::move(begin, end, std::back_inserter(_spikes));
         spikes.erase(begin, end);  // have to erase, because otherwise it is no more sorted
@@ -58,32 +60,32 @@ void filterTimestampUnsorted(Spikes& spikes, double tstart, double tstop) {
 }
 
 void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
-    auto end = std::upper_bound(spikes.begin(),
-                                spikes.end(),
-                                std::make_pair(0UL, tstop + EPSILON),
-                                [](const Spike& spike1, const Spike& spike2) {
-                                    return spike1.second < spike2.second;
-                                });
+    const auto end = std::upper_bound(spikes.begin(),
+                                      spikes.end(),
+                                      std::make_pair(0UL, tstop + EPSILON),
+                                      [](const Spike& spike1, const Spike& spike2) {
+                                          return spike1.second < spike2.second;
+                                      });
     spikes.erase(end, spikes.end());
-    auto begin = std::lower_bound(spikes.begin(),
-                                  spikes.end(),
-                                  std::make_pair(0UL, tstart - EPSILON),
-                                  [](const Spike& spike1, const Spike& spike2) {
-                                      return spike1.second < spike2.second;
-                                  });
+    const auto begin = std::lower_bound(spikes.begin(),
+                                        spikes.end(),
+                                        std::make_pair(0UL, tstart - EPSILON),
+                                        [](const Spike& spike1, const Spike& spike2) {
+                                            return spike1.second < spike2.second;
+                                        });
     spikes.erase(spikes.begin(), begin);
 }
 
 template <typename T>
-T make_key(NodeID node_id, uint32_t element_id);
+T make_key(NodeID node_id, ElementID element_id);
 
 template <>
-NodeID make_key(NodeID node_id, uint32_t /* element_id */) {
+NodeID make_key(NodeID node_id, ElementID /* element_id */) {
     return node_id;
 }
 
 template <>
-std::pair<NodeID, uint32_t> make_key(NodeID node_id, uint32_t element_id) {
+std::pair<NodeID, ElementID> make_key(NodeID node_id, ElementID element_id) {
     return {node_id, element_id};
 }
 
@@ -95,7 +97,7 @@ namespace sonata {
 SpikeReader::SpikeReader(const std::string& filename)
     : filename_(filename) {}
 
-std::vector<std::string> SpikeReader::getPopulationsNames() const {
+std::vector<std::string> SpikeReader::getPopulationNames() const {
     H5::File file(filename_, H5::File::ReadOnly);
     return file.getGroup("/spikes").listObjectNames();
 }
@@ -108,18 +110,29 @@ auto SpikeReader::openPopulation(const std::string& populationName) const -> con
     return populations_.at(populationName);
 }
 
-Spikes SpikeReader::Population::get(const Selection& node_ids, double tstart, double tstop) const {
-    tstart = tstart < 0 ? tstart_ : tstart;
-    tstop = tstop < 0 ? tstop_ : tstop;
-    if (tstart > tstop_ + EPSILON || tstop < tstart_ - EPSILON || tstop < tstart) {
+Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
+                                    const nonstd::optional<double>& tstart,
+                                    const nonstd::optional<double>& tstop) const {
+    const double start = tstart.value_or(tstart_);
+    const double stop = tstop.value_or(tstop_);
+
+    if (start < 0 - EPSILON || stop < 0 - EPSILON) {
+        throw SonataError("Times cannot be negative");
+    }
+
+    if (start > stop) {
+        throw SonataError("tstart should be <= to tstop");
+    }
+
+    if (node_ids and node_ids->empty()) {
         return Spikes{};
     }
 
     auto spikes = spikes_;
-    filterTimestamp(spikes, tstart, tstop);
+    filterTimestamp(spikes, start, stop);
 
-    if (!node_ids.empty()) {
-        filterNode(spikes, node_ids);
+    if (node_ids) {
+        filterNode(spikes, node_ids.value());
     }
 
     return spikes;
@@ -132,8 +145,8 @@ SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
 SpikeReader::Population::Population(const std::string& filename,
                                     const std::string& populationName) {
     H5::File file(filename, H5::File::ReadOnly);
-    auto pop_path = std::string("/spikes/") + populationName;
-    auto pop = file.getGroup(pop_path);
+    const auto pop_path = std::string("/spikes/") + populationName;
+    const auto pop = file.getGroup(pop_path);
 
     std::vector<Spike::first_type> node_ids;
     pop.getDataSet("node_ids").read(node_ids);
@@ -142,7 +155,7 @@ SpikeReader::Population::Population(const std::string& filename,
     pop.getDataSet("timestamps").read(timestamps);
 
     if (node_ids.size() != timestamps.size()) {
-        throw std::runtime_error(
+        throw SonataError(
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
 
@@ -188,7 +201,7 @@ ReportReader<T>::ReportReader(const std::string& filename)
     : file_(filename, H5::File::ReadOnly) {}
 
 template <typename T>
-std::vector<std::string> ReportReader<T>::getPopulationsNames() const {
+std::vector<std::string> ReportReader<T>::getPopulationNames() const {
     return file_.getGroup("/report").listObjectNames();
 }
 
@@ -205,15 +218,14 @@ template <typename T>
 ReportReader<T>::Population::Population(const H5::File& file, const std::string& populationName)
     : pop_group_(file.getGroup(std::string("/report/") + populationName)) {
     {
-        auto mapping_group = pop_group_.getGroup("mapping");
-        std::vector<NodeID> node_ids;
-        mapping_group.getDataSet("node_ids").read(node_ids);
+        const auto mapping_group = pop_group_.getGroup("mapping");
+        mapping_group.getDataSet("node_ids").read(nodes_ids_);
 
         std::vector<uint64_t> index_pointers;
         mapping_group.getDataSet("index_pointers").read(index_pointers);
 
-        for (size_t i = 0; i < node_ids.size(); ++i) {
-            nodes_pointers_.emplace_back(node_ids[i],
+        for (size_t i = 0; i < nodes_ids_.size(); ++i) {
+            nodes_pointers_.emplace_back(nodes_ids_[i],
                                          std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
 
@@ -225,8 +237,8 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
             tstep_ = times[2];
             mapping_group.getDataSet("time").getAttribute("units").read(time_units_);
             size_t i = 0;
-            for (double t = tstart_; t < tstop_ - EPSILON; t += tstep_) {
-                times_index_.push_back({i++, t});
+            for (double t = tstart_; t < tstop_ - EPSILON; t += tstep_, ++i) {
+                times_index_.emplace_back(i, t);
             }
         }
 
@@ -261,57 +273,57 @@ bool ReportReader<T>::Population::getSorted() const {
 }
 
 template <typename T>
-std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(double tstart, double tstop) const {
+std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
+    return nodes_ids_;
+}
+
+template <typename T>
+std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
+    const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
     std::pair<size_t, size_t> indexes;
-    if (tstart < 0 - EPSILON) {  // Default value
-        indexes.first = times_index_.front().first;
-    } else if (tstart > times_index_.back().second + EPSILON) {  // tstart is after end of range
-        indexes.first = 1;
-        indexes.second = 0;
-        return indexes;
-    } else {
-        for (const auto& time_index : times_index_) {
-            if (tstart < time_index.second + EPSILON) {
-                indexes.first = time_index.first;
-                break;
-            }
-        }
-    }
-    if (tstop < 0 - EPSILON) {  // Default value
-        indexes.second = times_index_.back().first;
-    } else if (tstop < times_index_.front().second - EPSILON) {  // tstop is before start of range
-        indexes.first = 1;
-        indexes.second = 0;
-        return indexes;
-    } else {
-        for (auto it = times_index_.crbegin(); it != times_index_.crend(); ++it) {
-            const auto& time_index = *it;
-            if (tstop > time_index.second - EPSILON) {
-                indexes.second = time_index.first;
-                break;
-            }
-        }
+
+    const double start = tstart.value_or(tstart_);
+    const double stop = tstop.value_or(tstop_);
+
+    if (start < 0 - EPSILON || stop < 0 - EPSILON) {
+        throw SonataError("Times cannot be negative");
     }
 
-    if (indexes.first > indexes.second) {
-        indexes.second = indexes.first;
+    const auto it_start = std::find_if(times_index_.cbegin(),
+                                       times_index_.cend(),
+                                       [&](const std::pair<size_t, double>& v) {
+                                           return start < v.second + EPSILON;
+                                       });
+    if (it_start == times_index_.end()) {
+        throw SonataError("tstart is after the end of the range");
     }
+    indexes.first = it_start->first;
+
+    const auto it_stop =
+        std::find_if(times_index_.crbegin(),
+                     times_index_.crend(),
+                     [&](const std::pair<size_t, double>& v) { return stop > v.second - EPSILON; });
+    if (it_stop == times_index_.rend()) {
+        throw SonataError("tstop is before the beginning of the range");
+    }
+    indexes.second = it_stop->first;
 
     return indexes;
 }
 
+
 template <typename T>
-DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
-                                              double tstart,
-                                              double tstop) const {
+DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& selection,
+                                              const nonstd::optional<double>& tstart,
+                                              const nonstd::optional<double>& tstop) const {
     DataFrame<T> data_frame;
 
     size_t index_start = 0;
     size_t index_stop = 0;
-
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
+
     if (index_start > index_stop) {
-        return data_frame;
+        throw SonataError("tstart should be <= to tstop");
     }
 
     for (size_t i = index_start; i <= index_stop; ++i) {
@@ -321,25 +333,57 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
     // Simplify selection
     // We should remove duplicates
     // And when we can work with ranges let's sort them
-    // auto nodes_ids_ = Selection::fromValues(nodes_ids.flatten().sort());
+    // auto nodes_ids_ = Selection::fromValues(node_ids.flatten().sort());
     Selection::Values node_ids;
 
-    if (selection.empty()) {  // Take all nodes in this case
+    if (!selection) {  // Take all nodes in this case
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
                        std::back_inserter(node_ids),
                        [](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
                            return node_pointer.first;
                        });
+    } else if (selection->empty()) {
+        return DataFrame<T>{{}, {}, {}};
     } else {
-        node_ids = selection.flatten();
+        node_ids = selection->flatten();
     }
 
-    data_frame.data.resize(index_stop - index_start + 1);
-    // FIXME: It will be good to do it for ranges but if nodes_ids are not sorted it is not easy
-    // TODO: specialized this function for sorted nodes_ids?
     for (const auto& node_id : node_ids) {
-        auto it = std::find_if(
+        const auto it = std::find_if(
+            nodes_pointers_.begin(),
+            nodes_pointers_.end(),
+            [&node_id](const std::pair<NodeID, std::pair<NodeID, uint64_t>>& node_pointer) {
+                return node_pointer.first == node_id;
+            });
+        if (it == nodes_pointers_.end()) {
+            continue;
+        }
+
+        std::vector<ElementID> element_ids;
+        pop_group_.getGroup("mapping")
+            .getDataSet("element_ids")
+            .select({it->second.first}, {it->second.second - it->second.first})
+            .read(element_ids);
+        for (const auto& elem : element_ids) {
+            data_frame.ids.push_back(make_key<T>(node_id, elem));
+        }
+    }
+    if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
+        return DataFrame<T>{{}, {}, {}};
+    }
+
+    // Fill .data member
+
+    auto n_time_entries = index_stop - index_start + 1;
+    auto n_ids = data_frame.ids.size();
+    data_frame.data.resize(n_time_entries * n_ids);
+
+    // FIXME: It will be good to do it for ranges but if node_ids are not sorted it is not easy
+    // TODO: specialized this function for sorted node_ids?
+    int ids_index = 0;
+    for (const auto& node_id : node_ids) {
+        const auto it = std::find_if(
             nodes_pointers_.begin(),
             nodes_pointers_.end(),
             [&node_id](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
@@ -355,28 +399,23 @@ DataFrame<T> ReportReader<T>::Population::get(const Selection& selection,
             .select({index_start, it->second.first},
                     {index_stop - index_start + 1, it->second.second - it->second.first})
             .read(data);
+
         int timer_index = 0;
+
         for (const std::vector<float>& datum : data) {
-            for (float d : datum) {
-                data_frame.data[timer_index].push_back(d);
-            }
+            std::copy(datum.data(),
+                      datum.data() + datum.size(),
+                      &data_frame.data[timer_index * n_ids + ids_index]);
             ++timer_index;
         }
-
-        std::vector<uint32_t> element_ids;
-        pop_group_.getGroup("mapping")
-            .getDataSet("element_ids")
-            .select({it->second.first}, {it->second.second - it->second.first})
-            .read(element_ids);
-        for (size_t i = 0; i < element_ids.size(); ++i) {
-            data_frame.ids.push_back(make_key<T>(node_id, element_ids[i]));
-        }
+        ids_index += data[0].size();
     }
+
     return data_frame;
 }
 
 template class ReportReader<NodeID>;
-template class ReportReader<std::pair<NodeID, uint32_t>>;
+template class ReportReader<std::pair<NodeID, ElementID>>;
 
 }  // namespace sonata
 }  // namespace bbp
