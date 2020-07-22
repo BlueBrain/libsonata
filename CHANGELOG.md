@@ -8,6 +8,7 @@
  - Better documentation
  - Report readers documentation
  - Bump HighFive and pybind11
+ - Numpy arrays for the report outputs
 
 ### Fixed:
 
