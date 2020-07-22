@@ -209,6 +209,7 @@ SpikePopulation
    Pandas can be used to create a dataframe and get a better representation of the data
 
 .. code-block:: pycon
+
    >>> import pandas
 
    data = population.get()
