@@ -1,10 +1,18 @@
 # Changelog
 
-## Development: v0.1.4
+## Development: v0.1.5
+
+## v0.1.4 Wed Jul 22 2020
+
+ - Use common docstrings between C++ and Python
+ - Better documentation
+ - Report readers documentation
+ - Bump HighFive and pybind11
 
 ### Fixed:
 
  - Fixed python sdist distribution by disabling test requirements
+ - Fix report_reader to have several time the same index
 
 ## v0.1.3: Fri Mar 13 2020
 
