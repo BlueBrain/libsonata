@@ -16,9 +16,9 @@ $BIN/pip -v install --upgrade pip setuptools wheel
 
 # install
 $BIN/pip -v install --force .
-$BIN/pip install nose
+#$BIN/pip install nose
 
-$BIN/nosetests -s -v python/tests
+#$BIN/nosetests -s -v python/tests
 
-python --version
-python setup.py test
+$BIN/python --version
+$BIN/python setup.py test
