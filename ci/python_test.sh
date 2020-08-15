@@ -16,11 +16,12 @@ $BIN/pip -v install --upgrade pip setuptools wheel
 
 # install
 $BIN/pip -v install --force .
-#$BIN/pip install nose
+$BIN/pip install nose
 
-#$BIN/nosetests -s -v python/tests
+$BIN/nosetests -s -v -P python/tests
 
 PYTHON_MAJOR_VERSION=$($BIN/python -c 'import sys; print(sys.version_info[0])')
-if [[ $PYTHON_MAJOR_VERSION -ge 3 ]]; then
+echo "PYTHON " $PYTHON_MAJOR_VERSION
+if [[ -z $PYTHON_MAJOR_VERSION && $PYTHON_MAJOR_VERSION -ge 3 ]]; then
     $BIN/python setup.py test
 fi
