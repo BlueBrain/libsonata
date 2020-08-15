@@ -20,5 +20,7 @@ $BIN/pip -v install --force .
 
 #$BIN/nosetests -s -v python/tests
 
-$BIN/python --version
-$BIN/python setup.py test
+PYTHON_MAJOR_VERSION=$($BIN/python -c 'import sys; print(sys.version_info[0])')
+if [[ $PYTHON_MAJOR_VERSION -ge 3 ]]; then
+    $BIN/python setup.py test
+fi
