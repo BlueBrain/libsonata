@@ -6,6 +6,7 @@ VENV=$(pwd)/build/venv-python-test/
 
 if [[ ! -d "$VENV" ]]; then
     # We use virtualenv instead of `python3 -mvenv` because of python2 tests
+    pip install -U pip
     pip install virtualenv
     virtualenv "$VENV"
 fi
@@ -21,7 +22,6 @@ $BIN/pip install nose
 $BIN/nosetests -s -v -P python/tests
 
 PYTHON_MAJOR_VERSION=$($BIN/python -c 'import sys; print(sys.version_info[0])')
-echo "PYTHON " $PYTHON_MAJOR_VERSION
-if [[ -z $PYTHON_MAJOR_VERSION && $PYTHON_MAJOR_VERSION -ge 3 ]]; then
+if [[ $PYTHON_MAJOR_VERSION -ge 3 ]]; then
     $BIN/python setup.py test
 fi
