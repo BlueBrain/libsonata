@@ -36,7 +36,7 @@ SonataData::SonataData(const std::string& report_name,
                        const std::vector<double>& spike_timestamps,
                        const std::vector<uint64_t>& spike_node_ids)
     : report_name_(report_name)
-    , population_name_(population_name)
+    , population_name_(population_name.empty() ? "All" : population_name)
     , spike_timestamps_(spike_timestamps)
     , spike_node_ids_(spike_node_ids)
     , hdf5_writer_(std::make_unique<HDF5Writer>(report_name)) {}
@@ -263,17 +263,17 @@ void SonataData::write_spikes_header(const std::string& order_by) {
     hdf5_writer_->configure_enum_attribute(spikes_population_group, "sorting", order_by);
     hsize_t timestamps_size = Implementation::get_global_dims(report_name_,
                                                               spike_timestamps_.size());
+    Implementation::sort_spikes(spike_timestamps_, spike_node_ids_, order_by);
+    hdf5_writer_->write(spikes_population_group + "/timestamps", spike_timestamps_);
     if (timestamps_size > 0) {
-        Implementation::sort_spikes(spike_timestamps_, spike_node_ids_, order_by);
-        hdf5_writer_->write(spikes_population_group + "/timestamps", spike_timestamps_);
         hdf5_writer_->configure_attribute(spikes_population_group + "/timestamps", "units", "ms");
-        std::vector<uint64_t> sonata_spike_node_ids(spike_node_ids_);
-        std::transform(std::begin(sonata_spike_node_ids),
-                       std::end(sonata_spike_node_ids),
-                       std::begin(sonata_spike_node_ids),
-                       [](int x) { return x - 1; });
-        hdf5_writer_->write(spikes_population_group + "/node_ids", sonata_spike_node_ids);
     }
+    std::vector<uint64_t> sonata_spike_node_ids(spike_node_ids_);
+    std::transform(std::begin(sonata_spike_node_ids),
+                   std::end(sonata_spike_node_ids),
+                   std::begin(sonata_spike_node_ids),
+                   [](int x) { return x - 1; });
+    hdf5_writer_->write(spikes_population_group + "/node_ids", sonata_spike_node_ids);
 }
 
 void SonataData::write_data() {
