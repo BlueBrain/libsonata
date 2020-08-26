@@ -185,7 +185,7 @@ def write_element_report(filepath):
         gpop_soma2 = h5f.create_group('/report/' + population_names[2])
 
 def write_spikes(filepath):
-    population_names = ['All', 'spikes1', 'spikes2']
+    population_names = ['All', 'spikes1', 'spikes2', 'empty']
     timestamps_base = (0.3, 0.1, 0.2, 1.3, 0.7)
     node_ids_base = (3, 5, 2, 3, 2)
 
@@ -212,6 +212,10 @@ def write_spikes(filepath):
         dtimestamps.attrs.create('units', data="ms", dtype=string_dtype)
         gpop_spikes2.create_dataset('node_ids', data=node_ids_base, dtype=np.uint64)
 
+        gpop_empty = h5f.create_group('/spikes/' + population_names[3])
+        gpop_empty.attrs.create('sorting', data=1, dtype=sorting_type)
+        dtimestamps = gpop_empty.create_dataset('timestamps', data=[], dtype=np.double)
+        gpop_empty.create_dataset('node_ids', data=[], dtype=np.uint64)
 
 if __name__ == '__main__':
     write_nodes('nodes1.h5')

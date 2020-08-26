@@ -232,7 +232,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.test_obj = SpikeReader(path)
 
     def test_get_all_populations(self):
-        self.assertEqual(self.test_obj.get_population_names(), ['All', 'spikes1', 'spikes2'])
+        self.assertEqual(self.test_obj.get_population_names(), ['All', 'empty', 'spikes1', 'spikes2'])
 
     def test_get_population(self):
         self.assertTrue(isinstance(self.test_obj['spikes1'], SpikePopulation))
@@ -253,6 +253,7 @@ class TestSpikePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].sorting, "by_time")
         self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting, "none")
+        self.assertEqual(self.test_obj['empty'].get(), [])
 
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[])), 0)
 
