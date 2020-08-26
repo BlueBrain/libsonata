@@ -175,8 +175,8 @@ SpikeReader::Population::Population(const std::string& filename,
         tstart_ = timestamps.empty() ? 0 : timestamps.front();
         tstop_ = timestamps.empty() ? 0 : timestamps.back();
     } else {
-        tstart_ = *min_element(timestamps.cbegin(), timestamps.cend());
-        tstop_ = *max_element(timestamps.cbegin(), timestamps.cend());
+        tstart_ = timestamps.empty() ? 0 : *min_element(timestamps.cbegin(), timestamps.cend());
+        tstop_ = timestamps.empty() ? 0 : *max_element(timestamps.cbegin(), timestamps.cend());
     }
 }
 
