@@ -148,9 +148,7 @@ void HDF5Writer::write(const std::string& dataset_name, const std::vector<T>& bu
     hid_t memspace = H5Screate_simple(1, &dims, nullptr);
     H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &offset, nullptr, &dims, nullptr);
 
-    if (!buffer.empty()) {
-        H5Dwrite(data_set, type, memspace, filespace, collective_list_, buffer.data());
-    }
+    H5Dwrite(data_set, type, memspace, filespace, collective_list_, buffer.data());
 
     H5Sclose(memspace);
     H5Sclose(filespace);
