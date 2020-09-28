@@ -12,10 +12,16 @@ fi
 
 BIN=$VENV/bin/
 
-$BIN/pip -v install --upgrade pip setuptools wheel
+source $BIN/activate
+pip -v install --upgrade pip setuptools wheel
 
 # install
-$BIN/pip -v install --force .
-$BIN/pip install nose
+pip -v install --force .
+pip install nose
 
-$BIN/nosetests -s -v python/tests
+nosetests -s -v -P python/tests
+
+PYTHON_MAJOR_VERSION=$(python -c 'import sys; print(sys.version_info[0])')
+if [[ $PYTHON_MAJOR_VERSION -ge 3 ]]; then
+    python setup.py test
+fi

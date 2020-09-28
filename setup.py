@@ -7,7 +7,6 @@ import sys
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from setuptools.command.install import install
 from setuptools.command.test import test
 from distutils.version import LooseVersion
 
@@ -146,6 +145,10 @@ setup_requires = [
     "setuptools_scm",
 ]
 
+doc_requires = [
+    "sphinx-bluebrain-theme"
+]
+
 # HACK: `setup_requires` uses `easy_install` to do the 'pre-installation' of
 # numpy, it doesn't realize it has to install numpy version that supports py2.
 if sys.version_info[0] == 3:
@@ -173,7 +176,8 @@ setup(
         test_doc=get_sphinx_command,
     ),
     zip_safe=False,
-    setup_requires=setup_requires,
+    setup_requires=setup_requires + doc_requires if "test" in sys.argv or "test_doc" in sys.argv
+    else setup_requires,
     install_requires=install_requires,
     extras_require={
         'docs': ['sphinx-bluebrain-theme'],
@@ -183,4 +187,5 @@ setup(
     package_dir={"": "python"},
     packages=['libsonata',
               ],
+    test_suite='tests.test_suite'
 )

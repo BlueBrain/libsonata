@@ -29,6 +29,7 @@ addons:
     - hdf5
   apt:
     packages:
+    - doxygen
     - libhdf5-dev
 
 cache:
