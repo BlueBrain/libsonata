@@ -358,13 +358,10 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         if (it == nodes_pointers_.end()) {
             continue;
         }
-        if (it->second.first < min) {
-            min = it->second.first;
-        }
-        if (it->second.second > max) {
-            max = it->second.second;
-        }
+        min = std::min(it->second.first, min);
+        max = std::max(it->second.second, max);
         positions.emplace_back(it->second.first, it->second.second);
+
         std::vector<ElementID> element_ids(it->second.second - it->second.first);
         dataset_elem_ids.select({it->second.first}, {it->second.second - it->second.first})
             .read(element_ids.data());
