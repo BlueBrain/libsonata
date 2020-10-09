@@ -343,7 +343,8 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                                 "A population inside a ReportReader")
         .def("get",
              &ReportType::Population::get,
-             "Return reports with all those node_ids between 'tstart' and 'tstop' with a stride tstride",
+             "Return reports with all those node_ids between 'tstart' and 'tstop' with a stride "
+             "tstride",
              "node_ids"_a = nonstd::nullopt,
              "tstart"_a = nonstd::nullopt,
              "tstop"_a = nonstd::nullopt,
