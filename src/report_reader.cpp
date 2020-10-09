@@ -225,8 +225,8 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
         mapping_group.getDataSet("index_pointers").read(index_pointers);
 
         for (size_t i = 0; i < nodes_ids_.size(); ++i) {
-            nodes_pointers_.emplace_back(nodes_ids_[i],
-                                         std::make_pair(index_pointers[i], index_pointers[i + 1]));
+            nodes_pointers_.emplace(nodes_ids_[i],
+                                    std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
 
         {  // Get times
@@ -315,18 +315,18 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& selection,
                                               const nonstd::optional<double>& tstart,
-                                              const nonstd::optional<double>& tstop) const {
+                                              const nonstd::optional<double>& tstop,
+                                              const nonstd::optional<size_t>& tstride) const {
     DataFrame<T> data_frame;
-
     size_t index_start = 0;
     size_t index_stop = 0;
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
-
+    const size_t stride = tstride.value_or(1) > 0 ? tstride.value_or(1) : 1;
     if (index_start > index_stop) {
         throw SonataError("tstart should be <= to tstop");
     }
 
-    for (size_t i = index_start; i <= index_stop; ++i) {
+    for (size_t i = index_start; i <= index_stop; i += stride) {
         data_frame.times.push_back(times_index_[i].second);
     }
 
@@ -349,22 +349,25 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         node_ids = selection->flatten();
     }
 
+    std::vector<std::pair<uint64_t, uint64_t>> positions;
+    uint64_t min = UINT64_MAX;
+    uint64_t max = 0;
+    auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
     for (const auto& node_id : node_ids) {
-        const auto it = std::find_if(
-            nodes_pointers_.begin(),
-            nodes_pointers_.end(),
-            [&node_id](const std::pair<NodeID, std::pair<NodeID, uint64_t>>& node_pointer) {
-                return node_pointer.first == node_id;
-            });
+        const auto it = nodes_pointers_.find(node_id);
         if (it == nodes_pointers_.end()) {
             continue;
         }
-
-        std::vector<ElementID> element_ids;
-        pop_group_.getGroup("mapping")
-            .getDataSet("element_ids")
-            .select({it->second.first}, {it->second.second - it->second.first})
-            .read(element_ids);
+        if (it->second.first < min) {
+            min = it->second.first;
+        }
+        if (it->second.second > max) {
+            max = it->second.second;
+        }
+        positions.emplace_back(it->second.first, it->second.second);
+        std::vector<ElementID> element_ids(it->second.second - it->second.first);
+        dataset_elem_ids.select({it->second.first}, {it->second.second - it->second.first})
+            .read(element_ids.data());
         for (const auto& elem : element_ids) {
             data_frame.ids.push_back(make_key<T>(node_id, elem));
         }
@@ -374,43 +377,34 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     }
 
     // Fill .data member
-
-    auto n_time_entries = index_stop - index_start + 1;
-    auto n_ids = data_frame.ids.size();
+    size_t n_time_entries = ((index_stop - index_start) / stride) + 1;
+    size_t n_ids = data_frame.ids.size();
     data_frame.data.resize(n_time_entries * n_ids);
 
-    // FIXME: It will be good to do it for ranges but if node_ids are not sorted it is not easy
-    // TODO: specialized this function for sorted node_ids?
-    int ids_index = 0;
-    for (const auto& node_id : node_ids) {
-        const auto it = std::find_if(
-            nodes_pointers_.begin(),
-            nodes_pointers_.end(),
-            [&node_id](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
-                return node_pointer.first == node_id;
-            });
-        if (it == nodes_pointers_.end()) {
-            continue;
+    std::vector<float> buffer(max - min);
+    auto dataset = pop_group_.getDataSet("data");
+    for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {
+        dataset.select({timer_index, min}, {1, max - min}).read(buffer.data());
+
+        off_t offset = 0;
+        off_t data_offset = (timer_index - index_start) / stride;
+        auto data_ptr = &data_frame.data[data_offset * n_ids];
+        for (const auto& position : positions) {
+            uint64_t elements_per_gid = position.second - position.first;
+            uint64_t gid_start = position.first - min;
+            uint64_t gid_end = position.second - min;
+
+            // Soma report
+            if (elements_per_gid == 1) {
+                data_ptr[offset] = buffer[gid_start];
+            } else {  // Elements report
+                std::memcpy(&data_ptr[offset],
+                            &buffer[gid_start],
+                            sizeof(float) * (gid_end - gid_start));
+            }
+            offset += elements_per_gid;
         }
-
-        // elems are by timestamp and by Nodes_id
-        std::vector<std::vector<float>> data;
-        pop_group_.getDataSet("data")
-            .select({index_start, it->second.first},
-                    {index_stop - index_start + 1, it->second.second - it->second.first})
-            .read(data);
-
-        int timer_index = 0;
-
-        for (const std::vector<float>& datum : data) {
-            std::copy(datum.data(),
-                      datum.data() + datum.size(),
-                      &data_frame.data[timer_index * n_ids + ids_index]);
-            ++timer_index;
-        }
-        ids_index += data[0].size();
     }
-
     return data_frame;
 }
 

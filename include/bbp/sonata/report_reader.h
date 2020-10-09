@@ -8,8 +8,8 @@
 
 #include <highfive/H5File.hpp>
 
-#include <bbp/sonata/population.h>
 #include <bbp/sonata/optional.hpp>
+#include <bbp/sonata/population.h>
 
 namespace H5 = HighFive;
 
@@ -123,19 +123,22 @@ class SONATA_API ReportReader
 
         /**
          * \param node_ids limit the report to the given selection.
-         * \param tstart return spikes occurring on or after tstart. tstart=nonstd::nullopt
-         * indicates no limit. \param tstop return spikes occurring on or before tstop.
-         * tstop=nonstd::nullopt indicates no limit.
+         * \param tstart return voltages occurring on or after tstart. tstart=nonstd::nullopt
+         * indicates no limit. \param tstop return voltages occurring on or before tstop.
+         * tstop=nonstd::nullopt indicates no limit. \param tstride indicates every how many
+         * timesteps we read data. tstride=nonstd::nullopt indicates that all timesteps are read.
          */
         DataFrame<KeyType> get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
                                const nonstd::optional<double>& tstart = nonstd::nullopt,
-                               const nonstd::optional<double>& tstop = nonstd::nullopt) const;
+                               const nonstd::optional<double>& tstop = nonstd::nullopt,
+                               const nonstd::optional<size_t>& tstride = nonstd::nullopt) const;
 
       private:
         Population(const H5::File& file, const std::string& populationName);
-        std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const;
+        std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
+                                           const nonstd::optional<double>& tstop) const;
 
-        std::vector<std::pair<NodeID, std::pair<uint64_t, uint64_t>>> nodes_pointers_;
+        std::map<NodeID, std::pair<uint64_t, uint64_t>> nodes_pointers_;
         H5::Group pop_group_;
         std::vector<NodeID> nodes_ids_;
         double tstart_, tstop_, tstep_;
