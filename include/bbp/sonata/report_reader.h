@@ -97,6 +97,9 @@ template <typename KeyType>
 class SONATA_API ReportReader
 {
   public:
+    using Range = std::pair<uint64_t, uint64_t>;
+    using Ranges = std::vector<Range>;
+
     class Population
     {
       public:
@@ -138,7 +141,7 @@ class SONATA_API ReportReader
         std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
                                            const nonstd::optional<double>& tstop) const;
 
-        std::map<NodeID, Selection::Range> nodes_pointers_;
+        std::map<NodeID, Range> nodes_pointers_;
         H5::Group pop_group_;
         std::vector<NodeID> nodes_ids_;
         double tstart_, tstop_, tstep_;

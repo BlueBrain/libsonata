@@ -344,7 +344,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
                        std::back_inserter(node_ids),
-                       [](const std::pair<NodeID, Selection::Range>& node_pointer) {
+                       [](const std::pair<NodeID, Range>& node_pointer) {
                            return node_pointer.first;
                        });
     } else if (selection->empty()) {
@@ -353,7 +353,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         node_ids = selection->flatten();
     }
 
-    Selection::Ranges positions;
+    Ranges positions;
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
     uint64_t min = std::numeric_limits<uint64_t>::max();
