@@ -275,14 +275,21 @@ class TestSomaReportPopulation(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].times, (0., 1., 0.1))
         self.assertEqual(self.test_obj['All'].time_units, 'ms')
         self.assertEqual(self.test_obj['All'].data_units, 'mV')
-        self.assertTrue(self.test_obj['All'].sorted)
+        self.assertFalse(self.test_obj['All'].sorted)
         self.assertEqual(len(self.test_obj['All'].get().ids), 20)  # Number of nodes
         self.assertEqual(len(self.test_obj['All'].get().times), 10)  # number of times
         self.assertEqual(len(self.test_obj['All'].get().data), 10)  # should be the same
+
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
         self.assertEqual(len(sel.times), 2)  # Number of timestamp (0.8 and 0.9)
         self.assertEqual(list(sel.ids), [13, 14])
         np.testing.assert_allclose(sel.data, [[13.8, 14.8], [13.9, 14.9]])
+
+        sel_all = self.test_obj['All'].get()
+        self.assertEqual(sel_all.ids, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+
+        sel_empty = self.test_obj['All'].get(node_ids=[])
+        np.testing.assert_allclose(sel_empty.data, np.empty(shape=(0, 0)))
 
 class TestElementReportPopulation(unittest.TestCase):
     def setUp(self):

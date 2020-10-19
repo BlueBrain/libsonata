@@ -321,7 +321,10 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     size_t index_start = 0;
     size_t index_stop = 0;
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
-    const size_t stride = tstride.value_or(1) > 0 ? tstride.value_or(1) : 1;
+    const size_t stride = tstride.value_or(1);
+    if (stride == 0) {
+        throw SonataError("tstride should be > 0");
+    }
     if (index_start > index_stop) {
         throw SonataError("tstart should be <= to tstop");
     }
@@ -337,10 +340,11 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     Selection::Values node_ids;
 
     if (!selection) {  // Take all nodes in this case
+        node_ids.reserve(nodes_pointers_.size());
         std::transform(nodes_pointers_.begin(),
                        nodes_pointers_.end(),
                        std::back_inserter(node_ids),
-                       [](const std::pair<NodeID, std::pair<uint64_t, uint64_t>>& node_pointer) {
+                       [](const std::pair<NodeID, Selection::Range>& node_pointer) {
                            return node_pointer.first;
                        });
     } else if (selection->empty()) {
@@ -349,9 +353,11 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         node_ids = selection->flatten();
     }
 
-    std::vector<std::pair<uint64_t, uint64_t>> positions;
-    uint64_t min = UINT64_MAX;
-    uint64_t max = 0;
+    Selection::Ranges positions;
+    // min and max offsets of the node_ids requested are calculated
+    // to reduce the amount of IO that is brought to memory
+    uint64_t min = std::numeric_limits<uint64_t>::max();
+    uint64_t max = std::numeric_limits<uint64_t>::min();
     auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
     for (const auto& node_id : node_ids) {
         const auto it = nodes_pointers_.find(node_id);
@@ -381,6 +387,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     std::vector<float> buffer(max - min);
     auto dataset = pop_group_.getDataSet("data");
     for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {
+        // Note: The code assumes that the file is chunked by rows and not by columns
+        // (i.e., if the chunking changes in the future, the reading method must also be adapted)
         dataset.select({timer_index, min}, {1, max - min}).read(buffer.data());
 
         off_t offset = 0;
@@ -389,15 +397,13 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         for (const auto& position : positions) {
             uint64_t elements_per_gid = position.second - position.first;
             uint64_t gid_start = position.first - min;
-            uint64_t gid_end = position.second - min;
 
             // Soma report
             if (elements_per_gid == 1) {
                 data_ptr[offset] = buffer[gid_start];
             } else {  // Elements report
-                std::memcpy(&data_ptr[offset],
-                            &buffer[gid_start],
-                            sizeof(float) * (gid_end - gid_start));
+                uint64_t gid_end = position.second - min;
+                std::copy(&buffer[gid_start], &buffer[gid_end], &data_ptr[offset]);
             }
             offset += elements_per_gid;
         }

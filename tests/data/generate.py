@@ -134,7 +134,7 @@ def write_edges(filepath):
 
 def write_soma_report(filepath):
     population_names = ['All', 'soma1', 'soma2']
-    node_ids = np.arange(1, 21)
+    node_ids = np.concatenate((np.arange(10, 21), np.arange(1, 10)), axis=None)
     index_pointers = np.arange(0, 21)
     element_ids = np.zeros(20)
     times = (0.0, 1.0, 0.1)
@@ -148,7 +148,6 @@ def write_soma_report(filepath):
         gmapping = h5f.create_group('/report/' + population_names[0] + '/mapping')
 
         dnodes = gmapping.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
-        dnodes.attrs.create('sorted', data=True, dtype=np.uint8)
         gmapping.create_dataset('index_pointers', data=index_pointers, dtype=np.uint64)
         gmapping.create_dataset('element_ids', data=element_ids, dtype=np.uint32)
         dtimes = gmapping.create_dataset('time', data=times, dtype=np.double)
