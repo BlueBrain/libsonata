@@ -1,4 +1,5 @@
 #include <bbp/sonata/report_reader.h>
+#include <fmt/format.h>
 
 constexpr double EPSILON = 1e-6;
 
@@ -384,8 +385,14 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     size_t n_ids = data_frame.ids.size();
     data_frame.data.resize(n_time_entries * n_ids);
 
-    std::vector<float> buffer(max - min);
     auto dataset = pop_group_.getDataSet("data");
+    auto dataset_type = dataset.getDataType();
+    if (dataset_type.getClass() != HighFive::DataTypeClass::Float || dataset_type.getSize() != 4) {
+        throw SonataError(
+            fmt::format("DataType of dataset 'data' should be Float32 ('{}' was found)",
+                        dataset_type.string()));
+    }
+    std::vector<float> buffer(max - min);
     for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {
         // Note: The code assumes that the file is chunked by rows and not by columns
         // (i.e., if the chunking changes in the future, the reading method must also be adapted)

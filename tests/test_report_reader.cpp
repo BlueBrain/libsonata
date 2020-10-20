@@ -57,6 +57,10 @@ TEST_CASE("SomaReportReader limits", "[base]") {
 
     // Negatives times
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), -1., -2.));
+
+    // DataType of dataset 'data' should be Float32
+    auto pop2 = reader.openPopulation("soma1");
+    REQUIRE_THROWS(pop2.get());
 }
 
 TEST_CASE("SomaReportReader", "[base]") {
