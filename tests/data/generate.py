@@ -134,7 +134,7 @@ def write_edges(filepath):
 
 def write_soma_report(filepath):
     population_names = ['All', 'soma1', 'soma2']
-    node_ids = np.arange(1, 21)
+    node_ids = np.concatenate((np.arange(10, 21), np.arange(1, 10)), axis=None)
     index_pointers = np.arange(0, 21)
     element_ids = np.zeros(20)
     times = (0.0, 1.0, 0.1)
@@ -148,13 +148,20 @@ def write_soma_report(filepath):
         gmapping = h5f.create_group('/report/' + population_names[0] + '/mapping')
 
         dnodes = gmapping.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
-        dnodes.attrs.create('sorted', data=True, dtype=np.uint8)
         gmapping.create_dataset('index_pointers', data=index_pointers, dtype=np.uint64)
         gmapping.create_dataset('element_ids', data=element_ids, dtype=np.uint32)
         dtimes = gmapping.create_dataset('time', data=times, dtype=np.double)
         dtimes.attrs.create('units', data="ms", dtype=string_dtype)
 
         gpop_soma1 = h5f.create_group('/report/' + population_names[1])
+        ddata2 = gpop_soma1.create_dataset('data', data=data, dtype=np.float64)
+        ddata2.attrs.create('units', data="mV", dtype=string_dtype)
+        gmapping2 = h5f.create_group('/report/' + population_names[1] + '/mapping')
+        gmapping2.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
+        gmapping2.create_dataset('index_pointers', data=index_pointers, dtype=np.uint64)
+        gmapping2.create_dataset('element_ids', data=element_ids, dtype=np.uint32)
+        dtimes2 = gmapping2.create_dataset('time', data=times, dtype=np.double)
+        dtimes2.attrs.create('units', data="ms", dtype=string_dtype)
         gpop_soma2 = h5f.create_group('/report/' + population_names[2])
 
 

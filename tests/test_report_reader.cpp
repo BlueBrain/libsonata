@@ -57,6 +57,10 @@ TEST_CASE("SomaReportReader limits", "[base]") {
 
     // Negatives times
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), -1., -2.));
+
+    // DataType of dataset 'data' should be Float32
+    auto pop2 = reader.openPopulation("soma1");
+    REQUIRE_THROWS(pop2.get());
 }
 
 TEST_CASE("SomaReportReader", "[base]") {
@@ -72,15 +76,22 @@ TEST_CASE("SomaReportReader", "[base]") {
 
     REQUIRE(pop.getDataUnits() == "mV");
 
-    REQUIRE(pop.getSorted());
+    REQUIRE(pop.getSorted() == false);
 
-    REQUIRE(pop.getNodeIds() == std::vector<NodeID>{1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
-                                                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20});
+    REQUIRE(pop.getNodeIds() == std::vector<NodeID>{10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                    20, 1,  2,  3,  4,  5,  6,  7,  8,  9});
 
     auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
     REQUIRE(data.ids == DataFrame<NodeID>::DataType{{3, 4}});
     testTimes(data.times, 0.2, 0.1, 4);
     REQUIRE(data.data == std::vector<float>{3.2f, 4.2f, 3.3f, 4.3f, 3.4f, 4.4f, 3.5f, 4.5f});
+
+    auto data_all = pop.get();
+    REQUIRE(data_all.ids == DataFrame<NodeID>::DataType{{1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                                                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20}});
+
+    auto data_empty = pop.get(Selection({}));
+    REQUIRE(data_empty.data == std::vector<float>{});
 }
 
 TEST_CASE("ElementReportReader limits", "[base]") {
@@ -106,6 +117,9 @@ TEST_CASE("ElementReportReader limits", "[base]") {
 
     // Negatives times
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), -1., -2.));
+
+    // Stride = 0
+    REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 0.1, 0.2, 0));
 }
 
 TEST_CASE("ElementReportReader", "[base]") {

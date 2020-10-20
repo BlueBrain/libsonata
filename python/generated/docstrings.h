@@ -255,12 +255,16 @@ R"doc(Parameter ``node_ids``:
     limit the report to the given selection.
 
 Parameter ``tstart``:
-    return spikes occurring on or after tstart. tstart=nonstd::nullopt
-    indicates no limit.
+    return voltages occurring on or after tstart.
+    tstart=nonstd::nullopt indicates no limit.
 
 Parameter ``tstop``:
-    return spikes occurring on or before tstop. tstop=nonstd::nullopt
-    indicates no limit.)doc";
+    return voltages occurring on or before tstop.
+    tstop=nonstd::nullopt indicates no limit.
+
+Parameter ``tstride``:
+    indicates every how many timesteps we read data.
+    tstride=nonstd::nullopt indicates that all timesteps are read.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
 
