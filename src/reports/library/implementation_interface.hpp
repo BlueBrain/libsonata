@@ -115,7 +115,7 @@ struct ParallelImplementation {
         MPI_Comm_split(MPI_COMM_WORLD, num_reports == 0, 0, &SonataReport::has_nodes_);
 
         // Send report numbers and generate offset array for allgatherv
-        std::vector<int> report_sizes(global_size);
+        std::vector<int> report_sizes(global_size); // TODO: It should be size of has_nodes_
         MPI_Allgather(
             &num_reports, 1, MPI_INT, report_sizes.data(), 1, MPI_INT, SonataReport::has_nodes_);
         std::vector<int> offsets(global_size + 1);
@@ -148,7 +148,7 @@ struct ParallelImplementation {
         // Eliminate duplicates
         std::set<size_t> result(global_report_hashes.begin(), global_report_hashes.end());
         // Create communicators per report name
-        for (auto& elem : global_report_hashes) {
+        for (auto& elem : result) {
             MPI_Comm_split(SonataReport::has_nodes_,
                            std::find(local_report_hashes.begin(),
                                      local_report_hashes.end(),
