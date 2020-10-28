@@ -5,7 +5,6 @@ env:
   CIBW_BUILD_VERBOSITY: 3
   CIBW_BUILD: 'cp*'
   CIBW_SKIP: 'cp35-* *-musllinux_* *-manylinux_i686'
-  CIBW_BEFORE_TEST: pip install nose
   CIBW_TEST_COMMAND: ( cd {project}/python/tests; python -m unittest -v )
 
 jobs:

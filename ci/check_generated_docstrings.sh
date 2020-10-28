@@ -12,22 +12,32 @@
 #
 # In order to ensure they are being kept up-to-date, the CI process
 # regenerates them and checks there are no diffs.
-#
-# TODO: on GitHub actions we are forced to create a symlink to
-# for libclang.so. It would be preferable if we instead set the
-# path to the library with the clang bindings. This doesn't seem
-# to be possible at the moment.
 
+set -x
 set -euo pipefail
 
-VENV=build/venv-docstrings
-python3 -mvenv "$VENV"
+if [[ -z $LIBCLANG_PATH ]]; then
+    echo "Expect a \$LIBCLANG_PATH in the environment, it should have the path to the libclang.so"
+    exit -1
+fi
 
-# regenerate the docstrings
-# Note: the path to mkdoc.py (python/pybind11/tools) must be in the PYTHONPATH
-$VENV/bin/python \
-  -m mkdoc ./include/bbp/sonata/*.h \
-  -o ./python/generated/docstrings.h \
+VERSION=bd40db3b4e24cd14d0f02fc782c7fdae4e17d351
+PACKAGE=git+git://github.com/pybind/pybind11_mkdoc.git@$VERSION
+
+VENV=build/venv-docstrings
+if [[ ! -d $VENV ]]; then
+    python3 -mvenv "$VENV"
+    $VENV/bin/pip install -U pip setuptools wheel
+    $VENV/bin/python -m pip install $PACKAGE
+fi
+
+DOCSTRING_PATH=./python/generated/docstrings.h
+
+rm -f $DOCSTRING_PATH
+
+$VENV/bin/python -m pybind11_mkdoc \
+  -o $DOCSTRING_PATH \
+  ./include/bbp/sonata/*.h \
   -Wno-pragma-once-outside-header \
   -ferror-limit=100000 \
   -I/usr/include/hdf5/serial \
@@ -35,4 +45,4 @@ $VENV/bin/python \
   -I./include
 
 # fail if there are diffs in the generated docstrings
-git diff --exit-code -- ./python/generated/docstrings.h
+git diff --exit-code -- $DOCSTRING_PATH
