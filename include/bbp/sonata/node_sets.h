@@ -31,6 +31,8 @@ class SONATA_API NodeSets
      * See also:
      * https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#node-sets-file
      *
+     * Note: floating point values aren't supported for comparison
+     *
      * \param content is the JSON node_sets value
      * \throw if content cannot be parsed
      */
@@ -38,6 +40,7 @@ class SONATA_API NodeSets
 
     /**
      * Return a selection corresponding to the node_set name
+     *
      * \param name is the name of the node_set rule to be evaluated
      * \param population is the population overwhich the returned selection will be valid
      */

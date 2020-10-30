@@ -1,4 +1,4 @@
-#include <algorithm>  // std::transform
+#include <algorithm>  // std::find, std::transform
 #include <cmath>
 #include <fmt/format.h>
 #include <sstream>
@@ -55,11 +55,11 @@ class NodeSetBasicRule: public NodeSetRule
 class NodeSetBasicPopulation: public NodeSetRule
 {
   public:
-    explicit NodeSetBasicPopulation(std::string name)
-        : name_(std::move(name)) {}
+    explicit NodeSetBasicPopulation(std::vector<std::string>&& values)
+        : values_(values) {}
 
     Selection materialize(const NodeSets& /* unused */, const NodePopulation& np) const final {
-        if (name_ == np.name()) {
+        if (std::find(values_.begin(), values_.end(), np.name()) != values_.end()) {
             return np.selectAll();
         }
 
@@ -67,12 +67,11 @@ class NodeSetBasicPopulation: public NodeSetRule
     }
 
     std::string toJSON() const final {
-        const std::vector<std::string> values = {name_};
-        return toString("population", values);
+        return toString("population", values_);
     }
 
   private:
-    std::string name_;
+    std::vector<std::string> values_;
 };
 
 class NodeSetBasicNodeIds: public NodeSetRule
@@ -81,9 +80,8 @@ class NodeSetBasicNodeIds: public NodeSetRule
     explicit NodeSetBasicNodeIds(Selection::Values&& values)
         : values_(values) {}
 
-    Selection materialize(const NodeSets& /* unused */,
-                          const NodePopulation& /* unused */) const final {
-        return Selection::fromValues(values_.begin(), values_.end());
+    Selection materialize(const NodeSets& /* unused */, const NodePopulation& np) const final {
+        return np.selectAll() & Selection::fromValues(values_.begin(), values_.end());
     }
 
     std::string toJSON() const final {
@@ -98,8 +96,8 @@ using CompoundTargets = std::vector<std::string>;
 class NodeSetCompoundRule: public NodeSetRule
 {
   public:
-    NodeSetCompoundRule(std::string attribute, const CompoundTargets& targets)
-        : attribute_(std::move(attribute))
+    NodeSetCompoundRule(std::string name, const CompoundTargets& targets)
+        : name_(std::move(name))
         , targets_(targets) {}
 
     Selection materialize(const NodeSets& ns, const NodePopulation& np) const final {
@@ -115,7 +113,7 @@ class NodeSetCompoundRule: public NodeSetRule
     }
 
   private:
-    std::string attribute_;
+    std::string name_;
     CompoundTargets targets_;
 };
 
@@ -153,7 +151,7 @@ NodeSetRules _dispatch_node(const json& contents) {
             }
 
             if (attribute == "population") {
-                ret.emplace_back(new NodeSetBasicPopulation(el.value().get<std::string>()));
+                ret.emplace_back(new NodeSetBasicPopulation({el.value().get<std::string>()}));
             } else {
                 ret.emplace_back(
                     new NodeSetBasicRule<std::string>(attribute, {el.value().get<std::string>()}));
@@ -161,11 +159,11 @@ NodeSetRules _dispatch_node(const json& contents) {
         } else if (el.value().is_array()) {
             const auto array = el.value();
 
-            if (attribute == "population" && (array.size() != 1 || !array[0].is_string())) {
-                throw SonataError("'population' must be a single string");
-            }
-
             if (array[0].is_number()) {
+                if (attribute == "population") {
+                    throw SonataError("'population' must be a string");
+                }
+
                 std::vector<int64_t> values;
                 for (auto& inner_el : array.items()) {
                     values.emplace_back(get_integer_or_throw(inner_el.value()));
@@ -196,7 +194,12 @@ NodeSetRules _dispatch_node(const json& contents) {
                     values.emplace_back(inner_el.value().get<std::string>());
                 }
 
-                ret.emplace_back(new NodeSetBasicRule<std::string>(attribute, std::move(values)));
+                if (attribute == "population") {
+                    ret.emplace_back(new NodeSetBasicPopulation(std::move(values)));
+                } else {
+                    ret.emplace_back(
+                        new NodeSetBasicRule<std::string>(attribute, std::move(values)));
+                }
             } else {
                 throw SonataError("Unknown array type");
             }
@@ -206,7 +209,7 @@ NodeSetRules _dispatch_node(const json& contents) {
 }
 
 void parse_basic(const json& j, std::map<std::string, NodeSetRules>& node_sets) {
-    for (auto& el : j.items()) {
+    for (const auto& el : j.items()) {
         if (el.value().is_object()) {
             node_sets[el.key()] = _dispatch_node(el.value());
         }
@@ -238,7 +241,7 @@ void parse_compound(const json& j, std::map<std::string, NodeSetRules>& node_set
             CompoundTargets targets;
             for (const auto& name : el.value()) {
                 if (!name.is_string()) {
-                    throw SonataError("All compound node types must be strings");
+                    throw SonataError("All compound elements must be strings");
                 }
 
                 targets.emplace_back(name);

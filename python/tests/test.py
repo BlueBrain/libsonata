@@ -364,7 +364,6 @@ class TestNodePopulationFailure(unittest.TestCase):
     def test_BasicScalarFailPopulation(self):
         self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "population": 1 } }')
         self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "population": [1, 2] } }')
-        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "population": ["foo", "bar"] } }')
 
     def test_FailCompoundWithInt(self):
         self.assertRaises(SonataError, NodeSets, '{"compound": ["foo", 1] }')
@@ -406,6 +405,9 @@ class TestNodePopulationNodeSet(unittest.TestCase):
 
     def test_BasicScalarPopulation(self):
         sel = NodeSets('{ "NodeSet0": { "population": "nodes-A" } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, self.population.select_all())
+
+        sel = NodeSets('{ "NodeSet0": { "population": ["nodes-A",  "FAKE"] } }').materialize("NodeSet0", self.population)
         self.assertEqual(sel, self.population.select_all())
 
         sel = NodeSets('{ "NodeSet0": { "population": "NOT_A_POP" } }').materialize("NodeSet0", self.population)

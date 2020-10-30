@@ -28,8 +28,6 @@ TEST_CASE("NodeSetParse") {
     SECTION("BasicScalarFailPopulation") {
         CHECK_THROWS_AS(NodeSets{R"({ "NodeSet0": { "population": 1 } })"}, SonataError);
         CHECK_THROWS_AS(NodeSets{R"({ "NodeSet0": { "population": [1, 2] } })"}, SonataError);
-        CHECK_THROWS_AS(NodeSets{R"({ "NodeSet0": { "population": ["foo", "bar"] } })"},
-                        SonataError);
     }
 
     SECTION("CompoundNonString") {
@@ -93,6 +91,12 @@ TEST_CASE("NodeSetBasic") {
                          }));
         }
         {
+            auto node_sets = R"({ "NodeSet0": { "node_id": [10000, 20000] } })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({}));
+        }
+        {
             auto node_sets = R"({ "NodeSet0": { "node_id": [1, 3, 5] } })";
             NodeSets ns(node_sets);
             Selection sel = ns.materialize("NodeSet0", population);
@@ -103,6 +107,13 @@ TEST_CASE("NodeSetBasic") {
     SECTION("BasicScalarPopulation") {
         {
             auto node_sets = R"({ "NodeSet0": { "population": "nodes-A" } })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == population.selectAll());
+        }
+
+        {
+            auto node_sets = R"({ "NodeSet0": { "population": ["nodes-A", "FAKE"] } })";
             NodeSets ns(node_sets);
             Selection sel = ns.materialize("NodeSet0", population);
             CHECK(sel == population.selectAll());
