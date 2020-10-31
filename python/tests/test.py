@@ -416,10 +416,11 @@ class TestNodePopulationNodeSet(unittest.TestCase):
     def test_NodeSetCompound(self):
         j = '''{"NodeSet0": { "node_id": [1] },
                 "NodeSet1": { "node_id": [2] },
-                "NodeSetCompound": ["NodeSet0", "NodeSet1", "NodeSet2"],
+                "NodeSetCompound0": ["NodeSet0", "NodeSet1"],
+                "NodeSetCompound1": ["NodeSetCompound0", "NodeSet2"],
                 "NodeSet2": { "node_id": [3] }
         }'''
-        sel = NodeSets(j).materialize("NodeSetCompound", self.population)
+        sel = NodeSets(j).materialize("NodeSetCompound1", self.population)
         self.assertEqual(sel, Selection(((1, 4), )))
 
     def test_NodeSet_toJSON(self):

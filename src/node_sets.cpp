@@ -218,19 +218,25 @@ void parse_basic(const json& j, std::map<std::string, NodeSetRules>& node_sets) 
 
 void check_compound(const std::map<std::string, NodeSetRules>& node_sets,
                     const std::map<std::string, CompoundTargets>& compound_rules,
+                    const std::string& name,
                     size_t depth) {
+    if (node_sets.count(name) > 0) {
+        return;
+    }
+
     if (depth > MAX_COMPOUND_RECURSION) {
         throw SonataError("Compound node_set recursion depth exceeded");
     }
 
-    for (auto const& it : compound_rules) {
-        for (auto const& name : it.second) {
-            if (compound_rules.count(name) > 0) {
-                check_compound(node_sets, compound_rules, depth + 1);
-            } else if (node_sets.count(name) == 0) {
-                throw SonataError(fmt::format("Missing '{}' from node_sets", name));
-            }
+    auto it = compound_rules.find(name);
+    if (it == compound_rules.end()) {
+        throw SonataError(fmt::format("Missing compound name target {}", name));
+    }
+    for (auto const& target : it->second) {
+        if (node_sets.count(target) == 0 && compound_rules.count(target) == 0) {
+            throw SonataError(fmt::format("Missing '{}' from node_sets", target));
         }
+        check_compound(node_sets, compound_rules, target, depth + 1);
     }
 }
 
@@ -250,9 +256,10 @@ void parse_compound(const json& j, std::map<std::string, NodeSetRules>& node_set
         }
     }
 
-    check_compound(node_sets, compound_rules, 0);
 
     for (const auto& rule : compound_rules) {
+        check_compound(node_sets, compound_rules, rule.first, 0);
+
         NodeSetRules rules;
         rules.emplace_back(new NodeSetCompoundRule(rule.first, rule.second));
         node_sets.emplace(rule.first, std::move(rules));
@@ -276,6 +283,10 @@ Selection NodeSets::materialize(const std::string& name, const NodePopulation& p
     Selection ret = population.selectAll();
 
     const auto& node_set = node_sets_.find(name);
+    if (node_set == node_sets_.end()) {
+        throw SonataError(fmt::format("Unknown node_set {}", name));
+    }
+
     for (const auto& ns : node_set->second) {
         Selection a = ns->materialize(*this, population);
         ret = ret & a;

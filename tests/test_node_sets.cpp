@@ -44,6 +44,12 @@ TEST_CASE("NodeSetParse") {
         auto node_sets = R"({"compound": ["missing"] })";
         CHECK_THROWS_AS(NodeSets{node_sets}, SonataError);
     }
+    SECTION("CompoundMissing") {
+        const NodePopulation population("./data/nodes1.h5", "", "nodes-A");
+        auto node_sets = R"({ "NodeSet0": { "attr-Y": 21 } })";
+        NodeSets ns(node_sets);
+        CHECK_THROWS_AS(ns.materialize("NONEXISTANT", population), SonataError);
+    }
 }
 
 TEST_CASE("NodeSetBasic") {
@@ -134,12 +140,21 @@ TEST_CASE("NodeSetCompound") {
         auto node_sets = R"({
             "NodeSet0": { "node_id": [1] },
             "NodeSet1": { "node_id": [2] },
-            "NodeSetCompound": ["NodeSet0", "NodeSet1", "NodeSet2"],
+            "NodeSetCompound0": ["NodeSet0", "NodeSet1"],
+            "NodeSetCompound1": ["NodeSetCompound0", "NodeSet2"],
+            "NodeSetCompound2": ["NodeSetCompound1"],
+            "NodeSetCompound3": ["NodeSetCompound2"],
+            "NodeSetCompound4": ["NodeSetCompound3"],
+            "NodeSetCompound5": ["NodeSetCompound4"],
             "NodeSet2": { "node_id": [3] }
         })";
         NodeSets ns(node_sets);
-        Selection sel = ns.materialize("NodeSetCompound", population);
-        CHECK(sel == Selection({{1, 4}}));
+        Selection expected{{{1, 4}}};
+        CHECK(expected == ns.materialize("NodeSetCompound1", population));
+        CHECK(expected == ns.materialize("NodeSetCompound2", population));
+        CHECK(expected == ns.materialize("NodeSetCompound3", population));
+        CHECK(expected == ns.materialize("NodeSetCompound4", population));
+        CHECK(expected == ns.materialize("NodeSetCompound5", population));
     }
 }
 
