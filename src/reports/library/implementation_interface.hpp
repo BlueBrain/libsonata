@@ -103,7 +103,7 @@ struct ParallelImplementation {
             mpi_size_type = MPI_UINT32_T;
         }
 
-        int global_rank, global_size;
+        int global_rank, global_size, local_size;
         MPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
         MPI_Comm_size(MPI_COMM_WORLD, &global_size);
 
@@ -113,12 +113,13 @@ struct ParallelImplementation {
         // Create a first communicator with the ranks with at least 1 report
         int num_reports = report_names.size();
         MPI_Comm_split(MPI_COMM_WORLD, num_reports == 0, 0, &SonataReport::has_nodes_);
+        MPI_Comm_size(SonataReport::has_nodes_, &local_size);
 
         // Send report numbers and generate offset array for allgatherv
-        std::vector<int> report_sizes(global_size);
+        std::vector<int> report_sizes(local_size);
         MPI_Allgather(
             &num_reports, 1, MPI_INT, report_sizes.data(), 1, MPI_INT, SonataReport::has_nodes_);
-        std::vector<int> offsets(global_size + 1);
+        std::vector<int> offsets(local_size + 1);
         offsets[0] = 0;
         std::partial_sum(report_sizes.begin(), report_sizes.end(), offsets.begin() + 1);
 
@@ -148,7 +149,7 @@ struct ParallelImplementation {
         // Eliminate duplicates
         std::set<size_t> result(global_report_hashes.begin(), global_report_hashes.end());
         // Create communicators per report name
-        for (auto& elem : global_report_hashes) {
+        for (auto& elem : result) {
             MPI_Comm_split(SonataReport::has_nodes_,
                            std::find(local_report_hashes.begin(),
                                      local_report_hashes.end(),
@@ -157,13 +158,6 @@ struct ParallelImplementation {
                            &SonataReport::communicators_[hash_report_names[elem]]);
         }
 
-        /*logger->trace("WORLD RANK/SIZE: {}/{} \t Size communicators: {}", global_rank,
-        global_size, SonataReport::communicators_.size()); for(auto& kv:
-        SonataReport::communicators_) { int node_rank, node_size; MPI_Comm_rank(kv.second,
-        &node_rank); MPI_Comm_size(kv.second, &node_size); logger->trace("WORLD RANK/SIZE: {}/{}
-        \t report:{} \t RANK/SIZE: {}/{}", global_rank, global_size, kv.first, node_rank,
-        node_size);
-        }*/
         return global_rank;
     };
 
