@@ -33,6 +33,6 @@ jobs:
           CIBW_BUILD: cp36-*
           CIBW_SKIP: "*-manylinux_i686"
           CIBW_BEFORE_TEST: pip install nose
-          CIBW_TEST_COMMAND: nosetests -s -v -P python/tests
+          CIBW_TEST_COMMAND: nosetests -s -v -P {project}/python/tests
         run: |
           python -m cibuildwheel --output-dir wheelhouse
