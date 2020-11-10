@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.6'
 
       - name: Install cibuildwheel
         run: |
@@ -30,7 +30,8 @@ jobs:
           CIBW_BEFORE_BUILD: "bash -x ci/prepare_for_wheel_build.sh"
           CIBW_BUILD_VERBOSITY: 2
           # Only build on Python 3.x
-          CIBW_BUILD: cp36*
+          CIBW_BUILD: cp36-*
+          CIBW_SKIP: "*-manylinux_i686"
         run: |
           python -m cibuildwheel --output-dir wheelhouse
       - name: Install requirements and the wheel
