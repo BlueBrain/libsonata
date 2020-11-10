@@ -40,7 +40,7 @@ jobs:
           python -m cibuildwheel --output-dir wheelhouse
 
       - name: Build wheels for mac os
-          if: runner.os == 'Darwin'
+          if: runner.os == 'macOS'
           env:
             MACOSX_DEPLOYMENT_TARGET: '10.13'
             CIBW_BEFORE_BUILD: "brew update; brew install cmake; brew install hdf5"
