@@ -159,6 +159,7 @@ with open('README.rst') as f:
 
 setup(
     name="libsonata",
+    version="6.6.6",
     description='SONATA files reader',
     author="Blue Brain Project, EPFL",
     long_description=README,
