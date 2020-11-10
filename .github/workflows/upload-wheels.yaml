@@ -27,7 +27,7 @@ jobs:
       - name: Build wheels
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BEFORE_BUILD: "bash -x ci/prepare_for_wheel_build.sh"
+          CIBW_BEFORE_BUILD: "yum update; yum -y install hdf5-devel;"
           CIBW_BUILD_VERBOSITY: 2
           # Only build on Python 3.x
           CIBW_BUILD: cp36-*
