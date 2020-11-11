@@ -13,8 +13,8 @@ env:
   # Only build on Python 3.x
   CIBW_BUILD: 'cp3?-*'
   CIBW_SKIP: 'cp35-* cp39-* *-manylinux_i686'
-  CIBW_BEFORE_TEST: pip install -r tests/requirement_tests.txt
-  CIBW_TEST_COMMAND: nosetests {project}/tests
+  CIBW_BEFORE_TEST: pip install nose mock
+  CIBW_TEST_COMMAND: nosetests -s -v -P {project}/python/tests
 
 jobs:
   build_wheels:
@@ -46,7 +46,7 @@ jobs:
       - name: Build wheels Mac OS
         if: runner.os == 'macOS'
         env:
-          CIBW_BEFORE_BUILD: 'brew install cmake hdf5'
+          CIBW_BEFORE_BUILD: 'brew update; brew install cmake hdf5'
         run: |
           python -m cibuildwheel --output-dir wheelhouse
       - name: Store wheel as artifact
