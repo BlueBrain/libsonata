@@ -2,8 +2,8 @@ name: Build
 
 on:
   push:
-#    tags:
-#      - 'v[0-9]+.[0-9]+.[0-9]+'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 
 env:
@@ -67,7 +67,7 @@ jobs:
       - name: Build a source tarball
         run:
           python setup.py sdist
-      - name: Store wheel as artifact
+      - name: Store sdist as artifact
         uses: actions/upload-artifact@v2
         with:
           name: dist
@@ -78,7 +78,7 @@ jobs:
     needs: [build_wheels, build_sdist]
     name: Upload wheels to PyPI
     steps:
-      - name: Download artifacts produced during the build_wheels job
+      - name: Download artifacts produced during the build_wheels and build_sdist jobs
         uses: actions/download-artifact@v2
         with:
           name: dist
@@ -88,9 +88,9 @@ jobs:
         run: ls -R
         working-directory: dist
 
-#      - name: Publish package to PyPI
-#        uses: pypa/gh-action-pypi-publish@master
-#        with:
-#          user: __token__
-#          password: ${{ secrets.PYPI_TOKEN_PASSWORD }}
-#          packages_dir: dist/
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN_PASSWORD }}
+          packages_dir: dist/
