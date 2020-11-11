@@ -212,16 +212,16 @@ struct ParallelImplementation {
         }
 
         double min_time;
-        MPI_Allreduce(&lmin_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, SonataReport::has_nodes_);
+        MPI_Allreduce(&lmin_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
         double max_time;
-        MPI_Allreduce(&lmax_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, SonataReport::has_nodes_);
+        MPI_Allreduce(&lmax_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
         std::vector<double> inTime = spikevec_time;
         std::vector<uint64_t> inGid = spikevec_gid;
         local_spikevec_sort(inTime, inGid, spikevec_time, spikevec_gid, order_by);
 
         int numprocs;
-        MPI_Comm_size(SonataReport::has_nodes_, &numprocs);
+        MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
         // allocate send and receive counts and displacements for MPI_Alltoallv
         std::vector<int> snd_cnts(numprocs);
         std::vector<int> rcv_cnts(numprocs);
@@ -239,7 +239,7 @@ struct ParallelImplementation {
 
         // now let each rank know how many spikes they will receive
         // and get in turn all the buffer sizes to receive
-        MPI_Alltoall(&snd_cnts[0], 1, MPI_INT, &rcv_cnts[0], 1, MPI_INT, SonataReport::has_nodes_);
+        MPI_Alltoall(&snd_cnts[0], 1, MPI_INT, &rcv_cnts[0], 1, MPI_INT, MPI_COMM_WORLD);
         for (int i = 1; i < numprocs; i++) {
             rcv_dsps[i] = rcv_dsps[i - 1] + rcv_cnts[i - 1];
         }
@@ -266,7 +266,7 @@ struct ParallelImplementation {
                       &rcv_cnts[0],
                       &rcv_dsps[0],
                       MPI_DOUBLE,
-                      SonataReport::has_nodes_);
+                      MPI_COMM_WORLD);
         MPI_Alltoallv(spikevec_gid.data(),
                       &snd_cnts[0],
                       &snd_dsps[0],
@@ -275,7 +275,7 @@ struct ParallelImplementation {
                       &rcv_cnts[0],
                       &rcv_dsps[0],
                       MPI_UINT64_T,
-                      SonataReport::has_nodes_);
+                      MPI_COMM_WORLD);
 
         local_spikevec_sort(svt_buf, svg_buf, spikevec_time, spikevec_gid, order_by);
     };
