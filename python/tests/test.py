@@ -1,10 +1,17 @@
 import os
+import pathlib
 import unittest
 
 import numpy as np
 
 from libsonata import EdgeStorage, NodeStorage, Selection, SonataError
-from libsonata import SpikeReader, SpikePopulation, SomaReportReader, SomaReportPopulation, ElementReportReader, ElementReportPopulation
+from libsonata import (SpikeReader,
+                       SpikePopulation,
+                       SomaReportReader,
+                       SomaReportPopulation,
+                       ElementReportReader,
+                       ElementReportPopulation,
+                       )
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -291,6 +298,7 @@ class TestSomaReportPopulation(unittest.TestCase):
         sel_empty = self.test_obj['All'].get(node_ids=[])
         np.testing.assert_allclose(sel_empty.data, np.empty(shape=(0, 0)))
 
+
 class TestElementReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "elements.h5")
@@ -336,6 +344,18 @@ class TestElementReportPopulation(unittest.TestCase):
         np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[1, 2], tstart=3., tstop=3.).data[0], [150.0, 150.1, 150.2, 150.3, 150.4, 150.5, 150.6, 150.7, 150.8, 150.9])
         np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstart=0.2, tstop=0.4).data[0], [11.0, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9], 1e-6, 0)
         np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstride=4).data[2], [81.0, 81.1, 81.2, 81.3, 81.4, 81.5, 81.6, 81.7, 81.8, 81.9], 1e-6, 0)
+
+
+def test_path_ctor():
+    #  make sure constructors that take file paths can use pathlib.Path
+    path = pathlib.Path(PATH)
+
+    NodeStorage(path / 'nodes1.h5')
+    EdgeStorage(path / 'edges1.h5')
+    SpikeReader(path / 'spikes.h5')
+    SomaReportReader(path / 'somas.h5')
+    ElementReportReader(path / 'elements.h5')
+
 
 if __name__ == '__main__':
     unittest.main()

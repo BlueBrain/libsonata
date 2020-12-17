@@ -291,7 +291,9 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
     };
     return py::class_<Storage>(
                m, clsName, imbuePopulationClassName(DOC(bbp, sonata, PopulationStorage)).c_str())
-        .def(py::init<const std::string&, const std::string&>(),
+        .def(py::init([](py::object h5_filepath, py::object csv_filepath) {
+                 return Storage(py::str(h5_filepath), py::str(csv_filepath));
+             }),
              "h5_filepath"_a,
              "csv_filepath"_a = "")
         .def_property_readonly("population_names",
@@ -323,7 +325,7 @@ void bindReportReader(py::module& m, const std::string& prefix) {
         .def_readonly("ids", &DataFrame<KeyType>::ids)
 
         // .data and .time members are owned by this c++ object. We can't do std::move.
-        // To avoid copies we must declare the owner of the data is the current python
+        // To avoid copies we must declare the owner of the data as the current python
         // object. Numpy will adjust owner reference count according to returned arrays
         // clang-format off
         .def_property_readonly("data", [](const DataFrame<KeyType>& dframe) {
@@ -365,7 +367,8 @@ void bindReportReader(py::module& m, const std::string& prefix) {
                                &ReportType::Population::getDataUnits,
                                DOC_REPORTREADER_POP(getDataUnits));
     py::class_<ReportType>(m, (prefix + "ReportReader").c_str(), "Used to read somas files")
-        .def(py::init<const std::string&>())
+        .def(py::init([](py::object h5_filepath) { return ReportType(py::str(h5_filepath)); }),
+             "h5_filepath"_a)
         .def("get_population_names", &ReportType::getPopulationNames, "Get list of all populations")
         .def("__getitem__", &ReportType::openPopulation);
 }
@@ -524,7 +527,8 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             DOC_SPIKEREADER_POP(getSorting));
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
-        .def(py::init<const std::string&>())
+        .def(py::init([](py::object h5_filepath) { return SpikeReader(py::str(h5_filepath)); }),
+             "h5_filepath"_a)
         .def("get_population_names",
              &SpikeReader::getPopulationNames,
              DOC_SPIKEREADER(getPopulationNames))
