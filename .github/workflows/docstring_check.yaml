@@ -14,7 +14,7 @@ jobs:
         - name: Install packages
           run: sudo apt-get update && sudo apt-get install build-essential libhdf5-dev python3-venv libclang1-9
         - name: Add pybind11 tools to path
-          run: echo "::set-env name=PYTHONPATH::/home/runner/work/libsonata/libsonata/python/pybind11/tools"
+          run: echo "PYTHONPATH=/home/runner/work/libsonata/libsonata/python/pybind11/tools" >> $GITHUB_ENV
         - name: Set libclang symlink
           run: |
             cd /usr/lib/x86_64-linux-gnu
