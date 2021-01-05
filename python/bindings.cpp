@@ -441,6 +441,7 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::class_<NodeSets>(m, "NodeSets", "")
         .def(py::init<const std::string&>())
+        .def_static("from_file", &NodeSets::fromFile)
         .def_property_readonly("names", &NodeSets::names, DOC_NODESETS(names))
         .def("materialize", &NodeSets::materialize, DOC_NODESETS(materialize))
         .def("toJSON", &NodeSets::toJSON, DOC_NODESETS(toJSON));

@@ -426,22 +426,24 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         self.assertEqual(sel, Selection(((1, 4), )))
 
     def test_NodeSet_toJSON(self):
-         j = '''
-         {"bio_layer45": {
-               "model_type": "biophysical",
-               "location": ["layer4", "layer5"]
-           },
-           "V1_point_prime": {
-               "population": "biophysical",
-               "model_type": "point",
-               "node_id": [1, 2, 3, 5, 7, 9]
-           },
-           "combined": ["bio_layer45", "V1_point_prime"]
-         }'''
-         new = NodeSets(j).toJSON()
-         ns1 = NodeSets(new)
-         self.assertEqual(new, ns1.toJSON())
+        j = '''
+        {"bio_layer45": {
+              "model_type": "biophysical",
+              "location": ["layer4", "layer5"]
+          },
+          "V1_point_prime": {
+              "population": "biophysical",
+              "model_type": "point",
+              "node_id": [1, 2, 3, 5, 7, 9]
+          },
+          "combined": ["bio_layer45", "V1_point_prime"]
+        }'''
+        new = NodeSets(j).toJSON()
+        ns1 = NodeSets(new)
+        self.assertEqual(new, ns1.toJSON())
 
+        ns = NodeSets.from_file(os.path.join(PATH, 'node_sets.json'))
+        self.assertEqual(new, ns.toJSON())
 
 
 def test_path_ctor():

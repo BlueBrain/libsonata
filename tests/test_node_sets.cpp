@@ -178,6 +178,9 @@ TEST_CASE("NodeSet") {
         std::string j = ns0.toJSON();
         NodeSets ns1(j);
         CHECK(ns0.toJSON() == ns1.toJSON());
+
+        auto ns = NodeSets::fromFile("./data/node_sets.json");
+        CHECK(ns.toJSON() == ns1.toJSON());
     }
 
     SECTION("names") {

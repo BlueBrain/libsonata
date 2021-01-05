@@ -83,10 +83,11 @@ set(SONATA_SRC
     src/edge_index.cpp
     src/edges.cpp
     src/hdf5_mutex.cpp
+    src/node_sets.cpp
     src/nodes.cpp
     src/population.cpp
     src/report_reader.cpp
-    src/node_sets.cpp
+    src/utils.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
     )
 

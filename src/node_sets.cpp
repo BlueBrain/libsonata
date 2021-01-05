@@ -6,6 +6,8 @@
 
 #include <json.hpp>
 
+#include "utils.h"  // readFile
+
 #include <bbp/sonata/node_sets.h>
 
 namespace bbp {
@@ -13,9 +15,9 @@ namespace sonata {
 
 namespace detail {
 
-using json = nlohmann::json;
-
 const size_t MAX_COMPOUND_RECURSION = 10;
+
+using json = nlohmann::json;
 
 template <typename T>
 std::string toString(const std::string& key, const std::vector<T>& values) {
@@ -27,7 +29,6 @@ std::string toString(const std::string& key, const std::vector<std::string>& val
     // strings need to be wrapped in quotes
     return fmt::format(R"("{}": ["{}"])", key, fmt::join(values, "\", \""));
 }
-
 
 class NodeSets;
 
@@ -360,6 +361,11 @@ NodeSets::NodeSets(const std::string& content)
 NodeSets::NodeSets(NodeSets&&) = default;
 NodeSets& NodeSets::operator=(NodeSets&&) = default;
 NodeSets::~NodeSets() = default;
+
+NodeSets NodeSets::fromFile(const std::string& path) {
+    const auto contents = readFile(path);
+    return NodeSets(contents);
+}
 
 Selection NodeSets::materialize(const std::string& name, const NodePopulation& population) const {
     return impl_->materialize(name, population);

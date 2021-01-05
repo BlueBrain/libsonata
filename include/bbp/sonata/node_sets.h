@@ -31,6 +31,9 @@ class SONATA_API NodeSets
     NodeSets& operator=(NodeSets&&);
     ~NodeSets();
 
+    /** Open a SONATA `node sets` file from a path */
+    static NodeSets fromFile(const std::string& path);
+
     /**
      * Return a selection corresponding to the node_set name
      *
