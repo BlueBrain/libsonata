@@ -1,26 +1,15 @@
 #pragma once
 
 #include <bbp/sonata/nodes.h>
-#include <map>
 #include <set>
 #include <string>
 #include <vector>
 
 namespace bbp {
 namespace sonata {
-
+namespace detail {
 class NodeSets;
-
-class NodeSetRule
-{
-  public:
-    virtual ~NodeSetRule(){};
-
-    virtual Selection materialize(const NodeSets&, const NodePopulation&) const = 0;
-    virtual std::string toJSON() const = 0;
-};
-
-using NodeSetRules = std::vector<std::unique_ptr<NodeSetRule>>;
+}
 
 class SONATA_API NodeSets
 {
@@ -37,6 +26,10 @@ class SONATA_API NodeSets
      * \throw if content cannot be parsed
      */
     NodeSets(const std::string& content);
+    NodeSets(NodeSets&&);
+    NodeSets(const NodeSets& other) = delete;
+    NodeSets& operator=(NodeSets&&);
+    ~NodeSets();
 
     /**
      * Return a selection corresponding to the node_set name
@@ -57,7 +50,7 @@ class SONATA_API NodeSets
     std::string toJSON() const;
 
   private:
-    std::map<std::string, NodeSetRules> node_sets_;
+    std::unique_ptr<detail::NodeSets> impl_;
 };
 
 }  // namespace sonata
