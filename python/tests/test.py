@@ -1,4 +1,5 @@
 import os
+import pathlib
 import unittest
 
 import numpy as np
@@ -296,6 +297,7 @@ class TestSomaReportPopulation(unittest.TestCase):
         sel_empty = self.test_obj['All'].get(node_ids=[])
         np.testing.assert_allclose(sel_empty.data, np.empty(shape=(0, 0)))
 
+
 class TestElementReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "elements.h5")
@@ -439,6 +441,18 @@ class TestNodePopulationNodeSet(unittest.TestCase):
          new = NodeSets(j).toJSON()
          ns1 = NodeSets(new)
          self.assertEqual(new, ns1.toJSON())
+
+
+
+def test_path_ctor():
+    #  make sure constructors that take file paths can use pathlib.Path
+    path = pathlib.Path(PATH)
+
+    NodeStorage(path / 'nodes1.h5')
+    EdgeStorage(path / 'edges1.h5')
+    SpikeReader(path / 'spikes.h5')
+    SomaReportReader(path / 'somas.h5')
+    ElementReportReader(path / 'elements.h5')
 
 
 if __name__ == '__main__':
