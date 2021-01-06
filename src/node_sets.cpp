@@ -1,4 +1,5 @@
 #include <algorithm>  // std::find, std::transform
+#include <cassert>
 #include <cmath>
 #include <fmt/format.h>
 #include <sstream>
@@ -315,10 +316,9 @@ void check_compound(const std::map<std::string, NodeSetRules>& node_sets,
         throw SonataError("Compound node_set recursion depth exceeded");
     }
 
-    auto it = compound_rules.find(name);
-    if (it == compound_rules.end()) {
-        throw SonataError(fmt::format("Missing compound name target {}", name));
-    }
+    const auto it = compound_rules.find(name);
+    assert(it != compound_rules.end());
+
     for (auto const& target : it->second) {
         if (node_sets.count(target) == 0 && compound_rules.count(target) == 0) {
             throw SonataError(fmt::format("Missing '{}' from node_sets", target));
