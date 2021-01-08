@@ -1,0 +1,79 @@
+name: Run tests
+on:
+    push:
+
+jobs:
+  build-linux-cpp:
+    name: Run tests on ubuntu-18.04
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        compiler:
+          - CC: clang
+            CXX: clang++
+          - CC: gcc
+            CXX: g++
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install libhdf5-dev
+
+      - name: Build and run unittests
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+        run: |
+          ./ci/cpp_test.sh
+
+  build-linux-python:
+    name: Run python tests on ubuntu-18.04
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        python-version: ['3.6', '3.7', '3.8', '3.9', ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install libhdf5-dev doxygen
+
+      - name: Build and run unittests
+        run: |
+            ./ci/python_test.sh
+
+  build-macos:
+    name: Run tests on macos
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Install packages on MacOS
+        run: |
+            brew update
+            brew unlink gcc@8 gcc@9  # work around for https://github.com/actions/virtual-environments/issues/2391
+            brew install cmake || true  # macos image has cmake installed, but a new version may exist; ignore it if so
+            brew install doxygen
+            brew install hdf5
+
+      - name: Build and run unittests
+        run: |
+            ./ci/cpp_test.sh
+            ./ci/python_test.sh
