@@ -5,23 +5,21 @@ set -euxo pipefail
 VENV=$(pwd)/build/venv-python-test/
 
 if [[ ! -d "$VENV" ]]; then
-    # We use virtualenv instead of `python3 -mvenv` because of python2 tests
-    pip install virtualenv
-    virtualenv "$VENV"
+    python3 -mvenv "$VENV"
 fi
 
 BIN=$VENV/bin/
 
+set +u  # ignore missing variables in activation script
 source $BIN/activate
-pip -v install --upgrade pip setuptools wheel
+set -u
 
-# install
-pip -v install --force .
-pip install nose
+$BIN/pip -v install --upgrade pip setuptools wheel
+$BIN/pip install nose
 
-nosetests -s -v -P python/tests
+# run tests with nose
+$BIN/pip -v install --force .
+$BIN/nosetests -s -v -P python/tests
 
-PYTHON_MAJOR_VERSION=$(python -c 'import sys; print(sys.version_info[0])')
-if [[ $PYTHON_MAJOR_VERSION -ge 3 ]]; then
-    python setup.py test
-fi
+# run tests through setup.py; also builds documentation
+$BIN/python setup.py test
