@@ -31,7 +31,7 @@ bool SonataReport::is_empty() {
 
 std::shared_ptr<Report> SonataReport::create_report(
     const std::string& name, const std::string& kind, double tstart, double tend, double dt) {
-    if (kind == "compartment") {
+    if (kind == "compartment" || kind == "synapse") {
         reports_.emplace(name, std::make_shared<ElementReport>(name, tstart, tend, dt));
     } else if (kind == "soma") {
         reports_.emplace(name, std::make_shared<SomaReport>(name, tstart, tend, dt));
