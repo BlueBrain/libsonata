@@ -26,6 +26,24 @@ class TestSelection(unittest.TestCase):
         self.assertEqual(selection.flat_size, 5)
         self.assertEqual(selection.flatten().tolist(), [3, 4, 0, 1, 2])
 
+    def test_dtypes(self):
+        for dtype in (np.uint, np.uint16, np.uint32, np.uint64, ):
+            self.assertEqual(Selection(np.array([1, 0, 1, 2], dtype=dtype)).flatten().tolist(),
+                             [1, 0, 1, 2])
+
+        # these work due to forcecast
+        for dtype in (np.int, np.int16, np.int32, np.int64, ):
+            self.assertEqual(Selection(np.array([1, 0, 1, 2], dtype=dtype)).flatten().tolist(),
+                             [1, 0, 1, 2])
+
+        # these fail due to being negative node ids
+        self.assertRaises(SonataError, Selection, [-1, 0, 1, 2])
+        self.assertRaises(SonataError, Selection, [1, 0, -1, 2])
+        Selection(((0, 1), (1, 2)))
+        self.assertRaises(SonataError, Selection, ((-2, -1), (1, 2)))
+
+        self.assertRaises(SonataError, Selection, [[-1, 1], [3, 4], [5, 6]])
+
     def test_from_values(self):
         values = [
             [1, 3, 4, 1],
@@ -36,6 +54,14 @@ class TestSelection(unittest.TestCase):
         self.assertEqual(Selection(np.array(values, dtype=np.uint64, order='C')[0]).ranges, expected)
         self.assertEqual(Selection(np.array(values, dtype=np.uint32, order='C')[0]).ranges, expected)
         self.assertEqual(Selection(np.array(values, dtype=np.uint64, order='F')[0]).ranges, expected)
+
+        self.assertRaises(ValueError, Selection, np.zeros((3, 3, 3), dtype=np.uint64))
+
+        self.assertRaises(SonataError, Selection, ((2, 1), (1, 2)))
+
+    def test_from_ranges(self):
+        Selection(((0, 1), (1, 2)))
+        self.assertRaises(SonataError, Selection, ((2, 1), (1, 2)))
 
     def test_from_values_empty(self):
         self.assertFalse(Selection([]))

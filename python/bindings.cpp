@@ -385,13 +385,45 @@ PYBIND11_MODULE(_libsonata, m) {
     py::class_<Selection>(m,
                           "Selection",
                           "ID sequence in the form convenient for querying attributes")
-        .def(py::init<const Selection::Ranges&>(), "ranges"_a, "Selection from list of intervals")
-        .def(py::init([](py::array_t<uint64_t, py::array::c_style | py::array::forcecast> values) {
+        .def(py::init<const Selection::Ranges&>(),
+             py::arg("ranges"),
+             "Selection from list of intervals")
+        .def(py::init([](py::array_t<uint64_t, py::array::c_style> values) {
                  const auto raw = values.unchecked<1>();
                  return Selection::fromValues(raw.data(0), raw.data(raw.shape(0)));
              }),
+             py::arg("values").noconvert(true),
+             "Selection from list of IDs: passing np.array with dtype np.uint64 is faster")
+        .def(py::init([](py::array_t<int64_t, py::array::c_style | py::array::forcecast> values) {
+                 /* Both the Selection::Range and fromValues cases are handled here:
+                  * It doesn't seem possible to prevent the cast of [(-1, 1), (2, 3) ... ] style
+                  * Ranges; the Numpy auto-conversion from happening in this case.
+                  */
+                 py::buffer_info info = values.request();
+                 if (info.ndim == 2) {
+                     const auto raw = values.unchecked<2>();
+                     Selection::Ranges ranges;
+                     ranges.reserve(raw.shape(0));
+                     for (py::ssize_t i = 0; i < raw.shape(0); ++i) {
+                         if (raw(i, 0) < 0 || raw(i, 1) < 0) {
+                             throw SonataError("Negative value passed to Selection");
+                         }
+                         ranges.emplace_back(raw(i, 0), raw(i, 1));
+                     }
+                     return Selection(ranges);
+                 }
+                 // one dimensional case; ie fromValues
+                 const auto raw = values.unchecked<1>();
+                 for (size_t i = 0; i < raw.shape(0); ++i) {
+                     if (raw[i] < 0) {
+                         throw SonataError("Negative value passed to Selection");
+                     }
+                 }
+
+                 return Selection::fromValues(raw.data(0), raw.data(raw.shape(0)));
+             }),
              "values"_a,
-             "Selection from list of IDs")
+             "Selection from list of IDs: passing np.array with dtype np.uint64 is faster")
         .def_property_readonly("ranges", &Selection::ranges, DOC_SEL(ranges))
         .def(
             "flatten", [](Selection& obj) { return asArray(obj.flatten()); }, DOC_SEL(flatten))
