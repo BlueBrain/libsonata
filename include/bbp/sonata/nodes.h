@@ -46,6 +46,13 @@ class SONATA_API NodePopulation: public Population
      */
     template <typename T>
     Selection matchAttributeValues(const std::string& attribute, const T value) const;
+
+    /**
+     * Like matchAttributeValues, but for vectors of values to match
+     */
+    template <typename T>
+    Selection matchAttributeValues(const std::string& attribute,
+                                   const std::vector<T>& values) const;
 };
 
 //--------------------------------------------------------------------------------------------------
