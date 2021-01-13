@@ -1,0 +1,12 @@
+{
+    "bio_layer45": {
+        "model_type": "biophysical",
+        "location": ["layer4", "layer5"]
+    },
+    "V1_point_prime": {
+        "population": "biophysical",
+        "model_type": "point",
+        "node_id": [1, 2, 3, 5, 7, 9]
+    },
+    "combined": ["bio_layer45", "V1_point_prime"]
+}

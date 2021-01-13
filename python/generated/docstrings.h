@@ -73,6 +73,45 @@ Throws:
 
 Note: This does not match dynamics_params datasets)doc";
 
+static const char *__doc_bbp_sonata_NodeSets = R"doc()doc";
+
+static const char *__doc_bbp_sonata_NodeSets_NodeSets =
+R"doc(Create nodeset from JSON
+
+See also: https://github.com/AllenInstitute/sonata/blob/master/docs/SO
+NATA_DEVELOPER_GUIDE.md#node-sets-file
+
+Note: floating point values aren't supported for comparison
+
+Parameter ``content``:
+    is the JSON node_sets value
+
+Throws:
+    if content cannot be parsed)doc";
+
+static const char *__doc_bbp_sonata_NodeSets_NodeSets_2 = R"doc()doc";
+
+static const char *__doc_bbp_sonata_NodeSets_NodeSets_3 = R"doc()doc";
+
+static const char *__doc_bbp_sonata_NodeSets_fromFile = R"doc(Open a SONATA `node sets` file from a path */)doc";
+
+static const char *__doc_bbp_sonata_NodeSets_impl = R"doc()doc";
+
+static const char *__doc_bbp_sonata_NodeSets_materialize =
+R"doc(Return a selection corresponding to the node_set name
+
+Parameter ``name``:
+    is the name of the node_set rule to be evaluated
+
+Parameter ``population``:
+    is the population overwhich the returned selection will be valid)doc";
+
+static const char *__doc_bbp_sonata_NodeSets_names = R"doc(Names of the node sets available)doc";
+
+static const char *__doc_bbp_sonata_NodeSets_operator_assign = R"doc()doc";
+
+static const char *__doc_bbp_sonata_NodeSets_toJSON = R"doc(Return string version of node sets)doc";
+
 static const char *__doc_bbp_sonata_Population = R"doc()doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage = R"doc(Collection of {PopulationClass}s stored in a H5 file and optional CSV.)doc";
@@ -374,6 +413,8 @@ static const char *__doc_bbp_sonata_SpikeReader_getPopulationNames = R"doc(Retur
 static const char *__doc_bbp_sonata_SpikeReader_openPopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_populations = R"doc()doc";
+
+static const char *__doc_bbp_sonata_detail_NodeSets = R"doc()doc";
 
 static const char *__doc_bbp_sonata_fromValues = R"doc()doc";
 
