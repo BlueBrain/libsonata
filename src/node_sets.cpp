@@ -122,11 +122,7 @@ class NodeSetBasicRule: public NodeSetRule
 
     Selection materialize(const detail::NodeSets& /* unused */,
                           const NodePopulation& np) const final {
-        Selection ret{{}};
-        for (const auto& v : values_) {
-            ret = ret | np.matchAttributeValues(attribute_, v);
-        }
-        return ret;
+        return np.matchAttributeValues(attribute_, values_);
     }
 
     std::string toJSON() const final {
