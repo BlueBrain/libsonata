@@ -67,12 +67,12 @@ jobs:
         with:
           python-version: 3.6
 
-      - name: Update pip/setuptools/wheel
-        run: pip3 install -U pip setuptools wheel
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install libhdf5-dev
 
-      - name: Build a source tarball
+      - name: Build a source tarball, check it installs
         run:
-          python setup.py sdist
+          ./ci/python_build_sdist.sh
 
       - name: Store sdist as artifact
         uses: actions/upload-artifact@v2
