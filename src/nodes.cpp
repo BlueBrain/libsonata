@@ -9,6 +9,8 @@
 
 #include "population.hpp"
 
+#include <algorithm>  // std::binary_search
+
 #include <fmt/format.h>
 
 #include <bbp/sonata/common.h>
@@ -41,8 +43,10 @@ Selection _getMatchingSelection(const std::vector<T>& values, const std::vector<
             ++id;
         }
     } else {
+        std::vector<T> wanted_sorted(wanted);
+        std::sort(wanted_sorted.begin(), wanted_sorted.end());
         for (const auto& v : values) {
-            if (std::find(wanted.cbegin(), wanted.cend(), v) != wanted.cend()) {
+            if (std::binary_search(wanted_sorted.cbegin(), wanted_sorted.cend(), v)) {
                 idx.push_back(id);
             }
             ++id;
