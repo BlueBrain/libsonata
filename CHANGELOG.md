@@ -1,6 +1,15 @@
 # Changelog
 
-## Development: v0.1.5
+## v0.1.7: Thu Jan 21 2021
+
+### Added:
+ - Implemented `node_sets` functionality (#107)
+ - Handle pathlib.Path for paths (#113)
+ - Add __repr__ to python Selection binding, aswell as the (Node|Edge)Population (#114)
+
+### Fixed:
+ - Fix python bindings for Selection with negative values (#112)
+ - Fix regression from move to GitHub actions
 
 ## v0.1.4 Wed Jul 22 2020
 
