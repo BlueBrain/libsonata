@@ -58,14 +58,22 @@ jobs:
     name: Build sdist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
       - name: Set up Python 3.6
         uses: actions/setup-python@v2
         with:
           python-version: 3.6
-      - name: Build a source tarball
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install libhdf5-dev
+
+      - name: Build a source tarball, check it installs
         run:
-          python setup.py sdist
+          ./ci/python_build_sdist.sh
+
       - name: Store sdist as artifact
         uses: actions/upload-artifact@v2
         with:

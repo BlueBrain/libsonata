@@ -1,7 +1,11 @@
 recursive-include src *
 recursive-include include *
-include VERSION
 include CMakeLists.txt
+
+include extlib/CMakeLists.txt
+
+# nlohman/json
+include extlib/nlohmann/json.hpp
 
 # fmt
 recursive-include extlib/fmt/include *
