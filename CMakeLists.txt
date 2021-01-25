@@ -136,6 +136,6 @@ if (ENABLE_COVERAGE)
     SETUP_TARGET_FOR_COVERAGE_LCOV(
         NAME coverage
         EXECUTABLE ctest
-        DEPENDENCIES unittests reports_unit_tests reports_integration_test
+        DEPENDENCIES reports_unit_tests reports_integration_test
     )
 endif()
