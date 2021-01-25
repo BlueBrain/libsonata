@@ -16,9 +16,10 @@ add_library(sonata_report SHARED ${sonatareport_SOURCES})
 target_include_directories(sonata_report
     SYSTEM PRIVATE
         ${PROJECT_SOURCE_DIR}/extlib/spdlog/include
+        ${MPI_INCLUDE_PATH}
+        ${HDF5_INCLUDE_DIRS}
     PUBLIC
         $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
-        ${MPI_INCLUDE_PATH}
         $<INSTALL_INTERFACE:include>
 )
 target_compile_options(sonata_report
