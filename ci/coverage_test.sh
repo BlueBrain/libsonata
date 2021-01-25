@@ -13,5 +13,5 @@ cmake                           \
     -DCMAKE_BUILD_TYPE=Debug    \
     -DEXTLIB_FROM_SUBMODULES=ON \
     ..
-make -j2
+make -j2 VERBOSE=1
 make coverage VERBOSE=1
