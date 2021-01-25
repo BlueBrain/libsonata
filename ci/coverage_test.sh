@@ -14,4 +14,4 @@ cmake                           \
     -DEXTLIB_FROM_SUBMODULES=ON \
     ..
 make -j2
-make coverage
+make coverage VERBOSE=1
