@@ -96,6 +96,7 @@ if(REPORTS_ENABLE_MPI)
 
 endif()
 
+find_package(HDF5)
 if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
     include(extlib/Catch2/contrib/Catch.cmake)
