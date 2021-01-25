@@ -34,6 +34,7 @@ class SonataData
     void record_data(double step, const std::vector<uint64_t>& node_ids);
     void record_data(double step);
     void check_and_write(double timestep);
+    void convert_gids_to_sonata(std::vector<uint64_t>& node_ids);
 
     const std::vector<float>& get_report_buffer() const noexcept {
         return report_buffer_;
