@@ -19,7 +19,6 @@ target_link_libraries(reports_unit_tests
         sonata_report
         Catch2::Catch2
         spdlog::spdlog_header_only
-        HighFive
         ${MPI_CXX_LIBRARIES}
 )
 

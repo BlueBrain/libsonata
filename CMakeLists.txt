@@ -37,10 +37,8 @@ set(SONATA_VERSION_ABI ${CMAKE_MATCH_1})
 project(sonata VERSION ${SONATA_VERSION})
 
 option(EXTLIB_FROM_SUBMODULES "Use Git submodules for header-only dependencies" OFF)
-option(SONATA_PYTHON "Build Python extensions" OFF)
 option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
 option(REPORTS_ENABLE_MPI "Enable MPI-based execution for the reporting" OFF)
-option(REPORTS_ONLY "Compile only the report writers" OFF)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -102,8 +100,6 @@ if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
     include(extlib/Catch2/contrib/Catch.cmake)
 else()
-    find_package(fmt REQUIRED)
-    find_package(HighFive REQUIRED)
     find_package(Catch2 REQUIRED)
     find_package(spdlog REQUIRED)
 endif()
@@ -111,88 +107,7 @@ endif()
 # =============================================================================
 # Targets
 # =============================================================================
-if(REPORTS_ONLY)
-    add_subdirectory(src/reports)
-
-else()
-    set(SONATA_SRC
-        src/common.cpp
-        src/edge_index.cpp
-        src/edges.cpp
-        src/hdf5_mutex.cpp
-        src/nodes.cpp
-        src/population.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
-        )
-
-    configure_file (
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp.in
-      ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
-      )
-
-    add_library(sonata_shared SHARED ${SONATA_SRC})
-    add_library(sonata_static STATIC ${SONATA_SRC})
-
-    add_subdirectory(src/reports)
-    foreach(TARGET sonata_shared sonata_static)
-        set_target_properties(${TARGET}
-            PROPERTIES
-                POSITION_INDEPENDENT_CODE ON
-                CXX_VISIBILITY_PRESET hidden
-                OUTPUT_NAME "sonata"
-        )
-        target_include_directories(${TARGET}
-            PUBLIC
-                $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
-                $<INSTALL_INTERFACE:include>
-        )
-        target_compile_options(${TARGET}
-            PRIVATE ${SONATA_COMPILE_OPTIONS}
-        )
-        if (ENABLE_COVERAGE)
-            target_compile_options(${TARGET}
-                PRIVATE -g -O0 --coverage -fprofile-arcs -ftest-coverage
-            )
-            target_link_libraries(${TARGET}
-                PRIVATE gcov
-            )
-        endif()
-    endforeach(TARGET)
-
-    set_target_properties(sonata_shared
-        PROPERTIES
-            VERSION ${SONATA_VERSION}
-            SOVERSION ${SONATA_VERSION_ABI}
-    )
-    target_compile_definitions(sonata_shared
-        PUBLIC SONATA_DLL
-        PRIVATE SONATA_DLL_EXPORTS
-    )
-    target_link_libraries(sonata_shared
-        PRIVATE fmt::fmt-header-only
-        PRIVATE HighFive
-    )
-
-    target_compile_definitions(sonata_static
-        PRIVATE FMT_HEADER_ONLY=1
-    )
-    target_include_directories(sonata_static
-        PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
-        PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
-    )
-
-# =============================================================================
-# Install
-# =============================================================================
-
-    install(TARGETS sonata_shared sonata_static
-        EXPORT sonata-targets
-        LIBRARY
-            DESTINATION lib
-        ARCHIVE
-            DESTINATION lib
-    )
-endif()
+add_subdirectory(src)
 
 install(DIRECTORY ${SONATA_INCLUDE_DIR}/bbp
     DESTINATION include
@@ -222,12 +137,4 @@ if (ENABLE_COVERAGE)
         EXECUTABLE ctest
         DEPENDENCIES unittests reports_unit_tests reports_integration_test
     )
-endif()
-
-# =============================================================================
-# Python bindings
-# =============================================================================
-
-if (SONATA_PYTHON)
-    add_subdirectory(python)
 endif()

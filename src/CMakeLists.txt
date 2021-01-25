@@ -41,7 +41,6 @@ set_target_properties(sonata_report
     OUTPUT_NAME "sonatareport"
 )
 target_link_libraries(sonata_report
-    PRIVATE HighFive
     PRIVATE spdlog::spdlog_header_only
     PRIVATE ${MPI_CXX_LIBRARIES}
 )

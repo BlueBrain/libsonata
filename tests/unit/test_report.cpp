@@ -1,9 +1,9 @@
 #include <array>
 #include <catch2/catch.hpp>
 #include <memory>
-#include <reports/library/element_report.h>
-#include <reports/library/report.h>
-#include <reports/library/soma_report.h>
+#include <library/element_report.h>
+#include <library/report.h>
+#include <library/soma_report.h>
 
 using namespace bbp::sonata;
 
