@@ -14,4 +14,4 @@ jobs:
             - name: Get submodules
               run: git submodule update --init --force --recursive
             - name: Build and run tests
-              run: mkdir BUILD && cd BUILD && cmake -DEXTLIB_FROM_SUBMODULES=ON && make all test
+              run: mkdir BUILD && cd BUILD && cmake -DEXTLIB_FROM_SUBMODULES=ON .. && make all test
