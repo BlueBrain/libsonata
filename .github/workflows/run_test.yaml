@@ -1,0 +1,16 @@
+name: coverage-test
+on:
+    push:
+
+jobs:
+    build:
+        name: coverage-test
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+            - name: Fetch repository
+              run: git fetch --prune --unshallow
+            - name: Get submodules
+              run: git submodule update --init --force --recursive
+            - name: Build and run tests
+              run: mkdir BUILD && cd BUILD && cmake -DEXTLIB_FROM_SUBMODULES=ON && make all test
