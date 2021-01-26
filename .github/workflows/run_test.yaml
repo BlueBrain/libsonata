@@ -16,4 +16,4 @@ jobs:
             - name: Install packages
               run: sudo apt-get install libhdf5-dev
             - name: Build and run tests
-              run: mkdir BUILD && cd BUILD && cmake -DEXTLIB_FROM_SUBMODULES=ON .. && make all test
+              run: mkdir BUILD && cd BUILD && cmake -DEXTLIB_FROM_SUBMODULES=ON .. && make all && ctest --output-on-failure
