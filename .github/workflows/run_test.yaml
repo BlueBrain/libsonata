@@ -23,3 +23,5 @@ jobs:
               run: sudo apt-get install libhdf5-dev hdf5-tools mpich libmpich-dev libhdf5-mpich-dev
             - name: Build and run tests
               run: mkdir BUILD && cd BUILD && cmake ${cmake_option} .. && make all && ctest --output-on-failure
+              env:
+                cmake_option: ${{ matrix.config.cmake_option }}
