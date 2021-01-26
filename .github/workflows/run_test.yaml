@@ -9,9 +9,9 @@ jobs:
         strategy:
             matrix:
                 os: [ ubuntu-18.04 ]
-        config:
-          - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON", mpi: ON}
-          - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON -DREPORTS_ENABLE_MPI=OFF"}
+                config:
+                  - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON", mpi: ON}
+                  - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON -DREPORTS_ENABLE_MPI=OFF"}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
