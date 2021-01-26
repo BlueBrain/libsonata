@@ -5,7 +5,13 @@ on:
 jobs:
     build:
         name: run-test
-        runs-on: ubuntu-18.04
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ ubuntu-18.04 ]
+        config:
+          - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON", mpi: ON}
+          - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON -DREPORTS_ENABLE_MPI=OFF"}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
@@ -14,6 +20,6 @@ jobs:
             - name: Get submodules
               run: git submodule update --init --force --recursive
             - name: Install packages
-              run: sudo apt-get install libhdf5-dev hdf5-tools
+              run: sudo apt-get install libhdf5-dev hdf5-tools mpich libmpich-dev libhdf5-mpich-dev
             - name: Build and run tests
-              run: mkdir BUILD && cd BUILD && cmake -DEXTLIB_FROM_SUBMODULES=ON .. && make all && ctest --output-on-failure
+              run: mkdir BUILD && cd BUILD && cmake ${cmake_option} .. && make all && ctest --output-on-failure

@@ -38,7 +38,7 @@ project(sonata VERSION ${SONATA_VERSION})
 
 option(EXTLIB_FROM_SUBMODULES "Use Git submodules for header-only dependencies" OFF)
 option(${PROJECT_NAME}_CXX_WARNINGS "Compile C++ with warnings as errors" ON)
-option(REPORTS_ENABLE_MPI "Enable MPI-based execution for the reporting" OFF)
+option(REPORTS_ENABLE_MPI "Enable MPI-based execution" ON)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -65,6 +65,7 @@ endif()
 # Dependencies
 # =============================================================================
 
+find_package(HDF5)
 if(REPORTS_ENABLE_MPI)
     find_package(MPI REQUIRED)
     if (MPI_FOUND)
@@ -72,7 +73,6 @@ if(REPORTS_ENABLE_MPI)
         set(HDF5_PREFER_PARALLEL "ON")
     endif()
 
-    find_package(HDF5)
     if (MPI_FOUND)
         if (HDF5_FOUND)
             if (HDF5_IS_PARALLEL)
@@ -93,10 +93,14 @@ if(REPORTS_ENABLE_MPI)
             message(FATAL_ERROR "No MPI or HDF5 found")
         endif()
     endif()
-
+else()
+    if (HDF5_IS_PARALLEL)
+        message(FATAL_ERROR "HDF5 parallel IO found without MPI")
+    else()
+        message(STATUS "MPI disabled, using reporting serial implementation")
+    endif()
 endif()
 
-find_package(HDF5)
 if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
     include(extlib/Catch2/contrib/Catch.cmake)
