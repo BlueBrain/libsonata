@@ -13,5 +13,7 @@ jobs:
               run: git fetch --prune --unshallow
             - name: Get submodules
               run: git submodule update --init --force --recursive
+            - name: Install packages
+              run: sudo apt-get install libhdf5-dev
             - name: Build and run tests
               run: mkdir BUILD && cd BUILD && cmake -DEXTLIB_FROM_SUBMODULES=ON .. && make all test
