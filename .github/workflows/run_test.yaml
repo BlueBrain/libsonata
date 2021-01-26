@@ -4,7 +4,7 @@ on:
 
 jobs:
     build:
-        name: coverage-test
+        name: run-test
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
