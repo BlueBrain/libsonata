@@ -84,7 +84,8 @@ void HDF5Writer::configure_enum_attribute(const std::string& group_name,
 void HDF5Writer::configure_dataset(const std::string& dataset_name,
                                    uint32_t total_steps,
                                    uint32_t total_elements) {
-    std::array<hsize_t, 2> dims = {total_steps, Implementation::get_global_dims(report_name_, total_elements)};
+    std::array<hsize_t, 2> dims = {total_steps,
+                                   Implementation::get_global_dims(report_name_, total_elements)};
     hid_t data_space = H5Screate_simple(2, dims.data(), nullptr);
     dataset_ = H5Dcreate(file_,
                          dataset_name.c_str(),
