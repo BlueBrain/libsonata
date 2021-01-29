@@ -248,10 +248,7 @@ struct ParallelImplementation {
             snd_dsps[i] = snd_dsps[i - 1] + snd_cnts[i - 1];
         }
 
-        std::size_t new_sz = 0;
-        for (const auto& r : rcv_cnts) {
-            new_sz += r;
-        }
+        const std::size_t new_sz = std::accumulate(rcv_cnts.begin(), rcv_cnts.end(), 0);
 
         // prepare new sorted vectors
         std::vector<double> svt_buf(new_sz, 0.0);

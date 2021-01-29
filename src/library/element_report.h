@@ -7,7 +7,7 @@ namespace sonata {
 class ElementReport: public Report
 {
   public:
-    ElementReport(const std::string& reportName, double tstart, double tend, double dt);
+    using Report::Report;
     size_t get_total_elements(const std::string& population_name) const override;
 };
 

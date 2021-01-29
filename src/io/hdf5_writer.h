@@ -34,12 +34,12 @@ class HDF5Writer
   private:
     std::string report_name_;
 
-    hid_t file_;
-    hid_t dataset_;
-    hid_t collective_list_;
-    hid_t independent_list_;
-    hid_t spikes_attr_type_;
-    std::array<hsize_t, 2> offset_;
+    hid_t file_ = 0;
+    hid_t dataset_ = 0;
+    hid_t collective_list_ = 0;
+    hid_t independent_list_ = 0;
+    hid_t spikes_attr_type_ = 0;
+    std::array<hsize_t, 2> offset_ = {0, 0};
 };
 
 }  // namespace sonata

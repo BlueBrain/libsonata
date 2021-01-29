@@ -18,20 +18,13 @@ template void HDF5Writer::write<double>(const std::string& dataset_name,
                                         const std::vector<double>& buffer);
 
 HDF5Writer::HDF5Writer(const std::string& report_name)
-    : report_name_(report_name)
-    , file_(0)
-    , dataset_(0)
-    , collective_list_(0)
-    , independent_list_(0)
-    , spikes_attr_type_(0) {
+    : report_name_(report_name) {
     hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
     std::tie(collective_list_, independent_list_) = Implementation::prepare_write(report_name,
                                                                                   plist_id);
     // Create hdf5 file named after the report_name
     const std::string file_name = report_name + ".h5";
     file_ = H5Fcreate(file_name.data(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
-    offset_[0] = 0;
-    offset_[1] = 0;
 
     // Create enum type for the ordering of the spikes
     spikes_attr_type_ = H5Tenum_create(H5T_STD_U8LE);
@@ -91,9 +84,7 @@ void HDF5Writer::configure_enum_attribute(const std::string& group_name,
 void HDF5Writer::configure_dataset(const std::string& dataset_name,
                                    uint32_t total_steps,
                                    uint32_t total_elements) {
-    std::array<hsize_t, 2> dims;
-    dims[0] = total_steps;
-    dims[1] = Implementation::get_global_dims(report_name_, total_elements);
+    std::array<hsize_t, 2> dims = {total_steps, Implementation::get_global_dims(report_name_, total_elements)};
     hid_t data_space = H5Screate_simple(2, dims.data(), nullptr);
     dataset_ = H5Dcreate(file_,
                          dataset_name.c_str(),
@@ -111,9 +102,7 @@ void HDF5Writer::configure_dataset(const std::string& dataset_name,
 void HDF5Writer::write_2D(const std::vector<float>& buffer,
                           uint32_t steps_to_write,
                           uint32_t total_elements) {
-    std::array<hsize_t, 2> count;
-    count[0] = steps_to_write;
-    count[1] = total_elements;
+    std::array<hsize_t, 2> count = {steps_to_write, total_elements};
 
     hid_t memspace = H5Screate_simple(2, count.data(), nullptr);
     hid_t filespace = H5Dget_space(dataset_);

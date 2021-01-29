@@ -7,9 +7,6 @@
 namespace bbp {
 namespace sonata {
 
-SomaReport::SomaReport(const std::string& report_name, double tstart, double tend, double dt)
-    : Report(report_name, tstart, tend, dt) {}
-
 void SomaReport::add_node(const std::string& population_name, uint64_t node_id) {
     if (population_exists(population_name)) {
         if (node_exists(population_name, node_id)) {
