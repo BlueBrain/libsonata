@@ -2,7 +2,7 @@
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <memory>
-#include <reports/data/sonata_data.h>
+#include <data/sonata_data.h>
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif

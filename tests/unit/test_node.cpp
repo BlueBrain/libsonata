@@ -1,7 +1,7 @@
 #include <catch2/catch.hpp>
 #include <memory>
-#include <reports/data/node.h>
-#include <reports/data/soma_node.h>
+#include <data/node.h>
+#include <data/soma_node.h>
 #include <spdlog/spdlog.h>
 
 using namespace bbp::sonata;

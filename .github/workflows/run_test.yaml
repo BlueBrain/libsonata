@@ -1,0 +1,31 @@
+name: run-test
+on:
+    push:
+
+jobs:
+    build:
+        name: run-test
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ ubuntu-18.04 ]
+                config:
+                  - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON", mpi: ON}
+                  - {cmake_option: "-DEXTLIB_FROM_SUBMODULES=ON -DREPORTS_ENABLE_MPI=OFF", mpi: OFF}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+            - name: Fetch repository
+              run: git fetch --prune --unshallow
+            - name: Get submodules
+              run: git submodule update --init --force --recursive
+            - name: Install parallel packages
+              if: ${{ matrix.config.mpi == 'ON' }}
+              run: sudo apt-get install mpich libmpich-dev libhdf5-mpich-dev hdf5-tools
+            - name: Install serial packages
+              if: ${{ matrix.config.mpi == 'OFF' }}
+              run: sudo apt-get install libhdf5-dev hdf5-tools
+            - name: Build and run tests
+              run: mkdir BUILD && cd BUILD && cmake ${cmake_option} .. && make all && ctest --output-on-failure
+              env:
+                cmake_option: ${{ matrix.config.cmake_option }}

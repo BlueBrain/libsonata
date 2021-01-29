@@ -10,7 +10,7 @@
 #endif
 
 #include <bbp/sonata/reports.h>
-#include <reports/utils/logger.h>
+#include <utils/logger.h>
 
 struct Neuron {
     uint64_t node_id;

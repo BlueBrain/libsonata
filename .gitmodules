@@ -1,12 +1,3 @@
-[submodule "extlib/fmt"]
-	path = extlib/fmt
-	url = https://github.com/fmtlib/fmt.git
-[submodule "extlib/HighFive"]
-	path = extlib/HighFive
-	url = https://github.com/BlueBrain/HighFive.git
-[submodule "python/pybind11"]
-	path = python/pybind11
-	url = https://github.com/pybind/pybind11.git
 [submodule "extlib/Catch2"]
 	path = extlib/Catch2
 	url = https://github.com/catchorg/Catch2.git

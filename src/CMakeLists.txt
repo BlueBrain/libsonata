@@ -17,8 +17,9 @@ target_include_directories(sonata_report
     SYSTEM PRIVATE
         ${PROJECT_SOURCE_DIR}/extlib/spdlog/include
     PUBLIC
-        $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
         ${MPI_INCLUDE_PATH}
+        ${HDF5_INCLUDE_DIRS}
+        $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
         $<INSTALL_INTERFACE:include>
 )
 target_compile_options(sonata_report
@@ -41,9 +42,9 @@ set_target_properties(sonata_report
     OUTPUT_NAME "sonatareport"
 )
 target_link_libraries(sonata_report
-    PRIVATE HighFive
     PRIVATE spdlog::spdlog_header_only
     PRIVATE ${MPI_CXX_LIBRARIES}
+    PRIVATE ${HDF5_C_LIBRARIES}
 )
 
 install(TARGETS sonata_report
