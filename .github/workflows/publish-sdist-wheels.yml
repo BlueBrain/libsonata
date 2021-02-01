@@ -45,7 +45,15 @@ jobs:
       - name: Build wheels Mac OS
         if: runner.os == 'macOS'
         env:
-          CIBW_BEFORE_BUILD: 'brew update; brew install cmake hdf5'
+          CIBW_BEFORE_BUILD: |
+             brew update
+             brew --version
+             brew install cmake
+             # the HDF5 bottle uses gcc10; https://formulae.brew.sh/formula/hdf5
+             # so we are hit by this: https://github.com/Homebrew/homebrew-core/issues/68866
+             # sadly, it seems Homebrew/brew#10327 doesn't fix it, so we unlink old gcc's manually
+             brew unlink gcc@8 gcc@9
+             brew install hdf5
         run: |
           python -m cibuildwheel --output-dir dist
       - name: Store wheel as artifact
