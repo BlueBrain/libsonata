@@ -1,13 +1,13 @@
 name: coverage-test
-on:
-    push:
-      branches:
-        - master
+on: [pull_request, push]
 
 jobs:
     build:
         name: coverage-test
         runs-on: ubuntu-18.04
+        # Run on external PRs, but not internal PRs as they'll be run by the push
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
