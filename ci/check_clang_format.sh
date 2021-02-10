@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+DIRS_TO_FORMAT='src include python'
+
 # Install the desired clang-format, check the lines
 # changed by this diff are formatted correctly
 
@@ -17,9 +19,9 @@ set +u  # ignore errors in virtualenv's activate
 source "$VENV/bin/activate"
 set -u
 
-changes=$(git-clang-format 'HEAD~1')
-if [[ $(echo "$changes" | grep -n1 'changed files' | grep -v 'extlib') ]]; then
+changes=$(git-clang-format 'HEAD~1' $DIRS_TO_FORMAT)
+if [[ $(echo "$changes" | grep -n1 'changed files') ]]; then
     echo "The following files require changes to pass the current clang-format"
-    echo "$changes" | grep -v 'extlib'
+    echo "$changes"
     exit 1
 fi
