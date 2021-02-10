@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.8: Wed 10 Feb 2021
+
+### Fixed:
+ - moved extlib/nlohmann/json.hpp one level deaper so that building with
+   non-versioned nlohmann json is easier
+
 ## v0.1.7: Thu Jan 21 2021
 
 ### Added:
