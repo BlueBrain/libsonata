@@ -114,6 +114,10 @@ foreach(TARGET sonata_shared sonata_static)
     target_compile_options(${TARGET}
         PRIVATE ${SONATA_COMPILE_OPTIONS}
     )
+    target_link_libraries(${TARGET}
+        PRIVATE HighFive
+        PRIVATE fmt::fmt-header-only
+    )
     if (ENABLE_COVERAGE)
         target_compile_options(${TARGET}
             PRIVATE -g -O0 --coverage -fprofile-arcs -ftest-coverage
@@ -134,17 +138,10 @@ target_compile_definitions(sonata_shared
     PRIVATE SONATA_DLL_EXPORTS
 )
 target_link_libraries(sonata_shared
-    PRIVATE fmt::fmt-header-only
-    PRIVATE HighFive
     PRIVATE nlohmann_json::nlohmann_json
 )
 
-target_compile_definitions(sonata_static
-    PRIVATE FMT_HEADER_ONLY=1
-)
 target_include_directories(sonata_static
-    PRIVATE $<TARGET_PROPERTY:fmt::fmt-header-only,INTERFACE_INCLUDE_DIRECTORIES>
-    PRIVATE $<TARGET_PROPERTY:HighFive,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:nlohmann_json::nlohmann_json,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
