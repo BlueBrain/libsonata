@@ -115,8 +115,8 @@ foreach(TARGET sonata_shared sonata_static)
         PRIVATE ${SONATA_COMPILE_OPTIONS}
     )
     target_link_libraries(${TARGET}
-        PRIVATE HighFive
         PRIVATE fmt::fmt-header-only
+        PUBLIC HighFive
     )
     if (ENABLE_COVERAGE)
         target_compile_options(${TARGET}
