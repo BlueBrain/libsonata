@@ -1,3 +1,4 @@
+option(HIGHFIVE_USE_BOOST "Disable boost in HighFive" OFF)
 add_subdirectory(HighFive)
 option(FMT_INSTALL "Install fmt for static library" ON)
 add_subdirectory(fmt)
