@@ -6,7 +6,6 @@
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/node_sets.h>
 #include <bbp/sonata/nodes.h>
-#include <bbp/sonata/report_reader.h>
 
 #include "generated/docstrings.h"
 
