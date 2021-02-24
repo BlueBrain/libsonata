@@ -356,9 +356,6 @@ def test_path_ctor():
 
     NodeStorage(path / 'nodes1.h5')
     EdgeStorage(path / 'edges1.h5')
-    SpikeReader(path / 'spikes.h5')
-    SomaReportReader(path / 'somas.h5')
-    ElementReportReader(path / 'elements.h5')
 
 
 if __name__ == '__main__':
