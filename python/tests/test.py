@@ -10,6 +10,7 @@ from libsonata import (EdgeStorage, NodeStorage,
                        SomaReportReader, SomaReportPopulation,
                        ElementReportReader, ElementReportPopulation,
                        NodeSets,
+                       CircuitConfig
                        )
 
 
@@ -481,6 +482,31 @@ def test_path_ctor():
     SpikeReader(path / 'spikes.h5')
     SomaReportReader(path / 'somas.h5')
     ElementReportReader(path / 'elements.h5')
+    NodeSets.from_file(path / 'node_sets.json')
+    CircuitConfig.from_file(path / 'config/circuit_config.json')
+
+
+class TestCircuitConfig(unittest.TestCase):
+    def setUp(self):
+        self.config = CircuitConfig.from_file(os.path.join(PATH, 'config/circuit_config.json'))
+
+    def test_basic(self):
+        self.assertEqual(self.config.target_simulator, "NEURON")
+        self.assertEqual(self.config.node_sets_path,
+                         os.path.abspath(os.path.join(PATH, 'config/node_sets.json')))
+
+        self.assertEqual(self.config.node_populations,
+                         {'nodes-A', 'nodes-B'})
+        self.assertEqual(self.config.node_population('nodes-A').name, 'nodes-A')
+
+        self.assertEqual(self.config.edge_populations,
+                         {'edges-AB', 'edges-AC'})
+        self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
+
+        self.assertEqual(self.config.components,
+                         {'morphologies_dir', 'biophysical_neuron_models_dir'})
+        self.assertEqual(self.config.component('morphologies_dir'),
+                         os.path.abspath(os.path.join(PATH, 'config/morphologies')))
 
 
 if __name__ == '__main__':

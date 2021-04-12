@@ -1,0 +1,27 @@
+{
+  "target_simulator": "NEURON",
+  "manifest": {
+    "$BASE_DIR": "./",
+    "$COMPONENT_DIR": "$BASE_DIR",
+    "$NETWORK_DIR": "../"
+  },
+  "components": {
+    "morphologies_dir": "$COMPONENT_DIR/morphologies",
+    "biophysical_neuron_models_dir": "$COMPONENT_DIR/biophysical_neuron_models"
+  },
+  "node_sets_file": "$BASE_DIR/node_sets.json",
+  "networks": {
+    "nodes": [
+      {
+        "nodes_file": "$NETWORK_DIR/nodes1.h5",
+        "node_types_file": null
+      }
+    ],
+    "edges": [
+      {
+        "edges_file": "$NETWORK_DIR/edges1.h5",
+        "edge_types_file": null
+      }
+    ]
+  }
+}

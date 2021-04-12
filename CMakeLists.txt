@@ -80,6 +80,7 @@ endif()
 
 set(SONATA_SRC
     src/common.cpp
+    src/config.cpp
     src/edge_index.cpp
     src/edges.cpp
     src/hdf5_mutex.cpp
@@ -107,6 +108,7 @@ foreach(TARGET sonata_shared sonata_static)
             OUTPUT_NAME "sonata"
     )
     target_include_directories(${TARGET}
+        PRIVATE $<TARGET_PROPERTY:ghc_filesystem,INTERFACE_INCLUDE_DIRECTORIES>
         PUBLIC
             $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
             $<INSTALL_INTERFACE:include>
@@ -114,6 +116,7 @@ foreach(TARGET sonata_shared sonata_static)
     target_compile_options(${TARGET}
         PRIVATE ${SONATA_COMPILE_OPTIONS}
     )
+
     if (ENABLE_COVERAGE)
         target_compile_options(${TARGET}
             PRIVATE -g -O0 --coverage -fprofile-arcs -ftest-coverage
@@ -134,8 +137,8 @@ target_compile_definitions(sonata_shared
     PRIVATE SONATA_DLL_EXPORTS
 )
 target_link_libraries(sonata_shared
-    PRIVATE fmt::fmt-header-only
     PRIVATE HighFive
+    PRIVATE fmt::fmt-header-only
     PRIVATE nlohmann_json::nlohmann_json
 )
 
