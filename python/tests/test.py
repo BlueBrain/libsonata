@@ -491,7 +491,6 @@ class TestCircuitConfig(unittest.TestCase):
         self.config = CircuitConfig.from_file(os.path.join(PATH, 'config/circuit_config.json'))
 
     def test_basic(self):
-        self.assertEqual(self.config.target_simulator, "NEURON")
         self.assertEqual(self.config.node_sets_path,
                          os.path.abspath(os.path.join(PATH, 'config/node_sets.json')))
 
@@ -502,11 +501,6 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertEqual(self.config.edge_populations,
                          {'edges-AB', 'edges-AC'})
         self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
-
-        self.assertEqual(self.config.components,
-                         {'morphologies_dir', 'biophysical_neuron_models_dir'})
-        self.assertEqual(self.config.component('morphologies_dir'),
-                         os.path.abspath(os.path.join(PATH, 'config/morphologies')))
 
 
 if __name__ == '__main__':

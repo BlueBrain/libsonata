@@ -483,14 +483,11 @@ PYBIND11_MODULE(_libsonata, m) {
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
                     [](py::object path) { return CircuitConfig::fromFile(py::str(path)); })
-        .def_property_readonly("target_simulator", &CircuitConfig::getTargetSimulator)
         .def_property_readonly("node_sets_path", &CircuitConfig::getNodeSetsPath)
         .def_property_readonly("node_populations", &CircuitConfig::listNodePopulations)
         .def("node_population", &CircuitConfig::getNodePopulation)
         .def_property_readonly("edge_populations", &CircuitConfig::listEdgePopulations)
-        .def("edge_population", &CircuitConfig::getEdgePopulation)
-        .def_property_readonly("components", &CircuitConfig::listComponents)
-        .def("component", &CircuitConfig::getComponent);
+        .def("edge_population", &CircuitConfig::getEdgePopulation);
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")

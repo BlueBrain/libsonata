@@ -1,5 +1,5 @@
 /*************************************************************************
- * Copyright (C) 2018-2020 Blue Brain Project
+ * Copyright (C) 2018-2021 Blue Brain Project
  *                         Jonas Karlsson <jonas.karlsson@epfl.ch>
  *                         Juan Hernando <juan.hernando@epfl.ch>
  *
@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <map>
 #include <memory>  // std::unique_ptr
 #include <set>
 #include <string>
@@ -25,16 +26,33 @@
 namespace bbp {
 namespace sonata {
 
+struct SONATA_API PopulationProperties
+{
+    std::string type;
+    std::string biophysicalNeuronModelsDir;
+    std::string morphologiesDir;
+    std::map<std::string, std::string> alternateMorphologyFormats;
+};
 
-/** Read access to a SONATA circuit config file.
+/**
+ *  Read access to a SONATA circuit config file.
  */
 class SONATA_API CircuitConfig
 {
   public:
-    /** Load SONATA circuit config JSON
+
+    /**
+     * @brief Parses a SONATA JSON Config file and checks it complies with the specification.
      *
-     * @param std::string contents of a circuit config JSON file
-     * @throw bbp::sonata::SonataError if file is not found or invalid
+     * @param contents string containing the JSON content of the file
+     * @param basePath string the path to the directory where the original file is located in
+     *                 on disk. It is needed for variable expansion.
+     *
+     * @throws SonataError on:
+     *          - Ill-formed JSON
+     *          - Missing mandatory entries (in any depth)
+     *          - Missing entries which become mandatory when another entry is present
+     *          - Multiple populations with the same name in different edge/node networks
      */
     CircuitConfig(const std::string& contents, const std::string& basePath);
 
@@ -42,44 +60,97 @@ class SONATA_API CircuitConfig
     CircuitConfig(const CircuitConfig& other) = delete;
     ~CircuitConfig();
 
-    /** Open a SONATA circuit config from a path to JSON */
+    /**
+     * @brief Loads a SONATA JSON config file from disk and returns a CircuitConfig object which
+     *        parses it.
+     *
+     * @throws SonataError on:
+     *          - Non accesible file (does not exists / does not have read access)
+     *          - Ill-formed JSON
+     *          - Missing mandatory entries (in any depth)
+     *          - Missing entries which become mandatory when another entry is present
+     *          - Multiple populations with the same name in different edge/node networks
+     */
     static CircuitConfig fromFile(const std::string& path);
 
-    /** Return the target simulator */
-    std::string getTargetSimulator() const;
-
-    /** Return the node_sets path */
+    /**
+     * @brief Returns the path to the node sets file.
+     *
+     * @returns a string with the path to the node sets file, or an empty string if none
+     */
     std::string getNodeSetsPath() const;
 
-    /** Return the names of the node population available */
+    /**
+     * @brief Returns a set with all available population names across all the node networks.
+     *
+     * @returns a std::set with population names.
+     */
     std::set<std::string> listNodePopulations() const;
 
-    /** Return the directory of a component in the components_dir given its name
+    /**
+     * @brief Creates and returns a NodePopulation object, initialized from the given population,
+     *        and the node network it belongs to.
      *
-     * @param name population name
-     * @throw bbp::sonata::SonataError if population not found
+     * @param name Name of a node population.
+     *
+     * @returns A NodePopulation object.
+     *
+     * @throws SonataError if the given population does not exist in any node network.
      */
     NodePopulation getNodePopulation(const std::string& name) const;
 
-    /** Return the names of the edge populations available */
+    /**
+     * @brief Returns a set with all available population names across all the edge networks.
+     *
+     * @returns a std::set with population names.
+     */
     std::set<std::string> listEdgePopulations() const;
 
-    /** Return the directory of a component in the components_dir given its name
+    /**
+     * @brief Creates and returns an EdgePopulation object, initialized from the given population,
+     *        and the edge network it belongs to.
      *
-     * @param name population name
-     * @throw bbp::sonata::SonataError if population not found
+     * @param name Name of an edge population.
+     *
+     * @returns An EdgePopulation object.
+     *
+     * @throws SonataError if the given population does not exist in any edge network.
      */
     EdgePopulation getEdgePopulation(const std::string& name) const;
 
-    /** Return the names of the components available */
-    std::set<std::string> listComponents() const;
-
-    /** Return the directory of a component in the components_dir given its name
+    /**
+     * @brief Return a structure containing node population specific properties, falling
+     *        back to network properties if there are no population-specific ones.
      *
-     * @param name component name
-     * @throw bbp::sonata::SonataError if component not found
+     * @param name Nam of a node population.
+     *
+     * @return The properties of the given population.
+     *
+     * @throws SonataError if the given population name does not correspond to any existing
+     *         node population.
      */
-    std::string getComponent(const std::string& name) const;
+    PopulationProperties getNodePopulationProperties(const std::string& name) const;
+
+    /**
+     * @brief Return a structure containing edge population specific properties, falling
+     *        back to network properties if there are no population-specific ones.
+     *
+     * @param name Nam of an edge population.
+     *
+     * @return The properties of the given population.
+     *
+     * @throws SonataError if the given population name does not correspond to any existing
+     *         edge population.
+     */
+    PopulationProperties getEdgePopulationProperties(const std::string& name) const;
+
+    /**
+     * @brief Returns the configuration file JSON whose variables have been expanded by the
+     *        manifest entries.
+     *
+     * @returns a JSON string with the expanded configuration file.
+     */
+    std::string getExpandedJSON() const;
 
   private:
     struct Impl;

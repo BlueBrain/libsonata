@@ -26,8 +26,11 @@
 #include "population.hpp"
 #include "utils.h"
 
+#include <iostream>
+
 
 namespace {
+using bbp::sonata::PopulationProperties;
 using bbp::sonata::CircuitConfig;
 using bbp::sonata::SonataError;
 
@@ -115,15 +118,52 @@ nlohmann::json expandVariables(const nlohmann::json& json,
     return jsonFlat.unflatten();
 }
 
-
-std::map<std::string, std::string> fillComponents(const nlohmann::json& json,
-                                                  const PathResolver& resolver) {
-    const auto components = json.at("components");
-    std::map<std::string, std::string> result;
-
-    for (auto it = components.begin(); it != components.end(); ++it) {
-        result[it.key()] = resolver.toAbsolute(it.value());
+std::string getJSONValue(const nlohmann::json& json,
+                         const std::string& key,
+                         const std::string& defaultValue = std::string())
+{
+    auto it = json.find(key);
+    if(it != json.end() && !it->is_null()) {
+        return it.value();
     }
+
+    return defaultValue;
+}
+
+std::string getJSONPath(const nlohmann::json& json,
+                        const std::string& key,
+                        const PathResolver& resolver,
+                        const std::string& defaultValue = std::string())
+{
+    auto value = getJSONValue(json, key);
+    if(!value.empty())
+        return resolver.toAbsolute(value);
+
+    return defaultValue;
+}
+
+struct Components {
+    std::string morphologiesDir;
+    std::map<std::string, std::string> alternateMorphologiesDir;
+    std::string biophysicalNeuronModelsDir;
+};
+
+Components fillComponents(const nlohmann::json& json, const PathResolver& resolver) {
+    const auto components = json.at("components");
+    Components result;
+
+    result.morphologiesDir = getJSONPath(components, "morphologies_dir", resolver);
+
+    const auto alternateMorphoDir = components.find("alternate_morphologies");
+    if(alternateMorphoDir != components.end()) {
+        for(auto it = alternateMorphoDir->begin(); it != alternateMorphoDir->end(); ++it) {
+            result.alternateMorphologiesDir[it.key()] = resolver.toAbsolute(it.value());
+        }
+    }
+
+    result.biophysicalNeuronModelsDir = getJSONPath(components,
+                                                    "biophysical_neuron_models_dir",
+                                                    resolver);
 
     return result;
 }
@@ -133,7 +173,7 @@ struct SubnetworkFiles {
     std::string types;
 };
 
-std::vector<SubnetworkFiles> fillSubnetwork(nlohmann::json& networks,
+std::vector<SubnetworkFiles> fillSubnetwork(const nlohmann::json& networks,
                                             const std::string& prefix,
                                             const PathResolver& resolver) {
     std::vector<SubnetworkFiles> output;
@@ -143,15 +183,70 @@ std::vector<SubnetworkFiles> fillSubnetwork(nlohmann::json& networks,
     const std::string typesFile = prefix + "_types_file";
 
     const auto iter = networks.find(component);
-    if (iter == networks.end()) {
-        return output;
+    for (const auto& node : *iter) {
+
+        auto h5File = getJSONPath(node, elementsFile, resolver);
+        if(h5File.empty())
+            throw SonataError(fmt::format("'{}' network do not define '{}' entry",
+                                          prefix,
+                                          elementsFile));
+
+        auto csvFile = getJSONPath(node, typesFile, resolver);
+
+        output.emplace_back(SubnetworkFiles{h5File, csvFile});
     }
 
-    for (const auto& node : *iter) {
-        auto h5File = resolver.toAbsolute(node.at(elementsFile));
-        auto csvFile = node.at(typesFile).is_null() ? std::string()
-                                                    : resolver.toAbsolute(node.at(typesFile));
-        output.emplace_back(SubnetworkFiles{h5File, csvFile});
+    return output;
+}
+
+template<typename Population>
+std::map<std::string, PopulationProperties>
+fillPopulationProperties(const nlohmann::json& network,
+                         const PathResolver& resolver,
+                         const Components& defaultComponents,
+                         const std::string& defaultPopulationType) {
+
+    std::map<std::string, PopulationProperties> output;
+
+    // Iterate over all defined subnetworks
+    for(const auto& node : network) {
+
+        const auto populationsIt = node.find("populations");
+        if(populationsIt == node.end())
+            continue;
+
+        // Iterate over all defined populations
+        for(auto it = populationsIt->begin(); it != populationsIt->end(); ++it) {
+            const auto& popData = it.value();
+            if(popData.empty())
+                continue;
+
+            std::cout << "Overriding " << it.key() << std::endl;
+            PopulationProperties& popProperties = output[it.key()];
+
+            // Take population-specific components, if any. Otherwise, fall back to default
+            popProperties.type = getJSONValue(popData, "type", defaultPopulationType);
+            popProperties.morphologiesDir = getJSONPath(popData,
+                                                        "morphologies_dir",
+                                                        resolver,
+                                                        defaultComponents.morphologiesDir);
+            popProperties.biophysicalNeuronModelsDir =
+                    getJSONPath(popData,
+                                "biophysical_neuron_models_dir",
+                                resolver,
+                                defaultComponents.biophysicalNeuronModelsDir);
+
+            // Copy default values
+            popProperties.alternateMorphologyFormats = defaultComponents.alternateMorphologiesDir;
+            // Overwrite those specified, if any
+            const auto altMorphoDir = popData.find("alternate_morphologies");
+            if(altMorphoDir != popData.end()) {
+                for(auto it = altMorphoDir->begin(); it != altMorphoDir->end(); ++it) {
+                    popProperties.alternateMorphologyFormats[it.key()] =
+                            resolver.toAbsolute(it.value());
+                }
+            }
+        }
     }
 
     return output;
@@ -216,6 +311,50 @@ std::set<std::string> listPopulations(const std::vector<SubnetworkFiles>& networ
                    [](std::pair<std::string, SubnetworkFiles> p) { return p.first; });
     return result;
 }
+
+template <typename Population>
+void checkDuplicatePopulationNames(const std::vector<SubnetworkFiles>& networkNodes) {
+    using PopulationStorage = bbp::sonata::PopulationStorage<Population>;
+    std::set<std::string> check;
+
+    for (const auto& network : networkNodes) {
+        const auto population = PopulationStorage(network.elements, network.types);
+        for (auto name : population.populationNames()) {
+            if(check.find(name) != check.end())
+                throw SonataError(fmt::format("Duplicate population name '{}'", name));
+            check.insert(name);
+        }
+    }
+}
+
+void checkBiophysicalNodePopulations(
+        const std::vector<SubnetworkFiles>& networkFiles,
+        const std::map<std::string, PopulationProperties>& nodePopulations) {
+
+    using PopulationStorage = bbp::sonata::PopulationStorage<bbp::sonata::NodePopulation>;
+
+    const std::string bioType ("biophysical");
+
+    // Check that all node populations with type 'biophysical' have a morphologyDir defined
+    for (const auto& network : networkFiles) {
+        const auto population = PopulationStorage(network.elements, network.types);
+        for (auto name : population.populationNames()) {
+
+            // Check if there is a population that does not override default components,
+            // or if there is any population which overrides default components, with
+            // biophysical type and that does not define a morphology dir
+            auto overridenIt = nodePopulations.find(name);
+            if(overridenIt == nodePopulations.end()
+                    || (overridenIt != nodePopulations.end()
+                    && overridenIt->second.type == bioType
+                    && overridenIt->second.morphologiesDir.empty())) {
+                throw SonataError(fmt::format("Node population '{}' is defined as 'biophysical' "
+                                              "but does not define 'morphology_dir'", name));
+            }
+        }
+    }
+}
+
 }  // namespace
 
 
@@ -225,33 +364,86 @@ namespace sonata {
 struct CircuitConfig::Impl {
     PathResolver resolver;
 
-    std::string target_simulator;
-    std::string node_sets_file;
-    std::map<std::string, std::string> components;
+    // Circuit config json string whose paths and variables have been expanded to include
+    // manifest variables
+    std::string expandedJSON;
+    // Path to the nodesets file
+    std::string nodeSetsFile;
+    // Default components value for all networks
+    Components components;
+    // Nodes network paths
     std::vector<SubnetworkFiles> networkNodes;
+    // Node populations that override default components variables
+    std::map<std::string, PopulationProperties> nodePopulationProperties;
+    // Edges network paths
     std::vector<SubnetworkFiles> networkEdges;
+    // Edge populations that override default components variables
+    std::map<std::string, PopulationProperties> edgePopulationProperties;
 
     Impl(const std::string& contents, const std::string& basePath)
         : resolver(basePath) {
         const auto json = parseSonataJson(contents);
+        expandedJSON = json.dump();
 
-        try {
-            target_simulator = json.at("target_simulator");
-        } catch (nlohmann::detail::out_of_range&) {
-        }
-
+        // Retrieve node sets file, if any
         if (json.find("node_sets_file") != json.end()) {
-            node_sets_file = resolver.toAbsolute(json["node_sets_file"]);
+            nodeSetsFile = resolver.toAbsolute(json["node_sets_file"]);
         }
 
+        // Fail if no network entry is defined
         if (json.find("networks") == json.end()) {
             throw SonataError("Error parsing config: `networks` not specified");
         }
-
         auto networks = json.at("networks");
+
+        // Fail if no networks/nodes entry is defined
+        if(networks.find("nodes") == networks.end()) {
+            throw SonataError("Error parsing networks config: `nodes` not specified");
+        }
+        // Fail if no networks/edges entry is defined
+        if(networks.find("edges") == networks.end()) {
+            throw SonataError("Error parsing networks config: `edges``not specified");
+        }
+
+        // Fill struct with default components values
         components = fillComponents(json, resolver);
+
+        // Fill node subnetwork paths
         networkNodes = fillSubnetwork(networks, "node", resolver);
+        // Check for duplicate populations on node network
+        try {
+            checkDuplicatePopulationNames<NodePopulation>(networkNodes);
+        } catch(const SonataError& e) {
+            throw SonataError(fmt::format("Node network duplicate populations check: '{}'",
+                                          e.what()));
+        }
+
+        // Fill node population properties
+        nodePopulationProperties =
+                fillPopulationProperties<NodePopulation>(networks.at("nodes"),
+                                                         resolver,
+                                                         components,
+                                                         "biophysical");
+        // Check if there is any 'biophysical' population without morphology dir
+        // (If thre is a default one, no check is needed)
+        if(components.morphologiesDir.empty())
+            checkBiophysicalNodePopulations(networkNodes, nodePopulationProperties);
+
+        // Fill edge subnetwork paths
         networkEdges = fillSubnetwork(networks, "edge", resolver);
+        // Check for duplicate populations on edge network
+        try {
+            checkDuplicatePopulationNames<EdgePopulation>(networkEdges);
+        } catch(const SonataError& e) {
+            throw SonataError(fmt::format("Edge network duplicate populations check: '{}'",
+                                          e.what()));
+        }
+        // Fill edge population properties
+        edgePopulationProperties =
+                fillPopulationProperties<EdgePopulation>(networks.at("edges"),
+                                                         resolver,
+                                                         components,
+                                                         "chemical_synapse");
     }
 };
 
@@ -265,12 +457,8 @@ CircuitConfig CircuitConfig::fromFile(const std::string& path) {
     return CircuitConfig(readFile(path), fs::path(path).parent_path());
 }
 
-std::string CircuitConfig::getTargetSimulator() const {
-    return impl->target_simulator;
-}
-
 std::string CircuitConfig::getNodeSetsPath() const {
-    return impl->node_sets_file;
+    return impl->nodeSetsFile;
 }
 
 std::set<std::string> CircuitConfig::listNodePopulations() const {
@@ -300,23 +488,45 @@ EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name) const {
     return getPopulation<EdgePopulation>(impl->networkEdges, name);
 }
 
-std::set<std::string> CircuitConfig::listComponents() const {
-    std::set<std::string> result;
-    std::transform(impl->components.begin(),
-                   impl->components.end(),
-                   std::inserter(result, result.end()),
-                   [](std::pair<std::string, std::string> p) { return p.first; });
-    return result;
-}
+PopulationProperties CircuitConfig::getNodePopulationProperties(const std::string &name) const {
 
-std::string CircuitConfig::getComponent(const std::string& name) const {
-    const auto it = impl->components.find(name);
-    if (it == impl->components.end()) {
-        throw SonataError(fmt::format("Could not find component '{}'", name));
+    auto populations = listNodePopulations();
+    if(populations.find(name) == populations.end())
+        throw SonataError(fmt::format("Could not find node population '{}'", name));
+
+    auto popPropertiesIt = impl->nodePopulationProperties.find(name);
+    if (popPropertiesIt != impl->nodePopulationProperties.end()) {
+        return popPropertiesIt->second;
     }
 
-    return it->second;
+    return {"biophysical",
+            impl->components.biophysicalNeuronModelsDir,
+            impl->components.morphologiesDir,
+            impl->components.alternateMorphologiesDir
+    };
 }
+
+PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string &name) const {
+    auto populations = listEdgePopulations();
+    if(populations.find(name) == populations.end())
+        throw SonataError(fmt::format("Could not find edge population '{}'", name));
+
+    auto popPropertiesIt = impl->edgePopulationProperties.find(name);
+    if (popPropertiesIt != impl->edgePopulationProperties.end()) {
+        return popPropertiesIt->second;
+    }
+
+    return {"chemical_synapse",
+            impl->components.biophysicalNeuronModelsDir,
+            impl->components.morphologiesDir,
+            impl->components.alternateMorphologiesDir
+    };
+}
+
+std::string CircuitConfig::getExpandedJSON() const {
+    return impl->expandedJSON;
+}
+
 
 }  // namespace sonata
 }  // namespace bbp
