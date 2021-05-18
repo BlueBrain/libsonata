@@ -328,7 +328,6 @@ void checkDuplicatePopulationNames(const std::vector<SubnetworkFiles>& networkNo
 }
 
 void checkBiophysicalNodePopulations(
-        const std::vector<SubnetworkFiles>& networkFiles,
         const std::map<std::string, PopulationProperties>& nodePopulations) {
 
     using PopulationStorage = bbp::sonata::PopulationStorage<bbp::sonata::NodePopulation>;
@@ -336,21 +335,13 @@ void checkBiophysicalNodePopulations(
     const std::string bioType ("biophysical");
 
     // Check that all node populations with type 'biophysical' have a morphologyDir defined
-    for (const auto& network : networkFiles) {
-        const auto population = PopulationStorage(network.elements, network.types);
-        for (auto name : population.populationNames()) {
+    for(const auto& entry : nodePopulations) {
 
-            // Check if there is a population that does not override default components,
-            // or if there is any population which overrides default components, with
-            // biophysical type and that does not define a morphology dir
-            auto overridenIt = nodePopulations.find(name);
-            if(overridenIt == nodePopulations.end()
-                    || (overridenIt != nodePopulations.end()
-                    && overridenIt->second.type == bioType
-                    && overridenIt->second.morphologiesDir.empty())) {
-                throw SonataError(fmt::format("Node population '{}' is defined as 'biophysical' "
-                                              "but does not define 'morphology_dir'", name));
-            }
+        // Check if there is any population which overrides default components, with
+        // biophysical type and that does not define a morphology dir
+        if(entry.second.type == bioType && entry.second.morphologiesDir.empty()) {
+            throw SonataError(fmt::format("Node population '{}' is defined as 'biophysical' "
+                                          "but does not define 'morphology_dir'", entry.first));
         }
     }
 }
