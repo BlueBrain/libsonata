@@ -30,8 +30,8 @@
 
 
 namespace {
-using bbp::sonata::PopulationProperties;
 using bbp::sonata::CircuitConfig;
+using bbp::sonata::PopulationProperties;
 using bbp::sonata::SonataError;
 
 // to be replaced by std::filesystem once C++17 is used
@@ -120,10 +120,9 @@ nlohmann::json expandVariables(const nlohmann::json& json,
 
 std::string getJSONValue(const nlohmann::json& json,
                          const std::string& key,
-                         const std::string& defaultValue = std::string())
-{
+                         const std::string& defaultValue = std::string()) {
     auto it = json.find(key);
-    if(it != json.end() && !it->is_null()) {
+    if (it != json.end() && !it->is_null()) {
         return it.value();
     }
 
@@ -133,10 +132,9 @@ std::string getJSONValue(const nlohmann::json& json,
 std::string getJSONPath(const nlohmann::json& json,
                         const std::string& key,
                         const PathResolver& resolver,
-                        const std::string& defaultValue = std::string())
-{
+                        const std::string& defaultValue = std::string()) {
     auto value = getJSONValue(json, key);
-    if(!value.empty())
+    if (!value.empty())
         return resolver.toAbsolute(value);
 
     return defaultValue;
@@ -155,15 +153,14 @@ Components fillComponents(const nlohmann::json& json, const PathResolver& resolv
     result.morphologiesDir = getJSONPath(components, "morphologies_dir", resolver);
 
     const auto alternateMorphoDir = components.find("alternate_morphologies");
-    if(alternateMorphoDir != components.end()) {
-        for(auto it = alternateMorphoDir->begin(); it != alternateMorphoDir->end(); ++it) {
+    if (alternateMorphoDir != components.end()) {
+        for (auto it = alternateMorphoDir->begin(); it != alternateMorphoDir->end(); ++it) {
             result.alternateMorphologiesDir[it.key()] = resolver.toAbsolute(it.value());
         }
     }
 
-    result.biophysicalNeuronModelsDir = getJSONPath(components,
-                                                    "biophysical_neuron_models_dir",
-                                                    resolver);
+    result.biophysicalNeuronModelsDir =
+        getJSONPath(components, "biophysical_neuron_models_dir", resolver);
 
     return result;
 }
@@ -184,12 +181,10 @@ std::vector<SubnetworkFiles> fillSubnetwork(const nlohmann::json& networks,
 
     const auto iter = networks.find(component);
     for (const auto& node : *iter) {
-
         auto h5File = getJSONPath(node, elementsFile, resolver);
-        if(h5File.empty())
-            throw SonataError(fmt::format("'{}' network do not define '{}' entry",
-                                          prefix,
-                                          elementsFile));
+        if (h5File.empty())
+            throw SonataError(
+                fmt::format("'{}' network do not define '{}' entry", prefix, elementsFile));
 
         auto csvFile = getJSONPath(node, typesFile, resolver);
 
@@ -199,26 +194,24 @@ std::vector<SubnetworkFiles> fillSubnetwork(const nlohmann::json& networks,
     return output;
 }
 
-template<typename Population>
-std::map<std::string, PopulationProperties>
-fillPopulationProperties(const nlohmann::json& network,
-                         const PathResolver& resolver,
-                         const Components& defaultComponents,
-                         const std::string& defaultPopulationType) {
-
+template <typename Population>
+std::map<std::string, PopulationProperties> fillPopulationProperties(
+    const nlohmann::json& network,
+    const PathResolver& resolver,
+    const Components& defaultComponents,
+    const std::string& defaultPopulationType) {
     std::map<std::string, PopulationProperties> output;
 
     // Iterate over all defined subnetworks
-    for(const auto& node : network) {
-
+    for (const auto& node : network) {
         const auto populationsIt = node.find("populations");
-        if(populationsIt == node.end())
+        if (populationsIt == node.end())
             continue;
 
         // Iterate over all defined populations
-        for(auto it = populationsIt->begin(); it != populationsIt->end(); ++it) {
+        for (auto it = populationsIt->begin(); it != populationsIt->end(); ++it) {
             const auto& popData = it.value();
-            if(popData.empty())
+            if (popData.empty())
                 continue;
 
             std::cout << "Overriding " << it.key() << std::endl;
@@ -231,19 +224,19 @@ fillPopulationProperties(const nlohmann::json& network,
                                                         resolver,
                                                         defaultComponents.morphologiesDir);
             popProperties.biophysicalNeuronModelsDir =
-                    getJSONPath(popData,
-                                "biophysical_neuron_models_dir",
-                                resolver,
-                                defaultComponents.biophysicalNeuronModelsDir);
+                getJSONPath(popData,
+                            "biophysical_neuron_models_dir",
+                            resolver,
+                            defaultComponents.biophysicalNeuronModelsDir);
 
             // Copy default values
             popProperties.alternateMorphologyFormats = defaultComponents.alternateMorphologiesDir;
             // Overwrite those specified, if any
             const auto altMorphoDir = popData.find("alternate_morphologies");
-            if(altMorphoDir != popData.end()) {
-                for(auto it = altMorphoDir->begin(); it != altMorphoDir->end(); ++it) {
-                    popProperties.alternateMorphologyFormats[it.key()] =
-                            resolver.toAbsolute(it.value());
+            if (altMorphoDir != popData.end()) {
+                for (auto it = altMorphoDir->begin(); it != altMorphoDir->end(); ++it) {
+                    popProperties.alternateMorphologyFormats[it.key()] = resolver.toAbsolute(
+                        it.value());
                 }
             }
         }
@@ -320,7 +313,7 @@ void checkDuplicatePopulationNames(const std::vector<SubnetworkFiles>& networkNo
     for (const auto& network : networkNodes) {
         const auto population = PopulationStorage(network.elements, network.types);
         for (auto name : population.populationNames()) {
-            if(check.find(name) != check.end())
+            if (check.find(name) != check.end())
                 throw SonataError(fmt::format("Duplicate population name '{}'", name));
             check.insert(name);
         }
@@ -328,28 +321,27 @@ void checkDuplicatePopulationNames(const std::vector<SubnetworkFiles>& networkNo
 }
 
 void checkBiophysicalNodePopulations(
-        const std::vector<SubnetworkFiles>& networkFiles,
-        const std::map<std::string, PopulationProperties>& nodePopulations) {
-
+    const std::vector<SubnetworkFiles>& networkFiles,
+    const std::map<std::string, PopulationProperties>& nodePopulations) {
     using PopulationStorage = bbp::sonata::PopulationStorage<bbp::sonata::NodePopulation>;
 
-    const std::string bioType ("biophysical");
+    const std::string bioType("biophysical");
 
     // Check that all node populations with type 'biophysical' have a morphologyDir defined
     for (const auto& network : networkFiles) {
         const auto population = PopulationStorage(network.elements, network.types);
         for (auto name : population.populationNames()) {
-
             // Check if there is a population that does not override default components,
             // or if there is any population which overrides default components, with
             // biophysical type and that does not define a morphology dir
             auto overridenIt = nodePopulations.find(name);
-            if(overridenIt == nodePopulations.end()
-                    || (overridenIt != nodePopulations.end()
-                    && overridenIt->second.type == bioType
-                    && overridenIt->second.morphologiesDir.empty())) {
-                throw SonataError(fmt::format("Node population '{}' is defined as 'biophysical' "
-                                              "but does not define 'morphology_dir'", name));
+            if (overridenIt == nodePopulations.end() ||
+                (overridenIt != nodePopulations.end() && overridenIt->second.type == bioType &&
+                 overridenIt->second.morphologiesDir.empty())) {
+                throw SonataError(
+                    fmt::format("Node population '{}' is defined as 'biophysical' "
+                                "but does not define 'morphology_dir'",
+                                name));
             }
         }
     }
@@ -397,11 +389,11 @@ struct CircuitConfig::Impl {
         auto networks = json.at("networks");
 
         // Fail if no networks/nodes entry is defined
-        if(networks.find("nodes") == networks.end()) {
+        if (networks.find("nodes") == networks.end()) {
             throw SonataError("Error parsing networks config: `nodes` not specified");
         }
         // Fail if no networks/edges entry is defined
-        if(networks.find("edges") == networks.end()) {
+        if (networks.find("edges") == networks.end()) {
             throw SonataError("Error parsing networks config: `edges``not specified");
         }
 
@@ -413,20 +405,19 @@ struct CircuitConfig::Impl {
         // Check for duplicate populations on node network
         try {
             checkDuplicatePopulationNames<NodePopulation>(networkNodes);
-        } catch(const SonataError& e) {
-            throw SonataError(fmt::format("Node network duplicate populations check: '{}'",
-                                          e.what()));
+        } catch (const SonataError& e) {
+            throw SonataError(
+                fmt::format("Node network duplicate populations check: '{}'", e.what()));
         }
 
         // Fill node population properties
-        nodePopulationProperties =
-                fillPopulationProperties<NodePopulation>(networks.at("nodes"),
-                                                         resolver,
-                                                         components,
-                                                         "biophysical");
+        nodePopulationProperties = fillPopulationProperties<NodePopulation>(networks.at("nodes"),
+                                                                            resolver,
+                                                                            components,
+                                                                            "biophysical");
         // Check if there is any 'biophysical' population without morphology dir
         // (If thre is a default one, no check is needed)
-        if(components.morphologiesDir.empty())
+        if (components.morphologiesDir.empty())
             checkBiophysicalNodePopulations(networkNodes, nodePopulationProperties);
 
         // Fill edge subnetwork paths
@@ -434,16 +425,15 @@ struct CircuitConfig::Impl {
         // Check for duplicate populations on edge network
         try {
             checkDuplicatePopulationNames<EdgePopulation>(networkEdges);
-        } catch(const SonataError& e) {
-            throw SonataError(fmt::format("Edge network duplicate populations check: '{}'",
-                                          e.what()));
+        } catch (const SonataError& e) {
+            throw SonataError(
+                fmt::format("Edge network duplicate populations check: '{}'", e.what()));
         }
         // Fill edge population properties
-        edgePopulationProperties =
-                fillPopulationProperties<EdgePopulation>(networks.at("edges"),
-                                                         resolver,
-                                                         components,
-                                                         "chemical_synapse");
+        edgePopulationProperties = fillPopulationProperties<EdgePopulation>(networks.at("edges"),
+                                                                            resolver,
+                                                                            components,
+                                                                            "chemical_synapse");
     }
 };
 
@@ -488,10 +478,9 @@ EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name) const {
     return getPopulation<EdgePopulation>(impl->networkEdges, name);
 }
 
-PopulationProperties CircuitConfig::getNodePopulationProperties(const std::string &name) const {
-
+PopulationProperties CircuitConfig::getNodePopulationProperties(const std::string& name) const {
     auto populations = listNodePopulations();
-    if(populations.find(name) == populations.end())
+    if (populations.find(name) == populations.end())
         throw SonataError(fmt::format("Could not find node population '{}'", name));
 
     auto popPropertiesIt = impl->nodePopulationProperties.find(name);
@@ -502,13 +491,12 @@ PopulationProperties CircuitConfig::getNodePopulationProperties(const std::strin
     return {"biophysical",
             impl->components.biophysicalNeuronModelsDir,
             impl->components.morphologiesDir,
-            impl->components.alternateMorphologiesDir
-    };
+            impl->components.alternateMorphologiesDir};
 }
 
-PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string &name) const {
+PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string& name) const {
     auto populations = listEdgePopulations();
-    if(populations.find(name) == populations.end())
+    if (populations.find(name) == populations.end())
         throw SonataError(fmt::format("Could not find edge population '{}'", name));
 
     auto popPropertiesIt = impl->edgePopulationProperties.find(name);
@@ -519,8 +507,7 @@ PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::strin
     return {"chemical_synapse",
             impl->components.biophysicalNeuronModelsDir,
             impl->components.morphologiesDir,
-            impl->components.alternateMorphologiesDir
-    };
+            impl->components.alternateMorphologiesDir};
 }
 
 std::string CircuitConfig::getExpandedJSON() const {
