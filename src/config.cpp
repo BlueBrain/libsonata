@@ -26,8 +26,6 @@
 #include "population.hpp"
 #include "utils.h"
 
-#include <iostream>
-
 
 namespace {
 using bbp::sonata::CircuitConfig;
@@ -118,12 +116,13 @@ nlohmann::json expandVariables(const nlohmann::json& json,
     return jsonFlat.unflatten();
 }
 
-std::string getJSONValue(const nlohmann::json& json,
-                         const std::string& key,
-                         const std::string& defaultValue = std::string()) {
+template <typename T>
+T getJSONValue(const nlohmann::json& json,
+               const std::string& key,
+               const std::string& defaultValue = std::string()) {
     auto it = json.find(key);
     if (it != json.end() && !it->is_null()) {
-        return it.value();
+        return it.value().get<T>();
     }
 
     return defaultValue;
@@ -133,7 +132,7 @@ std::string getJSONPath(const nlohmann::json& json,
                         const std::string& key,
                         const PathResolver& resolver,
                         const std::string& defaultValue = std::string()) {
-    auto value = getJSONValue(json, key);
+    auto value = getJSONValue<std::string>(json, key);
     if (!value.empty())
         return resolver.toAbsolute(value);
 
@@ -218,7 +217,7 @@ std::map<std::string, PopulationProperties> fillPopulationProperties(
             PopulationProperties& popProperties = output[it.key()];
 
             // Take population-specific components, if any. Otherwise, fall back to default
-            popProperties.type = getJSONValue(popData, "type", defaultPopulationType);
+            popProperties.type = getJSONValue<std::string>(popData, "type", defaultPopulationType);
             popProperties.morphologiesDir = getJSONPath(popData,
                                                         "morphologies_dir",
                                                         resolver,
@@ -314,7 +313,10 @@ void checkDuplicatePopulationNames(const std::vector<SubnetworkFiles>& networkNo
         const auto population = PopulationStorage(network.elements, network.types);
         for (auto name : population.populationNames()) {
             if (check.find(name) != check.end())
-                throw SonataError(fmt::format("Duplicate population name '{}'", name));
+                throw SonataError(
+                    fmt::format("Duplicate population name '{}' in node network file '{}'",
+                                name,
+                                network.elements));
             check.insert(name);
         }
     }
@@ -323,13 +325,11 @@ void checkDuplicatePopulationNames(const std::vector<SubnetworkFiles>& networkNo
 void checkBiophysicalNodePopulations(
     const std::vector<SubnetworkFiles>& networkFiles,
     const std::map<std::string, PopulationProperties>& nodePopulations) {
-    using PopulationStorage = bbp::sonata::PopulationStorage<bbp::sonata::NodePopulation>;
-
     const std::string bioType("biophysical");
 
     // Check that all node populations with type 'biophysical' have a morphologyDir defined
     for (const auto& network : networkFiles) {
-        const auto population = PopulationStorage(network.elements, network.types);
+        const auto population = bbp::sonata::NodeStorage(network.elements, network.types);
         for (auto name : population.populationNames()) {
             // Check if there is a population that does not override default components,
             // or if there is any population which overrides default components, with
