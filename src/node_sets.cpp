@@ -176,6 +176,120 @@ class NodeSetBasicNodeIds: public NodeSetRule
     Selection::Values values_;
 };
 
+class NodeSetBasicOperatorString: public NodeSetRule
+{
+  public:
+    explicit NodeSetBasicOperatorString(const std::string attribute,
+                                        const std::string op,
+                                        const std::string value)
+        : op_(string2op(op))
+        , attribute_(attribute)
+        , value_(value) {}
+
+    Selection materialize(const detail::NodeSets& /* unused */,
+                          const NodePopulation& np) const final {
+        return np.regexMatch(attribute_, value_);
+    }
+
+    std::string toJSON() const final {
+        return fmt::format(R"("{}": {{ "{}": "{}" }})", attribute_, op2string(op_), value_);
+    }
+
+    enum class Op {
+        regex = 1,
+    };
+
+    static Op string2op(const std::string& s) {
+        if (s == "$regex") {
+            return Op::regex;
+        }
+        throw SonataError(fmt::format("Operator '{}' not available for strings", s));
+    }
+
+    static std::string op2string(const Op op) {
+        switch (op) {
+        case Op::regex:
+            return "$regex";
+        default:
+            throw SonataError("Not Implemented NodeSetBasicOperator");
+        }
+    }
+
+  private:
+    Op op_;
+    std::string attribute_;
+    std::string value_;
+};
+
+class NodeSetBasicOperatorNumeric: public NodeSetRule
+{
+  public:
+    explicit NodeSetBasicOperatorNumeric(const std::string name, const std::string op, double value)
+        : name_(name)
+        , value_(value)
+        , op_(string2op(op)) {}
+
+    Selection materialize(const detail::NodeSets& /* unused */,
+                          const NodePopulation& np) const final {
+        switch (op_) {
+        case Op::gt:
+            return np.filterAttribute<double>(name_, [=](const double v) { return v > value_; });
+        case Op::lt:
+            return np.filterAttribute<double>(name_, [=](const double v) { return v < value_; });
+        case Op::gte:
+            return np.filterAttribute<double>(name_, [=](const double v) { return v >= value_; });
+        case Op::lte:
+            return np.filterAttribute<double>(name_, [=](const double v) { return v <= value_; });
+        default:
+            throw SonataError("Not Implemented NodeSetBasicOperator");
+        }
+    }
+
+    std::string toJSON() const final {
+        return fmt::format(R"("{}": {{ "{}": {} }})", name_, op2string(op_), value_);
+    }
+
+    enum class Op {
+        gt = 1,
+        lt = 2,
+        gte = 3,
+        lte = 4,
+    };
+
+    static Op string2op(const std::string& s) {
+        if (s == "$gt") {
+            return Op::gt;
+        } else if (s == "$lt") {
+            return Op::lt;
+        } else if (s == "$gte") {
+            return Op::gte;
+        } else if (s == "$lte") {
+            return Op::lte;
+        }
+        throw SonataError(fmt::format("Operator '{}' not available for numeric", s));
+    }
+
+    static std::string op2string(const Op op) {
+        switch (op) {
+        case Op::gt:
+            return "$gt";
+        case Op::lt:
+            return "$lt";
+        case Op::gte:
+            return "$gte";
+        case Op::lte:
+            return "$lte";
+        default:
+            throw SonataError("Not Implemented NodeSetBasicOperator");
+        }
+    }
+
+  private:
+    std::string name_;
+    double value_;
+    Op op_;
+};
+
 using CompoundTargets = std::vector<std::string>;
 class NodeSetCompoundRule: public NodeSetRule
 {
@@ -287,6 +401,26 @@ NodeSetRules _dispatch_node(const json& contents) {
             } else {
                 throw SonataError("Unknown array type");
             }
+        } else if (el.value().is_object()) {
+            const auto& definition = el.value();
+            if (definition.size() != 1) {
+                throw SonataError(
+                    fmt::format("Operator '{}' must have object with one key value pair",
+                                attribute));
+            }
+            const auto& key = definition.begin().key();
+            const auto& value = definition.begin().value();
+            if (value.is_number()) {
+                ret.emplace_back(
+                    new NodeSetBasicOperatorNumeric(attribute, key, value.get<double>()));
+            } else if (value.is_string()) {
+                ret.emplace_back(
+                    new NodeSetBasicOperatorString(attribute, key, value.get<std::string>()));
+            } else {
+                throw SonataError("Unknown operator");
+            }
+        } else {
+            throw SonataError("Unknown type");
         }
     }
     return ret;

@@ -11,11 +11,12 @@
 #include <utility>    // std::move
 
 #include "hdf5_mutex.hpp"
-#include "population.hpp"
+#include "utils.h"
 
 #include <fmt/format.h>
 #include <highfive/H5File.hpp>
 
+#include "population.hpp"
 
 namespace bbp {
 namespace sonata {
@@ -193,7 +194,7 @@ std::string _getDataType(const HighFive::DataSet& dset, const std::string& name)
     }
 }
 
-}  // unnamed namespace
+}  // anonymous namespace
 
 
 Population::Population(const std::string& h5FilePath,
@@ -344,6 +345,26 @@ std::string Population::_dynamicsAttributeDataType(const std::string& name) cons
     return _getDataType(impl_->getDynamicsAttributeDataSet(name), name);
 }
 
+template <>
+Selection Population::filterAttribute(const std::string& name,
+                                      std::function<bool(const std::string)> pred) const {
+    auto dtype = impl_->getAttributeDataSet(name).getDataType();
+    if (dtype != HighFive::AtomicType<std::string>()) {
+        throw SonataError("H5 dataset must be a string");
+    }
+
+    const auto& values = getAttribute<std::string>(name, selectAll());
+    return _getMatchingSelection(values, pred);
+}
+
+template <typename T>
+Selection Population::filterAttribute(const std::string& name,
+                                      std::function<bool(const T)> pred) const {
+    const auto& values = getAttribute<T>(name, selectAll());
+    return _getMatchingSelection(values, pred);
+}
+
+
 //--------------------------------------------------------------------------------------------------
 
 #define INSTANTIATE_TEMPLATE_METHODS(T)                                                         \
@@ -358,7 +379,9 @@ std::string Population::_dynamicsAttributeDataType(const std::string& name) cons
                                                                 const Selection&) const;        \
     template std::vector<T> Population::getDynamicsAttribute<T>(const std::string&,             \
                                                                 const Selection&,               \
-                                                                const T&) const;
+                                                                const T&) const;                \
+    template Selection Population::filterAttribute<T>(const std::string&,                       \
+                                                      std::function<bool(const T)> pred) const;
 
 
 INSTANTIATE_TEMPLATE_METHODS(float)

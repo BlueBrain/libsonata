@@ -83,6 +83,49 @@ TEST_CASE("NodeSetBasic") {
         CHECK(sel == Selection({{0, 1}, {2, 3}, {4, 6}}));
     }
 
+    SECTION("BasicScalarOperatorStringRegex") {
+        {
+            auto node_sets = R"({ "NodeSet0": {"E-mapping-good": {"$regex": "^[AC].*"}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 1}, {2, 6}}));
+        }
+
+        {
+            auto node_sets = R""({ "NodeSet0": {"attr-Z": {"$regex": "^(aa|bb|ff)"}} })"";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 2}, {5,6}}));
+        }
+    }
+
+    SECTION("BasicScalarOperatorNumeric") {
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$gt": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{3, 6}}));
+        }
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$lt": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 2}}));
+        }
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$gte": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{2, 6}}));
+        }
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$lte": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 3}}));
+        }
+    }
+
     SECTION("BasicScalarAnded") {
         auto node_sets = R"({"NodeSet0": {"E-mapping-good": "C",
                                           "attr-Y": [21, 22]
@@ -176,6 +219,12 @@ TEST_CASE("NodeSet") {
             "model_type": "point",
             "node_id": [1, 2, 3, 5, 7, 9]
         },
+        "power_number_test": {
+            "numeric_attribute": { "$gte": 3 }
+        },
+        "power_regex_test": {
+            "string_attr": { "$regex": "^[s][o]me value$" }
+        },
         "combined": ["bio_layer45", "V1_point_prime"]
     })";
 
@@ -191,7 +240,7 @@ TEST_CASE("NodeSet") {
 
     SECTION("names") {
         NodeSets ns(node_sets);
-        std::set<std::string> expected = {"bio_layer45", "V1_point_prime", "combined"};
+        std::set<std::string> expected = {"bio_layer45", "V1_point_prime", "combined", "power_number_test", "power_regex_test"};
         CHECK(ns.names() == expected);
     }
 }
