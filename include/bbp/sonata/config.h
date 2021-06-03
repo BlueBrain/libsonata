@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include <map>
 #include <memory>  // std::unique_ptr
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <bbp/sonata/edges.h>
@@ -48,7 +48,7 @@ struct SONATA_API PopulationProperties {
     /**
      * Dictionary for alternate directory paths.
      */
-    std::map<std::string, std::string> alternateMorphologyFormats;
+    std::unordered_map<std::string, std::string> alternateMorphologyFormats;
 };
 
 /**
@@ -68,8 +68,9 @@ class SONATA_API CircuitConfig
      */
     CircuitConfig(const std::string& contents, const std::string& basePath);
 
-    CircuitConfig(CircuitConfig&&);
     CircuitConfig(const CircuitConfig& other) = delete;
+    CircuitConfig(CircuitConfig&&);
+
     ~CircuitConfig();
 
     /**

@@ -141,7 +141,7 @@ std::string getJSONPath(const nlohmann::json& json,
 
 struct Components {
     std::string morphologiesDir;
-    std::map<std::string, std::string> alternateMorphologiesDir;
+    std::unordered_map<std::string, std::string> alternateMorphologiesDir;
     std::string biophysicalNeuronModelsDir;
 };
 
@@ -285,8 +285,8 @@ std::map<std::string, SubnetworkFiles> resolvePopulations(
     std::map<std::string, SubnetworkFiles> result;
 
     for (const auto& network : networkNodes) {
-        const auto population = PopulationStorage(network.elements, network.types);
-        for (auto name : population.populationNames()) {
+        const PopulationStorage population(network.elements, network.types);
+        for (const auto& name : population.populationNames()) {
             result[name] = network;
         }
     }
@@ -310,8 +310,8 @@ void checkDuplicatePopulationNames(const std::vector<SubnetworkFiles>& networkNo
     std::set<std::string> check;
 
     for (const auto& network : networkNodes) {
-        const auto population = PopulationStorage(network.elements, network.types);
-        for (auto name : population.populationNames()) {
+        const PopulationStorage population(network.elements, network.types);
+        for (const auto& name : population.populationNames()) {
             if (check.find(name) != check.end())
                 throw SonataError(
                     fmt::format("Duplicate population name '{}' in node network file '{}'",
@@ -329,7 +329,7 @@ void checkBiophysicalNodePopulations(
 
     // Check that all node populations with type 'biophysical' have a morphologyDir defined
     for (const auto& network : networkFiles) {
-        const auto population = bbp::sonata::NodeStorage(network.elements, network.types);
+        const bbp::sonata::NodeStorage population(network.elements, network.types);
         for (auto name : population.populationNames()) {
             // Check if there is a population that does not override default components,
             // or if there is any population which overrides default components, with
@@ -440,12 +440,13 @@ struct CircuitConfig::Impl {
 CircuitConfig::CircuitConfig(const std::string& contents, const std::string& basePath)
     : impl(new CircuitConfig::Impl(contents, basePath)) {}
 
-CircuitConfig::CircuitConfig(CircuitConfig&&) = default;
-CircuitConfig::~CircuitConfig() = default;
-
 CircuitConfig CircuitConfig::fromFile(const std::string& path) {
     return CircuitConfig(readFile(path), fs::path(path).parent_path());
 }
+
+CircuitConfig::CircuitConfig(CircuitConfig&&) = default;
+
+CircuitConfig::~CircuitConfig() = default;
 
 std::string CircuitConfig::getNodeSetsPath() const {
     return impl->nodeSetsFile;
