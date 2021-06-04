@@ -67,7 +67,6 @@ jobs:
       - name: Install packages on MacOS
         run: |
             brew update
-            brew unlink gcc@8 gcc@9  # work around for https://github.com/actions/virtual-environments/issues/2391
             brew install cmake || true  # macos image has cmake installed, but a new version may exist; ignore it if so
             brew install doxygen
             brew install hdf5
