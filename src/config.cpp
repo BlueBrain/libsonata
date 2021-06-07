@@ -333,6 +333,7 @@ class CircuitConfig::PopulationResolver
             for (const auto& population : subNetwork.populations) {
                 if (check.find(population) != check.end())
                     throw SonataError(fmt::format("Duplicate population name '{}'", population));
+                check.insert(population);
             }
         }
     }
