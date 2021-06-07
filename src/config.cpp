@@ -188,7 +188,7 @@ class CircuitConfig::Parser
     std::string getNodeSetsPath() const {
         // Retrieve node sets file, if any
         if (_json.find("node_sets_file") != _json.end()) {
-            toAbsolute(_json["node_sets_file"]);
+            return toAbsolute(_json["node_sets_file"]);
         }
 
         return std::string();
@@ -362,6 +362,8 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     _expandedJSON = parser.getExpandedJSON();
 
     _components = parser.parseDefaultComponents();
+
+    _nodeSetsFile = parser.getNodeSetsPath();
 
     // Load node subnetwork and check for duplicate populations
     _networkNodes = parser.parseNodeNetwork();
