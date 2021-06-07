@@ -360,6 +360,7 @@ For big datasets, using numpy arrays could greatly improve the performance
 
 Acknowledgements
 ----------------
+The development of this software was supported by funding to the Blue Brain Project, a research center of the École polytechnique fédérale de Lausanne (EPFL), from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology.
 
 This project/research has received funding from the European Union’s Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreement No. 785907 (Human Brain Project SGA2).
 
@@ -371,7 +372,7 @@ libsonata is distributed under the terms of the GNU Lesser General Public Licens
 unless noted otherwise, for example, for external dependencies.
 Refer to `COPYING.LESSER` and `COPYING` files for details.
 
-Copyright (C) 2018-2020, Blue Brain Project/EPFL and contributors.
+Copyright (c) 2018-2021 Blue Brain Project/EPFL
 
 libsonata is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License version 3
