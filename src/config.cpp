@@ -124,18 +124,17 @@ Variables readVariables(const nlohmann::json& json) {
     return variables;
 }
 
-}
+}  // namespace
 
 class CircuitConfig::Parser
 {
-public:
+  public:
     using Subnetworks = std::vector<CircuitConfig::SubnetworkFiles>;
     using PopulationOverrides = std::unordered_map<std::string, PopulationProperties>;
 
 
     Parser(const std::string& contents, const std::string& basePath)
         : _basePath(fs::absolute(fs::path(basePath))) {
-
         // Parse and expand JSON string
         const auto rawJson = nlohmann::json::parse(contents);
         const auto vars = replaceVariables(readVariables(rawJson));
@@ -170,8 +169,7 @@ public:
         return absolute.lexically_normal().string();
     }
 
-    const nlohmann::json& getSubNetworkJson(const std::string& prefix) const
-    {
+    const nlohmann::json& getSubNetworkJson(const std::string& prefix) const {
         // Fail if no network entry is defined
         if (_json.find("networks") == _json.end()) {
             throw SonataError("Error parsing config: `networks` not specified");
@@ -180,15 +178,14 @@ public:
         const auto& networks = _json.at("networks");
 
         const std::string component = prefix + "s";
-        if(networks.find(component) == networks.end())
-            throw SonataError(fmt::format("Error parsing networks config: '{}' not specified",
-                                          component));
+        if (networks.find(component) == networks.end())
+            throw SonataError(
+                fmt::format("Error parsing networks config: '{}' not specified", component));
 
         return networks.at(component);
     }
 
-    std::string getNodeSetsPath() const
-    {
+    std::string getNodeSetsPath() const {
         // Retrieve node sets file, if any
         if (_json.find("node_sets_file") != _json.end()) {
             toAbsolute(_json["node_sets_file"]);
@@ -197,8 +194,7 @@ public:
         return std::string();
     }
 
-    CircuitConfig::Components parseDefaultComponents() const
-    {
+    CircuitConfig::Components parseDefaultComponents() const {
         CircuitConfig::Components result;
         if (_json.find("components") == _json.end()) {
             return result;
@@ -214,15 +210,14 @@ public:
             }
         }
 
-        result.biophysicalNeuronModelsDir =
-            getJSONPath(components, "biophysical_neuron_models_dir");
+        result.biophysicalNeuronModelsDir = getJSONPath(components,
+                                                        "biophysical_neuron_models_dir");
 
         return result;
     }
 
-    template<typename PopulationType>
-    Subnetworks parseSubNetworks(const std::string& prefix) const
-    {
+    template <typename PopulationType>
+    Subnetworks parseSubNetworks(const std::string& prefix) const {
         using PopulationStorage = bbp::sonata::PopulationStorage<PopulationType>;
 
         const auto& network = getSubNetworkJson(prefix);
@@ -239,27 +234,23 @@ public:
 
             auto csvFile = getJSONPath(node, typesFile);
 
-            output.emplace_back(SubnetworkFiles{h5File,
-                                                csvFile,
-                                                PopulationStorage(h5File, csvFile).populationNames()});
+            output.emplace_back(SubnetworkFiles{
+                h5File, csvFile, PopulationStorage(h5File, csvFile).populationNames()});
         }
 
         return output;
     }
 
-    Subnetworks parseNodeNetwork() const
-    {
+    Subnetworks parseNodeNetwork() const {
         return parseSubNetworks<NodePopulation>("node");
     }
 
-    Subnetworks parseEdgeNetwork() const
-    {
+    Subnetworks parseEdgeNetwork() const {
         return parseSubNetworks<EdgePopulation>("edge");
     }
 
     template <typename Population>
     PopulationOverrides parsePopulationProperties(const std::string& prefix) const {
-
         const auto& network = getSubNetworkJson(prefix);
 
         std::unordered_map<std::string, PopulationProperties> output;
@@ -296,42 +287,39 @@ public:
         return output;
     }
 
-    PopulationOverrides parseNodePopulations() const
-    {
+    PopulationOverrides parseNodePopulations() const {
         return parsePopulationProperties<NodePopulation>("node");
     }
 
-    PopulationOverrides parseEdgePopulations() const
-    {
+    PopulationOverrides parseEdgePopulations() const {
         return parsePopulationProperties<EdgePopulation>("edge");
     }
 
-    std::string getExpandedJSON()
-    {
+    std::string getExpandedJSON() {
         return _json.dump();
     }
 
-private:
+  private:
     const fs::path _basePath;
     nlohmann::json _json;
 };
 
 class CircuitConfig::PopulationResolver
 {
-public:
+  public:
     static std::set<std::string> listPopulations(const std::vector<SubnetworkFiles>& src) {
         std::set<std::string> result;
-        for(const auto& subNetwork : src)
+        for (const auto& subNetwork : src)
             result.insert(subNetwork.populations.begin(), subNetwork.populations.end());
         return result;
     }
 
-    template<typename PopulationType>
+    template <typename PopulationType>
     static PopulationType getPopulation(const std::string& populationName,
-                                 const std::vector<SubnetworkFiles>& src) {
-        for(const auto& subNetwork : src) {
-            for(const auto& population : subNetwork.populations) {
-                if(population == populationName)
+                                        const std::vector<SubnetworkFiles>& src) {
+        for (const auto& subNetwork : src) {
+            for (const auto& population : subNetwork.populations) {
+                if (population == populationName)
                     return PopulationType(subNetwork.elements, subNetwork.types, populationName);
             }
         }
@@ -341,24 +329,23 @@ public:
 
     static void checkDuplicatePopulations(const std::vector<SubnetworkFiles>& src) {
         std::set<std::string> check;
-        for(const auto& subNetwork : src) {
-            for(const auto& population : subNetwork.populations) {
-                if(check.find(population) != check.end())
-                    throw SonataError(
-                        fmt::format("Duplicate population name '{}'", population));
+        for (const auto& subNetwork : src) {
+            for (const auto& population : subNetwork.populations) {
+                if (check.find(population) != check.end())
+                    throw SonataError(fmt::format("Duplicate population name '{}'", population));
             }
         }
     }
 
-    static void checkBiophysicalPopulations(const std::vector<SubnetworkFiles>& src,
-                                     const std::unordered_map<std::string, PopulationProperties>& populations) {
-        for(const auto& subNetwork : src) {
-            for(const auto& population : subNetwork.populations) {
+    static void checkBiophysicalPopulations(
+        const std::vector<SubnetworkFiles>& src,
+        const std::unordered_map<std::string, PopulationProperties>& populations) {
+        for (const auto& subNetwork : src) {
+            for (const auto& population : subNetwork.populations) {
                 const auto it = populations.find(population);
-                if(it == populations.end() ||
-                   (it != populations.end() &&
-                    it->second.type == "biophysical" &&
-                    it->second.morphologiesDir.empty())) {
+                if (it == populations.end() ||
+                    (it != populations.end() && it->second.type == "biophysical" &&
+                     it->second.morphologiesDir.empty())) {
                     throw SonataError(
                         fmt::format("Node population '{}' is defined as 'biophysical' "
                                     "but does not define 'morphology_dir'",
@@ -369,9 +356,8 @@ public:
     }
 };
 
-CircuitConfig::CircuitConfig(const std::string& contents, const std::string& basePath)
-{
-    Parser parser (contents, basePath);
+CircuitConfig::CircuitConfig(const std::string& contents, const std::string& basePath) {
+    Parser parser(contents, basePath);
 
     _expandedJSON = parser.getExpandedJSON();
 
@@ -392,24 +378,24 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     _edgePopulationProperties = parser.parseEdgePopulations();
 
     const auto updateDefaultProperties =
-    [&](std::unordered_map<std::string, PopulationProperties>& map, const std::string& defaultType)
-    {
-        for(auto& entry : map)
-        {
-            if(entry.second.type.empty())
-                entry.second.type = defaultType;
-            if(entry.second.alternateMorphologyFormats.empty())
-                entry.second.alternateMorphologyFormats = _components.alternateMorphologiesDir;
-            if(entry.second.biophysicalNeuronModelsDir.empty())
-                entry.second.biophysicalNeuronModelsDir = _components.biophysicalNeuronModelsDir;
-            if(entry.second.morphologiesDir.empty())
-                entry.second.morphologiesDir = _components.morphologiesDir;
-        }
-    };
+        [&](std::unordered_map<std::string, PopulationProperties>& map,
+            const std::string& defaultType) {
+            for (auto& entry : map) {
+                if (entry.second.type.empty())
+                    entry.second.type = defaultType;
+                if (entry.second.alternateMorphologyFormats.empty())
+                    entry.second.alternateMorphologyFormats = _components.alternateMorphologiesDir;
+                if (entry.second.biophysicalNeuronModelsDir.empty())
+                    entry.second.biophysicalNeuronModelsDir =
+                        _components.biophysicalNeuronModelsDir;
+                if (entry.second.morphologiesDir.empty())
+                    entry.second.morphologiesDir = _components.morphologiesDir;
+            }
+        };
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
     updateDefaultProperties(_edgePopulationProperties, "chemical_synapse");
 
-    if(_components.morphologiesDir.empty())
+    if (_components.morphologiesDir.empty())
         PopulationResolver::checkBiophysicalPopulations(_networkNodes, _nodePopulationProperties);
 }
 
