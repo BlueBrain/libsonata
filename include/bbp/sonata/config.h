@@ -68,11 +68,6 @@ class SONATA_API CircuitConfig
      */
     CircuitConfig(const std::string& contents, const std::string& basePath);
 
-    CircuitConfig(const CircuitConfig& other) = delete;
-    CircuitConfig(CircuitConfig&&);
-
-    ~CircuitConfig();
-
     /**
      * Loads a SONATA JSON config file from disk and returns a CircuitConfig object which
      * parses it.
@@ -89,7 +84,7 @@ class SONATA_API CircuitConfig
     /**
      * Returns the path to the node sets file.
      */
-    std::string getNodeSetsPath() const;
+    const std::string& getNodeSetsPath() const;
 
     /**
      *  Returns a set with all available population names across all the node networks.
@@ -139,11 +134,45 @@ class SONATA_API CircuitConfig
      * Returns the configuration file JSON whose variables have been expanded by the
      * manifest entries.
      */
-    std::string getExpandedJSON() const;
+    const std::string& getExpandedJSON() const;
 
   private:
-    struct Impl;
-    std::unique_ptr<Impl> impl;
+    struct Components {
+        std::string morphologiesDir;
+        std::unordered_map<std::string, std::string> alternateMorphologiesDir;
+        std::string biophysicalNeuronModelsDir;
+    };
+
+    struct SubnetworkFiles {
+        std::string elements;
+        std::string types;
+        std::set<std::string> populations;
+    };
+
+    class Parser;
+    friend class Parser;
+    class PopulationResolver;
+    friend class PopulationResolver;
+
+    // Circuit config json string whose paths and variables have been expanded to include
+    // manifest variables
+    std::string _expandedJSON;
+
+    // Path to the nodesets file
+    std::string _nodeSetsFile;
+
+    // Default components value for all networks
+    Components _components;
+
+    // Nodes network paths
+    std::vector<SubnetworkFiles> _networkNodes;
+    // Node populations that override default components variables
+    std::unordered_map<std::string, PopulationProperties> _nodePopulationProperties;
+
+    // Edges network paths
+    std::vector<SubnetworkFiles> _networkEdges;
+    // Edge populations that override default components variables
+    std::unordered_map<std::string, PopulationProperties> _edgePopulationProperties;
 };
 
 }  // namespace sonata
