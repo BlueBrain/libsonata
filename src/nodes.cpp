@@ -135,8 +135,12 @@ Selection NodePopulation::matchAttributeValues(const std::string& name, const T 
 template <>
 Selection NodePopulation::matchAttributeValues<std::string>(
     const std::string& name, const std::vector<std::string>& values) const {
-    const auto pred = [values](const std::string& v) {
-        return std::find(values.cbegin(), values.cend(), v) != values.cend();
+
+    std::vector<std::string> values_sorted(values);
+    std::sort(values_sorted.begin(), values_sorted.end());
+
+    const auto pred = [&values_sorted](const std::string& v) {
+        return std::find(values_sorted.cbegin(), values_sorted.cend(), v) != values_sorted.cend();
     };
 
     return _filterStringAttribute(*this, name, pred);

@@ -19,13 +19,13 @@ std::string readFile(const std::string& path);
 template <typename T, class UnaryPredicate>
 bbp::sonata::Selection _getMatchingSelection(const std::vector<T>& values, UnaryPredicate pred) {
     using bbp::sonata::Selection;
-    Selection::Values idx;
+    Selection::Values ids;
     Selection::Value id = 0;
     for (const auto& v : values) {
         if (pred(v)) {
-            idx.push_back(id);
+            ids.push_back(id);
         }
         ++id;
     }
-    return Selection::fromValues(idx);
+    return Selection::fromValues(ids);
 }

@@ -45,5 +45,8 @@ class SONATA_API SonataError: public std::runtime_error
   public:
     explicit SonataError(const std::string& what);
 };
+
+#define THROW_IF_REACHED throw SonataError("Should never be reached");
+
 }  // namespace sonata
 }  // namespace bbp

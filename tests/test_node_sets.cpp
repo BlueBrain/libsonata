@@ -56,6 +56,18 @@ TEST_CASE("NodeSetParse") {
         NodeSets ns(node_sets);
         CHECK_THROWS_AS(ns.materialize("NONEXISTANT", population), SonataError);
     }
+
+    SECTION("OperatorMultipleClauses")
+    {
+        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to ops": 3, "2nd": 3}} })"";
+        CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
+    }
+
+    SECTION("OperatorObject")
+    {
+        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to ops": {}}} })"";
+        CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
+    }
 }
 
 TEST_CASE("NodeSetBasic") {
@@ -97,6 +109,10 @@ TEST_CASE("NodeSetBasic") {
             Selection sel = ns.materialize("NodeSet0", population);
             CHECK(sel == Selection({{0, 2}, {5,6}}));
         }
+        {
+            auto node_sets = R""({ "NodeSet0": {"attr-Z": {"$op-does-not-exist": "dne"}} })"";
+            CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
+        }
     }
 
     SECTION("BasicScalarOperatorNumeric") {
@@ -123,6 +139,10 @@ TEST_CASE("NodeSetBasic") {
             NodeSets ns(node_sets);
             Selection sel = ns.materialize("NodeSet0", population);
             CHECK(sel == Selection({{0, 3}}));
+        }
+        {
+            auto node_sets = R""({ "NodeSet0": {"attr-Y": {"$op-does-not-exist": 3}} })"";
+            CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
         }
     }
 
@@ -220,7 +240,10 @@ TEST_CASE("NodeSet") {
             "node_id": [1, 2, 3, 5, 7, 9]
         },
         "power_number_test": {
-            "numeric_attribute": { "$gte": 3 }
+            "numeric_attribute_gt": { "$gt": 3 },
+            "numeric_attribute_lt": { "$lt": 3 },
+            "numeric_attribute_gte": { "$gte": 3 },
+            "numeric_attribute_lte": { "$lte": 3 }
         },
         "power_regex_test": {
             "string_attr": { "$regex": "^[s][o]me value$" }

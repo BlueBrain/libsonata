@@ -75,6 +75,8 @@ Note: This does not match dynamics_params datasets)doc";
 
 static const char *__doc_bbp_sonata_NodePopulation_matchAttributeValues_2 = R"doc(Like matchAttributeValues, but for vectors of values to match)doc";
 
+static const char *__doc_bbp_sonata_NodePopulation_regexMatch = R"doc()doc";
+
 static const char *__doc_bbp_sonata_NodeSets = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodeSets_NodeSets =
@@ -181,6 +183,8 @@ Parameter ``name``:
 
 Throws:
     if there is no such attribute for the population)doc";
+
+static const char *__doc_bbp_sonata_Population_filterAttribute = R"doc()doc";
 
 static const char *__doc_bbp_sonata_Population_getAttribute =
 R"doc(Get attribute values for given {element} Selection

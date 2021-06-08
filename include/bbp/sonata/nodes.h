@@ -55,7 +55,6 @@ class SONATA_API NodePopulation: public Population
                                    const std::vector<T>& values) const;
 
 
-    // XXX: need to do this better
     Selection regexMatch(const std::string& name, const std::string& re) const;
 };
 
