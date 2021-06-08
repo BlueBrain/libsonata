@@ -191,8 +191,8 @@ class NodeSetBasicOperatorString: public NodeSetRule
         switch (op_) {
         case Op::regex:
             return np.regexMatch(attribute_, value_);
-        default: // LCOV_EXCL_LINE
-            THROW_IF_REACHED // LCOV_EXCL_LINE
+        default:              // LCOV_EXCL_LINE
+            THROW_IF_REACHED  // LCOV_EXCL_LINE
         }
     }
 
@@ -215,8 +215,8 @@ class NodeSetBasicOperatorString: public NodeSetRule
         switch (op) {
         case Op::regex:
             return "$regex";
-        default: // LCOV_EXCL_LINE
-            THROW_IF_REACHED // LCOV_EXCL_LINE
+        default:              // LCOV_EXCL_LINE
+            THROW_IF_REACHED  // LCOV_EXCL_LINE
         }
     }
 
@@ -245,8 +245,8 @@ class NodeSetBasicOperatorNumeric: public NodeSetRule
             return np.filterAttribute<double>(name_, [=](const double v) { return v >= value_; });
         case Op::lte:
             return np.filterAttribute<double>(name_, [=](const double v) { return v <= value_; });
-        default: // LCOV_EXCL_LINE
-            THROW_IF_REACHED // LCOV_EXCL_LINE
+        default:              // LCOV_EXCL_LINE
+            THROW_IF_REACHED  // LCOV_EXCL_LINE
         }
     }
 
@@ -284,8 +284,8 @@ class NodeSetBasicOperatorNumeric: public NodeSetRule
             return "$gte";
         case Op::lte:
             return "$lte";
-        default: // LCOV_EXCL_LINE
-            THROW_IF_REACHED // LCOV_EXCL_LINE
+        default:              // LCOV_EXCL_LINE
+            THROW_IF_REACHED  // LCOV_EXCL_LINE
         }
     }
 
@@ -425,7 +425,7 @@ NodeSetRules _dispatch_node(const json& contents) {
                 throw SonataError("Unknown operator");
             }
         } else {
-            THROW_IF_REACHED // LCOV_EXCL_LINE
+            THROW_IF_REACHED  // LCOV_EXCL_LINE
         }
     }
     return ret;

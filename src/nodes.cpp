@@ -135,7 +135,6 @@ Selection NodePopulation::matchAttributeValues(const std::string& name, const T 
 template <>
 Selection NodePopulation::matchAttributeValues<std::string>(
     const std::string& name, const std::vector<std::string>& values) const {
-
     std::vector<std::string> values_sorted(values);
     std::sort(values_sorted.begin(), values_sorted.end());
 

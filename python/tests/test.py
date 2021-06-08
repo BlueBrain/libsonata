@@ -462,6 +462,15 @@ class TestNodePopulationNodeSet(unittest.TestCase):
               "model_type": "point",
               "node_id": [1, 2, 3, 5, 7, 9]
           },
+          "power_number_test": {
+              "numeric_attribute_gt": { "$gt": 3 },
+              "numeric_attribute_lt": { "$lt": 3 },
+              "numeric_attribute_gte": { "$gte": 3 },
+              "numeric_attribute_lte": { "$lte": 3 }
+          },
+          "power_regex_test": {
+              "string_attr": { "$regex": "^[s][o]me value$" }
+          },
           "combined": ["bio_layer45", "V1_point_prime"]
         }'''
         new = NodeSets(j).toJSON()
