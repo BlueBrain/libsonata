@@ -36,9 +36,10 @@ Selection _matchAttributeValues(const NodePopulation& population,
         std::vector<T> wanted_sorted(wanted);
         std::sort(wanted_sorted.begin(), wanted_sorted.end());
 
-        return population.filterAttribute<T>(name, [&wanted_sorted](const T& v) {
+        const auto pred = [&wanted_sorted](const T& v) {
             return std::binary_search(wanted_sorted.cbegin(), wanted_sorted.cend(), v);
-        });
+        };
+        return population.filterAttribute<T>(name, pred);
     }
 }
 
@@ -76,19 +77,15 @@ Selection _filterStringAttribute(const NodePopulation& population,
 
         const auto& values = population.getEnumeration<size_t>(name, population.selectAll());
         if (wanted_enum_value.size() == 1) {
-            const auto pred = [&wanted_enum_value](const size_t v) {
+            return _getMatchingSelection(values, [&wanted_enum_value](const size_t v) {
                 return wanted_enum_value[0] == v;
-            };
-
-            return _getMatchingSelection(values, pred);
+            });
         } else {
             std::sort(wanted_enum_value.begin(), wanted_enum_value.end());
 
-            const auto pred = [&wanted_enum_value](const size_t v) {
+            return _getMatchingSelection(values, [&wanted_enum_value](const size_t v) {
                 return std::binary_search(wanted_enum_value.cbegin(), wanted_enum_value.cend(), v);
-            };
-
-            return _getMatchingSelection(values, pred);
+            });
         }
     }
 
@@ -139,7 +136,7 @@ Selection NodePopulation::matchAttributeValues<std::string>(
     std::sort(values_sorted.begin(), values_sorted.end());
 
     const auto pred = [&values_sorted](const std::string& v) {
-        return std::find(values_sorted.cbegin(), values_sorted.cend(), v) != values_sorted.cend();
+        return std::binary_search(values_sorted.cbegin(), values_sorted.cend(), v);
     };
 
     return _filterStringAttribute(*this, name, pred);
