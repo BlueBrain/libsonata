@@ -18,4 +18,5 @@ target_include_directories(nlohmann_json INTERFACE
 
 if (SONATA_TESTS)
     add_subdirectory(Catch2)
+    include(Catch2/contrib/Catch.cmake)
 endif()
