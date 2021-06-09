@@ -479,6 +479,20 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("materialize", &NodeSets::materialize, DOC_NODESETS(materialize))
         .def("toJSON", &NodeSets::toJSON, DOC_NODESETS(toJSON));
 
+    py::class_<PopulationProperties>(m,
+                                     "PopulationProperties",
+                                     "Stores population-specific network information")
+        .def_readonly("type", &PopulationProperties::type, "Population type")
+        .def_readonly("biophysical_neuron_models_dir",
+                      &PopulationProperties::biophysicalNeuronModelsDir,
+                      "Path to the template HOC files defining the E-Mode")
+        .def_readonly("morphologies_dir",
+                      &PopulationProperties::morphologiesDir,
+                      "Path to the directory containing the morphologies")
+        .def_readonly("alternate_morphology_formats",
+                      &PopulationProperties::alternateMorphologyFormats,
+                      "Path to the directory containing the morphologies");
+
     py::class_<CircuitConfig>(m, "CircuitConfig", "")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
@@ -487,7 +501,11 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("node_populations", &CircuitConfig::listNodePopulations)
         .def("node_population", &CircuitConfig::getNodePopulation)
         .def_property_readonly("edge_populations", &CircuitConfig::listEdgePopulations)
-        .def("edge_population", &CircuitConfig::getEdgePopulation);
+        .def("edge_population", &CircuitConfig::getEdgePopulation)
+        .def("node_population_properties", &CircuitConfig::getNodePopulationProperties, "name"_a)
+        .def("edge_population_properties", &CircuitConfig::getEdgePopulationProperties, "name"_a)
+        .def_property_readonly("expanded_json", &CircuitConfig::getExpandedJSON);
+
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")

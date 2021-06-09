@@ -27,7 +27,7 @@ namespace bbp {
 namespace sonata {
 
 /**
- * Stores pouplation-specific network information.
+ * Stores population-specific network information.
  */
 struct SONATA_API PopulationProperties {
     /**

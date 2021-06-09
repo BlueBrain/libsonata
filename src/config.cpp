@@ -1,5 +1,5 @@
 /*************************************************************************
- * Copyright (C) 2018-2020 Blue Brain Project
+ * Copyright (C) 2018-2021 Blue Brain Project
  *                         Jonas Karlsson <jonas.karlsson@epfl.ch>
  *                         Juan Hernando <juan.hernando@epfl.ch>
  *
@@ -90,7 +90,7 @@ nlohmann::json expandVariables(const nlohmann::json& json,
 
             if (startPos != std::string::npos) {
                 valueStr.replace(startPos, varName.length(), varValue);
-                value = valueStr;
+                value = fs::path(valueStr).lexically_normal();
             }
         }
     }

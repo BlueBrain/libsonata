@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 import unittest
@@ -502,6 +503,27 @@ class TestCircuitConfig(unittest.TestCase):
                          {'edges-AB', 'edges-AC'})
         self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
 
+    def test_expanded_json(self):
+        config = json.loads(self.config.expanded_json)
+        self.assertEqual(config['components']['biophysical_neuron_models_dir'],
+                         'biophysical_neuron_models')
+        self.assertEqual(config['networks']['nodes'][0]['node_types_file'],
+                         None)
+        self.assertEqual(config['networks']['nodes'][0]['nodes_file'],
+                         '../nodes1.h5')
+
+    def test_get_population_properties(self):
+        node_prop = self.config.node_population_properties('nodes-A')
+        self.assertEqual(node_prop.type, 'biophysical')
+        self.assertTrue(node_prop.morphologies_dir.endswith('morphologies'))
+        self.assertTrue(node_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
+        self.assertEqual(node_prop.alternate_morphology_formats, {})
+
+        edge_prop = self.config.edge_population_properties('edges-AC')
+        self.assertEqual(edge_prop.type, 'chemical_synapse')
+        self.assertTrue(edge_prop.morphologies_dir.endswith('morphologies'))
+        self.assertTrue(edge_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
+        self.assertEqual(edge_prop.alternate_morphology_formats, {})
 
 if __name__ == '__main__':
     unittest.main()
