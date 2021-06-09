@@ -220,7 +220,7 @@ static const char *__doc_bbp_sonata_NodeSets_toJSON = R"doc(Return string versio
 
 static const char *__doc_bbp_sonata_Population = R"doc()doc";
 
-static const char *__doc_bbp_sonata_PopulationProperties = R"doc(Stores pouplation-specific network information.)doc";
+static const char *__doc_bbp_sonata_PopulationProperties = R"doc(Stores population-specific network information.)doc";
 
 static const char *__doc_bbp_sonata_PopulationProperties_alternateMorphologyFormats = R"doc(Dictionary for alternate directory paths.)doc";
 
