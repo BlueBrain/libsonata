@@ -10,7 +10,7 @@
 #include "population.hpp"
 #include "utils.h"
 
-#include <algorithm>  // std::binary_search
+#include <algorithm>  // std::binary_search, std::max_element, std::any_of
 #include <regex>
 
 #include <fmt/format.h>
@@ -62,31 +62,26 @@ Selection _filterStringAttribute(const NodePopulation& population,
                                  UnaryPredicate pred) {
     if (population.enumerationNames().count(name) > 0) {
         const auto& enum_values = population.enumerationValues(name);
-        std::vector<size_t> wanted_enum_value;
-        wanted_enum_value.reserve(enum_values.size());
+        // it's assumed that the cardinality of a @library is low
+        // enough that a std::vector<bool> won't be too large
+        std::vector<bool> wanted_enum_mask(enum_values.size());
 
+        bool has_elements = false;
         for (size_t i = 0; i < enum_values.size(); ++i) {
             if (pred(enum_values[i])) {
-                wanted_enum_value.push_back(i);
+                wanted_enum_mask[i] = true;
+                has_elements = true;
             }
         }
 
-        if (wanted_enum_value.empty()) {
+        if (!has_elements) {
             return Selection({});
         }
 
         const auto& values = population.getEnumeration<size_t>(name, population.selectAll());
-        if (wanted_enum_value.size() == 1) {
-            return _getMatchingSelection(values, [&wanted_enum_value](const size_t v) {
-                return wanted_enum_value[0] == v;
-            });
-        } else {
-            std::sort(wanted_enum_value.begin(), wanted_enum_value.end());
-
-            return _getMatchingSelection(values, [&wanted_enum_value](const size_t v) {
-                return std::binary_search(wanted_enum_value.cbegin(), wanted_enum_value.cend(), v);
-            });
-        }
+        return _getMatchingSelection(values, [&wanted_enum_mask](const size_t v) {
+            return wanted_enum_mask.at(v);
+        });
     }
 
     // normal, non-enum, attribute

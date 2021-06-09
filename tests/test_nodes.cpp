@@ -177,6 +177,11 @@ TEST_CASE("NodePopulationmatchAttributeValues", "[base]") {
         auto sel1 = population.matchAttributeValues("E-mapping-good",
                                                     std::string("does-not-exist"));
         CHECK(Selection({}) == sel1);
+
+        std::vector<std::string> strings {"C", "C", "C", "A", "B", "A"};
+        auto sel2 = population.matchAttributeValues("E-mapping-good", strings);
+        CHECK(sel2.flatSize() == 6);
+        CHECK(Selection({{0, 6}}) == sel2);
     }
 
     SECTION("Float attribute") {
