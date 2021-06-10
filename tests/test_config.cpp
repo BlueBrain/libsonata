@@ -114,6 +114,9 @@ TEST_CASE("CircuitConfig") {
               "manifest": {
                 "$NETWORK_DIR": "./data"
               },
+              "components": {
+                "morphologies_dir": ""
+              },
               "networks": {
                 "nodes": [
                   {
@@ -121,13 +124,46 @@ TEST_CASE("CircuitConfig") {
                     "populations": {
                       "nodes-A": {
                         "type": "biophysical"
+                      },
+                      "nodes-B": {
+                        "type": "virtualnode"
                       }
                     }
                   }
-                ]
+                ],
+                "edges":[]
               }
             })";
             CHECK_THROWS_AS(CircuitConfig(contents, "./"), SonataError);
+        }
+
+        {  // Biophysical population with morphology dir
+            auto contents = R"({
+              "manifest": {
+                "$NETWORK_DIR": "./data"
+              },
+              "components": {
+                "morphologies_dir": ""
+              },
+              "networks": {
+                "nodes": [
+                  {
+                    "nodes_file": "$NETWORK_DIR/nodes1.h5",
+                    "populations": {
+                      "nodes-A": {
+                        "type": "biophysical",
+                        "morphologies_dir": "/a/custom/morphology/path"
+                      },
+                      "nodes-B": {
+                        "type": "virtualnode"
+                      }
+                    }
+                  }
+                ],
+                "edges":[]
+              }
+            })";
+            CHECK_NOTHROW(CircuitConfig(contents, "./"));
         }
 
         {  // No node file defined for node subnetwork
@@ -164,7 +200,10 @@ TEST_CASE("CircuitConfig") {
               "networks": {
                 "nodes": [
                   {
-                    "nodes_file": "$NETWORK_DIR/nodes1.h5"
+                    "nodes_file": "$NETWORK_DIR/nodes1.h5",
+                    "populations": {
+                      "nodes-A": {}
+                    }
                   }
                 ],
                 "edges":[]
@@ -195,7 +234,15 @@ TEST_CASE("CircuitConfig") {
                     "nodes_file": "$NETWORK_DIR/nodes1.h5",
                     "populations": {
                       "nodes-A": {
-                        "morphologies_dir": "my/custom/morpholgoies/dir"
+                        "morphologies_dir": "my/custom/morpholgoies/dir",
+                        "alternate_morphologies": {
+                          "h5v1" : "another/custom/morphologies/dir"
+                        }
+                      },
+                      "nodes-B": {
+                        "alternate_morphologies": {
+                          "h5v1" : "another/custom/morphologies/dir"
+                        }
                       }
                     }
                   }
