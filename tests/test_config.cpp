@@ -117,12 +117,127 @@ TEST_CASE("CircuitConfig") {
               "networks": {
                 "nodes": [
                   {
-                    "nodes_file": "$NETWORK_DIR/nodes1.h5"
+                    "nodes_file": "$NETWORK_DIR/nodes1.h5",
+                    "populations": {
+                      "nodes-A": {
+                        "type": "biophysical"
+                      }
+                    }
                   }
                 ]
               }
             })";
             CHECK_THROWS_AS(CircuitConfig(contents, "./"), SonataError);
+        }
+
+        {  // No node file defined for node subnetwork
+            auto contents = R"({
+              "manifest": {
+                "$NETWORK_DIR": "./data"
+              },
+              "networks": {
+                "nodes": [
+                  {
+                    "nodes_file": ""
+                  }
+                ]
+              }
+            })";
+            CHECK_THROWS_AS(CircuitConfig(contents, "./"), SonataError);
+        }
+    }
+
+    SECTION("Overrides") {
+        {  // Population without overriden properties return default component values
+            auto contents = R"({
+              "manifest": {
+                "$NETWORK_DIR": "./data",
+                "$COMPONENT_DIR": "./"
+              },
+              "components": {
+                "morphologies_dir": "$COMPONENT_DIR/morphologies",
+                "biophysical_neuron_models_dir": "$COMPONENT_DIR/biophysical_neuron_models",
+                "alternate_morphologies": {
+                  "h5v1": "$COMPONENT_DIR/morphologies/h5"
+                }
+              },
+              "networks": {
+                "nodes": [
+                  {
+                    "nodes_file": "$NETWORK_DIR/nodes1.h5"
+                  }
+                ],
+                "edges":[]
+              }
+            })";
+            CHECK(CircuitConfig(contents, "./")
+                      .getNodePopulationProperties("nodes-A")
+                      .alternateMorphologyFormats["h5v1"]
+                      .find("morphologies/h5") != std::string::npos);
+        }
+
+        {  // Node population with overriden properties return correct information
+            auto contents = R"({
+              "manifest": {
+                "$NETWORK_DIR": "./data",
+                "$COMPONENT_DIR": "./"
+              },
+              "components": {
+                "morphologies_dir": "$COMPONENT_DIR/morphologies",
+                "biophysical_neuron_models_dir": "$COMPONENT_DIR/biophysical_neuron_models",
+                "alternate_morphologies": {
+                  "h5v1": "$COMPONENT_DIR/morphologies/h5"
+                }
+              },
+              "networks": {
+                "nodes": [
+                  {
+                    "nodes_file": "$NETWORK_DIR/nodes1.h5",
+                    "populations": {
+                      "nodes-A": {
+                        "morphologies_dir": "my/custom/morpholgoies/dir"
+                      }
+                    }
+                  }
+                ],
+                "edges":[]
+              }
+            })";
+            CHECK(CircuitConfig(contents, "./")
+                      .getNodePopulationProperties("nodes-A")
+                      .morphologiesDir.find("/my/custom/morpholgoies/dir") != std::string::npos);
+        }
+
+        {  // Edge population with overriden properties return correct information
+            auto contents = R"({
+              "manifest": {
+                "$NETWORK_DIR": "./data",
+                "$COMPONENT_DIR": "./"
+              },
+              "components": {
+                "morphologies_dir": "$COMPONENT_DIR/morphologies",
+                "biophysical_neuron_models_dir": "$COMPONENT_DIR/biophysical_neuron_models",
+                "alternate_morphologies": {
+                  "h5v1": "$COMPONENT_DIR/morphologies/h5"
+                }
+              },
+              "networks": {
+                "edges": [
+                  {
+                    "edges_file": "$NETWORK_DIR/edges1.h5",
+                    "populations": {
+                      "edges-AB": {
+                        "morphologies_dir": "my/custom/morpholgoies/dir"
+                      }
+                    }
+                  }
+                ],
+                "nodes":[]
+              }
+            })";
+            CHECK(CircuitConfig(contents, "./")
+                      .getEdgePopulationProperties("edges-AB")
+                      .morphologiesDir.find("/my/custom/morpholgoies/dir") != std::string::npos);
         }
     }
 }
