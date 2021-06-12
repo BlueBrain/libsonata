@@ -83,7 +83,7 @@ nlohmann::json expandVariables(const nlohmann::json& json,
 
         auto valueStr = value.get<std::string>();
 
-        for (auto& var : vars) {
+        for (const auto& var : vars) {
             const auto& varName = var.first;
             const auto& varValue = var.second;
             const auto startPos = valueStr.find(varName);
@@ -112,7 +112,7 @@ Variables readVariables(const nlohmann::json& json) {
     const std::regex regexVariable(R"(\$[a-zA-Z0-9_]*)");
 
     for (auto it = manifest.begin(); it != manifest.end(); ++it) {
-        const auto name = it.key();
+        const auto& name = it.key();
 
         if (std::regex_match(name, regexVariable)) {
             variables[name] = it.value();
@@ -157,8 +157,9 @@ class CircuitConfig::Parser
                             const std::string& key,
                             const std::string& defaultValue = std::string()) const {
         auto value = getJSONValue<std::string>(json, key);
-        if (!value.empty())
+        if (!value.empty()) {
             return toAbsolute(value);
+        }
 
         return defaultValue;
     }
@@ -178,9 +179,10 @@ class CircuitConfig::Parser
         const auto& networks = _json.at("networks");
 
         const std::string component = prefix + "s";
-        if (networks.find(component) == networks.end())
+        if (networks.find(component) == networks.end()) {
             throw SonataError(
                 fmt::format("Error parsing networks config: '{}' not specified", component));
+        }
 
         return networks.at(component);
     }
@@ -228,9 +230,10 @@ class CircuitConfig::Parser
         std::vector<SubnetworkFiles> output;
         for (const auto& node : network) {
             auto h5File = getJSONPath(node, elementsFile);
-            if (h5File.empty())
+            if (h5File.empty()) {
                 throw SonataError(
                     fmt::format("'{}' network do not define '{}' entry", prefix, elementsFile));
+            }
 
             auto csvFile = getJSONPath(node, typesFile);
 
@@ -258,14 +261,16 @@ class CircuitConfig::Parser
         // Iterate over all defined subnetworks
         for (const auto& node : network) {
             const auto populationsIt = node.find("populations");
-            if (populationsIt == node.end())
+            if (populationsIt == node.end()) {
                 continue;
+            }
 
             // Iterate over all defined populations
             for (auto it = populationsIt->begin(); it != populationsIt->end(); ++it) {
                 const auto& popData = it.value();
-                if (popData.empty())
+                if (popData.empty()) {
                     continue;
+                }
 
                 PopulationProperties& popProperties = output[it.key()];
 
@@ -309,8 +314,9 @@ class CircuitConfig::PopulationResolver
   public:
     static std::set<std::string> listPopulations(const std::vector<SubnetworkFiles>& src) {
         std::set<std::string> result;
-        for (const auto& subNetwork : src)
+        for (const auto& subNetwork : src) {
             result.insert(subNetwork.populations.begin(), subNetwork.populations.end());
+        }
         return result;
     }
 
@@ -319,8 +325,9 @@ class CircuitConfig::PopulationResolver
                                         const std::vector<SubnetworkFiles>& src) {
         for (const auto& subNetwork : src) {
             for (const auto& population : subNetwork.populations) {
-                if (population == populationName)
+                if (population == populationName) {
                     return PopulationType(subNetwork.elements, subNetwork.types, populationName);
+                }
             }
         }
 
@@ -331,8 +338,9 @@ class CircuitConfig::PopulationResolver
         std::set<std::string> check;
         for (const auto& subNetwork : src) {
             for (const auto& population : subNetwork.populations) {
-                if (check.find(population) != check.end())
+                if (check.find(population) != check.end()) {
                     throw SonataError(fmt::format("Duplicate population name '{}'", population));
+                }
                 check.insert(population);
             }
         }
@@ -384,22 +392,27 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
         [&](std::unordered_map<std::string, PopulationProperties>& map,
             const std::string& defaultType) {
             for (auto& entry : map) {
-                if (entry.second.type.empty())
+                if (entry.second.type.empty()) {
                     entry.second.type = defaultType;
-                if (entry.second.alternateMorphologyFormats.empty())
+                }
+                if (entry.second.alternateMorphologyFormats.empty()) {
                     entry.second.alternateMorphologyFormats = _components.alternateMorphologiesDir;
-                if (entry.second.biophysicalNeuronModelsDir.empty())
+                }
+                if (entry.second.biophysicalNeuronModelsDir.empty()) {
                     entry.second.biophysicalNeuronModelsDir =
                         _components.biophysicalNeuronModelsDir;
-                if (entry.second.morphologiesDir.empty())
+                }
+                if (entry.second.morphologiesDir.empty()) {
                     entry.second.morphologiesDir = _components.morphologiesDir;
+                }
             }
         };
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
     updateDefaultProperties(_edgePopulationProperties, "chemical_synapse");
 
-    if (_components.morphologiesDir.empty())
+    if (_components.morphologiesDir.empty()) {
         PopulationResolver::checkBiophysicalPopulations(_networkNodes, _nodePopulationProperties);
+    }
 }
 
 CircuitConfig CircuitConfig::fromFile(const std::string& path) {
@@ -428,8 +441,9 @@ EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name) const {
 
 PopulationProperties CircuitConfig::getNodePopulationProperties(const std::string& name) const {
     auto populations = listNodePopulations();
-    if (populations.find(name) == populations.end())
+    if (populations.find(name) == populations.end()) {
         throw SonataError(fmt::format("Could not find node population '{}'", name));
+    }
 
     auto popPropertiesIt = _nodePopulationProperties.find(name);
     if (popPropertiesIt != _nodePopulationProperties.end()) {
@@ -444,8 +458,9 @@ PopulationProperties CircuitConfig::getNodePopulationProperties(const std::strin
 
 PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string& name) const {
     auto populations = listEdgePopulations();
-    if (populations.find(name) == populations.end())
+    if (populations.find(name) == populations.end()) {
         throw SonataError(fmt::format("Could not find edge population '{}'", name));
+    }
 
     auto popPropertiesIt = _edgePopulationProperties.find(name);
     if (popPropertiesIt != _edgePopulationProperties.end()) {
