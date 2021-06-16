@@ -36,7 +36,7 @@ class NodeSets;
 class NodeSetRule
 {
   public:
-    virtual ~NodeSetRule(){};
+    virtual ~NodeSetRule() = default;
 
     virtual Selection materialize(const NodeSets&, const NodePopulation&) const = 0;
     virtual std::string toJSON() const = 0;
@@ -51,7 +51,7 @@ class NodeSets
     std::map<std::string, NodeSetRules> node_sets_;
 
   public:
-    NodeSets(const std::string& content) {
+    explicit NodeSets(const std::string& content) {
         json j = json::parse(content);
         if (!j.is_object()) {
             throw SonataError("Top level node_set must be an object");
@@ -179,9 +179,9 @@ class NodeSetBasicNodeIds: public NodeSetRule
 class NodeSetBasicOperatorString: public NodeSetRule
 {
   public:
-    explicit NodeSetBasicOperatorString(const std::string attribute,
-                                        const std::string op,
-                                        const std::string value)
+    explicit NodeSetBasicOperatorString(const std::string& attribute,
+                                        const std::string& op,
+                                        const std::string& value)
         : op_(string2op(op))
         , attribute_(attribute)
         , value_(value) {}
@@ -229,7 +229,9 @@ class NodeSetBasicOperatorString: public NodeSetRule
 class NodeSetBasicOperatorNumeric: public NodeSetRule
 {
   public:
-    explicit NodeSetBasicOperatorNumeric(const std::string name, const std::string op, double value)
+    explicit NodeSetBasicOperatorNumeric(const std::string& name,
+                                         const std::string& op,
+                                         double value)
         : name_(name)
         , value_(value)
         , op_(string2op(op)) {}
@@ -299,9 +301,9 @@ using CompoundTargets = std::vector<std::string>;
 class NodeSetCompoundRule: public NodeSetRule
 {
   public:
-    NodeSetCompoundRule(std::string name, const CompoundTargets& targets)
+    NodeSetCompoundRule(std::string name, CompoundTargets targets)
         : name_(std::move(name))
-        , targets_(targets) {}
+        , targets_(std::move(targets)) {}
 
     Selection materialize(const detail::NodeSets& ns, const NodePopulation& np) const final {
         Selection ret{{}};
@@ -493,8 +495,8 @@ void parse_compound(const json& j, std::map<std::string, NodeSetRules>& node_set
 NodeSets::NodeSets(const std::string& content)
     : impl_(new detail::NodeSets(content)) {}
 
-NodeSets::NodeSets(NodeSets&&) = default;
-NodeSets& NodeSets::operator=(NodeSets&&) = default;
+NodeSets::NodeSets(NodeSets&&) noexcept = default;
+NodeSets& NodeSets::operator=(NodeSets&&) noexcept = default;
 NodeSets::~NodeSets() = default;
 
 NodeSets NodeSets::fromFile(const std::string& path) {

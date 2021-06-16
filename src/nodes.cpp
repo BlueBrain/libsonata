@@ -43,16 +43,16 @@ Selection _matchAttributeValues(const NodePopulation& population,
     }
 }
 
-bool is_unsigned_int(HighFive::DataType dtype) {
+bool is_unsigned_int(const HighFive::DataType& dtype) {
     return dtype == HighFive::AtomicType<uint8_t>() || dtype == HighFive::AtomicType<uint16_t>() ||
            dtype == HighFive::AtomicType<uint32_t>() || dtype == HighFive::AtomicType<uint64_t>();
 }
 
-bool is_signed_int(HighFive::DataType dtype) {
+bool is_signed_int(const HighFive::DataType& dtype) {
     return dtype == HighFive::AtomicType<int8_t>() || dtype == HighFive::AtomicType<int16_t>() ||
            dtype == HighFive::AtomicType<int32_t>() || dtype == HighFive::AtomicType<int64_t>();
 }
-bool is_floating(HighFive::DataType dtype) {
+bool is_floating(const HighFive::DataType& dtype) {
     return dtype == HighFive::AtomicType<float>() || dtype == HighFive::AtomicType<double>();
 }
 
@@ -105,28 +105,28 @@ Selection NodePopulation::regexMatch(const std::string& name, const std::string&
 }
 
 template <typename T>
-Selection NodePopulation::matchAttributeValues(const std::string& name,
+Selection NodePopulation::matchAttributeValues(const std::string& attribute,
                                                const std::vector<T>& values) const {
-    auto dtype = impl_->getAttributeDataSet(name).getDataType();
+    auto dtype = impl_->getAttributeDataSet(attribute).getDataType();
     if (is_unsigned_int(dtype) || is_signed_int(dtype)) {
-        return _matchAttributeValues<T>(*this, name, values);
+        return _matchAttributeValues<T>(*this, attribute, values);
     } else if (is_floating(dtype)) {
         throw SonataError("Exact comparison for float/double explicitly not supported");
     } else {
         throw SonataError(
-            fmt::format("Unexpected datatype for dataset '{}'", _attributeDataType(name)));
+            fmt::format("Unexpected datatype for dataset '{}'", _attributeDataType(attribute)));
     }
 }
 
 template <typename T>
-Selection NodePopulation::matchAttributeValues(const std::string& name, const T value) const {
+Selection NodePopulation::matchAttributeValues(const std::string& attribute, const T value) const {
     std::vector<T> values{value};
-    return matchAttributeValues<T>(name, values);
+    return matchAttributeValues<T>(attribute, values);
 }
 
 template <>
 Selection NodePopulation::matchAttributeValues<std::string>(
-    const std::string& name, const std::vector<std::string>& values) const {
+    const std::string& attribute, const std::vector<std::string>& values) const {
     std::vector<std::string> values_sorted(values);
     std::sort(values_sorted.begin(), values_sorted.end());
 
@@ -134,14 +134,14 @@ Selection NodePopulation::matchAttributeValues<std::string>(
         return std::binary_search(values_sorted.cbegin(), values_sorted.cend(), v);
     };
 
-    return _filterStringAttribute(*this, name, pred);
+    return _filterStringAttribute(*this, attribute, pred);
 }
 
 template <>
-Selection NodePopulation::matchAttributeValues<std::string>(const std::string& name,
+Selection NodePopulation::matchAttributeValues<std::string>(const std::string& attribute,
                                                             const std::string value) const {
     std::vector<std::string> values{value};
-    return matchAttributeValues<std::string>(name, values);
+    return matchAttributeValues<std::string>(attribute, values);
 }
 
 
