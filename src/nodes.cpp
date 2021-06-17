@@ -8,120 +8,140 @@
  *************************************************************************/
 
 #include "population.hpp"
+#include "utils.h"
 
-#include <algorithm>  // std::binary_search
+#include <algorithm>  // std::binary_search, std::max_element, std::any_of
+#include <regex>
 
 #include <fmt/format.h>
 
 #include <bbp/sonata/common.h>
 #include <bbp/sonata/nodes.h>
 
-
 namespace bbp {
 namespace sonata {
 
-//--------------------------------------------------------------------------------------------------
+namespace {
+
+template <typename T>
+Selection _matchAttributeValues(const NodePopulation& population,
+                                const std::string& name,
+                                const std::vector<T>& wanted) {
+    if (wanted.empty()) {
+        return Selection({});
+    } else if (wanted.size() == 1) {
+        return population.filterAttribute<T>(name,
+                                             [&wanted](const T& v) { return wanted[0] == v; });
+    } else {
+        std::vector<T> wanted_sorted(wanted);
+        std::sort(wanted_sorted.begin(), wanted_sorted.end());
+
+        const auto pred = [&wanted_sorted](const T& v) {
+            return std::binary_search(wanted_sorted.cbegin(), wanted_sorted.cend(), v);
+        };
+        return population.filterAttribute<T>(name, pred);
+    }
+}
+
+bool is_unsigned_int(const HighFive::DataType& dtype) {
+    return dtype == HighFive::AtomicType<uint8_t>() || dtype == HighFive::AtomicType<uint16_t>() ||
+           dtype == HighFive::AtomicType<uint32_t>() || dtype == HighFive::AtomicType<uint64_t>();
+}
+
+bool is_signed_int(const HighFive::DataType& dtype) {
+    return dtype == HighFive::AtomicType<int8_t>() || dtype == HighFive::AtomicType<int16_t>() ||
+           dtype == HighFive::AtomicType<int32_t>() || dtype == HighFive::AtomicType<int64_t>();
+}
+bool is_floating(const HighFive::DataType& dtype) {
+    return dtype == HighFive::AtomicType<float>() || dtype == HighFive::AtomicType<double>();
+}
+
+template <typename UnaryPredicate>
+Selection _filterStringAttribute(const NodePopulation& population,
+                                 std::string name,
+                                 UnaryPredicate pred) {
+    if (population.enumerationNames().count(name) > 0) {
+        const auto& enum_values = population.enumerationValues(name);
+        // it's assumed that the cardinality of a @library is low
+        // enough that a std::vector<bool> won't be too large
+        std::vector<bool> wanted_enum_mask(enum_values.size());
+
+        bool has_elements = false;
+        for (size_t i = 0; i < enum_values.size(); ++i) {
+            if (pred(enum_values[i])) {
+                wanted_enum_mask[i] = true;
+                has_elements = true;
+            }
+        }
+
+        if (!has_elements) {
+            return Selection({});
+        }
+
+        const auto& values = population.getEnumeration<size_t>(name, population.selectAll());
+        return _getMatchingSelection(values, [&wanted_enum_mask](const size_t v) {
+            return wanted_enum_mask.at(v);
+        });
+    }
+
+    // normal, non-enum, attribute
+    return population.filterAttribute<std::string>(name, pred);
+}
+}  // anonymous namespace
 
 NodePopulation::NodePopulation(const std::string& h5FilePath,
                                const std::string& csvFilePath,
                                const std::string& name)
     : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
 
-
-namespace {
-
-template <typename T>
-Selection _getMatchingSelection(const std::vector<T>& values, const std::vector<T>& wanted) {
-    Selection::Values idx;
-    Selection::Value id = 0;
-
-    if (wanted.size() == 1) {
-        for (const auto& v : values) {
-            if (v == wanted[0]) {
-                idx.push_back(id);
-            }
-            ++id;
-        }
-    } else {
-        std::vector<T> wanted_sorted(wanted);
-        std::sort(wanted_sorted.begin(), wanted_sorted.end());
-        for (const auto& v : values) {
-            if (std::binary_search(wanted_sorted.cbegin(), wanted_sorted.cend(), v)) {
-                idx.push_back(id);
-            }
-            ++id;
-        }
-    }
-    return Selection::fromValues(idx);
+Selection NodePopulation::regexMatch(const std::string& name, const std::string& regex) const {
+    std::regex re(regex);
+    const auto pred = [re](const std::string& v) {
+        std::smatch match;
+        std::regex_search(v, match, re);
+        return !match.empty();
+    };
+    return _filterStringAttribute(*this, name, pred);
 }
 
 template <typename T>
-Selection _matchAttributeValues(const NodePopulation& population,
-                                const std::string& name,
-                                const std::vector<T>& wanted) {
-    return _getMatchingSelection(population.getAttribute<T>(name, population.selectAll()), wanted);
-}
-}  // anonymous namespace
-
-template <typename T>
-Selection NodePopulation::matchAttributeValues(const std::string& name,
-                                               const std::vector<T>& value) const {
-    auto dtype = impl_->getAttributeDataSet(name).getDataType();
-    if (dtype == HighFive::AtomicType<int8_t>() || dtype == HighFive::AtomicType<uint8_t>() ||
-        dtype == HighFive::AtomicType<int16_t>() || dtype == HighFive::AtomicType<uint16_t>() ||
-        dtype == HighFive::AtomicType<int32_t>() || dtype == HighFive::AtomicType<uint32_t>() ||
-        dtype == HighFive::AtomicType<int64_t>() || dtype == HighFive::AtomicType<uint64_t>()) {
-        return _matchAttributeValues<T>(*this, name, value);
-    } else if (dtype == HighFive::AtomicType<float>() || dtype == HighFive::AtomicType<double>()) {
+Selection NodePopulation::matchAttributeValues(const std::string& attribute,
+                                               const std::vector<T>& values) const {
+    auto dtype = impl_->getAttributeDataSet(attribute).getDataType();
+    if (is_unsigned_int(dtype) || is_signed_int(dtype)) {
+        return _matchAttributeValues<T>(*this, attribute, values);
+    } else if (is_floating(dtype)) {
         throw SonataError("Exact comparison for float/double explicitly not supported");
     } else {
         throw SonataError(
-            fmt::format("Unexpected datatype for dataset '{}'", _attributeDataType(name)));
+            fmt::format("Unexpected datatype for dataset '{}'", _attributeDataType(attribute)));
     }
 }
 
 template <typename T>
-Selection NodePopulation::matchAttributeValues(const std::string& name, const T value) const {
+Selection NodePopulation::matchAttributeValues(const std::string& attribute, const T value) const {
     std::vector<T> values{value};
-    return matchAttributeValues<T>(name, values);
+    return matchAttributeValues<T>(attribute, values);
 }
 
 template <>
 Selection NodePopulation::matchAttributeValues<std::string>(
-    const std::string& name, const std::vector<std::string>& values) const {
-    if (enumerationNames().count(name) > 0) {
-        const auto enum_values = enumerationValues(name);
-        std::vector<size_t> wanted_enum_value;
-        wanted_enum_value.reserve(values.size());
-        for (const auto& v : values) {
-            const auto wanted_index = std::find(enum_values.cbegin(), enum_values.cend(), v);
-            if (wanted_index != enum_values.cend()) {
-                wanted_enum_value.push_back(wanted_index - enum_values.cbegin());
-            }
-        }
+    const std::string& attribute, const std::vector<std::string>& values) const {
+    std::vector<std::string> values_sorted(values);
+    std::sort(values_sorted.begin(), values_sorted.end());
 
-        if (wanted_enum_value.empty()) {
-            return Selection({});
-        }
+    const auto pred = [&values_sorted](const std::string& v) {
+        return std::binary_search(values_sorted.cbegin(), values_sorted.cend(), v);
+    };
 
-        return _getMatchingSelection<size_t>(getEnumeration<size_t>(name, selectAll()),
-                                             wanted_enum_value);
-    }
-
-    auto dtype = impl_->getAttributeDataSet(name).getDataType();
-    if (dtype != HighFive::AtomicType<std::string>()) {
-        throw SonataError("H5 dataset must be a string");
-    }
-
-    // normal, non-enum, attribute
-    return _matchAttributeValues<std::string>(*this, name, values);
+    return _filterStringAttribute(*this, attribute, pred);
 }
 
 template <>
-Selection NodePopulation::matchAttributeValues<std::string>(const std::string& name,
+Selection NodePopulation::matchAttributeValues<std::string>(const std::string& attribute,
                                                             const std::string value) const {
     std::vector<std::string> values{value};
-    return matchAttributeValues<std::string>(name, values);
+    return matchAttributeValues<std::string>(attribute, values);
 }
 
 

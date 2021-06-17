@@ -56,6 +56,18 @@ TEST_CASE("NodeSetParse") {
         NodeSets ns(node_sets);
         CHECK_THROWS_AS(ns.materialize("NONEXISTANT", population), SonataError);
     }
+
+    SECTION("OperatorMultipleClauses")
+    {
+        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to ops": 3, "2nd": 3}} })"";
+        CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
+    }
+
+    SECTION("OperatorObject")
+    {
+        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to ops": {}}} })"";
+        CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
+    }
 }
 
 TEST_CASE("NodeSetBasic") {
@@ -81,6 +93,57 @@ TEST_CASE("NodeSetBasic") {
         NodeSets ns(node_sets);
         Selection sel = ns.materialize("NodeSet0", population);
         CHECK(sel == Selection({{0, 1}, {2, 3}, {4, 6}}));
+    }
+
+    SECTION("BasicScalarOperatorStringRegex") {
+        {
+            auto node_sets = R"({ "NodeSet0": {"E-mapping-good": {"$regex": "^[AC].*"}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 1}, {2, 6}}));
+        }
+
+        {
+            auto node_sets = R""({ "NodeSet0": {"attr-Z": {"$regex": "^(aa|bb|ff)"}} })"";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 2}, {5,6}}));
+        }
+        {
+            auto node_sets = R""({ "NodeSet0": {"attr-Z": {"$op-does-not-exist": "dne"}} })"";
+            CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
+        }
+    }
+
+    SECTION("BasicScalarOperatorNumeric") {
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$gt": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{3, 6}}));
+        }
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$lt": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 2}}));
+        }
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$gte": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{2, 6}}));
+        }
+        {
+            auto node_sets = R"({ "NodeSet0": {"attr-Y": {"$lte": 23}} })";
+            NodeSets ns(node_sets);
+            Selection sel = ns.materialize("NodeSet0", population);
+            CHECK(sel == Selection({{0, 3}}));
+        }
+        {
+            auto node_sets = R""({ "NodeSet0": {"attr-Y": {"$op-does-not-exist": 3}} })"";
+            CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
+        }
     }
 
     SECTION("BasicScalarAnded") {
@@ -176,6 +239,15 @@ TEST_CASE("NodeSet") {
             "model_type": "point",
             "node_id": [1, 2, 3, 5, 7, 9]
         },
+        "power_number_test": {
+            "numeric_attribute_gt": { "$gt": 3 },
+            "numeric_attribute_lt": { "$lt": 3 },
+            "numeric_attribute_gte": { "$gte": 3 },
+            "numeric_attribute_lte": { "$lte": 3 }
+        },
+        "power_regex_test": {
+            "string_attr": { "$regex": "^[s][o]me value$" }
+        },
         "combined": ["bio_layer45", "V1_point_prime"]
     })";
 
@@ -191,7 +263,7 @@ TEST_CASE("NodeSet") {
 
     SECTION("names") {
         NodeSets ns(node_sets);
-        std::set<std::string> expected = {"bio_layer45", "V1_point_prime", "combined"};
+        std::set<std::string> expected = {"bio_layer45", "V1_point_prime", "combined", "power_number_test", "power_regex_test"};
         CHECK(ns.names() == expected);
     }
 }
