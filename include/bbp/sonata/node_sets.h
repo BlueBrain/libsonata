@@ -26,9 +26,9 @@ class SONATA_API NodeSets
      * \throw if content cannot be parsed
      */
     NodeSets(const std::string& content);
-    NodeSets(NodeSets&&);
+    NodeSets(NodeSets&&) noexcept;
     NodeSets(const NodeSets& other) = delete;
-    NodeSets& operator=(NodeSets&&);
+    NodeSets& operator=(NodeSets&&) noexcept;
     ~NodeSets();
 
     /** Open a SONATA `node sets` file from a path */

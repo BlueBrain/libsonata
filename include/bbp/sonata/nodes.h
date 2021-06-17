@@ -45,7 +45,7 @@ class SONATA_API NodePopulation: public Population
      * Note: This does not match dynamics_params datasets
      */
     template <typename T>
-    Selection matchAttributeValues(const std::string& attribute, const T value) const;
+    Selection matchAttributeValues(const std::string& attribute, const T values) const;
 
     /**
      * Like matchAttributeValues, but for vectors of values to match
@@ -53,6 +53,12 @@ class SONATA_API NodePopulation: public Population
     template <typename T>
     Selection matchAttributeValues(const std::string& attribute,
                                    const std::vector<T>& values) const;
+
+
+    /**
+     * For named attribute, return a selection where the passed regular expression matches
+     */
+    Selection regexMatch(const std::string& attribute, const std::string& re) const;
 };
 
 //--------------------------------------------------------------------------------------------------

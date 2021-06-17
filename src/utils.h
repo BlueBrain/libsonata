@@ -10,5 +10,22 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
+#include <bbp/sonata/population.h>
 
 std::string readFile(const std::string& path);
+
+template <typename T, class UnaryPredicate>
+bbp::sonata::Selection _getMatchingSelection(const std::vector<T>& values, UnaryPredicate pred) {
+    using bbp::sonata::Selection;
+    Selection::Values ids;
+    Selection::Value id = 0;
+    for (const auto& v : values) {
+        if (pred(v)) {
+            ids.push_back(id);
+        }
+        ++id;
+    }
+    return Selection::fromValues(ids);
+}
