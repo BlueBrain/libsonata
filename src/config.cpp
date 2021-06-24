@@ -103,7 +103,7 @@ using Variables = std::map<std::string, std::string>;
 Variables readVariables(const nlohmann::json& json) {
     Variables variables;
 
-    if (json.find("networks") == json.end()) {
+    if (json.find("networks") == json.end() || json.find("manifest") == json.end()) {
         return variables;
     }
 
