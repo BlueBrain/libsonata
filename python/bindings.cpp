@@ -3,6 +3,7 @@
 #include <pybind11/stl.h>
 
 #include <bbp/sonata/common.h>
+#include <bbp/sonata/config.h>
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/node_sets.h>
 #include <bbp/sonata/nodes.h>
@@ -473,10 +474,37 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::class_<NodeSets>(m, "NodeSets", "")
         .def(py::init<const std::string&>())
-        .def_static("from_file", &NodeSets::fromFile)
+        .def_static("from_file", [](py::object path) { return NodeSets::fromFile(py::str(path)); })
         .def_property_readonly("names", &NodeSets::names, DOC_NODESETS(names))
         .def("materialize", &NodeSets::materialize, DOC_NODESETS(materialize))
         .def("toJSON", &NodeSets::toJSON, DOC_NODESETS(toJSON));
+
+    py::class_<PopulationProperties>(m,
+                                     "PopulationProperties",
+                                     "Stores population-specific network information")
+        .def_readonly("type", &PopulationProperties::type, "Population type")
+        .def_readonly("biophysical_neuron_models_dir",
+                      &PopulationProperties::biophysicalNeuronModelsDir,
+                      "Path to the template HOC files defining the E-Mode")
+        .def_readonly("morphologies_dir",
+                      &PopulationProperties::morphologiesDir,
+                      "Path to the directory containing the morphologies")
+        .def_readonly("alternate_morphology_formats",
+                      &PopulationProperties::alternateMorphologyFormats,
+                      "Path to the directory containing the morphologies");
+
+    py::class_<CircuitConfig>(m, "CircuitConfig", "")
+        .def(py::init<const std::string&, const std::string&>())
+        .def_static("from_file",
+                    [](py::object path) { return CircuitConfig::fromFile(py::str(path)); })
+        .def_property_readonly("node_sets_path", &CircuitConfig::getNodeSetsPath)
+        .def_property_readonly("node_populations", &CircuitConfig::listNodePopulations)
+        .def("node_population", &CircuitConfig::getNodePopulation)
+        .def_property_readonly("edge_populations", &CircuitConfig::listEdgePopulations)
+        .def("edge_population", &CircuitConfig::getEdgePopulation)
+        .def("node_population_properties", &CircuitConfig::getNodePopulationProperties, "name"_a)
+        .def("edge_population_properties", &CircuitConfig::getEdgePopulationProperties, "name"_a)
+        .def_property_readonly("expanded_json", &CircuitConfig::getExpandedJSON);
 
 
     bindPopulationClass<EdgePopulation>(

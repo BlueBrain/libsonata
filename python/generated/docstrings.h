@@ -23,6 +23,110 @@
 #endif
 
 
+static const char *__doc_bbp_sonata_CircuitConfig = R"doc(Read access to a SONATA circuit config file.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_CircuitConfig =
+R"doc(Parses a SONATA JSON config file.
+
+Throws:
+    s SonataError on: - Ill-formed JSON - Missing mandatory entries
+    (in any depth) - Missing entries which become mandatory when
+    another entry is present - Multiple populations with the same name
+    in different edge/node networks)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components_alternateMorphologiesDir = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components_biophysicalNeuronModelsDir = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components_morphologiesDir = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Parser = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_PopulationResolver = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_elements = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_populations = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_types = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_components = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_edgePopulationProperties = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_expandedJSON = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_fromFile =
+R"doc(Loads a SONATA JSON config file from disk and returns a CircuitConfig
+object which parses it.
+
+Throws:
+    s SonataError on: - Non accesible file (does not exists / does not
+    have read access) - Ill-formed JSON - Missing mandatory entries
+    (in any depth) - Missing entries which become mandatory when
+    another entry is present - Multiple populations with the same name
+    in different edge/node networks)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getEdgePopulation =
+R"doc(Creates and returns an EdgePopulation object, initialized from the
+given population, and the edge network it belongs to.
+
+Throws:
+    s SonataError if the given population does not exist in any edge
+    network.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getEdgePopulationProperties =
+R"doc(Return a structure containing edge population specific properties,
+falling back to network properties if there are no population-specific
+ones.
+
+Throws:
+    s SonataError if the given population name does not correspond to
+    any existing edge population.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getExpandedJSON =
+R"doc(Returns the configuration file JSON whose variables have been expanded
+by the manifest entries.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getNodePopulation =
+R"doc(Creates and returns a NodePopulation object, initialized from the
+given population, and the node network it belongs to.
+
+Throws:
+    s SonataError if the given population does not exist in any node
+    network.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getNodePopulationProperties =
+R"doc(Return a structure containing node population specific properties,
+falling back to network properties if there are no population-specific
+ones.
+
+Throws:
+    s SonataError if the given population name does not correspond to
+    any existing node population.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getNodeSetsPath = R"doc(Returns the path to the node sets file.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_listEdgePopulations =
+R"doc(Returns a set with all available population names across all the edge
+networks.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_listNodePopulations =
+R"doc(Returns a set with all available population names across all the node
+networks.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_networkEdges = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_networkNodes = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_nodePopulationProperties = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_nodeSetsFile = R"doc()doc";
+
 static const char *__doc_bbp_sonata_DataFrame = R"doc()doc";
 
 static const char *__doc_bbp_sonata_DataFrame_data = R"doc()doc";
@@ -119,6 +223,16 @@ static const char *__doc_bbp_sonata_NodeSets_operator_assign = R"doc()doc";
 static const char *__doc_bbp_sonata_NodeSets_toJSON = R"doc(Return string version of node sets)doc";
 
 static const char *__doc_bbp_sonata_Population = R"doc()doc";
+
+static const char *__doc_bbp_sonata_PopulationProperties = R"doc(Stores population-specific network information.)doc";
+
+static const char *__doc_bbp_sonata_PopulationProperties_alternateMorphologyFormats = R"doc(Dictionary for alternate directory paths.)doc";
+
+static const char *__doc_bbp_sonata_PopulationProperties_biophysicalNeuronModelsDir = R"doc(Path to the template HOC files defining the E-Mode)doc";
+
+static const char *__doc_bbp_sonata_PopulationProperties_morphologiesDir = R"doc(Path to the directory containing the morphologies)doc";
+
+static const char *__doc_bbp_sonata_PopulationProperties_type = R"doc(Population type)doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage = R"doc(Collection of {PopulationClass}s stored in a H5 file and optional CSV.)doc";
 
