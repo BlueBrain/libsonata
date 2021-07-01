@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.1.9: Thu 01 Jul 2021
+
+### Added:
+    * circuit_config.json implementation (#142)
+    * allow for simple expressions (#147) in node_sets as proposed to the 
+      offical SONATA spec in https://github.com/AllenInstitute/sonata/pull/129
+
+### Fixed:
+    * upgrade Catch2 to 2.13.6; autodetect test names (#148)
+    * move to fmt 7.1.2 (#145)
+
 ## v0.1.8: Wed 10 Feb 2021
 
 ### Fixed:
