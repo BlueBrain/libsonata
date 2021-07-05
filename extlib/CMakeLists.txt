@@ -6,8 +6,6 @@ target_include_directories(HighFive INTERFACE
 target_link_libraries(HighFive INTERFACE
     ${HDF5_C_LIBRARIES})
 
-add_subdirectory(filesystem)
-
 add_subdirectory(fmt)
 
 add_library(nlohmann_json INTERFACE)
