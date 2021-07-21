@@ -68,9 +68,9 @@ endif()
 if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
 else()
-    find_package(fmt REQUIRED)
     find_package(Catch2 REQUIRED)
     find_package(HighFive REQUIRED)
+    find_package(fmt REQUIRED)
     find_package(nlohmann_json REQUIRED)
 endif()
 
@@ -108,7 +108,6 @@ foreach(TARGET sonata_shared sonata_static)
             OUTPUT_NAME "sonata"
     )
     target_include_directories(${TARGET}
-        PRIVATE $<TARGET_PROPERTY:ghc_filesystem,INTERFACE_INCLUDE_DIRECTORIES>
         PUBLIC
             $<BUILD_INTERFACE:${SONATA_INCLUDE_DIR}>
             $<INSTALL_INTERFACE:include>
