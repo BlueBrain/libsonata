@@ -12,6 +12,7 @@ add_executable(unittests ${TESTS_SRC})
 target_link_libraries(unittests
     PRIVATE sonata_shared
     PRIVATE Catch2::Catch2
+    PRIVATE nlohmann_json::nlohmann_json
 )
 add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
