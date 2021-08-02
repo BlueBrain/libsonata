@@ -1,5 +1,6 @@
 set(TESTS_SRC
   main.cpp
+  test_config.cpp
   test_edges.cpp
   test_node_sets.cpp
   test_nodes.cpp
@@ -13,3 +14,7 @@ target_link_libraries(unittests
     PRIVATE Catch2::Catch2
 )
 add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
+catch_discover_tests(unittests
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    )

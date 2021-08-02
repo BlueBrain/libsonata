@@ -68,9 +68,9 @@ endif()
 if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
 else()
-    find_package(fmt REQUIRED)
     find_package(Catch2 REQUIRED)
     find_package(HighFive REQUIRED)
+    find_package(fmt REQUIRED)
     find_package(nlohmann_json REQUIRED)
 endif()
 
@@ -80,6 +80,7 @@ endif()
 
 set(SONATA_SRC
     src/common.cpp
+    src/config.cpp
     src/edge_index.cpp
     src/edges.cpp
     src/hdf5_mutex.cpp
@@ -118,6 +119,7 @@ foreach(TARGET sonata_shared sonata_static)
         PRIVATE fmt::fmt-header-only
         PUBLIC HighFive
     )
+
     if (ENABLE_COVERAGE)
         target_compile_options(${TARGET}
             PRIVATE -g -O0 --coverage -fprofile-arcs -ftest-coverage

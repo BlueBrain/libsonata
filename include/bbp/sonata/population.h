@@ -12,6 +12,7 @@
 #include "common.h"
 
 #include <cstdint>
+#include <functional>
 #include <memory>  // std::shared_ptr, std::unique_ptr
 #include <set>
 #include <string>
@@ -231,6 +232,9 @@ class SONATA_API Population
      * and is not intended for use in the ordinary client C++ code.
      */
     std::string _dynamicsAttributeDataType(const std::string& name) const;
+
+    template <typename T>
+    Selection filterAttribute(const std::string& name, std::function<bool(const T)> pred) const;
 
   protected:
     Population(const std::string& h5FilePath,

@@ -19,6 +19,9 @@ recursive-include extlib/HighFive/include *
 include extlib/HighFive/CMakeLists.txt
 include extlib/HighFive/LICENSE
 
+# ghc::filesystem
+include extlib/filesystem.hpp
+
 # pybind11
 recursive-include python/pybind11/include *
 recursive-include python/pybind11/tools *.cmake
