@@ -103,6 +103,10 @@ class SONATA_API ReportReader
     class Population
     {
       public:
+        Population(const Population&) = delete;
+        Population& operator=(const Population&) = delete;
+        Population(Population&&) = default;
+        Population& operator=(Population&) = default;
         /**
          * Return (tstart, tstop, tstep) of the population
          */

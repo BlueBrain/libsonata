@@ -38,7 +38,7 @@ TEST_CASE("SpikeReader", "[base]") {
 TEST_CASE("SomaReportReader limits", "[base]") {
     const SomaReportReader reader("./data/somas.h5");
 
-    auto pop = reader.openPopulation("All");
+    auto& pop = reader.openPopulation("All");
 
     // ids out of range
     REQUIRE(pop.get(Selection({{100, 101}})).ids == DataFrame<NodeID>::DataType{});
@@ -59,7 +59,7 @@ TEST_CASE("SomaReportReader limits", "[base]") {
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), -1., -2.));
 
     // DataType of dataset 'data' should be Float32
-    auto pop2 = reader.openPopulation("soma1");
+    auto& pop2 = reader.openPopulation("soma1");
     REQUIRE_THROWS(pop2.get());
 }
 
@@ -68,7 +68,7 @@ TEST_CASE("SomaReportReader", "[base]") {
 
     REQUIRE(reader.getPopulationNames() == std::vector<std::string>{"All", "soma1", "soma2"});
 
-    auto pop = reader.openPopulation("All");
+    auto& pop = reader.openPopulation("All");
 
     REQUIRE(pop.getTimes() == std::make_tuple(0., 1., 0.1));
 
@@ -97,7 +97,7 @@ TEST_CASE("SomaReportReader", "[base]") {
 TEST_CASE("ElementReportReader limits", "[base]") {
     const ElementReportReader reader("./data/elements.h5");
 
-    auto pop = reader.openPopulation("All");
+    auto& pop = reader.openPopulation("All");
 
     // ids out of range
     REQUIRE(pop.get(Selection({{100, 101}})).ids ==
@@ -128,7 +128,7 @@ TEST_CASE("ElementReportReader", "[base]") {
     REQUIRE(reader.getPopulationNames() ==
             std::vector<std::string>{"All", "element1", "element42"});
 
-    auto pop = reader.openPopulation("All");
+    auto& pop = reader.openPopulation("All");
 
     REQUIRE(pop.getTimes() == std::make_tuple(0., 4., 0.2));
 
