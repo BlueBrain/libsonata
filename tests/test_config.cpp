@@ -298,7 +298,8 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().dt == 0.025f);
 
         namespace fs = ghc::filesystem;
-        const auto basePath = fs::absolute(fs::path("./data/config/simulation_config.json").parent_path());
+        const auto basePath = fs::absolute(
+            fs::path("./data/config/simulation_config.json").parent_path());
 
         const auto outputPath = fs::absolute(basePath / fs::path("output"));
         CHECK(config.getOutput().outputDir == outputPath.lexically_normal());
@@ -311,7 +312,8 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getReport("compartment").dt == 0.1f);
         CHECK(config.getReport("axonal_comp_centers").startTime == 0.f);
         const auto axonalFilePath = fs::absolute(basePath / fs::path("axon_centers.h5"));
-        CHECK(config.getReport("axonal_comp_centers").fileName == axonalFilePath.lexically_normal());
+        CHECK(config.getReport("axonal_comp_centers").fileName ==
+              axonalFilePath.lexically_normal());
         CHECK(config.getReport("cell_imembrane").endTime == 500.f);
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getJSON()));

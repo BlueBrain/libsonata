@@ -173,33 +173,30 @@ class SONATA_API CircuitConfig
     std::vector<SubnetworkFiles> _networkEdges;
     // Edge populations that override default components variables
     std::unordered_map<std::string, PopulationProperties> _edgePopulationProperties;
-}; 
+};
 
 /**
  *  Read access to a SONATA simulation config file.
  */
 class SONATA_API SimulationConfig
 {
-public:
+  public:
     // Parameters defining global simulation settings for spike reports
-    struct Run
-    {
+    struct Run {
         // Biological run time end time in milliseconds
         float tstop;
         // Integration step duration in milliseconds
         float dt;
     };
     // Parameters to override simulator output for spike reports
-    struct Output
-    {
+    struct Output {
         // Spike report file output directory. Default is "output"
         std::string outputDir;
         // Spike report file name. Default is "out.h5"
         std::string spikesFile;
     };
     // Data collection description collected during the simulation
-    struct Report
-    {
+    struct Report {
         // Node sets on which to report
         std::string cells;
         // Report type. Possible values: "compartment", "summation", "synapse"
@@ -265,7 +262,7 @@ public:
      */
     const Report& getReport(const std::string& name) const;
 
-private:
+  private:
     // JSON string
     const std::string _jsonContent;
     // Base path of the simulation config file

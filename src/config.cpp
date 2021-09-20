@@ -283,7 +283,8 @@ class CircuitConfig::Parser
                 const auto altMorphoDir = popData.find("alternate_morphologies");
                 if (altMorphoDir != popData.end()) {
                     for (auto it = altMorphoDir->begin(); it != altMorphoDir->end(); ++it) {
-                        popProperties.alternateMorphologyFormats[it.key()] = toAbsolute(_basePath, it.value());
+                        popProperties.alternateMorphologyFormats[it.key()] = toAbsolute(_basePath,
+                                                                                        it.value());
                     }
                 }
             }
@@ -480,23 +481,19 @@ const std::string& CircuitConfig::getExpandedJSON() const {
 
 class SimulationConfig::Parser
 {
-public:
+  public:
     Parser(const std::string& content, const std::string& basePath)
-     : _basePath(fs::absolute(fs::path(basePath)))
-     , _json(nlohmann::json::parse(content))
-    {
-    }
+        : _basePath(fs::absolute(fs::path(basePath)))
+        , _json(nlohmann::json::parse(content)) {}
 
-    SimulationConfig::Run parseRun() const
-    {
+    SimulationConfig::Run parseRun() const {
         const auto runIt = _json.find("run");
-        if(runIt == _json.end())
+        if (runIt == _json.end())
             throw SonataError("Could not find 'run' section");
 
-        const auto parse = [&](const char* name, auto& var)
-        {
+        const auto parse = [&](const char* name, auto& var) {
             const auto it = runIt->find(name);
-            if(it == runIt->end())
+            if (it == runIt->end())
                 throw SonataError(fmt::format("Could not find '{}' in 'run' section", name));
             var = it->get<std::decay_t<decltype(var)>>();
         };
@@ -517,19 +514,16 @@ public:
         */
     }
 
-    SimulationConfig::Output parseOutput() const
-    {
+    SimulationConfig::Output parseOutput() const {
         SimulationConfig::Output result;
         result.outputDir = "output";
         result.spikesFile = "out.h5";
 
         const auto outputIt = _json.find("output");
-        if(outputIt != _json.end())
-        {
-            const auto parse = [&](const char* name, auto& var)
-            {
+        if (outputIt != _json.end()) {
+            const auto parse = [&](const char* name, auto& var) {
                 const auto it = outputIt->find(name);
-                if(it != outputIt->end())
+                if (it != outputIt->end())
                     var = it->get<std::decay_t<decltype(var)>>();
             };
 
@@ -542,25 +536,25 @@ public:
         return result;
     }
 
-    std::unordered_map<std::string, SimulationConfig::Report> parseReports() const
-    {
+    std::unordered_map<std::string, SimulationConfig::Report> parseReports() const {
         const auto reportsIt = _json.find("reports");
-        if(reportsIt == _json.end())
+        if (reportsIt == _json.end())
             return {};
 
         std::unordered_map<std::string, SimulationConfig::Report> result;
 
-        const auto parseMandatory = [](const auto& iterator, const std::string& report, const char* name, auto& var)
-        {
+        const auto parseMandatory = [](const auto& iterator,
+                                       const std::string& report,
+                                       const char* name,
+                                       auto& var) {
             auto innerIt = iterator.find(name);
-            if(innerIt == iterator.end())
+            if (innerIt == iterator.end())
                 throw SonataError(fmt::format("Could not find '{}' in report '{}'", name, report));
             var = innerIt->template get<std::decay_t<decltype(var)>>();
         };
-        const auto parseOpt = [](const auto& iterator, const char* name, auto& var)
-        {
+        const auto parseOpt = [](const auto& iterator, const char* name, auto& var) {
             auto innerIt = iterator.find(name);
-            if(innerIt != iterator.end())
+            if (innerIt != iterator.end())
                 var = innerIt->template get<std::decay_t<decltype(var)>>();
         };
 
@@ -574,9 +568,9 @@ public:
             parseMandatory(valueIt, it.key(), "end_time", report.endTime);
 
             parseOpt(valueIt, "file_name", report.fileName);
-            if(report.fileName.empty())
-               report.fileName = it.key() + "_SONATA.h5";
-            else if(report.fileName.find(".h5") == std::string::npos)
+            if (report.fileName.empty())
+                report.fileName = it.key() + "_SONATA.h5";
+            else if (report.fileName.find(".h5") == std::string::npos)
                 report.fileName += ".h5";
             report.fileName = toAbsolute(_basePath, report.fileName);
         }
@@ -584,51 +578,45 @@ public:
         return result;
     }
 
-private:
+  private:
     const fs::path _basePath;
     const nlohmann::json _json;
 };
 
 SimulationConfig::SimulationConfig(const std::string& content, const std::string& basePath)
- : _jsonContent(content)
- , _basePath(fs::absolute(fs::path(basePath)).lexically_normal())
-{
-    const Parser parser (content, basePath);
+    : _jsonContent(content)
+    , _basePath(fs::absolute(fs::path(basePath)).lexically_normal()) {
+    const Parser parser(content, basePath);
     _run = parser.parseRun();
     _output = parser.parseOutput();
     _reports = parser.parseReports();
 }
 
-SimulationConfig SimulationConfig::fromFile(const std::string& path)
-{
+SimulationConfig SimulationConfig::fromFile(const std::string& path) {
     return SimulationConfig(readFile(path), fs::path(path).parent_path());
 }
 
-const std::string& SimulationConfig::getBasePath() const noexcept
-{
+const std::string& SimulationConfig::getBasePath() const noexcept {
     return _basePath;
 }
 
-const std::string& SimulationConfig::getJSON() const noexcept
-{
+const std::string& SimulationConfig::getJSON() const noexcept {
     return _jsonContent;
 }
 
-const SimulationConfig::Run& SimulationConfig::getRun() const noexcept
-{
+const SimulationConfig::Run& SimulationConfig::getRun() const noexcept {
     return _run;
 }
 
-const SimulationConfig::Output& SimulationConfig::getOutput() const noexcept
-{
+const SimulationConfig::Output& SimulationConfig::getOutput() const noexcept {
     return _output;
 }
 
-const SimulationConfig::Report& SimulationConfig::getReport(const std::string& name) const
-{
+const SimulationConfig::Report& SimulationConfig::getReport(const std::string& name) const {
     const auto it = _reports.find(name);
-    if(it == _reports.end())
-        throw SonataError(fmt::format("The report '{}' is not present in the simulation config file", name));
+    if (it == _reports.end())
+        throw SonataError(
+            fmt::format("The report '{}' is not present in the simulation config file", name));
 
     return it->second;
 }
