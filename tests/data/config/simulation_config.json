@@ -1,0 +1,63 @@
+{
+    "run": {
+         "tstop": 1000,
+         "dt": 0.025,
+         "random_seed": 201506,
+         "spike_location": "ais",
+         "integration_method" : 2,
+         "forward_skip": 500
+    },
+    "output": {
+         "output_dir": "output",
+         "spikes_file": "out.h5"
+    },
+    "reports": {
+         "soma": {
+              "cells": "Mosaic",
+              "sections": "soma",
+              "type": "compartment",
+              "variable_name": "v",
+              "unit": "mV",
+              "dt": 0.1,
+              "start_time" : 0,
+              "end_time" : 500,
+              "file_name": "soma",
+              "enabled" : true
+         },
+         "compartment": {
+              "cells": "Mosaic",
+              "sections": "all",
+              "type": "compartment",
+              "variable_name": "v",
+              "unit": "mV",
+              "dt": 0.1,
+              "start_time" : 0,
+              "end_time" : 500,
+              "file_name": "voltage",
+              "enabled" : true
+         },
+         "axonal_comp_centers": {
+              "cells": "Mosaic",
+              "sections": "axon",
+              "type": "compartment",
+              "variable_name": "v",
+              "unit": "mV",
+              "compartments": "center",
+              "dt": 0.1,
+              "start_time" : 0,
+              "end_time" : 500,
+              "file_name": "axon_centers",
+              "enabled" : true
+         },
+         "cell_imembrane": {
+             "cells": "Column",
+             "sections": "soma",
+             "type": "summation",
+             "unit": "nA",
+             "dt": 0.05,
+             "start_time": 0,
+             "end_time": 500,
+             "enabled": true
+         }
+    }
+}

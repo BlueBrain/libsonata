@@ -2,6 +2,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "../extlib/filesystem.hpp"
+
 #include <bbp/sonata/config.h>
 
 #include <cstdio>
@@ -285,6 +287,147 @@ TEST_CASE("CircuitConfig") {
             CHECK(CircuitConfig(contents, "./")
                       .getEdgePopulationProperties("edges-AB")
                       .morphologiesDir.find("/my/custom/morpholgoies/dir") != std::string::npos);
+        }
+    }
+}
+
+TEST_CASE("SimulationConfig") {
+    SECTION("Simple") {
+        const auto config = SimulationConfig::fromFile("./data/config/simulation_config.json");
+        CHECK(config.getRun().tstop == 1000.f);
+        CHECK(config.getRun().dt == 0.025f);
+
+        namespace fs = ghc::filesystem;
+        const auto basePath = fs::absolute(fs::path("./data/config/simulation_config.json").parent_path());
+
+        const auto outputPath = fs::absolute(basePath / fs::path("output"));
+        CHECK(config.getOutput().outputDir == outputPath.lexically_normal());
+        CHECK(config.getOutput().spikesFile == "out.h5");
+
+        CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
+
+        CHECK(config.getReport("soma").cells == "Mosaic");
+        CHECK(config.getReport("soma").type == "compartment");
+        CHECK(config.getReport("compartment").dt == 0.1f);
+        CHECK(config.getReport("axonal_comp_centers").startTime == 0.f);
+        const auto axonalFilePath = fs::absolute(basePath / fs::path("axon_centers.h5"));
+        CHECK(config.getReport("axonal_comp_centers").fileName == axonalFilePath.lexically_normal());
+        CHECK(config.getReport("cell_imembrane").endTime == 500.f);
+
+        CHECK_NOTHROW(nlohmann::json::parse(config.getJSON()));
+        CHECK(config.getBasePath() == basePath.lexically_normal());
+    }
+
+    SECTION("Exception") {
+        {  // No run section
+            auto contents = R"({})";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No tstop in run section
+            auto contents = R"({
+              "run": {
+                "dt": 0.05
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No dt in run section
+            auto contents = R"({
+              "run": {
+                "tstop": 1000
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No cells in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "type": "typestring",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No type in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No dt in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "type": "typestring",
+                   "variable_name": "variablestring",
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No start_time in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "type": "typestring",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No end_time in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "type": "typestring",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
     }
 }
