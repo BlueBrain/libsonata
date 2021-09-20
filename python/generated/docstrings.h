@@ -487,6 +487,78 @@ static const char *__doc_bbp_sonata_Selection_ranges = R"doc(Get a list of range
 
 static const char *__doc_bbp_sonata_Selection_ranges_2 = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig = R"doc(Read access to a SONATA simulation config file.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_outputDir = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_spikesFile = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Parser = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_cells = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_dt = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_endTime = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_fileName = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_startTime = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
+R"doc(Parses a SONATA JSON simulation configuration file.
+
+Throws:
+    s SonataError on: - Ill-formed JSON - Missing mandatory entries
+    (in any depth) - Missing entries which become mandatory when
+    another entry is present - Multiple reports with the same name)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_fromFile =
+R"doc(Loads a SONATA JSON simulation config file from disk and returns a
+CircuitConfig object which parses it.
+
+Throws:
+    s SonataError on: - Non accesible file (does not exists / does not
+    have read access) - Ill-formed JSON - Missing mandatory entries
+    (in any depth) - Multiple reports with the same name)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getJSON = R"doc(Returns the JSON content of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getOutput = R"doc(Returns the Output section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getReport =
+R"doc(Returns the given report parameters.
+
+Throws:
+    s SonataError if the given report name does not correspond with
+    any existing report.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getRun = R"doc(Returns the Run section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_jsonContent = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_output = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_reports = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_run = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SonataError = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SonataError_SonataError = R"doc()doc";
