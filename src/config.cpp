@@ -564,9 +564,8 @@ class SimulationConfig::Parser
 };
 
 SimulationConfig::SimulationConfig(const std::string& content, const std::string& basePath)
- : _jsonContent(content)
- , _basePath(fs::absolute(basePath).lexically_normal().string())
-{
+    : _jsonContent(content)
+    , _basePath(fs::absolute(basePath).lexically_normal().string()) {
     const Parser parser(content, basePath);
     _run = parser.parseRun();
     _output = parser.parseOutput();
