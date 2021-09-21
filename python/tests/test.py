@@ -11,7 +11,7 @@ from libsonata import (EdgeStorage, NodeStorage,
                        SomaReportReader, SomaReportPopulation,
                        ElementReportReader, ElementReportPopulation,
                        NodeSets,
-                       CircuitConfig
+                       CircuitConfig, SimulationConfig
                        )
 
 
