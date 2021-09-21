@@ -522,8 +522,7 @@ R"doc(Parses a SONATA JSON simulation configuration file.
 
 Throws:
     s SonataError on: - Ill-formed JSON - Missing mandatory entries
-    (in any depth) - Missing entries which become mandatory when
-    another entry is present - Multiple reports with the same name)doc";
+    (in any depth))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
 
@@ -534,7 +533,7 @@ CircuitConfig object which parses it.
 Throws:
     s SonataError on: - Non accesible file (does not exists / does not
     have read access) - Ill-formed JSON - Missing mandatory entries
-    (in any depth) - Multiple reports with the same name)doc";
+    (in any depth))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
 
