@@ -217,8 +217,6 @@ class SONATA_API SimulationConfig
      * \throws SonataError on:
      *          - Ill-formed JSON
      *          - Missing mandatory entries (in any depth)
-     *          - Missing entries which become mandatory when another entry is present
-     *          - Multiple reports with the same name
      */
     SimulationConfig(const std::string& content, const std::string& basePath);
 
@@ -230,7 +228,6 @@ class SONATA_API SimulationConfig
      *          - Non accesible file (does not exists / does not have read access)
      *          - Ill-formed JSON
      *          - Missing mandatory entries (in any depth)
-     *          - Multiple reports with the same name
      */
     static SimulationConfig fromFile(const std::string& path);
 
