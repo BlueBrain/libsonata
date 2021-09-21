@@ -483,91 +483,71 @@ class SimulationConfig::Parser
 {
   public:
     Parser(const std::string& content, const std::string& basePath)
-        : _basePath(fs::absolute(fs::path(basePath)))
+        : _basePath(fs::absolute(fs::path(basePath)).lexically_normal())
         , _json(nlohmann::json::parse(content)) {}
+
+    template <typename Iterator, typename Type, typename SectionName>
+    void parseMandatory(const Iterator& it,
+                        const char* name,
+                        const SectionName& sn,
+                        Type& buf) const {
+        const auto element = it.find(name);
+        if (element == it.end())
+            throw SonataError(fmt::format("Could not find '{}' in '{}'", name, sn));
+        buf = element->template get<Type>();
+    }
+
+    template <typename Iterator, typename Type>
+    void parseOptional(const Iterator& it, const char* name, Type& buf) const {
+        const auto element = it.find(name);
+        if (element != it.end())
+            buf = element->template get<Type>();
+    }
 
     SimulationConfig::Run parseRun() const {
         const auto runIt = _json.find("run");
         if (runIt == _json.end())
             throw SonataError("Could not find 'run' section");
 
-        const auto parse = [&](const char* name, auto& var) {
-            const auto it = runIt->find(name);
-            if (it == runIt->end())
-                throw SonataError(fmt::format("Could not find '{}' in 'run' section", name));
-            var = it->get<std::decay_t<decltype(var)>>();
-        };
-
-        SimulationConfig::Run result;
-        parse("tstop", result.tstop);
-        parse("dt", result.dt);
+        SimulationConfig::Run result{};
+        parseMandatory(*runIt, "tstop", "run", result.tstop);
+        parseMandatory(*runIt, "dt", "run", result.dt);
         return result;
-
-        /*
-        const auto tStopIt = runIt->find("tstop");
-        if(tStopIt == runIt->end())
-            throw SonataError("Could not find 'tstop' in 'run' section");
-
-        const auto dtIt = runIt->find("dt");
-        if(dtIt == runIt->end())
-            throw SonataError("Could not find 'dt' in 'run' section");
-        */
     }
 
     SimulationConfig::Output parseOutput() const {
-        SimulationConfig::Output result;
+        SimulationConfig::Output result{};
         result.outputDir = "output";
         result.spikesFile = "out.h5";
 
         const auto outputIt = _json.find("output");
         if (outputIt != _json.end()) {
-            const auto parse = [&](const char* name, auto& var) {
-                const auto it = outputIt->find(name);
-                if (it != outputIt->end())
-                    var = it->get<std::decay_t<decltype(var)>>();
-            };
-
-            parse("output_dir", result.outputDir);
-            parse("spikes_file", result.spikesFile);
-
-            result.outputDir = toAbsolute(_basePath, result.outputDir);
+            parseOptional(*outputIt, "output_dir", result.outputDir);
+            parseOptional(*outputIt, "spikes_file", result.spikesFile);
         }
+
+        result.outputDir = toAbsolute(_basePath, result.outputDir);
 
         return result;
     }
 
     std::unordered_map<std::string, SimulationConfig::Report> parseReports() const {
-        const auto reportsIt = _json.find("reports");
-        if (reportsIt == _json.end())
-            return {};
-
         std::unordered_map<std::string, SimulationConfig::Report> result;
 
-        const auto parseMandatory = [](const auto& iterator,
-                                       const std::string& report,
-                                       const char* name,
-                                       auto& var) {
-            auto innerIt = iterator.find(name);
-            if (innerIt == iterator.end())
-                throw SonataError(fmt::format("Could not find '{}' in report '{}'", name, report));
-            var = innerIt->template get<std::decay_t<decltype(var)>>();
-        };
-        const auto parseOpt = [](const auto& iterator, const char* name, auto& var) {
-            auto innerIt = iterator.find(name);
-            if (innerIt != iterator.end())
-                var = innerIt->template get<std::decay_t<decltype(var)>>();
-        };
+        const auto reportsIt = _json.find("reports");
+        if (reportsIt == _json.end())
+            return result;
 
         for (auto it = reportsIt->begin(); it != reportsIt->end(); ++it) {
             auto& report = result[it.key()];
             auto& valueIt = it.value();
-            parseMandatory(valueIt, it.key(), "cells", report.cells);
-            parseMandatory(valueIt, it.key(), "type", report.type);
-            parseMandatory(valueIt, it.key(), "dt", report.dt);
-            parseMandatory(valueIt, it.key(), "start_time", report.startTime);
-            parseMandatory(valueIt, it.key(), "end_time", report.endTime);
-
-            parseOpt(valueIt, "file_name", report.fileName);
+            const auto debugStr = fmt::format("report {}", it.key());
+            parseMandatory(valueIt, "cells", debugStr, report.cells);
+            parseMandatory(valueIt, "type", debugStr, report.type);
+            parseMandatory(valueIt, "dt", debugStr, report.dt);
+            parseMandatory(valueIt, "start_time", debugStr, report.startTime);
+            parseMandatory(valueIt, "end_time", debugStr, report.endTime);
+            parseOptional(valueIt, "file_name", report.fileName);
             if (report.fileName.empty())
                 report.fileName = it.key() + "_SONATA.h5";
             else if (report.fileName.find(".h5") == std::string::npos)
@@ -584,8 +564,9 @@ class SimulationConfig::Parser
 };
 
 SimulationConfig::SimulationConfig(const std::string& content, const std::string& basePath)
-    : _jsonContent(content)
-    , _basePath(fs::absolute(fs::path(basePath)).lexically_normal()) {
+ : _jsonContent(content)
+ , _basePath(fs::absolute(basePath).lexically_normal().string())
+{
     const Parser parser(content, basePath);
     _run = parser.parseRun();
     _output = parser.parseOutput();

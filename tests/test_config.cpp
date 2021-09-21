@@ -294,6 +294,7 @@ TEST_CASE("CircuitConfig") {
 TEST_CASE("SimulationConfig") {
     SECTION("Simple") {
         const auto config = SimulationConfig::fromFile("./data/config/simulation_config.json");
+        CHECK_NOTHROW(config.getRun());
         CHECK(config.getRun().tstop == 1000.f);
         CHECK(config.getRun().dt == 0.025f);
 
@@ -301,6 +302,7 @@ TEST_CASE("SimulationConfig") {
         const auto basePath = fs::absolute(
             fs::path("./data/config/simulation_config.json").parent_path());
 
+        CHECK_NOTHROW(config.getOutput());
         const auto outputPath = fs::absolute(basePath / fs::path("output"));
         CHECK(config.getOutput().outputDir == outputPath.lexically_normal());
         CHECK(config.getOutput().spikesFile == "out.h5");
@@ -340,6 +342,15 @@ TEST_CASE("SimulationConfig") {
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No reports section
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              }
+            })";
+            CHECK_NOTHROW(SimulationConfig(contents, "./"));
         }
         {  // No cells in a report object
             auto contents = R"({
