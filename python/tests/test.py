@@ -544,15 +544,15 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.base_path, os.path.abspath(os.path.join(PATH, 'config')))
 
         self.assertEqual(self.config.run.tstop, 1000)
-        self.assertEqual(self.config.run.dt, 0.025)
+        self.assertTrue(self.config.run.dt - 0.025 < 0.01)
 
-        self.assertEqual(self.output.output_dir,
+        self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/output')))
-        self.assertEqual(self.output.spikes_file, 'out.h5')
+        self.assertEqual(self.config.output.spikes_file, 'out.h5')
 
-        self.assertEqual(self.config.report('soma').cells, 'Mossaic')
+        self.assertEqual(self.config.report('soma').cells, 'Mosaic')
         self.assertEqual(self.config.report('soma').type, 'compartment')
-        self.assertEqual(self.config.report('compartment').dt, 0.1)
+        self.assertTrue(self.config.report('compartment').dt - 0.1 < 0.01)
         self.assertEqual(self.config.report('axonal_comp_centers').start_time, 0)
         self.assertEqual(self.config.report('axonal_comp_centers').file_name,
                          os.path.abspath(os.path.join(PATH, 'config/axon_centers.h5')))
