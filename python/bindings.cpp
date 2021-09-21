@@ -506,6 +506,45 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("edge_population_properties", &CircuitConfig::getEdgePopulationProperties, "name"_a)
         .def_property_readonly("expanded_json", &CircuitConfig::getExpandedJSON);
 
+    py::class_<SimulationConfig::Run>(m,
+                                      "Run",
+                                      "Stores parameters defining global simulation settings")
+        .def_readonly("tstop", &SimulationConfig::Run::tstop,
+                      "Biological simulation end time in milliseconds")
+        .def_readonly("dt", &SimulationConfig::Run::dt,
+                      "Simulation integration step in milliseconds");
+
+    py::class_<SimulationConfig::Output>(m,
+                                         "Output",
+                                         "Stores overriden parameters of simulation output")
+        .def_readonly("output_dir", &SimulationConfig::Output::outputDir,
+                      "Simulation output directory")
+        .def_readonly("spikes_file", &SimulationConfig::Output::spikesFile,
+                      "Spike report filename");
+
+    py::class_<SimulationConfig::Report>(m,
+                                         "Report",
+                                         "List of parameters of a report")
+        .def_readonly("cells", &SimulationConfig::Report::cells, "Node sets on which to report")
+        .def_readonly("type", &SimulationConfig::Report::type,
+                      "Report type. Possible values are 'compartment', 'summation', 'synapse")
+        .def_readonly("dt", &SimulationConfig::Report::dt,
+                      "Interval between reporting steps in milliseconds")
+        .def_readonly("start_time", &SimulationConfig::Report::startTime,
+                      "Time to start reporting, in milliseconds")
+        .def_readonly("end_time", &SimulationConfig::Report::endTime,
+                      "Time to stop reporting in milliseconds")
+        .def_readonly("file_name", &SimulationConfig::Report::fileName, "Report file name");
+
+    py::class_<SimulationConfig>(m, "SimulationConfig", "")
+        .def(py::init<const std::string&, const std::string&>())
+        .def_static("from_file",
+                    [](py::object path) { return SimulationConfig::fromFile(py::str(path)); })
+        .def_property_readonly("base_path", &SimulationConfig::getBasePath)
+        .def_property_readonly("json", &SimulationConfig::getJSON)
+        .def_property_readonly("run", &SimulationConfig::getRun)
+        .def_property_readonly("output", &SimulationConfig::getOutput)
+        .def("report", &SimulationConfig::getReport, "name"_a);
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")

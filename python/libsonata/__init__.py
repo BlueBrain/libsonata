@@ -2,6 +2,7 @@
 #  https://github.com/matthew-brett/delocate/issues/22
 
 from libsonata._libsonata import (CircuitConfig,
+                                  SimulationConfig,
                                   EdgePopulation,
                                   EdgeStorage,
                                   ElementDataFrame,
