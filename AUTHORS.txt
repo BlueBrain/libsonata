@@ -1,0 +1,14 @@
+Aleksei Sanin
+Andrew Hale
+Arseny V. Povolotsky
+Benoit Coste
+Fernando Pereira
+Ioannis Magkanaris
+Jean-Denis Courcol
+Jorge Blanco Alonso
+Matthias Wolf
+Mike Gevaert (maintainer)
+Nicolas Cornu
+Sergio Rivas-Gomez
+Thomas Delemontex
+Weina Ji
