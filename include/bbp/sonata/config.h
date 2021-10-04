@@ -186,7 +186,7 @@ class SONATA_API SimulationConfig
         // Biological simulation end time in milliseconds
         float tstop{};
         // Integration step duration in milliseconds
-        float dt;
+        float dt{};
     };
     // Parameters to override simulator output for spike reports
     struct Output {
@@ -202,11 +202,11 @@ class SONATA_API SimulationConfig
         // Report type. Possible values: "compartment", "summation", "synapse"
         std::string type;
         // Interval between reporting steps in milliseconds
-        float dt;
+        float dt{};
         // Time to step reporting in milliseconds
         float startTime{};
         // Time to stop reporting in milliseconds
-        float endTime;
+        float endTime{};
         // Report filename. Default is "<report name>_SONATA.h5"
         std::string fileName;
     };

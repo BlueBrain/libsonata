@@ -295,8 +295,9 @@ TEST_CASE("SimulationConfig") {
     SECTION("Simple") {
         const auto config = SimulationConfig::fromFile("./data/config/simulation_config.json");
         CHECK_NOTHROW(config.getRun());
-        CHECK(config.getRun().tstop == 1000.f);
-        CHECK(config.getRun().dt == 0.025f);
+        using Catch::Matchers::WithinULP;
+        REQUIRE_THAT(config.getRun().tstop, WithinULP(1000.f, 1));
+        REQUIRE_THAT(config.getRun().dt, WithinULP(0.025f, 1));
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
