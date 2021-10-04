@@ -184,7 +184,7 @@ class SONATA_API SimulationConfig
     // Parameters defining global simulation settings for spike reports
     struct Run {
         // Biological simulation end time in milliseconds
-        float tstop;
+        float tstop{};
         // Integration step duration in milliseconds
         float dt;
     };
