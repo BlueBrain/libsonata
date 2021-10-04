@@ -549,8 +549,12 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "file_name", report.fileName);
             if (report.fileName.empty())
                 report.fileName = it.key() + "_SONATA.h5";
-            else if (report.fileName.find(".h5") == std::string::npos)
-                report.fileName += ".h5";
+            else
+            {
+                const auto extension = fs::path(report.fileName).extension().string();
+                if (extension.empty() || extension != ".h5")
+                    report.fileName += ".h5";
+            }
             report.fileName = toAbsolute(_basePath, report.fileName);
         }
 
