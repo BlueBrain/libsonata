@@ -552,7 +552,7 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.report('soma').cells, 'Mosaic')
         self.assertEqual(self.config.report('soma').type, 'compartment')
-        self.assertTrue(self.config.report('compartment').dt - 0.1 < 0.01)
+        self.assertTrue(abs(self.config.report('compartment').dt - 0.1) < 0.01)
         self.assertEqual(self.config.report('axonal_comp_centers').start_time, 0)
         self.assertEqual(self.config.report('axonal_comp_centers').file_name,
                          os.path.abspath(os.path.join(PATH, 'config/axon_centers.h5')))
