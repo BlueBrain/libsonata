@@ -544,7 +544,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.base_path, os.path.abspath(os.path.join(PATH, 'config')))
 
         self.assertEqual(self.config.run.tstop, 1000)
-        self.assertTrue(self.config.run.dt - 0.025 < 0.01)
+        self.assertTrue(abs(self.config.run.dt - 0.025) < 0.01)
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/output')))
