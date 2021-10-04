@@ -204,7 +204,7 @@ class SONATA_API SimulationConfig
         // Interval between reporting steps in milliseconds
         float dt;
         // Time to step reporting in milliseconds
-        float startTime;
+        float startTime{};
         // Time to stop reporting in milliseconds
         float endTime;
         // Report filename. Default is "<report name>_SONATA.h5"
