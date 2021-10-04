@@ -124,8 +124,7 @@ Variables readVariables(const nlohmann::json& json) {
     return variables;
 }
 
-std::string toAbsolute(const fs::path& base, const std::string& pathStr) {
-    const fs::path path(pathStr);
+std::string toAbsolute(const fs::path& base, const fs::path& path) {
     const auto absolute = path.is_absolute() ? path : fs::absolute(base / path);
     return absolute.lexically_normal().string();
 }
