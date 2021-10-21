@@ -15,6 +15,7 @@ HIGHFIVE_REGISTER_TYPE(bbp::sonata::SpikeReader::Population::Sorting, create_enu
 
 namespace {
 
+using bbp::sonata::CompartmentID;
 using bbp::sonata::ElementID;
 using bbp::sonata::NodeID;
 using bbp::sonata::Selection;
@@ -86,7 +87,7 @@ NodeID make_key(NodeID node_id, ElementID /* element_id */) {
 }
 
 template <>
-std::pair<NodeID, ElementID> make_key(NodeID node_id, ElementID element_id) {
+CompartmentID make_key(NodeID node_id, ElementID element_id) {
     return {node_id, element_id};
 }
 
@@ -419,7 +420,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 }
 
 template class ReportReader<NodeID>;
-template class ReportReader<std::pair<NodeID, ElementID>>;
+template class ReportReader<CompartmentID>;
 
 }  // namespace sonata
 }  // namespace bbp
