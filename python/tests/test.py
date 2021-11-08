@@ -316,11 +316,15 @@ class TestSomaReportPopulation(unittest.TestCase):
 
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.0)
         self.assertEqual(len(sel.times), 2)  # Number of timestamp (0.8 and 0.9)
-        self.assertEqual(list(sel.ids), [13, 14])
+        keys = sel.ids
+        keys_ref = np.asarray([13, 14])
+        self.assertTrue((keys == keys_ref).all())
         np.testing.assert_allclose(sel.data, [[13.8, 14.8], [13.9, 14.9]])
 
         sel_all = self.test_obj['All'].get()
-        self.assertEqual(sel_all.ids, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+        keys_all = sel_all.ids
+        keys_all_ref = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+        self.assertTrue((keys_all == keys_all_ref).all())
 
         sel_empty = self.test_obj['All'].get(node_ids=[])
         np.testing.assert_allclose(sel_empty.data, np.empty(shape=(0, 0)))
@@ -355,10 +359,9 @@ class TestElementReportPopulation(unittest.TestCase):
         self.assertEqual(len(self.test_obj['All'].get(tstride=2).times), 10)  # Should be the same
         self.assertEqual(len(self.test_obj['All'].get().ids), 100)
         sel = self.test_obj['All'].get(node_ids=[13, 14], tstart=0.8, tstop=1.2)
-        keys = list(sel.ids)
-        keys.sort()
-        self.assertEqual(keys, [(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)])
-
+        keys = sel.ids
+        keys_ref = np.asarray([(13, 30), (13, 30), (13, 31), (13, 31), (13, 32), (14, 32), (14, 33), (14, 33), (14, 34), (14, 34)])
+        self.assertTrue((keys == keys_ref).all())
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).data), 0)
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).times), 0)
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[]).ids), 0)
