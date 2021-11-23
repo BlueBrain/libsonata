@@ -149,10 +149,8 @@ doc_requires = [
     "sphinx-bluebrain-theme"
 ]
 
-# HACK: `setup_requires` uses `easy_install` to do the 'pre-installation' of
-# numpy, it doesn't realize it has to install numpy version that supports py2.
-if sys.version_info[0] == 3:
-    setup_requires.append(REQUIRED_NUMPY_VERSION)
+if "test" in sys.argv or "test_doc" in sys.argv:
+    setup_requires += doc_requires
 
 with open('README.rst') as f:
     README = f.read()
@@ -176,16 +174,16 @@ setup(
         test_doc=get_sphinx_command,
     ),
     zip_safe=False,
-    setup_requires=setup_requires + doc_requires if "test" in sys.argv or "test_doc" in sys.argv
-    else setup_requires,
+    setup_requires=setup_requires,
     install_requires=install_requires,
     extras_require={
         'docs': ['sphinx-bluebrain-theme'],
     },
+    python_requires=">=3.7",
     use_scm_version={"local_scheme": "no-local-version",
                      },
     package_dir={"": "python"},
     packages=['libsonata',
               ],
-    test_suite='tests.test_suite'
+    test_suite='tests.test_suite',
 )
