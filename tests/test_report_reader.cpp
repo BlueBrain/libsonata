@@ -101,7 +101,7 @@ TEST_CASE("ElementReportReader limits", "[base]") {
 
     // ids out of range
     REQUIRE(pop.get(Selection({{100, 101}})).ids ==
-            DataFrame<std::pair<NodeID, ElementID>>::DataType{});
+            DataFrame<CompartmentID>::DataType{});
 
     // Inverted id
     REQUIRE_THROWS(pop.get(Selection({{2, 1}})));
@@ -143,7 +143,7 @@ TEST_CASE("ElementReportReader", "[base]") {
 
     auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
     REQUIRE(data.ids ==
-            DataFrame<std::pair<NodeID, ElementID>>::DataType{
+            DataFrame<CompartmentID>::DataType{
                 {{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}}});
     testTimes(data.times, 0.2, 0.2, 2);
     REQUIRE(data.data == std::vector<float>{11.0f, 11.1f, 11.2f, 11.3f, 11.4f, 11.5f, 11.6f,
