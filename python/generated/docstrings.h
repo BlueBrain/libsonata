@@ -429,15 +429,19 @@ Parameter ``tstride``:
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
 
+static const char *__doc_bbp_sonata_ReportReader_Population_getIds = R"doc(Return selected ids.)doc";
+
 static const char *__doc_bbp_sonata_ReportReader_Population_getIndex = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIds = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIds = R"doc(Return all the node ids.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getSorted = R"doc(Return true if the data is sorted.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getTimeUnits = R"doc(Return the unit of time)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getTimes = R"doc(Return (tstart, tstop, tstep) of the population)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_node_ids_from_selection = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_nodes_ids = R"doc()doc";
 
