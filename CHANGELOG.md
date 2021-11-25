@@ -2,10 +2,13 @@
 
 ## v0.1.10:
 
+### Fixed:
+
 * Exclude musllinux wheels building
 * Have the shim module document functionality (#162)
 * move to C++14 (#159)
 * Update HighFive submodule to latest 2.3.1 (#156)
+* Increased performance of report reading (#164)
 
 ## v0.1.9: Thu 01 Jul 2021
 
