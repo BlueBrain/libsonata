@@ -122,7 +122,16 @@ class SONATA_API ReportReader
          * Return true if the data is sorted.
          */
         bool getSorted() const;
+
+        /**
+         * Return all the node ids.
+         */
         std::vector<NodeID> getNodeIds() const;
+
+        /**
+         * Return selected ids.
+         */
+        typename DataFrame<KeyType>::DataType getIds(const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         /**
          * \param node_ids limit the report to the given selection.
@@ -149,6 +158,7 @@ class SONATA_API ReportReader
         std::string time_units_;
         std::string data_units_;
         bool nodes_ids_sorted_ = false;
+        Selection::Values node_ids_from_selection(const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         friend ReportReader;
     };
