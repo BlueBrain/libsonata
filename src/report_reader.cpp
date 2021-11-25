@@ -280,7 +280,8 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-Selection::Values ReportReader<T>::Population::node_ids_from_selection(const nonstd::optional<Selection>& selection) const {
+Selection::Values ReportReader<T>::Population::node_ids_from_selection(
+    const nonstd::optional<Selection>& selection) const {
     // Simplify selection
     // We should remove duplicates
     // And when we can work with ranges let's sort them
@@ -339,7 +340,8 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 
 template <typename T>
-typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(const nonstd::optional<Selection>& selection) const {
+typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(
+    const nonstd::optional<Selection>& selection) const {
     typename DataFrame<T>::DataType ids{};
 
 

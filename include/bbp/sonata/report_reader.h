@@ -131,7 +131,8 @@ class SONATA_API ReportReader
         /**
          * Return selected ids.
          */
-        typename DataFrame<KeyType>::DataType getIds(const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+        typename DataFrame<KeyType>::DataType getIds(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         /**
          * \param node_ids limit the report to the given selection.
@@ -158,7 +159,8 @@ class SONATA_API ReportReader
         std::string time_units_;
         std::string data_units_;
         bool nodes_ids_sorted_ = false;
-        Selection::Values node_ids_from_selection(const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+        Selection::Values node_ids_from_selection(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         friend ReportReader;
     };
