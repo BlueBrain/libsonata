@@ -341,7 +341,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(
-    const nonstd::optional<Selection>& selection, std::function<void(const Range&)> fun) const {
+    const nonstd::optional<Selection>& selection, std::function<void(const Range&)> fn) const {
     typename DataFrame<T>::DataType ids{};
 
 
@@ -365,8 +365,9 @@ typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(
             ids.push_back(make_key<T>(node_id, elem));
         }
 
-        if (fun)
-            fun(it->second);
+        if (fn) {
+            fn(it->second);
+        }
     }
     return ids;
 }
