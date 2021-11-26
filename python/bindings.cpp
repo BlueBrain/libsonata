@@ -614,7 +614,10 @@ PYBIND11_MODULE(_libsonata, m) {
                     return "by_time";
                 return "none";
             },
-            DOC_SPIKEREADER_POP(getSorting));
+            DOC_SPIKEREADER_POP(getSorting))
+        .def_property_readonly("times",
+                               &SpikeReader::Population::getTimes,
+                               DOC_SPIKEREADER_POP(getTimes));
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init([](py::object h5_filepath) { return SpikeReader(py::str(h5_filepath)); }),
              "h5_filepath"_a)

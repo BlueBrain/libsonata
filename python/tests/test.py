@@ -291,6 +291,9 @@ class TestSpikePopulation(unittest.TestCase):
 
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[])), 0)
 
+    def test_getTimes_from_population(self):
+        self.assertEqual(self.test_obj['All'].times, (0.1, 1.3))
+
 class TestSomaReportPopulation(unittest.TestCase):
     def setUp(self):
         path = os.path.join(PATH, "somas.h5")
