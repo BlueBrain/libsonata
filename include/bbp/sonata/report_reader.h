@@ -52,6 +52,11 @@ class SONATA_API SpikeReader
         };
 
         /**
+         * Return (tstart, tstop) of the population
+         */
+        std::tuple<double, double> getTimes() const;
+
+        /**
          * Return reports for this population.
          */
         Spikes get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
