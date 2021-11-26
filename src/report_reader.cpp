@@ -341,7 +341,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(
-    const nonstd::optional<Selection>& selection) const {
+    const nonstd::optional<Selection>& selection, std::function<void(const Range&)> fun) const {
     typename DataFrame<T>::DataType ids{};
 
 
@@ -364,6 +364,9 @@ typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(
         for (const auto& elem : element_ids) {
             ids.push_back(make_key<T>(node_id, elem));
         }
+
+        if (fun)
+            fun(it->second);
     }
     return ids;
 }
@@ -389,7 +392,16 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         data_frame.times.push_back(times_index_[i].second);
     }
 
-    data_frame.ids = getIds(selection);
+    // min and max offsets of the node_ids requested are calculated
+    // to reduce the amount of IO that is brought to memory
+    Ranges positions;
+    uint64_t min = std::numeric_limits<uint64_t>::max();
+    uint64_t max = std::numeric_limits<uint64_t>::min();
+    data_frame.ids = getIds(selection, [&](const Range& range) {
+        min = std::min(range.first, min);
+        max = std::max(range.second, max);
+        positions.emplace_back(range.first, range.second);
+    });
     if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
     }
@@ -405,21 +417,6 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         throw SonataError(
             fmt::format("DataType of dataset 'data' should be Float32 ('{}' was found)",
                         dataset_type.string()));
-    }
-    // min and max offsets of the node_ids requested are calculated
-    // to reduce the amount of IO that is brought to memory
-    uint64_t min = std::numeric_limits<uint64_t>::max();
-    uint64_t max = std::numeric_limits<uint64_t>::min();
-    const auto node_ids = node_ids_from_selection(selection);
-    Ranges positions;
-    for (const auto& node_id : node_ids) {
-        const auto it = nodes_pointers_.find(node_id);
-        if (it == nodes_pointers_.end()) {
-            continue;
-        }
-        min = std::min(it->second.first, min);
-        max = std::max(it->second.second, max);
-        positions.emplace_back(it->second.first, it->second.second);
     }
     std::vector<float> buffer(max - min);
     for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {

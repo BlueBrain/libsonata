@@ -132,7 +132,8 @@ class SONATA_API ReportReader
          * Return selected ids.
          */
         typename DataFrame<KeyType>::DataType getIds(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            std::function<void(const Range&)> = nullptr) const;
 
         /**
          * \param node_ids limit the report to the given selection.
