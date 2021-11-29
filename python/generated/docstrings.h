@@ -589,6 +589,8 @@ static const char *__doc_bbp_sonata_SpikeReader_Population_get = R"doc(Return re
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc(Return the way data are sorted ('none', 'by_id', 'by_time'))doc";
 
+static const char *__doc_bbp_sonata_SpikeReader_Population_getTimes = R"doc(Return (tstart, tstop) of the population)doc";
+
 static const char *__doc_bbp_sonata_SpikeReader_Population_sorting = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_spikes = R"doc()doc";

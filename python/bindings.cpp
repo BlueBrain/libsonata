@@ -330,12 +330,14 @@ void bindReportReader(py::module& m, const std::string& prefix) {
     py::class_<DataFrame<KeyType>>(m,
                                    (prefix + "DataFrame").c_str(),
                                    "A container of raw reporting data, compatible with Pandas")
-        .def_readonly("ids", &DataFrame<KeyType>::ids)
-
-        // .data and .time members are owned by this c++ object. We can't do std::move.
-        // To avoid copies we must declare the owner of the data as the current python
+        // .ids, .data and .time members are owned by the c++ object. We can't do std::move.
+        // To avoid copies, we must declare the owner of the data as the current Python
         // object. Numpy will adjust owner reference count according to returned arrays
         // clang-format off
+        .def_property_readonly("ids", [](const DataFrame<KeyType>& dframe) {
+            std::array<ssize_t, 1> dims { ssize_t(dframe.ids.size()) };
+            return managedMemoryArray(dframe.ids.data(), dims, dframe);
+        })
         .def_property_readonly("data", [](const DataFrame<KeyType>& dframe) {
             std::array<ssize_t, 2> dims {0l, ssize_t(dframe.ids.size())};
             if (dims[1] > 0) {
@@ -657,7 +659,10 @@ PYBIND11_MODULE(_libsonata, m) {
                     return "by_time";
                 return "none";
             },
-            DOC_SPIKEREADER_POP(getSorting));
+            DOC_SPIKEREADER_POP(getSorting))
+        .def_property_readonly("times",
+                               &SpikeReader::Population::getTimes,
+                               DOC_SPIKEREADER_POP(getTimes));
     py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
         .def(py::init([](py::object h5_filepath) { return SpikeReader(py::str(h5_filepath)); }),
              "h5_filepath"_a)
@@ -667,7 +672,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("__getitem__", &SpikeReader::openPopulation);
 
     bindReportReader<SomaReportReader, NodeID>(m, "Soma");
-    bindReportReader<ElementReportReader, std::pair<NodeID, uint32_t>>(m, "Element");
+    bindReportReader<ElementReportReader, CompartmentID>(m, "Element");
 
     py::register_exception<SonataError>(m, "SonataError");
 }

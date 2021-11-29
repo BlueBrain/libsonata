@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <stdexcept>
 
@@ -39,6 +40,9 @@ SONATA_API const std::string version();
 using NodeID = uint64_t;
 using EdgeID = uint64_t;
 using ElementID = uint32_t;
+// For performance reasons and to ease the Python bindings, the definition of
+// CompartmentID is no longer an std::pair<typeof(NodeID), typeof(ElementID)>
+using CompartmentID = std::array<uint64_t, 2>;
 
 class SONATA_API SonataError: public std::runtime_error
 {
