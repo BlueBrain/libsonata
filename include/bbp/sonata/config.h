@@ -181,33 +181,39 @@ class SONATA_API CircuitConfig
 class SONATA_API SimulationConfig
 {
   public:
-    // Parameters defining global simulation settings for spike reports
+    /**
+     * Parameters defining global simulation settings for spike reports
+     */
     struct Run {
-        // Biological simulation end time in milliseconds
+        /// Biological simulation end time in milliseconds
         float tstop{};
-        // Integration step duration in milliseconds
+        /// Integration step duration in milliseconds
         float dt{};
     };
-    // Parameters to override simulator output for spike reports
+    /** 
+     * Parameters to override simulator output for spike reports
+     */
     struct Output {
-        // Spike report file output directory. Default is "output"
+        /// Spike report file output directory. Default is "output"
         std::string outputDir;
-        // Spike report file name. Default is "out.h5"
+        /// Spike report file name. Default is "out.h5"
         std::string spikesFile;
     };
-    // List of report parameters collected during the simulation
+    /**
+     * List of report parameters collected during the simulation
+     */
     struct Report {
-        // Node sets on which to report
+        /// Node sets on which to report
         std::string cells;
-        // Report type. Possible values: "compartment", "summation", "synapse"
+        /// Report type. Possible values: "compartment", "summation", "synapse"
         std::string type;
-        // Interval between reporting steps in milliseconds
+        /// Interval between reporting steps in milliseconds
         float dt{};
-        // Time to step reporting in milliseconds
+        /// Time to step reporting in milliseconds
         float startTime{};
-        // Time to stop reporting in milliseconds
+        /// Time to stop reporting in milliseconds
         float endTime{};
-        // Report filename. Default is "<report name>_SONATA.h5"
+        /// Report filename. Default is "<report name>_SONATA.h5"
         std::string fileName;
     };
 
