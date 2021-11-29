@@ -489,33 +489,33 @@ static const char *__doc_bbp_sonata_Selection_ranges_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig = R"doc(Read access to a SONATA simulation config file.)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Output = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Output = R"doc(Parameters to override simulator output for spike reports)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Output_outputDir = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Output_outputDir = R"doc(Spike report file output directory. Default is "output")doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Output_spikesFile = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Output_spikesFile = R"doc(Spike report file name. Default is "out.h5")doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Parser = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report = R"doc(List of report parameters collected during the simulation)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_cells = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_cells = R"doc(Node sets on which to report)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_dt = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_dt = R"doc(Interval between reporting steps in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_endTime = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_endTime = R"doc(Time to stop reporting in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_fileName = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_fileName = R"doc(Report filename. Default is "<report name>_SONATA.h5")doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_startTime = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_startTime = R"doc(Time to step reporting in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc(Report type. Possible values: "compartment", "summation", "synapse")doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defining global simulation settings for spike reports)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
 R"doc(Parses a SONATA JSON simulation configuration file.
