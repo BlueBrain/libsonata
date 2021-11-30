@@ -190,7 +190,7 @@ class SONATA_API SimulationConfig
         /// Integration step duration in milliseconds
         float dt{};
     };
-    /** 
+    /**
      * Parameters to override simulator output for spike reports
      */
     struct Output {
