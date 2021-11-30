@@ -124,6 +124,11 @@ Variables readVariables(const nlohmann::json& json) {
     return variables;
 }
 
+std::string toAbsolute(const fs::path& base, const fs::path& path) {
+    const auto absolute = path.is_absolute() ? path : fs::absolute(base / path);
+    return absolute.lexically_normal().string();
+}
+
 }  // namespace
 
 class CircuitConfig::Parser
@@ -158,16 +163,10 @@ class CircuitConfig::Parser
                             const std::string& defaultValue = std::string()) const {
         auto value = getJSONValue<std::string>(json, key);
         if (!value.empty()) {
-            return toAbsolute(value);
+            return toAbsolute(_basePath, value);
         }
 
         return defaultValue;
-    }
-
-    std::string toAbsolute(const std::string& pathStr) const {
-        const fs::path path(pathStr);
-        const auto absolute = path.is_absolute() ? path : fs::absolute(_basePath / path);
-        return absolute.lexically_normal().string();
     }
 
     const nlohmann::json& getSubNetworkJson(const std::string& prefix) const {
@@ -190,7 +189,7 @@ class CircuitConfig::Parser
     std::string getNodeSetsPath() const {
         // Retrieve node sets file, if any
         if (_json.find("node_sets_file") != _json.end()) {
-            return toAbsolute(_json["node_sets_file"]);
+            return toAbsolute(_basePath, _json["node_sets_file"]);
         }
 
         return std::string();
@@ -208,7 +207,7 @@ class CircuitConfig::Parser
         const auto alternateMorphoDir = components.find("alternate_morphologies");
         if (alternateMorphoDir != components.end()) {
             for (auto it = alternateMorphoDir->begin(); it != alternateMorphoDir->end(); ++it) {
-                result.alternateMorphologiesDir[it.key()] = toAbsolute(it.value());
+                result.alternateMorphologiesDir[it.key()] = toAbsolute(_basePath, it.value());
             }
         }
 
@@ -283,7 +282,8 @@ class CircuitConfig::Parser
                 const auto altMorphoDir = popData.find("alternate_morphologies");
                 if (altMorphoDir != popData.end()) {
                     for (auto it = altMorphoDir->begin(); it != altMorphoDir->end(); ++it) {
-                        popProperties.alternateMorphologyFormats[it.key()] = toAbsolute(it.value());
+                        popProperties.alternateMorphologyFormats[it.key()] = toAbsolute(_basePath,
+                                                                                        it.value());
                     }
                 }
             }
@@ -477,6 +477,131 @@ const std::string& CircuitConfig::getExpandedJSON() const {
     return _expandedJSON;
 }
 
+
+class SimulationConfig::Parser
+{
+  public:
+    Parser(const std::string& content, const std::string& basePath)
+        : _basePath(fs::absolute(fs::path(basePath)).lexically_normal())
+        , _json(nlohmann::json::parse(content)) {}
+
+    template <typename Iterator, typename Type, typename SectionName>
+    void parseMandatory(const Iterator& it,
+                        const char* name,
+                        const SectionName& sn,
+                        Type& buf) const {
+        const auto element = it.find(name);
+        if (element == it.end())
+            throw SonataError(fmt::format("Could not find '{}' in '{}'", name, sn));
+        buf = element->template get<Type>();
+    }
+
+    template <typename Iterator, typename Type>
+    void parseOptional(const Iterator& it, const char* name, Type& buf) const {
+        const auto element = it.find(name);
+        if (element != it.end())
+            buf = element->template get<Type>();
+    }
+
+    SimulationConfig::Run parseRun() const {
+        const auto runIt = _json.find("run");
+        if (runIt == _json.end())
+            throw SonataError("Could not find 'run' section");
+
+        SimulationConfig::Run result{};
+        parseMandatory(*runIt, "tstop", "run", result.tstop);
+        parseMandatory(*runIt, "dt", "run", result.dt);
+        return result;
+    }
+
+    SimulationConfig::Output parseOutput() const {
+        SimulationConfig::Output result{};
+        result.outputDir = "output";
+        result.spikesFile = "out.h5";
+
+        const auto outputIt = _json.find("output");
+        if (outputIt != _json.end()) {
+            parseOptional(*outputIt, "output_dir", result.outputDir);
+            parseOptional(*outputIt, "spikes_file", result.spikesFile);
+        }
+
+        result.outputDir = toAbsolute(_basePath, result.outputDir);
+
+        return result;
+    }
+
+    std::unordered_map<std::string, SimulationConfig::Report> parseReports() const {
+        std::unordered_map<std::string, SimulationConfig::Report> result;
+
+        const auto reportsIt = _json.find("reports");
+        if (reportsIt == _json.end())
+            return result;
+
+        for (auto it = reportsIt->begin(); it != reportsIt->end(); ++it) {
+            auto& report = result[it.key()];
+            auto& valueIt = it.value();
+            const auto debugStr = fmt::format("report {}", it.key());
+            parseMandatory(valueIt, "cells", debugStr, report.cells);
+            parseMandatory(valueIt, "type", debugStr, report.type);
+            parseMandatory(valueIt, "dt", debugStr, report.dt);
+            parseMandatory(valueIt, "start_time", debugStr, report.startTime);
+            parseMandatory(valueIt, "end_time", debugStr, report.endTime);
+            parseOptional(valueIt, "file_name", report.fileName);
+            if (report.fileName.empty())
+                report.fileName = it.key() + "_SONATA.h5";
+            else {
+                const auto extension = fs::path(report.fileName).extension().string();
+                if (extension.empty() || extension != ".h5")
+                    report.fileName += ".h5";
+            }
+            report.fileName = toAbsolute(_basePath, report.fileName);
+        }
+
+        return result;
+    }
+
+  private:
+    const fs::path _basePath;
+    const nlohmann::json _json;
+};
+
+SimulationConfig::SimulationConfig(const std::string& content, const std::string& basePath)
+    : _jsonContent(content)
+    , _basePath(fs::absolute(basePath).lexically_normal().string()) {
+    const Parser parser(content, basePath);
+    _run = parser.parseRun();
+    _output = parser.parseOutput();
+    _reports = parser.parseReports();
+}
+
+SimulationConfig SimulationConfig::fromFile(const std::string& path) {
+    return SimulationConfig(readFile(path), fs::path(path).parent_path());
+}
+
+const std::string& SimulationConfig::getBasePath() const noexcept {
+    return _basePath;
+}
+
+const std::string& SimulationConfig::getJSON() const noexcept {
+    return _jsonContent;
+}
+
+const SimulationConfig::Run& SimulationConfig::getRun() const noexcept {
+    return _run;
+}
+
+const SimulationConfig::Output& SimulationConfig::getOutput() const noexcept {
+    return _output;
+}
+
+const SimulationConfig::Report& SimulationConfig::getReport(const std::string& name) const {
+    const auto it = _reports.find(name);
+    if (it == _reports.end())
+        throw SonataError(
+            fmt::format("The report '{}' is not present in the simulation config file", name));
+
+    return it->second;
+}
 
 }  // namespace sonata
 }  // namespace bbp

@@ -11,7 +11,7 @@ from libsonata import (EdgeStorage, NodeStorage,
                        SomaReportReader, SomaReportPopulation,
                        ElementReportReader, ElementReportPopulation,
                        NodeSets,
-                       CircuitConfig
+                       CircuitConfig, SimulationConfig
                        )
 
 
@@ -539,6 +539,34 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertTrue(edge_prop.morphologies_dir.endswith('morphologies'))
         self.assertTrue(edge_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
         self.assertEqual(edge_prop.alternate_morphology_formats, {})
+
+
+class TestSimulationConfig(unittest.TestCase):
+    def setUp(self):
+        self.config = SimulationConfig.from_file(
+                        os.path.join(PATH, 'config/simulation_config.json'))
+
+    def test_basic(self):
+        self.assertEqual(self.config.base_path, os.path.abspath(os.path.join(PATH, 'config')))
+
+        self.assertEqual(self.config.run.tstop, 1000)
+        self.assertTrue(abs(self.config.run.dt - 0.025) < 0.01)
+
+        self.assertEqual(self.config.output.output_dir,
+                         os.path.abspath(os.path.join(PATH, 'config/output')))
+        self.assertEqual(self.config.output.spikes_file, 'out.h5')
+
+        self.assertEqual(self.config.report('soma').cells, 'Mosaic')
+        self.assertEqual(self.config.report('soma').type, 'compartment')
+        self.assertTrue(abs(self.config.report('compartment').dt - 0.1) < 0.01)
+        self.assertEqual(self.config.report('axonal_comp_centers').start_time, 0)
+        self.assertEqual(self.config.report('axonal_comp_centers').file_name,
+                         os.path.abspath(os.path.join(PATH, 'config/axon_centers.h5')))
+        self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
+
+    def test_json(self):
+        temp_config = json.loads(self.config.json)
+        self.assertEqual(temp_config['run']['tstop'], 1000)
 
 if __name__ == '__main__':
     unittest.main()

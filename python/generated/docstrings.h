@@ -487,6 +487,77 @@ static const char *__doc_bbp_sonata_Selection_ranges = R"doc(Get a list of range
 
 static const char *__doc_bbp_sonata_Selection_ranges_2 = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig = R"doc(Read access to a SONATA simulation config file.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output = R"doc(Parameters to override simulator output for spike reports)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_outputDir = R"doc(Spike report file output directory. Default is "output")doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_spikesFile = R"doc(Spike report file name. Default is "out.h5")doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Parser = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report = R"doc(List of report parameters collected during the simulation)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_cells = R"doc(Node sets on which to report)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_dt = R"doc(Interval between reporting steps in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_endTime = R"doc(Time to stop reporting in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_fileName = R"doc(Report filename. Default is "<report name>_SONATA.h5")doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_startTime = R"doc(Time to step reporting in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc(Report type. Possible values: "compartment", "summation", "synapse")doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defining global simulation settings for spike reports)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
+R"doc(Parses a SONATA JSON simulation configuration file.
+
+Throws:
+    s SonataError on: - Ill-formed JSON - Missing mandatory entries
+    (in any depth))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_fromFile =
+R"doc(Loads a SONATA JSON simulation config file from disk and returns a
+CircuitConfig object which parses it.
+
+Throws:
+    s SonataError on: - Non accesible file (does not exists / does not
+    have read access) - Ill-formed JSON - Missing mandatory entries
+    (in any depth))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getJSON = R"doc(Returns the JSON content of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getOutput = R"doc(Returns the Output section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getReport =
+R"doc(Returns the given report parameters.
+
+Throws:
+    s SonataError if the given report name does not correspond with
+    any existing report.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getRun = R"doc(Returns the Run section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_jsonContent = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_output = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_reports = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_run = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SonataError = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SonataError_SonataError = R"doc()doc";
