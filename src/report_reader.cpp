@@ -112,6 +112,10 @@ auto SpikeReader::openPopulation(const std::string& populationName) const -> con
     return populations_.at(populationName);
 }
 
+std::tuple<double, double> SpikeReader::Population::getTimes() const {
+    return std::tie(tstart_, tstop_);
+}
+
 Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
                                     const nonstd::optional<double>& tstart,
                                     const nonstd::optional<double>& tstop) const {

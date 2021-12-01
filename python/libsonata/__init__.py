@@ -5,6 +5,7 @@
 
 from libsonata._libsonata import (
     CircuitConfig,
+    SimulationConfig,
     EdgePopulation,
     EdgeStorage,
     ElementDataFrame,

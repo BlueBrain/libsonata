@@ -175,5 +175,112 @@ class SONATA_API CircuitConfig
     std::unordered_map<std::string, PopulationProperties> _edgePopulationProperties;
 };
 
+/**
+ *  Read access to a SONATA simulation config file.
+ */
+class SONATA_API SimulationConfig
+{
+  public:
+    /**
+     * Parameters defining global simulation settings for spike reports
+     */
+    struct Run {
+        /// Biological simulation end time in milliseconds
+        float tstop{};
+        /// Integration step duration in milliseconds
+        float dt{};
+    };
+    /** 
+     * Parameters to override simulator output for spike reports
+     */
+    struct Output {
+        /// Spike report file output directory. Default is "output"
+        std::string outputDir;
+        /// Spike report file name. Default is "out.h5"
+        std::string spikesFile;
+    };
+    /**
+     * List of report parameters collected during the simulation
+     */
+    struct Report {
+        /// Node sets on which to report
+        std::string cells;
+        /// Report type. Possible values: "compartment", "summation", "synapse"
+        std::string type;
+        /// Interval between reporting steps in milliseconds
+        float dt{};
+        /// Time to step reporting in milliseconds
+        float startTime{};
+        /// Time to stop reporting in milliseconds
+        float endTime{};
+        /// Report filename. Default is "<report name>_SONATA.h5"
+        std::string fileName;
+    };
+
+    /**
+     * Parses a SONATA JSON simulation configuration file.
+     *
+     * \throws SonataError on:
+     *          - Ill-formed JSON
+     *          - Missing mandatory entries (in any depth)
+     */
+    SimulationConfig(const std::string& content, const std::string& basePath);
+
+    /**
+     * Loads a SONATA JSON simulation config file from disk and returns a CircuitConfig object
+     * which parses it.
+     *
+     * \throws SonataError on:
+     *          - Non accesible file (does not exists / does not have read access)
+     *          - Ill-formed JSON
+     *          - Missing mandatory entries (in any depth)
+     */
+    static SimulationConfig fromFile(const std::string& path);
+
+    /**
+     * Returns the base path of the simulation config file
+     */
+    const std::string& getBasePath() const noexcept;
+
+    /**
+     * Returns the JSON content of the simulation config file
+     */
+    const std::string& getJSON() const noexcept;
+
+    /**
+     * Returns the Run section of the simulation configuration.
+     */
+    const Run& getRun() const noexcept;
+
+    /**
+     * Returns the Output section of the simulation configuration.
+     */
+    const Output& getOutput() const noexcept;
+
+    /**
+     * Returns the given report parameters.
+     *
+     * \throws SonataError if the given report name does not correspond with any existing
+     *         report.
+     */
+    const Report& getReport(const std::string& name) const;
+
+  private:
+    // JSON string
+    const std::string _jsonContent;
+    // Base path of the simulation config file
+    const std::string _basePath;
+
+    // Run section
+    Run _run;
+    // Output section
+    Output _output;
+    // List of reports
+    std::unordered_map<std::string, Report> _reports;
+
+    class Parser;
+    friend class Parser;
+};
+
 }  // namespace sonata
 }  // namespace bbp
