@@ -286,10 +286,6 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 template <typename T>
 Selection::Values ReportReader<T>::Population::node_ids_from_selection(
     const nonstd::optional<Selection>& selection) const {
-    // Simplify selection
-    // We should remove duplicates
-    // And when we can work with ranges let's sort them
-    // auto nodes_ids_ = Selection::fromValues(node_ids.flatten().sort());
     Selection::Values node_ids;
 
     if (!selection) {  // Take all nodes in this case
@@ -348,11 +344,6 @@ typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(
     const nonstd::optional<Selection>& selection, std::function<void(const Range&)> fn) const {
     typename DataFrame<T>::DataType ids{};
 
-
-    // Simplify selection
-    // We should remove duplicates
-    // And when we can work with ranges let's sort them
-    // auto nodes_ids_ = Selection::fromValues(node_ids.flatten().sort());
     Selection::Values node_ids = node_ids_from_selection(selection);
 
     auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
