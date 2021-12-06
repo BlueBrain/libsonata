@@ -364,7 +364,14 @@ void bindReportReader(py::module& m, const std::string& prefix) {
         .def("get_node_ids",
              &ReportType::Population::getNodeIds,
              "Return the list of nodes ids for this population")
-        .def("get_ids", &ReportType::Population::getIds, "Return selected ids")
+        .def(
+            "get_ids",
+            [](const typename ReportType::Population& population,
+               const nonstd::optional<Selection>& selection) {
+                return population.getIds(selection, nullptr);
+            },
+            DOC_REPORTREADER_POP(getIds),
+            "selection"_a = nonstd::nullopt)
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
                                DOC_REPORTREADER_POP(getSorted))
