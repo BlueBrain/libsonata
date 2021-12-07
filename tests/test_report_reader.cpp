@@ -95,7 +95,7 @@ TEST_CASE("SomaReportReader", "[base]") {
     auto data_empty = pop.get(Selection({}));
     REQUIRE(data_empty.data == std::vector<float>{});
 
-    auto ids = pop.getIds(Selection({{3, 5}}));
+    auto ids = pop.getNodeIdElementIdMapping(Selection({{3, 5}}));
     REQUIRE(ids == std::vector<NodeID>{3, 4});
 }
 
@@ -159,6 +159,6 @@ TEST_CASE("ElementReportReader", "[base]") {
     REQUIRE(pop.get(Selection({{1, 2}}), 0.6, 0.6).data ==
             std::vector<float>{30.0f, 30.1f, 30.2f, 30.3f, 30.4f});
 
-    auto ids = pop.getIds(Selection({{3, 5}}));
+    auto ids = pop.getNodeIdElementIdMapping(Selection({{3, 5}}));
     REQUIRE(ids == std::vector<CompartmentID>{{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}});
 }

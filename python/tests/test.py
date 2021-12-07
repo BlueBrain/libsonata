@@ -333,8 +333,8 @@ class TestSomaReportPopulation(unittest.TestCase):
         sel_empty = self.test_obj['All'].get(node_ids=[])
         np.testing.assert_allclose(sel_empty.data, np.empty(shape=(0, 0)))
 
-    def test_get_ids(self):
-        self.assertEqual(self.test_obj['All'].get_ids([[3, 5]]),
+    def test_get_node_id_element_id_mapping(self):
+        self.assertEqual(self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]]),
                          [3, 4])
 
 
@@ -389,8 +389,8 @@ class TestElementReportPopulation(unittest.TestCase):
         np.testing.assert_allclose(self.test_obj['All'].get(node_ids=[3, 4], tstride=4).data[2],
                                    [81.0, 81.1, 81.2, 81.3, 81.4, 81.5, 81.6, 81.7, 81.8, 81.9], 1e-6, 0)
 
-    def test_get_ids(self):
-        self.assertEqual(self.test_obj['All'].get_ids([[3, 5]]),
+    def test_get_node_id_element_id_mapping(self):
+        self.assertEqual(self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]]),
                          [[3, 5], [3, 5], [3, 6], [3, 6], [3, 7], [4, 7], [4, 8], [4, 8], [4, 9], [4, 9]])
 
 

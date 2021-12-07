@@ -340,7 +340,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 
 template <typename T>
-typename DataFrame<T>::DataType ReportReader<T>::Population::getIds(
+typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
     const nonstd::optional<Selection>& selection, std::function<void(const Range&)> fn) const {
     typename DataFrame<T>::DataType ids{};
 
@@ -393,7 +393,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     Ranges positions;
     uint64_t min = std::numeric_limits<uint64_t>::max();
     uint64_t max = std::numeric_limits<uint64_t>::min();
-    data_frame.ids = getIds(selection, [&](const Range& range) {
+    data_frame.ids = getNodeIdElementIdMapping(selection, [&](const Range& range) {
         min = std::min(range.first, min);
         max = std::max(range.second, max);
         positions.emplace_back(range.first, range.second);

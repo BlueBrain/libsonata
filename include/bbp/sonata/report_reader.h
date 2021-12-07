@@ -134,11 +134,14 @@ class SONATA_API ReportReader
         std::vector<NodeID> getNodeIds() const;
 
         /**
-         * Return selected ids.
+         * Return the ElementIds for the passed Node
+         *
+         * \param node_ids limit the report to the given selection. If nullptr, all nodes are used
+         * \param fn lambda applied to all ranges for all node ids
          */
-        typename DataFrame<KeyType>::DataType getIds(
+        typename DataFrame<KeyType>::DataType getNodeIdElementIdMapping(
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
-            std::function<void(const Range&)> = nullptr) const;
+            std::function<void(const Range&)> fn = nullptr) const;
 
         /**
          * \param node_ids limit the report to the given selection.

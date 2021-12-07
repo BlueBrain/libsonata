@@ -429,7 +429,7 @@ Parameter ``tstride``:
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_getIds = R"doc(Return selected ids.)doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIdElementIdMapping = R"doc(Return selected ids.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getIndex = R"doc()doc";
 
