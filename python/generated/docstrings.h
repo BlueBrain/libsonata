@@ -429,9 +429,17 @@ Parameter ``tstride``:
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIdElementIdMapping = R"doc(Return selected ids.)doc";
-
 static const char *__doc_bbp_sonata_ReportReader_Population_getIndex = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIdElementIdMapping =
+R"doc(Return the ElementIds for the passed Node
+
+Parameter ``node_ids``:
+    limit the report to the given selection. If nullptr, all nodes are
+    used
+
+Parameter ``fn``:
+    lambda applied to all ranges for all node ids)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIds = R"doc(Return all the node ids.)doc";
 
