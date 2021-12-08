@@ -15,11 +15,11 @@ source $BIN/activate
 set -u
 
 $BIN/pip -v install --upgrade pip setuptools wheel
-$BIN/pip install nose
-
-# run tests with nose
 $BIN/pip -v install --force .
-$BIN/nosetests -s -v -P python/tests
+
+pushd python/tests
+$BIN/python -m unittest -v 
+popd
 
 # run tests through setup.py; also builds documentation
 $BIN/python setup.py test
