@@ -1,3 +1,5 @@
+.cache
+.clangd
 build
 .eggs/
 .tox/
