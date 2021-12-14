@@ -134,9 +134,16 @@ class SONATA_API ReportReader
         std::vector<NodeID> getNodeIds() const;
 
         /**
-         * Return the ElementIds for the passed Node
+         * Return the ElementIds for the passed Node.
+         * The return type will depend on the report reader:
+         * - For Soma report reader, the return value will be the Node ID to which the report
+         *   value belongs to.
+         * - For Element/full compartment readers, the return value will be an array with 2
+         *   elements, the first element is the Node ID and the second element is the 
+         *   compartment ID of the given Node.
          *
-         * \param node_ids limit the report to the given selection. If nullptr, all nodes are used
+         * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
+         * report are used
          * \param fn lambda applied to all ranges for all node ids
          */
         typename DataFrame<KeyType>::DataType getNodeIdElementIdMapping(
