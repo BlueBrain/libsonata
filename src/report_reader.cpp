@@ -284,6 +284,27 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
+Selection::Values ReportReader<T>::Population::node_ids_from_selection(
+    const nonstd::optional<Selection>& selection) const {
+    Selection::Values node_ids;
+
+    if (!selection) {  // Take all nodes in this case
+        node_ids.reserve(nodes_pointers_.size());
+        std::transform(nodes_pointers_.begin(),
+                       nodes_pointers_.end(),
+                       std::back_inserter(node_ids),
+                       [](const std::pair<NodeID, Range>& node_pointer) {
+                           return node_pointer.first;
+                       });
+    } else if (selection->empty()) {
+        return {};
+    } else {
+        node_ids = selection->flatten();
+    }
+    return node_ids;
+}
+
+template <typename T>
 std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
     const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
     std::pair<size_t, size_t> indexes;
@@ -319,6 +340,34 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 
 template <typename T>
+typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
+    const nonstd::optional<Selection>& selection, std::function<void(const Range&)> fn) const {
+    typename DataFrame<T>::DataType ids{};
+
+    Selection::Values node_ids = node_ids_from_selection(selection);
+
+    auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
+    for (const auto& node_id : node_ids) {
+        const auto it = nodes_pointers_.find(node_id);
+        if (it == nodes_pointers_.end()) {
+            continue;
+        }
+
+        std::vector<ElementID> element_ids(it->second.second - it->second.first);
+        dataset_elem_ids.select({it->second.first}, {it->second.second - it->second.first})
+            .read(element_ids.data());
+        for (const auto& elem : element_ids) {
+            ids.push_back(make_key<T>(node_id, elem));
+        }
+
+        if (fn) {
+            fn(it->second);
+        }
+    }
+    return ids;
+}
+
+template <typename T>
 DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& selection,
                                               const nonstd::optional<double>& tstart,
                                               const nonstd::optional<double>& tstop,
@@ -339,48 +388,16 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         data_frame.times.push_back(times_index_[i].second);
     }
 
-    // Simplify selection
-    // We should remove duplicates
-    // And when we can work with ranges let's sort them
-    // auto nodes_ids_ = Selection::fromValues(node_ids.flatten().sort());
-    Selection::Values node_ids;
-
-    if (!selection) {  // Take all nodes in this case
-        node_ids.reserve(nodes_pointers_.size());
-        std::transform(nodes_pointers_.begin(),
-                       nodes_pointers_.end(),
-                       std::back_inserter(node_ids),
-                       [](const std::pair<NodeID, Range>& node_pointer) {
-                           return node_pointer.first;
-                       });
-    } else if (selection->empty()) {
-        return DataFrame<T>{{}, {}, {}};
-    } else {
-        node_ids = selection->flatten();
-    }
-
-    Ranges positions;
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
+    Ranges positions;
     uint64_t min = std::numeric_limits<uint64_t>::max();
     uint64_t max = std::numeric_limits<uint64_t>::min();
-    auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
-    for (const auto& node_id : node_ids) {
-        const auto it = nodes_pointers_.find(node_id);
-        if (it == nodes_pointers_.end()) {
-            continue;
-        }
-        min = std::min(it->second.first, min);
-        max = std::max(it->second.second, max);
-        positions.emplace_back(it->second.first, it->second.second);
-
-        std::vector<ElementID> element_ids(it->second.second - it->second.first);
-        dataset_elem_ids.select({it->second.first}, {it->second.second - it->second.first})
-            .read(element_ids.data());
-        for (const auto& elem : element_ids) {
-            data_frame.ids.push_back(make_key<T>(node_id, elem));
-        }
-    }
+    data_frame.ids = getNodeIdElementIdMapping(selection, [&](const Range& range) {
+        min = std::min(range.first, min);
+        max = std::max(range.second, max);
+        positions.emplace_back(range.first, range.second);
+    });
     if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
     }

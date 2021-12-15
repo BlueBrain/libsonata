@@ -431,13 +431,30 @@ static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getIndex = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIds = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIdElementIdMapping =
+R"doc(Return the ElementIds for the passed Node. The return type will depend
+on the report reader: - For Soma report reader, the return value will
+be the Node ID to which the report value belongs to. - For
+Element/full compartment readers, the return value will be an array
+with 2 elements, the first element is the Node ID and the second
+element is the compartment ID of the given Node.
+
+Parameter ``node_ids``:
+    limit the report to the given selection. If nullptr, all nodes in
+    the report are used
+
+Parameter ``fn``:
+    lambda applied to all ranges for all node ids)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIds = R"doc(Return all the node ids.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getSorted = R"doc(Return true if the data is sorted.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getTimeUnits = R"doc(Return the unit of time)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getTimes = R"doc(Return (tstart, tstop, tstep) of the population)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_node_ids_from_selection = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_nodes_ids = R"doc()doc";
 

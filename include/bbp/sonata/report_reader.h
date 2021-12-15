@@ -127,7 +127,28 @@ class SONATA_API ReportReader
          * Return true if the data is sorted.
          */
         bool getSorted() const;
+
+        /**
+         * Return all the node ids.
+         */
         std::vector<NodeID> getNodeIds() const;
+
+        /**
+         * Return the ElementIds for the passed Node.
+         * The return type will depend on the report reader:
+         * - For Soma report reader, the return value will be the Node ID to which the report
+         *   value belongs to.
+         * - For Element/full compartment readers, the return value will be an array with 2
+         *   elements, the first element is the Node ID and the second element is the 
+         *   compartment ID of the given Node.
+         *
+         * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
+         * report are used
+         * \param fn lambda applied to all ranges for all node ids
+         */
+        typename DataFrame<KeyType>::DataType getNodeIdElementIdMapping(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            std::function<void(const Range&)> fn = nullptr) const;
 
         /**
          * \param node_ids limit the report to the given selection.
@@ -154,6 +175,8 @@ class SONATA_API ReportReader
         std::string time_units_;
         std::string data_units_;
         bool nodes_ids_sorted_ = false;
+        Selection::Values node_ids_from_selection(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         friend ReportReader;
     };
