@@ -1,6 +1,6 @@
 /*
-  This file contains docstrings for the Python bindings.
-  Do not edit! These were automatically extracted by mkdoc.py
+  This file contains docstrings for use in the Python bindings.
+  Do not edit! They were automatically extracted by pybind11_mkdoc.
  */
 
 #define __EXPAND(x)                                      x
@@ -29,10 +29,10 @@ static const char *__doc_bbp_sonata_CircuitConfig_CircuitConfig =
 R"doc(Parses a SONATA JSON config file.
 
 Throws:
-    s SonataError on: - Ill-formed JSON - Missing mandatory entries
-    (in any depth) - Missing entries which become mandatory when
-    another entry is present - Multiple populations with the same name
-    in different edge/node networks)doc";
+    SonataError on: - Ill-formed JSON - Missing mandatory entries (in
+    any depth) - Missing entries which become mandatory when another
+    entry is present - Multiple populations with the same name in
+    different edge/node networks)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_Components = R"doc()doc";
 
@@ -65,7 +65,7 @@ R"doc(Loads a SONATA JSON config file from disk and returns a CircuitConfig
 object which parses it.
 
 Throws:
-    s SonataError on: - Non accesible file (does not exists / does not
+    SonataError on: - Non accesible file (does not exists / does not
     have read access) - Ill-formed JSON - Missing mandatory entries
     (in any depth) - Missing entries which become mandatory when
     another entry is present - Multiple populations with the same name
@@ -76,7 +76,7 @@ R"doc(Creates and returns an EdgePopulation object, initialized from the
 given population, and the edge network it belongs to.
 
 Throws:
-    s SonataError if the given population does not exist in any edge
+    SonataError if the given population does not exist in any edge
     network.)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_getEdgePopulationProperties =
@@ -85,7 +85,7 @@ falling back to network properties if there are no population-specific
 ones.
 
 Throws:
-    s SonataError if the given population name does not correspond to
+    SonataError if the given population name does not correspond to
     any existing edge population.)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_getExpandedJSON =
@@ -97,7 +97,7 @@ R"doc(Creates and returns a NodePopulation object, initialized from the
 given population, and the node network it belongs to.
 
 Throws:
-    s SonataError if the given population does not exist in any node
+    SonataError if the given population does not exist in any node
     network.)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_getNodePopulationProperties =
@@ -106,7 +106,7 @@ falling back to network properties if there are no population-specific
 ones.
 
 Throws:
-    s SonataError if the given population name does not correspond to
+    SonataError if the given population name does not correspond to
     any existing node population.)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_getNodeSetsPath = R"doc(Returns the path to the node sets file.)doc";
@@ -533,8 +533,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
 R"doc(Parses a SONATA JSON simulation configuration file.
 
 Throws:
-    s SonataError on: - Ill-formed JSON - Missing mandatory entries
-    (in any depth))doc";
+    SonataError on: - Ill-formed JSON - Missing mandatory entries (in
+    any depth))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
 
@@ -543,7 +543,7 @@ R"doc(Loads a SONATA JSON simulation config file from disk and returns a
 CircuitConfig object which parses it.
 
 Throws:
-    s SonataError on: - Non accesible file (does not exists / does not
+    SonataError on: - Non accesible file (does not exists / does not
     have read access) - Ill-formed JSON - Missing mandatory entries
     (in any depth))doc";
 
@@ -557,8 +557,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_getReport =
 R"doc(Returns the given report parameters.
 
 Throws:
-    s SonataError if the given report name does not correspond with
-    any existing report.)doc";
+    SonataError if the given report name does not correspond with any
+    existing report.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getRun = R"doc(Returns the Run section of the simulation configuration.)doc";
 

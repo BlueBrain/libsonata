@@ -577,5 +577,6 @@ class TestSimulationConfig(unittest.TestCase):
         temp_config = json.loads(self.config.json)
         self.assertEqual(temp_config['run']['tstop'], 1000)
 
+
 if __name__ == '__main__':
     unittest.main()
