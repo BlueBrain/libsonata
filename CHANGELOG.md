@@ -2,21 +2,29 @@
 
 ## v0.1.10:
 
-* Exclude musllinux wheels building
-* Have the shim module document functionality (#162)
-* move to C++14 (#159)
-* Update HighFive submodule to latest 2.3.1 (#156)
+### Added:
+ - Have the shim module document functionality (#162)
+ - added simulation config implementation (#158)
+ - reporting getNodeIdElementIdMapping function(#168)
+ - getTimes inside SpikeReader::Population (#169)
+
+### Fixed:
+ - move to C++14 (#159)
+ - Exclude musllinux wheels building
+ - Update HighFive submodule to latest 2.3.1 (#156)
+ - update to new pybind11::mkdocs method (#173)
+ - switch away from nose for test discovery (#172)
 
 ## v0.1.9: Thu 01 Jul 2021
 
 ### Added:
-    * circuit_config.json implementation (#142)
-    * allow for simple expressions (#147) in node_sets as proposed to the 
-      offical SONATA spec in https://github.com/AllenInstitute/sonata/pull/129
+ - circuit_config.json implementation (#142)
+ - allow for simple expressions (#147) in node_sets as proposed to the
+   offical SONATA spec in https://github.com/AllenInstitute/sonata/pull/129
 
 ### Fixed:
-    * upgrade Catch2 to 2.13.6; autodetect test names (#148)
-    * move to fmt 7.1.2 (#145)
+ - upgrade Catch2 to 2.13.6; autodetect test names (#148)
+ - move to fmt 7.1.2 (#145)
 
 ## v0.1.8: Wed 10 Feb 2021
 
