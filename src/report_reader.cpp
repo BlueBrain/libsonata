@@ -18,6 +18,7 @@ namespace {
 using bbp::sonata::CompartmentID;
 using bbp::sonata::ElementID;
 using bbp::sonata::NodeID;
+using bbp::sonata::NodePointers;
 using bbp::sonata::Selection;
 using bbp::sonata::Spike;
 using bbp::sonata::Spikes;
@@ -284,24 +285,71 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-Selection::Values ReportReader<T>::Population::node_ids_from_selection(
+std::pair<NodePointers, Range> ReportReader<T>::Population::node_pointers_from_selection(
     const nonstd::optional<Selection>& selection) const {
-    Selection::Values node_ids;
+    NodePointers node_pointers;
+    Range range = { std::numeric_limits<uint64_t>::max(),
+                    std::numeric_limits<uint64_t>::min() };
 
-    if (!selection) {  // Take all nodes in this case
-        node_ids.reserve(nodes_pointers_.size());
-        std::transform(nodes_pointers_.begin(),
-                       nodes_pointers_.end(),
-                       std::back_inserter(node_ids),
-                       [](const std::pair<NodeID, Range>& node_pointer) {
-                           return node_pointer.first;
-                       });
-    } else if (selection->empty()) {
-        return {};
-    } else {
-        node_ids = selection->flatten();
+    const auto& update_range = [&range](const Range range_) {
+        range.first = std::min(range.first, range_.first);
+        range.second = std::max(range.second, range_.second);
+    };
+
+    // Take all nodes if no selection is provided
+    if (!selection) {
+        node_pointers = nodes_pointers_;
+        
+        for (const auto& node_pointer : node_pointers) {
+            update_range(node_pointer.second);
+        }
     }
-    return node_ids;
+    else if (!selection->empty()) {
+        const auto& node_ids = selection->flatten();
+        
+        for (const auto& node_id : node_ids) {
+            const auto it = nodes_pointers_.find(node_id);
+            if (it != nodes_pointers_.end()) {
+                node_pointers.emplace(*it);
+                update_range(it->second);
+            }
+        }
+    }
+
+    return { node_pointers, range };
+}
+
+template <typename T>
+typename DataFrame<T>::DataType ReportReader<T>::Population::ids_from_node_pointers(
+            const std::pair<NodePointers, Range>& result) const {
+    typename DataFrame<T>::DataType ids{};
+    
+    const auto& node_pointers = result.first;
+    const auto& min = result.second.first;
+    const auto& max = result.second.second;
+
+    if (!node_pointers.empty())
+    {
+        std::vector<ElementID> element_ids;
+        auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
+        dataset_elem_ids.select({min}, {max - min}).read(element_ids);
+
+        ids.reserve(max - min);
+
+        for (const auto& node_pointer : node_pointers) {
+            const auto& node_id = node_pointer.first;
+            const auto& range = node_pointer.second;
+            
+            for (auto i = (range.first - min); i < (range.second - min); i++)
+            {
+                ids.emplace_back(make_key<T>(node_id, element_ids[i]));
+            }
+        }
+
+        ids.shrink_to_fit();
+    }
+    
+    return ids;
 }
 
 template <typename T>
@@ -341,30 +389,9 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
-    const nonstd::optional<Selection>& selection, std::function<void(const Range&)> fn) const {
-    typename DataFrame<T>::DataType ids{};
-
-    Selection::Values node_ids = node_ids_from_selection(selection);
-
-    auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
-    for (const auto& node_id : node_ids) {
-        const auto it = nodes_pointers_.find(node_id);
-        if (it == nodes_pointers_.end()) {
-            continue;
-        }
-
-        std::vector<ElementID> element_ids(it->second.second - it->second.first);
-        dataset_elem_ids.select({it->second.first}, {it->second.second - it->second.first})
-            .read(element_ids.data());
-        for (const auto& elem : element_ids) {
-            ids.push_back(make_key<T>(node_id, elem));
-        }
-
-        if (fn) {
-            fn(it->second);
-        }
-    }
-    return ids;
+    const nonstd::optional<Selection>& selection) const {
+    const auto& result = node_pointers_from_selection(selection);
+    return ids_from_node_pointers(result);
 }
 
 template <typename T>
@@ -390,14 +417,12 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
-    Ranges positions;
-    uint64_t min = std::numeric_limits<uint64_t>::max();
-    uint64_t max = std::numeric_limits<uint64_t>::min();
-    data_frame.ids = getNodeIdElementIdMapping(selection, [&](const Range& range) {
-        min = std::min(range.first, min);
-        max = std::max(range.second, max);
-        positions.emplace_back(range.first, range.second);
-    });
+    const auto& result = node_pointers_from_selection(selection);
+    const auto& node_pointers = result.first;
+    const auto& min = result.second.first;
+    const auto& max = result.second.second;
+
+    data_frame.ids = ids_from_node_pointers(result);
     if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
     }
@@ -423,7 +448,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         off_t offset = 0;
         off_t data_offset = (timer_index - index_start) / stride;
         auto data_ptr = &data_frame.data[data_offset * n_ids];
-        for (const auto& position : positions) {
+        for (const auto& node_pointer : node_pointers) {
+            const auto& position = node_pointer.second;
             uint64_t elements_per_gid = position.second - position.first;
             uint64_t gid_start = position.first - min;
 
