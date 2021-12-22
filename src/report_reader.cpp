@@ -285,28 +285,27 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-std::pair<NodePointers, Range> ReportReader<T>::Population::node_pointers_from_selection(
+std::pair<NodePointers, Range> ReportReader<T>::Population::getNodePointers(
     const nonstd::optional<Selection>& selection) const {
     NodePointers node_pointers;
-    Range range = { std::numeric_limits<uint64_t>::max(),
-                    std::numeric_limits<uint64_t>::min() };
+    Range range = {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::min()};
 
-    const auto& update_range = [&range](const Range range_) {
-        range.first = std::min(range.first, range_.first);
-        range.second = std::max(range.second, range_.second);
+    // Helper function to update the min and max values
+    const auto& update_range = [&range](const Range range_new) {
+        range.first = std::min(range.first, range_new.first);
+        range.second = std::max(range.second, range_new.second);
     };
 
     // Take all nodes if no selection is provided
     if (!selection) {
         node_pointers = nodes_pointers_;
-        
+
         for (const auto& node_pointer : node_pointers) {
             update_range(node_pointer.second);
         }
-    }
-    else if (!selection->empty()) {
+    } else if (!selection->empty()) {
         const auto& node_ids = selection->flatten();
-        
+
         for (const auto& node_id : node_ids) {
             const auto it = nodes_pointers_.find(node_id);
             if (it != nodes_pointers_.end()) {
@@ -316,39 +315,37 @@ std::pair<NodePointers, Range> ReportReader<T>::Population::node_pointers_from_s
         }
     }
 
-    return { node_pointers, range };
+    return {node_pointers, range};
 }
 
 template <typename T>
-typename DataFrame<T>::DataType ReportReader<T>::Population::ids_from_node_pointers(
-            const std::pair<NodePointers, Range>& result) const {
+typename DataFrame<T>::DataType ReportReader<T>::Population::getElementIds(
+    const NodePointers& node_pointers, const Range& range) const {
     typename DataFrame<T>::DataType ids{};
-    
-    const auto& node_pointers = result.first;
-    const auto& min = result.second.first;
-    const auto& max = result.second.second;
 
-    if (!node_pointers.empty())
-    {
+    if (!node_pointers.empty()) {
+        const auto& min = range.first;
+        const auto& max = range.second;
+
         std::vector<ElementID> element_ids;
         auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
         dataset_elem_ids.select({min}, {max - min}).read(element_ids);
 
+        // Reserve at least (max - min) elements and shrink afterwards
         ids.reserve(max - min);
 
         for (const auto& node_pointer : node_pointers) {
             const auto& node_id = node_pointer.first;
             const auto& range = node_pointer.second;
-            
-            for (auto i = (range.first - min); i < (range.second - min); i++)
-            {
+
+            for (auto i = (range.first - min); i < (range.second - min); i++) {
                 ids.emplace_back(make_key<T>(node_id, element_ids[i]));
             }
         }
 
         ids.shrink_to_fit();
     }
-    
+
     return ids;
 }
 
@@ -390,8 +387,8 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
     const nonstd::optional<Selection>& selection) const {
-    const auto& result = node_pointers_from_selection(selection);
-    return ids_from_node_pointers(result);
+    const auto& result = getNodePointers(selection);
+    return getElementIds(result.first, result.second);
 }
 
 template <typename T>
@@ -417,12 +414,12 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
-    const auto& result = node_pointers_from_selection(selection);
+    const auto& result = getNodePointers(selection);
     const auto& node_pointers = result.first;
     const auto& min = result.second.first;
     const auto& max = result.second.second;
 
-    data_frame.ids = ids_from_node_pointers(result);
+    data_frame.ids = getElementIds(result.first, result.second);
     if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
     }

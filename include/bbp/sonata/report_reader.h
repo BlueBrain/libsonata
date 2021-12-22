@@ -98,9 +98,9 @@ class SONATA_API SpikeReader
     mutable std::map<std::string, Population> populations_;
 };
 
-  using Range = std::pair<uint64_t, uint64_t>;
-  using Ranges = std::vector<Range>;
-  using NodePointers = std::map<NodeID, Range>;
+using Range = std::pair<uint64_t, uint64_t>;
+using Ranges = std::vector<Range>;
+using NodePointers = std::map<NodeID, Range>;
 
 template <typename KeyType>
 class SONATA_API ReportReader
@@ -166,6 +166,10 @@ class SONATA_API ReportReader
         Population(const H5::File& file, const std::string& populationName);
         std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
                                            const nonstd::optional<double>& tstop) const;
+        std::pair<NodePointers, Range> getNodePointers(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+        typename DataFrame<KeyType>::DataType getElementIds(const NodePointers& node_pointers,
+                                                            const Range& range) const;
 
         NodePointers nodes_pointers_;
         H5::Group pop_group_;
@@ -175,10 +179,6 @@ class SONATA_API ReportReader
         std::string time_units_;
         std::string data_units_;
         bool nodes_ids_sorted_ = false;
-        std::pair<NodePointers, Range> node_pointers_from_selection(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
-        typename DataFrame<KeyType>::DataType ids_from_node_pointers(
-            const std::pair<NodePointers, Range>& result) const;
 
         friend ReportReader;
     };
