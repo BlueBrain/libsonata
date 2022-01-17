@@ -83,24 +83,28 @@ class CMakeBuild(build_ext, object):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+
+        build_type =  os.environ.get("SONATA_BUILD_TYPE", "Release")
+        if self.debug:
+            build_type = "Debug"
+
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DSONATA_TESTS={}".format(os.environ.get("SONATA_TESTS", "OFF")),
             "-DEXTLIB_FROM_SUBMODULES=ON",
             "-DSONATA_PYTHON=ON",
             "-DSONATA_VERSION=" + self.distribution.get_version(),
-            "-DCMAKE_BUILD_TYPE=",
+            "-DCMAKE_BUILD_TYPE={}".format(build_type),
             "-DSONATA_CXX_WARNINGS=OFF",
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
-        optimize = "OFF" if self.debug else "ON"
-        build_args = ["--config", optimize, "--target", self.target]
+        build_args = ["--config", build_type, "--target", self.target]
 
         if platform.system() == "Windows":
             cmake_args += [
                 "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}".format(
-                    optimize.upper(), extdir
+                    build_type.upper(), extdir
                 )
             ]
             if sys.maxsize > 2 ** 32:
@@ -109,15 +113,18 @@ class CMakeBuild(build_ext, object):
         else:
             build_args += ["--", "-j{}".format(max(MIN_CPU_CORES, get_cpu_count()))]
 
+        if not os.path.exists(self.build_temp):
+            os.makedirs(self.build_temp)
+
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get("CXXFLAGS", ""), self.distribution.get_version()
         )
-        if not os.path.exists(self.build_temp):
-            os.makedirs(self.build_temp)
+
         subprocess.check_call(
             ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env
         )
+
         subprocess.check_call(
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
