@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.11:
+
+### Added:
+
+### Fixed:
+ - Prefer building Release mode for python wheels, can control with SONATA_BUILD_TYPE (#174) 
+
 ## v0.1.10:
 
 ### Added:
