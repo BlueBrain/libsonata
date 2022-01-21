@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <map>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -145,7 +146,6 @@ class SONATA_API ReportReader
          *
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
-         * \param fn lambda applied to all ranges for all node ids
          */
         typename DataFrame<KeyType>::DataType getNodeIdElementIdMapping(
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
@@ -166,10 +166,16 @@ class SONATA_API ReportReader
         Population(const H5::File& file, const std::string& populationName);
         std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
                                            const nonstd::optional<double>& tstop) const;
-        std::pair<NodePointers, Range> getNodePointers(
+        /**
+         * Return the ElementIds for the given selection, alongside the filtered NodePointers
+         * and the range of positions where they fit in the file. This latter two are necessary
+         * for performance to understand how and where to retrieve the data from storage.
+         *
+         * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
+         * report are used
+         */
+        std::tuple<NodePointers, Range, typename DataFrame<KeyType>::DataType> getElementIds(
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
-        typename DataFrame<KeyType>::DataType getElementIds(const NodePointers& node_pointers,
-                                                            const Range& range) const;
 
         NodePointers nodes_pointers_;
         H5::Group pop_group_;

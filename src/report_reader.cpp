@@ -285,15 +285,18 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-std::pair<NodePointers, Range> ReportReader<T>::Population::getNodePointers(
-    const nonstd::optional<Selection>& selection) const {
+std::tuple<NodePointers, Range, typename DataFrame<T>::DataType>
+ReportReader<T>::Population::getElementIds(const nonstd::optional<Selection>& selection) const {
     NodePointers node_pointers;
     Range range = {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::min()};
+    typename DataFrame<T>::DataType ids{};
+    size_t eids_count = 0;
 
-    // Helper function to update the min and max values
-    const auto& update_range = [&range](const Range range_new) {
+    // Helper function to update the min / max values and count
+    const auto& update_range = [&range, &eids_count](const Range& range_new) {
         range.first = std::min(range.first, range_new.first);
         range.second = std::max(range.second, range_new.second);
+        eids_count += (range_new.second - range_new.first);
     };
 
     // Take all nodes if no selection is provided
@@ -315,14 +318,7 @@ std::pair<NodePointers, Range> ReportReader<T>::Population::getNodePointers(
         }
     }
 
-    return {node_pointers, range};
-}
-
-template <typename T>
-typename DataFrame<T>::DataType ReportReader<T>::Population::getElementIds(
-    const NodePointers& node_pointers, const Range& range) const {
-    typename DataFrame<T>::DataType ids{};
-
+    // Extract the ElementIDs from the GIDs
     if (!node_pointers.empty()) {
         const auto& min = range.first;
         const auto& max = range.second;
@@ -331,8 +327,7 @@ typename DataFrame<T>::DataType ReportReader<T>::Population::getElementIds(
         auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
         dataset_elem_ids.select({min}, {max - min}).read(element_ids);
 
-        // Reserve at least (max - min) elements and shrink afterwards
-        ids.reserve(max - min);
+        ids.reserve(eids_count);
 
         for (const auto& node_pointer : node_pointers) {
             const auto& node_id = node_pointer.first;
@@ -343,10 +338,11 @@ typename DataFrame<T>::DataType ReportReader<T>::Population::getElementIds(
             }
         }
 
-        ids.shrink_to_fit();
+        // Reduces overhead of next IOps by clearing-up internal buffers of HDF5
+        dataset_elem_ids.select({min}, {1}).read(element_ids);
     }
 
-    return ids;
+    return std::make_tuple(node_pointers, range, ids);
 }
 
 template <typename T>
@@ -387,8 +383,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
     const nonstd::optional<Selection>& selection) const {
-    const auto& result = getNodePointers(selection);
-    return getElementIds(result.first, result.second);
+    return std::get<2>(getElementIds(selection));
 }
 
 template <typename T>
@@ -414,12 +409,12 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
-    const auto& result = getNodePointers(selection);
-    const auto& node_pointers = result.first;
-    const auto& min = result.second.first;
-    const auto& max = result.second.second;
+    const auto& result = getElementIds(selection);
+    const auto& node_pointers = std::get<0>(result);
+    const auto& min = std::get<1>(result).first;
+    const auto& max = std::get<1>(result).second;
 
-    data_frame.ids = getElementIds(result.first, result.second);
+    data_frame.ids = std::get<2>(result);
     if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
     }
