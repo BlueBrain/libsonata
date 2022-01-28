@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <map>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -99,10 +98,6 @@ class SONATA_API SpikeReader
     mutable std::map<std::string, Population> populations_;
 };
 
-using Range = std::pair<uint64_t, uint64_t>;
-using Ranges = std::vector<Range>;
-using NodePointers = std::map<NodeID, Range>;
-
 template <typename KeyType>
 class SONATA_API ReportReader
 {
@@ -163,21 +158,27 @@ class SONATA_API ReportReader
                                const nonstd::optional<size_t>& tstride = nonstd::nullopt) const;
 
       private:
+        struct ElementIdsData {
+            typename DataFrame<KeyType>::DataType ids;
+            std::map<NodeID, Selection::Range> node_pointers;
+            Selection::Range range;
+        };
+
         Population(const H5::File& file, const std::string& populationName);
         std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
                                            const nonstd::optional<double>& tstop) const;
         /**
-         * Return the ElementIds for the given selection, alongside the filtered NodePointers
+         * Return the element IDs for the given selection, alongside the filtered node pointers
          * and the range of positions where they fit in the file. This latter two are necessary
          * for performance to understand how and where to retrieve the data from storage.
          *
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
          */
-        std::tuple<NodePointers, Range, typename DataFrame<KeyType>::DataType> getElementIds(
+        ElementIdsData getElementIds(
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
-        NodePointers nodes_pointers_;
+        std::map<NodeID, Selection::Range> node_pointers_;
         H5::Group pop_group_;
         std::vector<NodeID> nodes_ids_;
         double tstart_, tstop_, tstep_;
