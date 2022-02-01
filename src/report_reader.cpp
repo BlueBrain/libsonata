@@ -231,8 +231,8 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
         mapping_group.getDataSet("index_pointers").read(index_pointers);
 
         for (size_t i = 0; i < nodes_ids_.size(); ++i) {
-            node_pointers_.emplace(nodes_ids_[i],
-                                   std::make_pair(index_pointers[i], index_pointers[i + 1]));
+            node_ranges_.emplace(nodes_ids_[i],
+                                 std::make_pair(index_pointers[i], index_pointers[i + 1]));
         }
 
         {  // Get times
@@ -285,39 +285,39 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 
 template <typename T>
 typename ReportReader<T>::Population::ElementIdsData ReportReader<T>::Population::getElementIds(
-    const nonstd::optional<Selection>& selection) const {
+    const nonstd::optional<Selection>& node_ids) const {
     ElementIdsData result;
     result.range = {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::min()};
-    size_t eids_count = 0;
+    size_t element_ids_count = 0;
 
     // Helper function to update the min / max values and count
-    const auto& update_range = [&result, &eids_count](const Selection::Range& range_new) {
+    const auto& update_range = [&result, &element_ids_count](const Selection::Range& range_new) {
         result.range.first = std::min(result.range.first, range_new.first);
         result.range.second = std::max(result.range.second, range_new.second);
-        eids_count += (range_new.second - range_new.first);
+        element_ids_count += (range_new.second - range_new.first);
     };
 
     // Take all nodes if no selection is provided
-    if (!selection) {
-        result.node_pointers = node_pointers_;
+    if (!node_ids) {
+        result.node_ranges = node_ranges_;
 
-        for (const auto& node_pointer : result.node_pointers) {
-            update_range(node_pointer.second);
+        for (const auto& node_range : result.node_ranges) {
+            update_range(node_range.second);
         }
-    } else if (!selection->empty()) {
-        const auto& node_ids = selection->flatten();
+    } else if (!node_ids->empty()) {
+        const auto node_ids_vector = node_ids->flatten();
 
-        for (const auto& node_id : node_ids) {
-            const auto it = node_pointers_.find(node_id);
-            if (it != node_pointers_.end()) {
-                result.node_pointers.emplace(*it);
+        for (const auto& node_id : node_ids_vector) {
+            const auto it = node_ranges_.find(node_id);
+            if (it != node_ranges_.end()) {
+                result.node_ranges.emplace(*it);
                 update_range(it->second);
             }
         }
     }
 
     // Extract the ElementIDs from the GIDs
-    if (!result.node_pointers.empty()) {
+    if (!result.node_ranges.empty()) {
         const auto min = result.range.first;
         const auto max = result.range.second;
 
@@ -325,11 +325,11 @@ typename ReportReader<T>::Population::ElementIdsData ReportReader<T>::Population
         auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
         dataset_elem_ids.select({min}, {max - min}).read(element_ids);
 
-        result.ids.reserve(eids_count);
+        result.ids.reserve(element_ids_count);
 
-        for (const auto& node_pointer : result.node_pointers) {
-            const auto node_id = node_pointer.first;
-            const auto& range = node_pointer.second;
+        for (const auto& node_range : result.node_ranges) {
+            const auto node_id = node_range.first;
+            const auto& range = node_range.second;
 
             for (auto i = (range.first - min); i < (range.second - min); i++) {
                 result.ids.emplace_back(make_key<T>(node_id, element_ids[i]));
@@ -380,12 +380,12 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
-    const nonstd::optional<Selection>& selection) const {
-    return getElementIds(selection).ids;
+    const nonstd::optional<Selection>& node_ids) const {
+    return getElementIds(node_ids).ids;
 }
 
 template <typename T>
-DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& selection,
+DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& node_ids,
                                               const nonstd::optional<double>& tstart,
                                               const nonstd::optional<double>& tstop,
                                               const nonstd::optional<size_t>& tstride) const {
@@ -407,8 +407,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
-    const auto& result = getElementIds(selection);
-    const auto& node_pointers = result.node_pointers;
+    const auto result = getElementIds(node_ids);
+    const auto& node_ranges = result.node_ranges;
     const auto min = result.range.first;
     const auto max = result.range.second;
 
@@ -438,8 +438,8 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         off_t offset = 0;
         off_t data_offset = (timer_index - index_start) / stride;
         auto data_ptr = &data_frame.data[data_offset * n_ids];
-        for (const auto& node_pointer : node_pointers) {
-            const auto& position = node_pointer.second;
+        for (const auto& node_range : node_ranges) {
+            const auto& position = node_range.second;
             uint64_t elements_per_gid = position.second - position.first;
             uint64_t gid_start = position.first - min;
 

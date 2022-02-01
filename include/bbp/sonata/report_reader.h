@@ -160,7 +160,7 @@ class SONATA_API ReportReader
       private:
         struct ElementIdsData {
             typename DataFrame<KeyType>::DataType ids;
-            std::map<NodeID, Selection::Range> node_pointers;
+            std::map<NodeID, Selection::Range> node_ranges;
             Selection::Range range;
         };
 
@@ -178,7 +178,7 @@ class SONATA_API ReportReader
         ElementIdsData getElementIds(
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
-        std::map<NodeID, Selection::Range> node_pointers_;
+        std::map<NodeID, Selection::Range> node_ranges_;
         H5::Group pop_group_;
         std::vector<NodeID> nodes_ids_;
         double tstart_, tstop_, tstep_;
