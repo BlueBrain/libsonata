@@ -158,7 +158,7 @@ class SONATA_API ReportReader
                                const nonstd::optional<size_t>& tstride = nonstd::nullopt) const;
 
       private:
-        struct ElementIdsData {
+        struct NodeIdElementLayout {
             typename DataFrame<KeyType>::DataType ids;
             std::map<NodeID, Selection::Range> node_ranges;
             Selection::Range range;
@@ -175,7 +175,7 @@ class SONATA_API ReportReader
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
          */
-        ElementIdsData getElementIds(
+        NodeIdElementLayout getNodeIdElementLayout(
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         std::map<NodeID, Selection::Range> node_ranges_;

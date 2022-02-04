@@ -284,9 +284,10 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-typename ReportReader<T>::Population::ElementIdsData ReportReader<T>::Population::getElementIds(
+typename ReportReader<T>::Population::NodeIdElementLayout
+ReportReader<T>::Population::getNodeIdElementLayout(
     const nonstd::optional<Selection>& node_ids) const {
-    ElementIdsData result;
+    NodeIdElementLayout result;
     result.range = {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::min()};
     size_t element_ids_count = 0;
 
@@ -381,7 +382,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
     const nonstd::optional<Selection>& node_ids) const {
-    return getElementIds(node_ids).ids;
+    return getNodeIdElementLayout(node_ids).ids;
 }
 
 template <typename T>
@@ -407,12 +408,12 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
-    const auto result = getElementIds(node_ids);
-    const auto& node_ranges = result.node_ranges;
-    const auto min = result.range.first;
-    const auto max = result.range.second;
+    const auto node_id_element_layout = getNodeIdElementLayout(node_ids);
+    const auto& node_ranges = node_id_element_layout.node_ranges;
+    const auto min = node_id_element_layout.range.first;
+    const auto max = node_id_element_layout.range.second;
 
-    data_frame.ids = result.ids;
+    data_frame.ids = node_id_element_layout.ids;
     if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
     }
