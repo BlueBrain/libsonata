@@ -160,8 +160,8 @@ class SONATA_API ReportReader
       private:
         struct NodeIdElementLayout {
             typename DataFrame<KeyType>::DataType ids;
-            std::map<NodeID, Selection::Range> node_ranges;
-            Selection::Range range;
+            Selection::Ranges node_ranges;
+            Selection::Range min_max_range;
         };
 
         Population(const H5::File& file, const std::string& populationName);

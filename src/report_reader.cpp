@@ -287,40 +287,54 @@ template <typename T>
 typename ReportReader<T>::Population::NodeIdElementLayout
 ReportReader<T>::Population::getNodeIdElementLayout(
     const nonstd::optional<Selection>& node_ids) const {
+    std::vector<NodeID> concrete_node_ids;
     NodeIdElementLayout result;
-    result.range = {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::min()};
+    result.min_max_range = {std::numeric_limits<uint64_t>::max(),
+                            std::numeric_limits<uint64_t>::min()};
     size_t element_ids_count = 0;
 
-    // Helper function to update the min / max values and count
-    const auto& update_range = [&result, &element_ids_count](const Selection::Range& range_new) {
-        result.range.first = std::min(result.range.first, range_new.first);
-        result.range.second = std::max(result.range.second, range_new.second);
-        element_ids_count += (range_new.second - range_new.first);
+    // Helper function to update layout, alongside the min / max values and count
+    const auto update_layout = [&](const NodeID& node_id, const Selection::Range& range) {
+        concrete_node_ids.emplace_back(node_id);
+        result.node_ranges.emplace_back(range);
+
+        result.min_max_range.first = std::min(result.min_max_range.first, range.first);
+        result.min_max_range.second = std::max(result.min_max_range.second, range.second);
+        element_ids_count += (range.second - range.first);
     };
 
     // Take all nodes if no selection is provided
     if (!node_ids) {
-        result.node_ranges = node_ranges_;
+        concrete_node_ids.reserve(node_ranges_.size());
+        result.node_ranges.reserve(node_ranges_.size());
 
-        for (const auto& node_range : result.node_ranges) {
-            update_range(node_range.second);
+        for (const auto& node_range : node_ranges_) {
+            update_layout(node_range.first, node_range.second);
         }
     } else if (!node_ids->empty()) {
-        const auto node_ids_vector = node_ids->flatten();
+        const auto selected_node_ids = node_ids->flatten();
 
-        for (const auto& node_id : node_ids_vector) {
+        // Reserve space for all the requested IDs and shrink afterwards
+        concrete_node_ids.reserve(selected_node_ids.size());
+        result.node_ranges.reserve(selected_node_ids.size());
+
+        for (const auto node_id : selected_node_ids) {
             const auto it = node_ranges_.find(node_id);
             if (it != node_ranges_.end()) {
-                result.node_ranges.emplace(*it);
-                update_range(it->second);
+                update_layout(it->first, it->second);
             }
         }
+
+        concrete_node_ids.shrink_to_fit();
+        result.node_ranges.shrink_to_fit();
+    } else {
+        // node_ids Selection exists, but is empty
     }
 
     // Extract the ElementIDs from the GIDs
     if (!result.node_ranges.empty()) {
-        const auto min = result.range.first;
-        const auto max = result.range.second;
+        const auto min = result.min_max_range.first;
+        const auto max = result.min_max_range.second;
 
         std::vector<ElementID> element_ids;
         auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
@@ -328,9 +342,9 @@ ReportReader<T>::Population::getNodeIdElementLayout(
 
         result.ids.reserve(element_ids_count);
 
-        for (const auto& node_range : result.node_ranges) {
-            const auto node_id = node_range.first;
-            const auto& range = node_range.second;
+        for (size_t i = 0; i < concrete_node_ids.size(); ++i) {
+            const auto node_id = concrete_node_ids[i];
+            const auto& range = result.node_ranges[i];
 
             for (auto i = (range.first - min); i < (range.second - min); i++) {
                 result.ids.emplace_back(make_key<T>(node_id, element_ids[i]));
@@ -390,7 +404,6 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
                                               const nonstd::optional<double>& tstart,
                                               const nonstd::optional<double>& tstop,
                                               const nonstd::optional<size_t>& tstride) const {
-    DataFrame<T> data_frame;
     size_t index_start = 0;
     size_t index_stop = 0;
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
@@ -402,21 +415,25 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         throw SonataError("tstart should be <= to tstop");
     }
 
-    for (size_t i = index_start; i <= index_stop; i += stride) {
-        data_frame.times.push_back(times_index_[i].second);
-    }
-
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
     const auto node_id_element_layout = getNodeIdElementLayout(node_ids);
     const auto& node_ranges = node_id_element_layout.node_ranges;
-    const auto min = node_id_element_layout.range.first;
-    const auto max = node_id_element_layout.range.second;
+    const auto min = node_id_element_layout.min_max_range.first;
+    const auto max = node_id_element_layout.min_max_range.second;
 
-    data_frame.ids = node_id_element_layout.ids;
-    if (data_frame.ids.empty()) {  // At the end no data available (wrong node_ids?)
+    if (node_id_element_layout.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
     }
+
+    // Fill times
+    DataFrame<T> data_frame;
+    for (size_t i = index_start; i <= index_stop; i += stride) {
+        data_frame.times.push_back(times_index_[i].second);
+    }
+
+    // Fill ids
+    data_frame.ids = node_id_element_layout.ids;
 
     // Fill .data member
     size_t n_time_entries = ((index_stop - index_start) / stride) + 1;
@@ -430,6 +447,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             fmt::format("DataType of dataset 'data' should be Float32 ('{}' was found)",
                         dataset_type.string()));
     }
+
     std::vector<float> buffer(max - min);
     for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {
         // Note: The code assumes that the file is chunked by rows and not by columns
@@ -439,21 +457,21 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         off_t offset = 0;
         off_t data_offset = (timer_index - index_start) / stride;
         auto data_ptr = &data_frame.data[data_offset * n_ids];
-        for (const auto& node_range : node_ranges) {
-            const auto& position = node_range.second;
-            uint64_t elements_per_gid = position.second - position.first;
-            uint64_t gid_start = position.first - min;
+        for (const auto& range : node_ranges) {
+            uint64_t elements_per_gid = range.second - range.first;
+            uint64_t gid_start = range.first - min;
 
             // Soma report
             if (elements_per_gid == 1) {
                 data_ptr[offset] = buffer[gid_start];
             } else {  // Elements report
-                uint64_t gid_end = position.second - min;
+                uint64_t gid_end = range.second - min;
                 std::copy(&buffer[gid_start], &buffer[gid_end], &data_ptr[offset]);
             }
             offset += elements_per_gid;
         }
     }
+
     return data_frame;
 }
 
