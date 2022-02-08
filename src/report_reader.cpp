@@ -351,7 +351,11 @@ ReportReader<T>::Population::getNodeIdElementLayout(
             }
         }
 
-        // Reduces overhead of next IOps by clearing-up internal buffers of HDF5
+        // Temp. fix: When you ask for a large hyperslab in a dataset and then move
+        //            to another dataset in the same file where you also ask for
+        //            another large range, the next IOps take an extra few seconds.
+        //            We observed that fooling HDF5 hides the issue, but we should
+        //            verify this behaviour once new releases of HDF5 are available.
         dataset_elem_ids.select({min}, {1}).read(element_ids);
     }
 
