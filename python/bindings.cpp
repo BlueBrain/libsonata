@@ -368,7 +368,7 @@ void bindReportReader(py::module& m, const std::string& prefix) {
             "get_node_id_element_id_mapping",
             [](const typename ReportType::Population& population,
                const nonstd::optional<Selection>& selection) {
-                return population.getNodeIdElementIdMapping(selection, nullptr);
+                return population.getNodeIdElementIdMapping(selection);
             },
             DOC_REPORTREADER_POP(getNodeIdElementIdMapping),
             "selection"_a = nonstd::nullopt)

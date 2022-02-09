@@ -102,9 +102,6 @@ template <typename KeyType>
 class SONATA_API ReportReader
 {
   public:
-    using Range = std::pair<uint64_t, uint64_t>;
-    using Ranges = std::vector<Range>;
-
     class Population
     {
       public:
@@ -144,11 +141,9 @@ class SONATA_API ReportReader
          *
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
-         * \param fn lambda applied to all ranges for all node ids
          */
         typename DataFrame<KeyType>::DataType getNodeIdElementIdMapping(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
-            std::function<void(const Range&)> fn = nullptr) const;
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         /**
          * \param node_ids limit the report to the given selection.
@@ -163,11 +158,27 @@ class SONATA_API ReportReader
                                const nonstd::optional<size_t>& tstride = nonstd::nullopt) const;
 
       private:
+        struct NodeIdElementLayout {
+            typename DataFrame<KeyType>::DataType ids;
+            Selection::Ranges node_ranges;
+            Selection::Range min_max_range;
+        };
+
         Population(const H5::File& file, const std::string& populationName);
         std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
                                            const nonstd::optional<double>& tstop) const;
+        /**
+         * Return the element IDs for the given selection, alongside the filtered node pointers
+         * and the range of positions where they fit in the file. This latter two are necessary
+         * for performance to understand how and where to retrieve the data from storage.
+         *
+         * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
+         * report are used
+         */
+        NodeIdElementLayout getNodeIdElementLayout(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
-        std::map<NodeID, Range> nodes_pointers_;
+        std::map<NodeID, Selection::Range> node_ranges_;
         H5::Group pop_group_;
         std::vector<NodeID> nodes_ids_;
         double tstart_, tstop_, tstep_;
@@ -175,8 +186,6 @@ class SONATA_API ReportReader
         std::string time_units_;
         std::string data_units_;
         bool nodes_ids_sorted_ = false;
-        Selection::Values node_ids_from_selection(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
         friend ReportReader;
     };
