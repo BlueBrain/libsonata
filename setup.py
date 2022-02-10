@@ -10,7 +10,6 @@ from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
 
-REQUIRED_NUMPY_VERSION = "numpy>=1.12.0"
 MIN_CPU_CORES = 2
 
 
@@ -121,8 +120,20 @@ class CMakeBuild(build_ext):
         )
 
 
+# sync'd from https://github.com/scipy/oldest-supported-numpy/blob/main/setup.cfg
+# NOTE we aren't supporting AIX/aarch64/s390x/PyPy
 install_requires = [
-    REQUIRED_NUMPY_VERSION,
+    # default numpy requirements
+    "numpy==1.14.5; python_version=='3.7'",
+    "numpy==1.17.3; python_version=='3.8'",
+    "numpy==1.19.3; python_version=='3.9'",
+    "numpy==1.21.4; python_version=='3.10'",
+
+    # For Python versions which aren't yet officially supported,
+    # we specify an unpinned Numpy which allows source distributions
+    # to be used and allows wheels to be used as soon as they
+    # become available.
+    "numpy; python_version>='3.11'",
 ]
 
 setup_requires = [
