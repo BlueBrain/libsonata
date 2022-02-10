@@ -20,6 +20,3 @@ $BIN/pip -v install --force .
 pushd python/tests
 $BIN/python -m unittest -v 
 popd
-
-# run tests through setup.py; also builds documentation
-$BIN/python setup.py test
