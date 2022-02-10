@@ -13,18 +13,6 @@ from distutils.version import LooseVersion
 MIN_CPU_CORES = 2
 
 
-class lazy_dict(dict):
-    """When the value associated to a key is a function, then returns
-    the function call instead of the function.
-    """
-
-    def __getitem__(self, item):
-        value = dict.__getitem__(self, item)
-        if inspect.isfunction(value):
-            return value()
-        return value
-
-
 def get_cpu_count():
     try:
         return len(os.sched_getaffinity(0))  # linux only
