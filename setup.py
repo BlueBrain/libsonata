@@ -73,7 +73,7 @@ class CMakeBuild(build_ext):
         build_args = ["--config", build_type,
                       "--target", self.target,
                       "--",
-                      "-j{}".format(max(MIN_CPU_CORES, get_cpu_count()))]
+                      "-j{}".format(max(MIN_CPU_CORES, get_cpu_count())),
                       ]
 
         if not os.path.exists(self.build_temp):
