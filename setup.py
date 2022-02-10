@@ -7,32 +7,10 @@ import sys
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from setuptools.command.test import test
 from distutils.version import LooseVersion
 
 
-REQUIRED_NUMPY_VERSION = "numpy>=1.12.0"
 MIN_CPU_CORES = 2
-
-
-class lazy_dict(dict):
-    """When the value associated to a key is a function, then returns
-    the function call instead of the function.
-    """
-
-    def __getitem__(self, item):
-        value = dict.__getitem__(self, item)
-        if inspect.isfunction(value):
-            return value()
-        return value
-
-
-def get_sphinx_command():
-    """Lazy load of Sphinx distutils command class
-    """
-    from sphinx.setup_command import BuildDoc
-
-    return BuildDoc
 
 
 def get_cpu_count():
@@ -53,7 +31,7 @@ class CMakeExtension(Extension):
         self.sourcedir = os.path.abspath(sourcedir)
 
 
-class CMakeBuild(build_ext, object):
+class CMakeBuild(build_ext):
     user_options = build_ext.user_options + [
         ('target=', None, "specify the CMake target to build")
     ]
@@ -70,13 +48,6 @@ class CMakeBuild(build_ext, object):
                 "CMake must be installed to build the following extensions: "
                 + ", ".join(e.name for e in self.extensions)
             )
-
-        if platform.system() == "Windows":
-            cmake_version = LooseVersion(
-                re.search(r"version\s*([\d.]+)", out.decode()).group(1)
-            )
-            if cmake_version < "3.1.0":
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
         for ext in self.extensions:
             self.build_extension(ext)
@@ -99,19 +70,11 @@ class CMakeBuild(build_ext, object):
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
-        build_args = ["--config", build_type, "--target", self.target]
-
-        if platform.system() == "Windows":
-            cmake_args += [
-                "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}".format(
-                    build_type.upper(), extdir
-                )
-            ]
-            if sys.maxsize > 2 ** 32:
-                cmake_args += ["-A", "x64"]
-            build_args += ["--", "/m"]
-        else:
-            build_args += ["--", "-j{}".format(max(MIN_CPU_CORES, get_cpu_count()))]
+        build_args = ["--config", build_type,
+                      "--target", self.target,
+                      "--",
+                      "-j{}".format(max(MIN_CPU_CORES, get_cpu_count())),
+                      ]
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
@@ -130,34 +93,19 @@ class CMakeBuild(build_ext, object):
         )
 
 
-class PkgTest(test):
-    """Custom disutils command that acts like as a replacement
-    for the "test" command.
-    """
-
-    new_commands = [('test_ext', lambda self: True), ('test_doc', lambda self: True)]
-    sub_commands = test.sub_commands + new_commands
-
-    def run(self):
-        super(PkgTest, self).run()
-        self.run_command('test_ext')
-        self.run_command('test_doc')
-
-
+# nearly verbatim from how h5py handles is
 install_requires = [
-    REQUIRED_NUMPY_VERSION,
+    # We only really aim to support NumPy & Python combinations for which
+    # there are wheels on PyPI (e.g. NumPy >=1.17.5 for Python 3.8).
+    # But we don't want to duplicate the information in oldest-supported-numpy
+    # here, and if you can build an older NumPy on a newer Python
+    # NumPy 1.14.5 is the first with wheels for Python 3.7, our minimum Python.
+    "numpy >=1.14.5",
 ]
 
 setup_requires = [
     "setuptools_scm",
 ]
-
-doc_requires = [
-    "sphinx-bluebrain-theme"
-]
-
-if "test" in sys.argv or "test_doc" in sys.argv:
-    setup_requires += doc_requires
 
 with open('README.rst') as f:
     README = f.read()
@@ -174,12 +122,8 @@ setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     ],
     ext_modules=[CMakeExtension("libsonata._libsonata")],
-    cmdclass=lazy_dict(
-        build_ext=CMakeBuild,
-        test_ext=CMakeBuild,
-        test=PkgTest,
-        test_doc=get_sphinx_command,
-    ),
+    cmdclass={'build_ext': CMakeBuild,
+              },
     zip_safe=False,
     setup_requires=setup_requires,
     install_requires=install_requires,
@@ -192,5 +136,4 @@ setup(
     package_dir={"": "python"},
     packages=['libsonata',
               ],
-    test_suite='tests.test_suite',
 )
