@@ -146,7 +146,8 @@ TEST_CASE("ElementReportReader", "[base]") {
     REQUIRE(pop.getNodeIds() == std::vector<NodeID>{1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
                                                     11, 12, 13, 14, 15, 16, 17, 18, 19, 20});
 
-    auto data = pop.get(Selection({{3, 5}}), 0.2, 0.5);
+    auto sel = Selection::fromValues({424242, 424242, 3, 424242, 424242, 4, 424242, 424242});
+    auto data = pop.get(sel, 0.2, 0.5);
     REQUIRE(data.ids ==
             DataFrame<CompartmentID>::DataType{
                 {{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}}});
