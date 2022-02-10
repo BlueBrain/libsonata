@@ -49,13 +49,6 @@ class CMakeBuild(build_ext):
                 + ", ".join(e.name for e in self.extensions)
             )
 
-        if platform.system() == "Windows":
-            cmake_version = LooseVersion(
-                re.search(r"version\s*([\d.]+)", out.decode()).group(1)
-            )
-            if cmake_version < "3.1.0":
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
-
         for ext in self.extensions:
             self.build_extension(ext)
 
@@ -77,19 +70,11 @@ class CMakeBuild(build_ext):
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
-        build_args = ["--config", build_type, "--target", self.target]
-
-        if platform.system() == "Windows":
-            cmake_args += [
-                "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}".format(
-                    build_type.upper(), extdir
-                )
-            ]
-            if sys.maxsize > 2 ** 32:
-                cmake_args += ["-A", "x64"]
-            build_args += ["--", "/m"]
-        else:
-            build_args += ["--", "-j{}".format(max(MIN_CPU_CORES, get_cpu_count()))]
+        build_args = ["--config", build_type,
+                      "--target", self.target,
+                      "--",
+                      "-j{}".format(max(MIN_CPU_CORES, get_cpu_count()))]
+                      ]
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
