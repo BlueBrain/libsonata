@@ -1,7 +1,8 @@
 [build-system]
 requires = [
+    "cmake",
+    "oldest-supported-numpy",
     "setuptools",
     "wheel",
-    "oldest-supported-numpy",
 ]
 build-backend = "setuptools.build_meta"

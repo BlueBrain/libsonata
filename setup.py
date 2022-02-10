@@ -93,20 +93,14 @@ class CMakeBuild(build_ext):
         )
 
 
-# sync'd from https://github.com/scipy/oldest-supported-numpy/blob/main/setup.cfg
-# NOTE we aren't supporting AIX/aarch64/s390x/PyPy
+# nearly verbatim from how h5py handles is
 install_requires = [
-    # default numpy requirements
-    "numpy==1.14.5; python_version=='3.7'",
-    "numpy==1.17.3; python_version=='3.8'",
-    "numpy==1.19.3; python_version=='3.9'",
-    "numpy==1.21.4; python_version=='3.10'",
-
-    # For Python versions which aren't yet officially supported,
-    # we specify an unpinned Numpy which allows source distributions
-    # to be used and allows wheels to be used as soon as they
-    # become available.
-    "numpy; python_version>='3.11'",
+    # We only really aim to support NumPy & Python combinations for which
+    # there are wheels on PyPI (e.g. NumPy >=1.17.5 for Python 3.8).
+    # But we don't want to duplicate the information in oldest-supported-numpy
+    # here, and if you can build an older NumPy on a newer Python
+    # NumPy 1.14.5 is the first with wheels for Python 3.7, our minimum Python.
+    "numpy >=1.14.5",
 ]
 
 setup_requires = [
