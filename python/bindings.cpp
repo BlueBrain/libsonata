@@ -362,7 +362,6 @@ void bindReportReader(py::module& m, const std::string& prefix) {
         .def("get_node_ids",
              &ReportType::Population::getNodeIds,
              "Return the list of nodes ids for this population")
-        // clang-format off
         .def("get_node_id_element_id_mapping",
              [](const typename ReportType::Population& population,
                 const nonstd::optional<Selection>& selection) {
@@ -370,7 +369,6 @@ void bindReportReader(py::module& m, const std::string& prefix) {
              },
              DOC_REPORTREADER_POP(getNodeIdElementIdMapping),
              "selection"_a = nonstd::nullopt)
-        // clang-format on
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
                                DOC_REPORTREADER_POP(getSorted))
