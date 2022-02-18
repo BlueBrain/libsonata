@@ -333,7 +333,6 @@ void bindReportReader(py::module& m, const std::string& prefix) {
         // .ids, .data and .time members are owned by the c++ object. We can't do std::move.
         // To avoid copies, we must declare the owner of the data as the current Python
         // object. Numpy will adjust owner reference count according to returned arrays
-        // clang-format off
         .def_property_readonly("ids", [](const DataFrame<KeyType>& dframe) {
             std::array<ssize_t, 1> dims { ssize_t(dframe.ids.size()) };
             return managedMemoryArray(dframe.ids.data(), dims, dframe);
@@ -345,7 +344,6 @@ void bindReportReader(py::module& m, const std::string& prefix) {
             }
             return managedMemoryArray(dframe.data.data(), dims, dframe);
         })
-        // clang-format on
         .def_property_readonly("times", [](DataFrame<KeyType>& dframe) {
             return managedMemoryArray(dframe.times.data(), dframe.times.size(), dframe);
         });
@@ -364,14 +362,15 @@ void bindReportReader(py::module& m, const std::string& prefix) {
         .def("get_node_ids",
              &ReportType::Population::getNodeIds,
              "Return the list of nodes ids for this population")
-        .def(
-            "get_node_id_element_id_mapping",
-            [](const typename ReportType::Population& population,
-               const nonstd::optional<Selection>& selection) {
-                return population.getNodeIdElementIdMapping(selection);
-            },
-            DOC_REPORTREADER_POP(getNodeIdElementIdMapping),
-            "selection"_a = nonstd::nullopt)
+        // clang-format off
+        .def("get_node_id_element_id_mapping",
+             [](const typename ReportType::Population& population,
+                const nonstd::optional<Selection>& selection) {
+                 return asArray(population.getNodeIdElementIdMapping(selection));
+             },
+             DOC_REPORTREADER_POP(getNodeIdElementIdMapping),
+             "selection"_a = nonstd::nullopt)
+        // clang-format on
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
                                DOC_REPORTREADER_POP(getSorted))
