@@ -421,7 +421,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
-    const auto node_id_element_layout = getNodeIdElementLayout(node_ids);
+    auto node_id_element_layout = getNodeIdElementLayout(node_ids);
     const auto& node_ranges = node_id_element_layout.node_ranges;
     const auto min = node_id_element_layout.min_max_range.first;
     const auto max = node_id_element_layout.min_max_range.second;
@@ -433,11 +433,11 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     // Fill times
     DataFrame<T> data_frame;
     for (size_t i = index_start; i <= index_stop; i += stride) {
-        data_frame.times.push_back(times_index_[i].second);
+        data_frame.times.emplace_back(times_index_[i].second);
     }
 
     // Fill ids
-    data_frame.ids = node_id_element_layout.ids;
+    data_frame.ids.swap(node_id_element_layout.ids);
 
     // Fill .data member
     size_t n_time_entries = ((index_stop - index_start) / stride) + 1;

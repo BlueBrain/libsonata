@@ -334,8 +334,9 @@ class TestSomaReportPopulation(unittest.TestCase):
         np.testing.assert_allclose(sel_empty.data, np.empty(shape=(0, 0)))
 
     def test_get_node_id_element_id_mapping(self):
-        self.assertEqual(self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]]),
-                         [3, 4])
+        ids_mapping = self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]])
+        ids_mapping_ref = np.asarray([3, 4])
+        self.assertTrue((ids_mapping == ids_mapping_ref).all())
 
 
 class TestElementReportPopulation(unittest.TestCase):
@@ -390,8 +391,9 @@ class TestElementReportPopulation(unittest.TestCase):
                                    [81.0, 81.1, 81.2, 81.3, 81.4, 81.5, 81.6, 81.7, 81.8, 81.9], 1e-6, 0)
 
     def test_get_node_id_element_id_mapping(self):
-        self.assertEqual(self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]]),
-                         [[3, 5], [3, 5], [3, 6], [3, 6], [3, 7], [4, 7], [4, 8], [4, 8], [4, 9], [4, 9]])
+        ids_mapping = self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]])
+        ids_mapping_ref = np.asarray([[3, 5], [3, 5], [3, 6], [3, 6], [3, 7], [4, 7], [4, 8], [4, 8], [4, 9], [4, 9]])
+        self.assertTrue((ids_mapping == ids_mapping_ref).all())
 
 
 class TestNodePopulationFailure(unittest.TestCase):
