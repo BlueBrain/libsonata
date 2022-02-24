@@ -91,6 +91,103 @@ CompartmentID make_key(NodeID node_id, ElementID element_id) {
     return {node_id, element_id};
 }
 
+template <typename KeyType>
+struct NodeIdElementLayout {
+    typename bbp::sonata::DataFrame<KeyType>::DataType ids;
+    Selection::Ranges node_ranges;
+    Selection::Range min_max_range;
+};
+
+/**
+ * Return the element IDs for the given selection, alongside the filtered node pointers
+ * and the range of positions where they fit in the file. This latter two are necessary
+ * for performance to understand how and where to retrieve the data from storage.
+ *
+ * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
+ * report are used
+ */
+
+template <typename KeyType>
+NodeIdElementLayout<KeyType> getNodeIdElementLayout(
+    const H5::Group& pop_group,
+    const std::map<NodeID, Selection::Range>& node_ranges,
+    const nonstd::optional<Selection>& node_ids = nonstd::nullopt) {
+    std::vector<NodeID> concrete_node_ids;
+    NodeIdElementLayout<KeyType> result;
+    result.min_max_range = {std::numeric_limits<uint64_t>::max(),
+                            std::numeric_limits<uint64_t>::min()};
+    size_t element_ids_count = 0;
+
+    // Helper function to update layout, alongside the min / max values and count
+    const auto update_layout = [&](const NodeID& node_id, const Selection::Range& range) {
+        concrete_node_ids.emplace_back(node_id);
+        result.node_ranges.emplace_back(range);
+
+        result.min_max_range.first = std::min(result.min_max_range.first, range.first);
+        result.min_max_range.second = std::max(result.min_max_range.second, range.second);
+        element_ids_count += (range.second - range.first);
+    };
+
+    // Take all nodes if no selection is provided
+    if (!node_ids) {
+        concrete_node_ids.reserve(node_ranges.size());
+        result.node_ranges.reserve(node_ranges.size());
+
+        for (const auto& node_range : node_ranges) {
+            update_layout(node_range.first, node_range.second);
+        }
+    } else if (!node_ids->empty()) {
+        const auto selected_node_ids = node_ids->flatten();
+
+        // Reserve space for all the requested IDs and shrink afterwards
+        concrete_node_ids.reserve(selected_node_ids.size());
+        result.node_ranges.reserve(selected_node_ids.size());
+
+        for (const auto node_id : selected_node_ids) {
+            const auto it = node_ranges.find(node_id);
+            if (it != node_ranges.end()) {
+                update_layout(it->first, it->second);
+            }
+        }
+
+        concrete_node_ids.shrink_to_fit();
+        result.node_ranges.shrink_to_fit();
+    } else {
+        // node_ids Selection exists, but is empty
+    }
+
+    // Extract the ElementIDs from the GIDs
+    if (!result.node_ranges.empty()) {
+        const auto min = result.min_max_range.first;
+        const auto max = result.min_max_range.second;
+
+        std::vector<ElementID> element_ids;
+        auto dataset_elem_ids = pop_group.getGroup("mapping").getDataSet("element_ids");
+        dataset_elem_ids.select({min}, {max - min}).read(element_ids);
+
+        result.ids.reserve(element_ids_count);
+
+        for (size_t i = 0; i < concrete_node_ids.size(); ++i) {
+            const auto node_id = concrete_node_ids[i];
+            const auto& range = result.node_ranges[i];
+
+            for (auto i = (range.first - min); i < (range.second - min); i++) {
+                result.ids.emplace_back(make_key<KeyType>(node_id, element_ids[i]));
+            }
+        }
+
+        // Temp. fix: When you ask for a large hyperslab in a dataset and then move
+        //            to another dataset in the same file where you also ask for
+        //            another large range, the next IOps take an extra few seconds.
+        //            We observed that fooling HDF5 hides the issue, but we should
+        //            verify this behaviour once new releases of HDF5 are available.
+        dataset_elem_ids.select({min}, {1}).read(element_ids);
+    }
+
+    return result;
+}
+
+
 }  // anonymous namespace
 
 namespace bbp {
@@ -284,85 +381,6 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 }
 
 template <typename T>
-typename ReportReader<T>::Population::NodeIdElementLayout
-ReportReader<T>::Population::getNodeIdElementLayout(
-    const nonstd::optional<Selection>& node_ids) const {
-    std::vector<NodeID> concrete_node_ids;
-    NodeIdElementLayout result;
-    result.min_max_range = {std::numeric_limits<uint64_t>::max(),
-                            std::numeric_limits<uint64_t>::min()};
-    size_t element_ids_count = 0;
-
-    // Helper function to update layout, alongside the min / max values and count
-    const auto update_layout = [&](const NodeID& node_id, const Selection::Range& range) {
-        concrete_node_ids.emplace_back(node_id);
-        result.node_ranges.emplace_back(range);
-
-        result.min_max_range.first = std::min(result.min_max_range.first, range.first);
-        result.min_max_range.second = std::max(result.min_max_range.second, range.second);
-        element_ids_count += (range.second - range.first);
-    };
-
-    // Take all nodes if no selection is provided
-    if (!node_ids) {
-        concrete_node_ids.reserve(node_ranges_.size());
-        result.node_ranges.reserve(node_ranges_.size());
-
-        for (const auto& node_range : node_ranges_) {
-            update_layout(node_range.first, node_range.second);
-        }
-    } else if (!node_ids->empty()) {
-        const auto selected_node_ids = node_ids->flatten();
-
-        // Reserve space for all the requested IDs and shrink afterwards
-        concrete_node_ids.reserve(selected_node_ids.size());
-        result.node_ranges.reserve(selected_node_ids.size());
-
-        for (const auto node_id : selected_node_ids) {
-            const auto it = node_ranges_.find(node_id);
-            if (it != node_ranges_.end()) {
-                update_layout(it->first, it->second);
-            }
-        }
-
-        concrete_node_ids.shrink_to_fit();
-        result.node_ranges.shrink_to_fit();
-    } else {
-        // node_ids Selection exists, but is empty
-    }
-
-    // Extract the ElementIDs from the GIDs
-    if (!result.node_ranges.empty()) {
-        const auto min = result.min_max_range.first;
-        const auto max = result.min_max_range.second;
-
-        std::vector<ElementID> element_ids;
-        auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
-        dataset_elem_ids.select({min}, {max - min}).read(element_ids);
-
-        result.ids.reserve(element_ids_count);
-
-        for (size_t i = 0; i < concrete_node_ids.size(); ++i) {
-            const auto node_id = concrete_node_ids[i];
-            const auto& range = result.node_ranges[i];
-
-            for (auto i = (range.first - min); i < (range.second - min); i++) {
-                result.ids.emplace_back(make_key<T>(node_id, element_ids[i]));
-            }
-        }
-
-        // Temp. fix: When you ask for a large hyperslab in a dataset and then move
-        //            to another dataset in the same file where you also ask for
-        //            another large range, the next IOps take an extra few seconds.
-        //            We observed that fooling HDF5 hides the issue, but we should
-        //            verify this behaviour once new releases of HDF5 are available.
-        dataset_elem_ids.select({min}, {1}).read(element_ids);
-    }
-
-    return result;
-}
-
-template <typename T>
 std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
     const nonstd::optional<double>& tstart, const nonstd::optional<double>& tstop) const {
     std::pair<size_t, size_t> indexes;
@@ -400,7 +418,7 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
     const nonstd::optional<Selection>& node_ids) const {
-    return getNodeIdElementLayout(node_ids).ids;
+    return getNodeIdElementLayout<T>(pop_group_, node_ranges_, node_ids).ids;
 }
 
 template <typename T>
@@ -421,7 +439,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
     // min and max offsets of the node_ids requested are calculated
     // to reduce the amount of IO that is brought to memory
-    auto node_id_element_layout = getNodeIdElementLayout(node_ids);
+    auto node_id_element_layout = getNodeIdElementLayout<T>(pop_group_, node_ranges_, node_ids);
     const auto& node_ranges = node_id_element_layout.node_ranges;
     const auto min = node_id_element_layout.min_max_range.first;
     const auto max = node_id_element_layout.min_max_range.second;
