@@ -470,7 +470,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
                 data_ptr[offset] = buffer[gid_start];
             } else {  // Elements report
                 uint64_t gid_end = range.second - min;
-                std::copy(&buffer[gid_start], &buffer[gid_end], &data_ptr[offset]);
+                std::copy(buffer.begin() + gid_start, buffer.begin() + gid_end, &data_ptr[offset]);
             }
             offset += elements_per_gid;
         }
