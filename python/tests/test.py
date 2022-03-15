@@ -325,7 +325,8 @@ class TestSomaReportPopulation(unittest.TestCase):
         self.assertTrue((keys == keys_ref).all())
         np.testing.assert_allclose(sel.data, [[13.8, 14.8], [13.9, 14.9]])
 
-        sel_all = self.test_obj['All'].get()
+        node_ids_ordered = sorted(self.test_obj['All'].get_node_ids())
+        sel_all = self.test_obj['All'].get(node_ids = node_ids_ordered)
         keys_all = sel_all.ids
         keys_all_ref = np.asarray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
         self.assertTrue((keys_all == keys_all_ref).all())

@@ -160,7 +160,9 @@ class SONATA_API ReportReader
         struct NodeIdElementLayout {
             typename DataFrame<KeyType>::DataType ids;
             Selection::Ranges node_ranges;
-            Selection::Range min_max_range;
+            std::vector<uint64_t> node_offsets;
+            std::vector<uint64_t> node_index;
+            Selection::Ranges min_max_blocks;
         };
 
         Population(const H5::File& file, const std::string& populationName);
@@ -177,14 +179,16 @@ class SONATA_API ReportReader
         NodeIdElementLayout getNodeIdElementLayout(
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
 
-        std::map<NodeID, Selection::Range> node_ranges_;
         H5::Group pop_group_;
-        std::vector<NodeID> nodes_ids_;
+        std::vector<NodeID> node_ids_;
+        std::vector<Selection::Range> node_ranges_;
+        std::vector<uint64_t> node_offsets_;
+        std::vector<uint64_t> node_index_;
         double tstart_, tstop_, tstep_;
         std::vector<std::pair<size_t, double>> times_index_;
         std::string time_units_;
         std::string data_units_;
-        bool nodes_ids_sorted_ = false;
+        bool is_node_ids_sorted_ = false;
 
         friend ReportReader;
     };

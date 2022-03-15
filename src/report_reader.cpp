@@ -82,16 +82,17 @@ void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
 }
 
 template <typename T>
-T make_key(NodeID node_id, ElementID element_id);
+void emplace_ids(T& key, NodeID node_id, ElementID element_id);
 
 template <>
-NodeID make_key(NodeID node_id, ElementID /* element_id */) {
-    return node_id;
+void emplace_ids(NodeID& key, NodeID node_id, ElementID /* element_id */) {
+    key = node_id;
 }
 
 template <>
-CompartmentID make_key(NodeID node_id, ElementID element_id) {
-    return {node_id, element_id};
+void emplace_ids(CompartmentID& key, NodeID node_id, ElementID element_id) {
+    key[0] = node_id;
+    key[1] = element_id;
 }
 
 }  // anonymous namespace
@@ -225,36 +226,50 @@ auto ReportReader<T>::openPopulation(const std::string& populationName) const ->
 
 template <typename T>
 ReportReader<T>::Population::Population(const H5::File& file, const std::string& populationName)
-    : pop_group_(file.getGroup(std::string("/report/") + populationName)) {
-    {
-        const auto mapping_group = pop_group_.getGroup("mapping");
-        mapping_group.getDataSet("node_ids").read(nodes_ids_);
+    : pop_group_(file.getGroup(std::string("/report/") + populationName))
+    , is_node_ids_sorted_(false) {
+    const auto mapping_group = pop_group_.getGroup("mapping");
+    mapping_group.getDataSet("node_ids").read(node_ids_);
 
-        std::vector<uint64_t> index_pointers;
-        mapping_group.getDataSet("index_pointers").read(index_pointers);
+    // Expand the pointers into tuples that define the range of each GID
+    std::vector<uint64_t> index_pointers;
+    mapping_group.getDataSet("index_pointers").read(index_pointers);
+    size_t element_ids_count = 0;
+    for (size_t i = 0; i < node_ids_.size(); ++i) {
+        node_ranges_.emplace_back(index_pointers[i], index_pointers[i + 1]);  // Range of GID
+        node_offsets_.emplace_back(element_ids_count);                        // Offset in output
+        node_index_.emplace_back(i);                                          // Index of previous
 
-        for (size_t i = 0; i < nodes_ids_.size(); ++i) {
-            node_ranges_.emplace(nodes_ids_[i],
-                                 std::make_pair(index_pointers[i], index_pointers[i + 1]));
-        }
+        element_ids_count += (index_pointers[i + 1] - index_pointers[i]);
+    }
+    node_offsets_.emplace_back(element_ids_count);
 
-        {  // Get times
-            std::vector<double> times;
-            mapping_group.getDataSet("time").read(times);
-            tstart_ = times[0];
-            tstop_ = times[1];
-            tstep_ = times[2];
-            mapping_group.getDataSet("time").getAttribute("units").read(time_units_);
-            size_t i = 0;
-            for (double t = tstart_; t < tstop_ - EPSILON; t += tstep_, ++i) {
-                times_index_.emplace_back(i, t);
-            }
-        }
-
+    {  // Sort the index according to the GIDs, if not sorted in file
         if (mapping_group.getDataSet("node_ids").hasAttribute("sorted")) {
-            uint8_t sorted;
+            uint8_t sorted = 0;
             mapping_group.getDataSet("node_ids").getAttribute("sorted").read(sorted);
-            nodes_ids_sorted_ = sorted != 0;
+            is_node_ids_sorted_ = (sorted != 0);
+        }
+
+        if (!is_node_ids_sorted_) {
+            // Note: The idea is to sort the positions to access the values, allowing us to
+            //       maintain all vectors intact, while still being able to index the data
+            std::sort(node_index_.begin(), node_index_.end(), [&](const size_t i, const size_t j) {
+                return node_ids_[i] < node_ids_[j];
+            });
+        }
+    }
+
+    {  // Get times
+        std::vector<double> times;
+        mapping_group.getDataSet("time").read(times);
+        tstart_ = times[0];
+        tstop_ = times[1];
+        tstep_ = times[2];
+        mapping_group.getDataSet("time").getAttribute("units").read(time_units_);
+        size_t i = 0;
+        for (double t = tstart_; t < tstop_ - EPSILON; t += tstep_, ++i) {
+            times_index_.emplace_back(i, t);
         }
     }
 
@@ -278,79 +293,109 @@ std::string ReportReader<T>::Population::getDataUnits() const {
 
 template <typename T>
 bool ReportReader<T>::Population::getSorted() const {
-    return nodes_ids_sorted_;
+    return is_node_ids_sorted_;
 }
 
 template <typename T>
 std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
-    return nodes_ids_;
+    return node_ids_;
 }
 
 template <typename T>
 typename ReportReader<T>::Population::NodeIdElementLayout
 ReportReader<T>::Population::getNodeIdElementLayout(
     const nonstd::optional<Selection>& node_ids) const {
-    std::vector<NodeID> concrete_node_ids;
     NodeIdElementLayout result;
-    result.min_max_range = {std::numeric_limits<uint64_t>::max(),
-                            std::numeric_limits<uint64_t>::min()};
+    std::vector<NodeID> concrete_node_ids;
     size_t element_ids_count = 0;
-
-    // Helper function to update layout, alongside the min / max values and count
-    const auto update_layout = [&](const NodeID& node_id, const Selection::Range& range) {
-        concrete_node_ids.emplace_back(node_id);
-        result.node_ranges.emplace_back(range);
-
-        result.min_max_range.first = std::min(result.min_max_range.first, range.first);
-        result.min_max_range.second = std::max(result.min_max_range.second, range.second);
-        element_ids_count += (range.second - range.first);
-    };
 
     // Take all nodes if no selection is provided
     if (!node_ids) {
-        concrete_node_ids.reserve(node_ranges_.size());
-        result.node_ranges.reserve(node_ranges_.size());
-
-        for (const auto& node_range : node_ranges_) {
-            update_layout(node_range.first, node_range.second);
-        }
+        concrete_node_ids = node_ids_;
+        result.node_ranges = node_ranges_;
+        result.node_offsets = node_offsets_;
+        result.node_index = node_index_;
+        element_ids_count = node_offsets_.back();
     } else if (!node_ids->empty()) {
         const auto selected_node_ids = node_ids->flatten();
 
-        // Reserve space for all the requested IDs and shrink afterwards
-        concrete_node_ids.reserve(selected_node_ids.size());
-        result.node_ranges.reserve(selected_node_ids.size());
-
         for (const auto node_id : selected_node_ids) {
-            const auto it = node_ranges_.find(node_id);
-            if (it != node_ranges_.end()) {
-                update_layout(it->first, it->second);
+            const auto it = std::lower_bound(node_index_.begin(),
+                                             node_index_.end(),
+                                             node_id,
+                                             [&](const size_t i, const NodeID node_id) {
+                                                 return node_ids_[i] < node_id;
+                                             });
+
+            if (it != node_index_.end() && node_ids_[*it] == node_id) {
+                const auto& range = node_ranges_[*it];
+
+                concrete_node_ids.emplace_back(node_id);
+                result.node_ranges.emplace_back(range);
+                result.node_offsets.emplace_back(element_ids_count);
+                result.node_index.emplace_back(result.node_index.size());
+
+                element_ids_count += (range.second - range.first);
             }
         }
-
-        concrete_node_ids.shrink_to_fit();
-        result.node_ranges.shrink_to_fit();
     } else {
         // node_ids Selection exists, but is empty
     }
 
     // Extract the ElementIDs from the GIDs
-    if (!result.node_ranges.empty()) {
-        const auto min = result.min_max_range.first;
-        const auto max = result.min_max_range.second;
+    if (!concrete_node_ids.empty()) {
+        // Retrieve the maximum gap between blocks (defaults to 128MB == 8 x GPFS blocks)
+        const auto block_gap_limit_env = getenv("LIBSONATA_BLOCK_GAP_LIMIT");
+        const auto block_gap_limit = std::stoull(
+            std::string(block_gap_limit_env ? block_gap_limit_env : "16777216"));
 
+        // Sort the index by the selected ranges
+        std::sort(result.node_index.begin(),
+                  result.node_index.end(),
+                  [&](const size_t i, const size_t j) {
+                      return result.node_ranges[i].first < result.node_ranges[j].first;
+                  });
+
+        // Generate the {min,max} IO blocks for the requests
+        size_t offset = 0;
+        for (size_t i = 0; (i + 1) < result.node_index.size(); i++) {
+            const auto index = result.node_index[i];
+            const auto index_next = result.node_index[i + 1];
+            const auto max = result.node_ranges[index].second;
+            const auto min_next = result.node_ranges[index_next].first;
+
+            if ((min_next - max) > block_gap_limit) {
+                result.min_max_blocks.emplace_back(std::make_pair(offset, (i + 1)));
+                offset = (i + 1);
+            }
+        }
+        result.min_max_blocks.emplace_back(std::make_pair(offset, result.node_index.size()));
+
+        // Fill the GID-ElementID mapping in blocks to reduce the file system overhead
         std::vector<ElementID> element_ids;
         auto dataset_elem_ids = pop_group_.getGroup("mapping").getDataSet("element_ids");
-        dataset_elem_ids.select({min}, {max - min}).read(element_ids);
 
-        result.ids.reserve(element_ids_count);
+        result.ids.resize(element_ids_count);
 
-        for (size_t i = 0; i < concrete_node_ids.size(); ++i) {
-            const auto node_id = concrete_node_ids[i];
-            const auto& range = result.node_ranges[i];
+        for (const auto& min_max_block : result.min_max_blocks) {
+            const auto first_index = result.node_index[min_max_block.first];
+            const auto last_index = result.node_index[min_max_block.second - 1];
+            const auto min = result.node_ranges[first_index].first;
+            const auto max = result.node_ranges[last_index].second;
 
-            for (auto i = (range.first - min); i < (range.second - min); i++) {
-                result.ids.emplace_back(make_key<T>(node_id, element_ids[i]));
+            dataset_elem_ids.select({min}, {max - min}).read(element_ids);
+
+            // Copy the values for each of the GIDs assigned into this block
+            for (size_t i = min_max_block.first; i < min_max_block.second; ++i) {
+                const auto index = result.node_index[i];
+                const auto node_id = concrete_node_ids[index];
+                const auto range = Selection::Range(result.node_ranges[index].first - min,
+                                                    result.node_ranges[index].second - min);
+
+                auto offset = result.node_offsets[index];
+                for (auto i = range.first; i < range.second; i++, offset++) {
+                    emplace_ids<T>(result.ids[offset], node_id, element_ids[i]);
+                }
             }
         }
 
@@ -359,7 +404,9 @@ ReportReader<T>::Population::getNodeIdElementLayout(
         //            another large range, the next IOps take an extra few seconds.
         //            We observed that fooling HDF5 hides the issue, but we should
         //            verify this behaviour once new releases of HDF5 are available.
-        dataset_elem_ids.select({min}, {1}).read(element_ids);
+        const auto min_max_block = result.min_max_blocks.back();
+        const auto index = result.node_index[min_max_block.first];
+        dataset_elem_ids.select({result.node_ranges[index].first}, {1}).read(element_ids);
     }
 
     return result;
@@ -422,12 +469,12 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         throw SonataError("tstart should be <= to tstop");
     }
 
-    // min and max offsets of the node_ids requested are calculated
-    // to reduce the amount of IO that is brought to memory
+    // Retrieve the GID-ElementID layout, alongside the {min,max} blocks
     auto node_id_element_layout = getNodeIdElementLayout(node_ids);
     const auto& node_ranges = node_id_element_layout.node_ranges;
-    const auto min = node_id_element_layout.min_max_range.first;
-    const auto max = node_id_element_layout.min_max_range.second;
+    const auto& node_offsets = node_id_element_layout.node_offsets;
+    const auto& node_index = node_id_element_layout.node_index;
+    const auto& min_max_blocks = node_id_element_layout.min_max_blocks;
 
     if (node_id_element_layout.ids.empty()) {  // At the end no data available (wrong node_ids?)
         return DataFrame<T>{{}, {}, {}};
@@ -443,9 +490,9 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     data_frame.ids.swap(node_id_element_layout.ids);
 
     // Fill .data member
-    size_t n_time_entries = ((index_stop - index_start) / stride) + 1;
-    size_t n_ids = data_frame.ids.size();
-    data_frame.data.resize(n_time_entries * n_ids);
+    const size_t n_time_entries = ((index_stop - index_start) / stride) + 1;
+    const size_t element_ids_count = data_frame.ids.size();
+    data_frame.data.resize(n_time_entries * element_ids_count);
 
     auto dataset = pop_group_.getDataSet("data");
     auto dataset_type = dataset.getDataType();
@@ -455,30 +502,36 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
                         dataset_type.string()));
     }
 
-    std::vector<float> buffer(max - min);
+    std::vector<float> buffer;
+    auto data_ptr = data_frame.data.data();
     for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {
-        // Note: The code assumes that the file is chunked by rows and not by columns
-        // (i.e., if the chunking changes in the future, the reading method must also be adapted)
-        dataset.select({timer_index, min}, {1, max - min}).read(buffer.data());
+        // Access the data in blocks to reduce the file system overhead
+        for (const auto& min_max_block : min_max_blocks) {
+            const auto first_index = node_index[min_max_block.first];
+            const auto last_index = node_index[min_max_block.second - 1];
+            const auto min = node_ranges[first_index].first;
+            const auto max = node_ranges[last_index].second;
 
-        size_t offset = 0;
-        size_t data_offset = (timer_index - index_start) / stride * n_ids;
-        auto data_start = std::next(data_frame.data.begin(), data_offset);
-        for (const auto& range : node_ranges) {
-            uint64_t elements_per_gid = range.second - range.first;
-            uint64_t gid_start = range.first - min;
+            dataset.select({timer_index, min}, {1, max - min}).read(buffer);
 
-            // Soma report
-            if (elements_per_gid == 1) {
-                data_start[offset] = buffer[gid_start];
-            } else {  // Elements report
-                uint64_t gid_end = range.second - min;
-                std::copy(std::next(buffer.begin(), gid_start),
-                          std::next(buffer.begin(), gid_end),
-                          std::next(data_start, offset));
+            // Copy the values for each of the GIDs assigned into this block
+            for (size_t i = min_max_block.first; i < min_max_block.second; ++i) {
+                const auto index = node_index[i];
+                const auto range = Selection::Range(node_ranges[index].first - min,
+                                                    node_ranges[index].second - min);
+                const auto elements_per_gid = (range.second - range.first);
+                const auto offset = node_offsets[index];
+
+                // Soma report
+                if (elements_per_gid == 1) {
+                    data_ptr[offset] = buffer[range.first];
+                } else {  // Elements report
+                    std::copy(&buffer[range.first], &buffer[range.second], &data_ptr[offset]);
+                }
             }
-            offset += elements_per_gid;
         }
+
+        data_ptr += element_ids_count;
     }
 
     return data_frame;
