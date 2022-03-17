@@ -1,6 +1,9 @@
 #include <bbp/sonata/report_reader.h>
 #include <fmt/format.h>
 
+#include <algorithm>  // std::copy, std::find, std::lower_bound, std::upper_bound
+#include <iterator>   // std::next
+
 constexpr double EPSILON = 1e-6;
 
 H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
@@ -458,19 +461,21 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
         // (i.e., if the chunking changes in the future, the reading method must also be adapted)
         dataset.select({timer_index, min}, {1, max - min}).read(buffer.data());
 
-        off_t offset = 0;
-        off_t data_offset = (timer_index - index_start) / stride;
-        auto data_ptr = &data_frame.data[data_offset * n_ids];
+        size_t offset = 0;
+        size_t data_offset = (timer_index - index_start) / stride * n_ids;
+        auto data_start = std::next(data_frame.data.begin(), data_offset);
         for (const auto& range : node_ranges) {
             uint64_t elements_per_gid = range.second - range.first;
             uint64_t gid_start = range.first - min;
 
             // Soma report
             if (elements_per_gid == 1) {
-                data_ptr[offset] = buffer[gid_start];
+                data_start[offset] = buffer[gid_start];
             } else {  // Elements report
                 uint64_t gid_end = range.second - min;
-                std::copy(&buffer[gid_start], &buffer[gid_end], &data_ptr[offset]);
+                std::copy(std::next(buffer.begin(), gid_start),
+                          std::next(buffer.begin(), gid_end),
+                          std::next(data_start, offset));
             }
             offset += elements_per_gid;
         }
