@@ -2,7 +2,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>  // std::copy, std::find, std::lower_bound, std::upper_bound
-#include <iterator>   // std::next
+#include <iterator>   // std::advance, std::next
 
 constexpr double EPSILON = 1e-6;
 
@@ -503,7 +503,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     }
 
     std::vector<float> buffer;
-    auto data_ptr = data_frame.data.data();
+    auto data_start = data_frame.data.begin();
     for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {
         // Access the data in blocks to reduce the file system overhead
         for (const auto& min_max_block : min_max_blocks) {
@@ -515,6 +515,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
             dataset.select({timer_index, min}, {1, max - min}).read(buffer);
 
             // Copy the values for each of the GIDs assigned into this block
+            const auto buffer_start = buffer.begin();
             for (size_t i = min_max_block.first; i < min_max_block.second; ++i) {
                 const auto index = node_index[i];
                 const auto range = Selection::Range(node_ranges[index].first - min,
@@ -524,14 +525,16 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
 
                 // Soma report
                 if (elements_per_gid == 1) {
-                    data_ptr[offset] = buffer[range.first];
+                    data_start[offset] = buffer_start[range.first];
                 } else {  // Elements report
-                    std::copy(&buffer[range.first], &buffer[range.second], &data_ptr[offset]);
+                    std::copy(std::next(buffer_start, range.first),
+                              std::next(buffer_start, range.second),
+                              std::next(data_start, offset));
                 }
             }
         }
 
-        data_ptr += element_ids_count;
+        std::advance(data_start, element_ids_count);
     }
 
     return data_frame;

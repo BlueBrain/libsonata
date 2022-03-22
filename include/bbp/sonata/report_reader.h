@@ -28,16 +28,6 @@ struct SONATA_API DataFrame {
 using Spike = std::pair<NodeID, double>;
 using Spikes = std::vector<Spike>;
 
-/**
-  const SpikeReader file(filename);
-  auto pops = file.getPopulationNames();
-  for (const auto& data: file[pops.openPopulation(0).get(Selection{12UL, 34UL, 58UL})) {
-      NodeID node_id;
-      double timestamp;
-      std::tie(node_id, timestamp) = data;
-      std::cout << "[" << timestamp << "] " << node_id << std::endl;
-  }
-*/
 class SONATA_API SpikeReader
 {
   public:
@@ -188,7 +178,7 @@ class SONATA_API ReportReader
         std::vector<std::pair<size_t, double>> times_index_;
         std::string time_units_;
         std::string data_units_;
-        bool is_node_ids_sorted_ = false;
+        bool is_node_ids_sorted_;
 
         friend ReportReader;
     };
