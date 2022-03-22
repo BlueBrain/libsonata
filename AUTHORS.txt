@@ -8,6 +8,7 @@ Jean-Denis Courcol
 Jorge Blanco Alonso
 Matthias Wolf
 Mike Gevaert (maintainer)
+Nadir Roman Guerrero
 Nicolas Cornu
 Sergio Rivas-Gomez
 Thomas Delemontex
