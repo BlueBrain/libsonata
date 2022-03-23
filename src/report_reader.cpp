@@ -304,10 +304,18 @@ std::vector<NodeID> ReportReader<T>::Population::getNodeIds() const {
 template <typename T>
 typename ReportReader<T>::Population::NodeIdElementLayout
 ReportReader<T>::Population::getNodeIdElementLayout(
-    const nonstd::optional<Selection>& node_ids) const {
+    const nonstd::optional<Selection>& node_ids,
+    const nonstd::optional<size_t>& _block_gap_limit) const {
     NodeIdElementLayout result;
     std::vector<NodeID> concrete_node_ids;
     size_t element_ids_count = 0;
+
+    // Set the gap between IO blocks while fetching data (Default: 128MB / 8 x GPFS blocks)
+    const size_t block_gap_limit = _block_gap_limit.value_or(16777216);
+
+    if (block_gap_limit < 2097152) {
+        throw SonataError("block_gap_limit must be at least 2097152 (16MB / 1 x GPFS block)");
+    }
 
     // Take all nodes if no selection is provided
     if (!node_ids) {
@@ -344,11 +352,6 @@ ReportReader<T>::Population::getNodeIdElementLayout(
 
     // Extract the ElementIDs from the GIDs
     if (!concrete_node_ids.empty()) {
-        // Retrieve the maximum gap between blocks (defaults to 128MB == 8 x GPFS blocks)
-        const auto block_gap_limit_env = getenv("LIBSONATA_BLOCK_GAP_LIMIT");
-        const auto block_gap_limit = std::stoull(
-            std::string(block_gap_limit_env ? block_gap_limit_env : "16777216"));
-
         // Sort the index by the selected ranges
         std::sort(result.node_index.begin(),
                   result.node_index.end(),
@@ -449,15 +452,18 @@ std::pair<size_t, size_t> ReportReader<T>::Population::getIndex(
 
 template <typename T>
 typename DataFrame<T>::DataType ReportReader<T>::Population::getNodeIdElementIdMapping(
-    const nonstd::optional<Selection>& node_ids) const {
-    return getNodeIdElementLayout(node_ids).ids;
+    const nonstd::optional<Selection>& node_ids,
+    const nonstd::optional<size_t>& block_gap_limit) const {
+    return getNodeIdElementLayout(node_ids, block_gap_limit).ids;
 }
 
 template <typename T>
-DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>& node_ids,
-                                              const nonstd::optional<double>& tstart,
-                                              const nonstd::optional<double>& tstop,
-                                              const nonstd::optional<size_t>& tstride) const {
+DataFrame<T> ReportReader<T>::Population::get(
+    const nonstd::optional<Selection>& node_ids,
+    const nonstd::optional<double>& tstart,
+    const nonstd::optional<double>& tstop,
+    const nonstd::optional<size_t>& tstride,
+    const nonstd::optional<size_t>& block_gap_limit) const {
     size_t index_start = 0;
     size_t index_stop = 0;
     std::tie(index_start, index_stop) = getIndex(tstart, tstop);
@@ -470,7 +476,7 @@ DataFrame<T> ReportReader<T>::Population::get(const nonstd::optional<Selection>&
     }
 
     // Retrieve the GID-ElementID layout, alongside the {min,max} blocks
-    auto node_id_element_layout = getNodeIdElementLayout(node_ids);
+    auto node_id_element_layout = getNodeIdElementLayout(node_ids, block_gap_limit);
     const auto& node_ranges = node_id_element_layout.node_ranges;
     const auto& node_offsets = node_id_element_layout.node_offsets;
     const auto& node_index = node_id_element_layout.node_index;

@@ -125,14 +125,16 @@ class SONATA_API ReportReader
          * - For Soma report reader, the return value will be the Node ID to which the report
          *   value belongs to.
          * - For Element/full compartment readers, the return value will be an array with 2
-         *   elements, the first element is the Node ID and the second element is the 
+         *   elements, the first element is the Node ID and the second element is the
          *   compartment ID of the given Node.
          *
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
+         * \param block_gap_limit gap limit between each IO block while fetching data from storage
          */
         typename DataFrame<KeyType>::DataType getNodeIdElementIdMapping(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
         /**
          * \param node_ids limit the report to the given selection.
@@ -140,11 +142,14 @@ class SONATA_API ReportReader
          * indicates no limit. \param tstop return voltages occurring on or before tstop.
          * tstop=nonstd::nullopt indicates no limit. \param tstride indicates every how many
          * timesteps we read data. tstride=nonstd::nullopt indicates that all timesteps are read.
+         * \param block_gap_limit gap limit between each IO block while fetching data from storage.
          */
-        DataFrame<KeyType> get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
-                               const nonstd::optional<double>& tstart = nonstd::nullopt,
-                               const nonstd::optional<double>& tstop = nonstd::nullopt,
-                               const nonstd::optional<size_t>& tstride = nonstd::nullopt) const;
+        DataFrame<KeyType> get(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            const nonstd::optional<double>& tstart = nonstd::nullopt,
+            const nonstd::optional<double>& tstop = nonstd::nullopt,
+            const nonstd::optional<size_t>& tstride = nonstd::nullopt,
+            const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
       private:
         struct NodeIdElementLayout {
@@ -165,9 +170,11 @@ class SONATA_API ReportReader
          *
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
+         * \param block_gap_limit gap limit between each IO block while fetching data from storage
          */
         NodeIdElementLayout getNodeIdElementLayout(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
         H5::Group pop_group_;
         std::vector<NodeID> node_ids_;

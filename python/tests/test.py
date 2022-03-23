@@ -339,6 +339,14 @@ class TestSomaReportPopulation(unittest.TestCase):
         ids_mapping_ref = np.asarray([3, 4])
         self.assertTrue((ids_mapping == ids_mapping_ref).all())
 
+    def test_block_gap_limit(self):
+        ids_mapping = self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]], block_gap_limit=2097152) # >= 1 x GPFS block
+        ids_mapping_ref = np.asarray([3, 4])
+        self.assertTrue((ids_mapping == ids_mapping_ref).all())
+
+        with self.assertRaises(SonataError):
+            self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]], block_gap_limit=2097151) # < 1 x GPFS block
+
 
 class TestElementReportPopulation(unittest.TestCase):
     def setUp(self):
@@ -395,6 +403,14 @@ class TestElementReportPopulation(unittest.TestCase):
         ids_mapping = self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]])
         ids_mapping_ref = np.asarray([[3, 5], [3, 5], [3, 6], [3, 6], [3, 7], [4, 7], [4, 8], [4, 8], [4, 9], [4, 9]])
         self.assertTrue((ids_mapping == ids_mapping_ref).all())
+
+    def test_block_gap_limit(self):
+        ids_mapping = self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]], block_gap_limit=2097152) # >= 1 x GPFS block
+        ids_mapping_ref = np.asarray([[3, 5], [3, 5], [3, 6], [3, 6], [3, 7], [4, 7], [4, 8], [4, 8], [4, 9], [4, 9]])
+        self.assertTrue((ids_mapping == ids_mapping_ref).all())
+
+        with self.assertRaises(SonataError):
+            self.test_obj['All'].get_node_id_element_id_mapping([[3, 5]], block_gap_limit=2097151) # < 1 x GPFS block
 
 
 class TestNodePopulationFailure(unittest.TestCase):

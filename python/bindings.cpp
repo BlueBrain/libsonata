@@ -358,18 +358,21 @@ void bindReportReader(py::module& m, const std::string& prefix) {
              "node_ids"_a = nonstd::nullopt,
              "tstart"_a = nonstd::nullopt,
              "tstop"_a = nonstd::nullopt,
-             "tstride"_a = nonstd::nullopt)
+             "tstride"_a = nonstd::nullopt,
+             "block_gap_limit"_a = nonstd::nullopt)
         .def("get_node_ids",
              &ReportType::Population::getNodeIds,
              "Return the list of nodes ids for this population")
         .def(
             "get_node_id_element_id_mapping",
             [](const typename ReportType::Population& population,
-               const nonstd::optional<Selection>& selection) {
-                return asArray(population.getNodeIdElementIdMapping(selection));
+               const nonstd::optional<Selection>& selection,
+               const nonstd::optional<size_t>& block_gap_limit) {
+                return asArray(population.getNodeIdElementIdMapping(selection, block_gap_limit));
             },
             DOC_REPORTREADER_POP(getNodeIdElementIdMapping),
-            "selection"_a = nonstd::nullopt)
+            "selection"_a = nonstd::nullopt,
+            "block_gap_limit"_a = nonstd::nullopt)
         .def_property_readonly("sorted",
                                &ReportType::Population::getSorted,
                                DOC_REPORTREADER_POP(getSorted))
