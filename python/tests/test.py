@@ -585,7 +585,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.base_path, os.path.abspath(os.path.join(PATH, 'config')))
 
         self.assertEqual(self.config.run.tstop, 1000)
-        self.assertTrue(abs(self.config.run.dt - 0.025) < 0.01)
+        self.assertEqual(self.config.run.dt, 0.025)
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/output')))
@@ -593,11 +593,14 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.report('soma').cells, 'Mosaic')
         self.assertEqual(self.config.report('soma').type, 'compartment')
-        self.assertTrue(abs(self.config.report('compartment').dt - 0.1) < 0.01)
+        self.assertEqual(self.config.report('compartment').dt, 0.1)
         self.assertEqual(self.config.report('axonal_comp_centers').start_time, 0)
         self.assertEqual(self.config.report('axonal_comp_centers').file_name,
                          os.path.abspath(os.path.join(PATH, 'config/axon_centers.h5')))
         self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
+
+        self.assertEqual(self.config.network,
+                         os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
 
     def test_json(self):
         temp_config = json.loads(self.config.json)

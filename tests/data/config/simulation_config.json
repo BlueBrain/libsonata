@@ -1,5 +1,10 @@
 {
-    "run": {
+     "manifest": {
+         "$OUTPUT_DIR": ".",
+         "$INPUT_DIR": "."
+     },
+     "network": "$INPUT_DIR/circuit_config.json",
+     "run": {
          "tstop": 1000,
          "dt": 0.025,
          "random_seed": 201506,
@@ -8,7 +13,7 @@
          "forward_skip": 500
     },
     "output": {
-         "output_dir": "output",
+         "output_dir": "$OUTPUT_DIR/output",
          "spikes_file": "out.h5"
     },
     "reports": {

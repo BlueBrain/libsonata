@@ -296,8 +296,8 @@ TEST_CASE("SimulationConfig") {
         const auto config = SimulationConfig::fromFile("./data/config/simulation_config.json");
         CHECK_NOTHROW(config.getRun());
         using Catch::Matchers::WithinULP;
-        REQUIRE_THAT(config.getRun().tstop, WithinULP(1000.f, 1));
-        REQUIRE_THAT(config.getRun().dt, WithinULP(0.025f, 1));
+        CHECK(config.getRun().tstop == 1000);
+        CHECK(config.getRun().dt == 0.025);
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
@@ -312,15 +312,18 @@ TEST_CASE("SimulationConfig") {
 
         CHECK(config.getReport("soma").cells == "Mosaic");
         CHECK(config.getReport("soma").type == "compartment");
-        CHECK(config.getReport("compartment").dt == 0.1f);
-        CHECK(config.getReport("axonal_comp_centers").startTime == 0.f);
+        CHECK(config.getReport("compartment").dt == 0.1);
+        CHECK(config.getReport("axonal_comp_centers").startTime == 0.);
         const auto axonalFilePath = fs::absolute(basePath / fs::path("axon_centers.h5"));
         CHECK(config.getReport("axonal_comp_centers").fileName ==
               axonalFilePath.lexically_normal());
-        CHECK(config.getReport("cell_imembrane").endTime == 500.f);
+        CHECK(config.getReport("cell_imembrane").endTime == 500.);
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getJSON()));
         CHECK(config.getBasePath() == basePath.lexically_normal());
+
+        const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
+        CHECK(config.getNetwork() == network.lexically_normal());
     }
 
     SECTION("Exception") {

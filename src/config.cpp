@@ -100,15 +100,9 @@ nlohmann::json expandVariables(const nlohmann::json& json,
 
 using Variables = std::map<std::string, std::string>;
 
-Variables readVariables(const nlohmann::json& json) {
+// parse variables named like $[a-zA-Z0-9_]* like in manifest sections
+Variables parseManifest(const nlohmann::json& manifest) {
     Variables variables;
-
-    if (json.find("networks") == json.end() || json.find("manifest") == json.end()) {
-        return variables;
-    }
-
-    const auto manifest = json["manifest"];
-
     const std::regex regexVariable(R"(\$[a-zA-Z0-9_]*)");
 
     for (auto it = manifest.begin(); it != manifest.end(); ++it) {
@@ -122,6 +116,16 @@ Variables readVariables(const nlohmann::json& json) {
     }
 
     return variables;
+}
+
+// read variables in manifest section for circuit_config
+Variables readVariables(const nlohmann::json& json) {
+    Variables variables;
+
+    if (json.find("networks") == json.end() || json.find("manifest") == json.end()) {
+        return variables;
+    }
+    return parseManifest(json["manifest"]);
 }
 
 std::string toAbsolute(const fs::path& base, const fs::path& path) {
@@ -482,8 +486,14 @@ class SimulationConfig::Parser
 {
   public:
     Parser(const std::string& content, const std::string& basePath)
-        : _basePath(fs::absolute(fs::path(basePath)).lexically_normal())
-        , _json(nlohmann::json::parse(content)) {}
+        : _basePath(fs::absolute(fs::path(basePath)).lexically_normal()) {
+        // Parse manifest section and expand JSON string
+        _json = nlohmann::json::parse(content);
+        if (_json.contains("manifest")) {
+            const auto vars = replaceVariables(parseManifest(_json["manifest"]));
+            _json = expandVariables(_json, vars);
+        }
+    }
 
     template <typename Iterator, typename Type, typename SectionName>
     void parseMandatory(const Iterator& it,
@@ -560,9 +570,14 @@ class SimulationConfig::Parser
         return result;
     }
 
+    const std::string parseNetwork() const {
+        auto val = _json.find("network") != _json.end() ? _json["network"] : "circuit_config.json";
+        return toAbsolute(_basePath, val);
+    }
+
   private:
     const fs::path _basePath;
-    const nlohmann::json _json;
+    nlohmann::json _json;
 };
 
 SimulationConfig::SimulationConfig(const std::string& content, const std::string& basePath)
@@ -572,6 +587,7 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _run = parser.parseRun();
     _output = parser.parseOutput();
     _reports = parser.parseReports();
+    _network = parser.parseNetwork();
 }
 
 SimulationConfig SimulationConfig::fromFile(const std::string& path) {
@@ -592,6 +608,10 @@ const SimulationConfig::Run& SimulationConfig::getRun() const noexcept {
 
 const SimulationConfig::Output& SimulationConfig::getOutput() const noexcept {
     return _output;
+}
+
+const std::string& SimulationConfig::getNetwork() const noexcept {
+    return _network;
 }
 
 const SimulationConfig::Report& SimulationConfig::getReport(const std::string& name) const {
