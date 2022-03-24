@@ -231,9 +231,14 @@ ReportReader<T>::Population::Population(const H5::File& file, const std::string&
     const auto mapping_group = pop_group_.getGroup("mapping");
     mapping_group.getDataSet("node_ids").read(node_ids_);
 
-    // Expand the pointers into tuples that define the range of each GID
     std::vector<uint64_t> index_pointers;
     mapping_group.getDataSet("index_pointers").read(index_pointers);
+
+    if (index_pointers.size() != (node_ids_.size() + 1)) {
+        throw SonataError("'index_pointers' dataset size must be 'node_ids' size plus one");
+    }
+
+    // Expand the pointers into tuples that define the range of each GID
     size_t element_ids_count = 0;
     for (size_t i = 0; i < node_ids_.size(); ++i) {
         node_ranges_.emplace_back(index_pointers[i], index_pointers[i + 1]);  // Range of GID
