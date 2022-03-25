@@ -315,11 +315,11 @@ ReportReader<T>::Population::getNodeIdElementLayout(
     std::vector<NodeID> concrete_node_ids;
     size_t element_ids_count = 0;
 
-    // Set the gap between IO blocks while fetching data (Default: 128MB / 8 x GPFS blocks)
+    // Set the gap between IO blocks while fetching data (Default: 64MB / 4 x GPFS blocks)
     const size_t block_gap_limit = _block_gap_limit.value_or(16777216);
 
-    if (block_gap_limit < 2097152) {
-        throw SonataError("block_gap_limit must be at least 2097152 (16MB / 1 x GPFS block)");
+    if (block_gap_limit < 4194304) {
+        throw SonataError("block_gap_limit must be at least 4194304 (16MB / 1 x GPFS block)");
     }
 
     // Take all nodes if no selection is provided
