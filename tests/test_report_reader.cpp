@@ -91,6 +91,10 @@ TEST_CASE("SomaReportReader", "[base]") {
     auto data_all = pop.get();
     REQUIRE(data_all.ids == DataFrame<NodeID>::DataType{{1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
                                                          11, 12, 13, 14, 15, 16, 17, 18, 19, 20}});
+    REQUIRE(std::vector<float>(data_all.data.begin(), data_all.data.begin() + 10)  == 
+            std::vector<float>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f,});
+    REQUIRE(std::vector<float>(data_all.data.end() - 10, data_all.data.end()) == 
+            std::vector<float>{11.9f, 12.9f, 13.9f, 14.9f, 15.9f, 16.9f, 17.9f, 18.9f, 19.9f, 20.9f});
 
     auto data_empty = pop.get(Selection({}));
     REQUIRE(data_empty.data == std::vector<float>{});
