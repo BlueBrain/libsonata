@@ -9,10 +9,16 @@
 
 #include "utils.h"
 
+#include "../extlib/filesystem.hpp"
+
 #include <fstream>
 
-
 std::string readFile(const std::string& path) {
+    namespace fs = ghc::filesystem;
+
+    if (!fs::is_regular_file(path))
+        throw std::runtime_error("Path `" + path + "` is not a file");
+
     std::ifstream file(path);
 
     if (file.fail())
