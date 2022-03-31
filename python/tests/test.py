@@ -330,6 +330,14 @@ class TestSomaReportPopulation(unittest.TestCase):
         keys_all_ref = np.asarray([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 1, 2, 3, 4, 5, 6, 7, 8, 9])
         self.assertTrue((keys_all == keys_all_ref).all())
 
+        data_begin = sel_all.data[0][:10]
+        data_begin_ref = np.asarray([10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0], dtype=np.float32)
+        self.assertTrue((data_begin == data_begin_ref).all())
+
+        data_end = sel_all.data[-1][-10:]
+        data_end_ref = np.asarray([20.9, 1.9, 2.9, 3.9, 4.9, 5.9, 6.9, 7.9, 8.9, 9.9], dtype=np.float32)
+        self.assertTrue((data_end == data_end_ref).all())
+
         sel_empty = self.test_obj['All'].get(node_ids=[])
         np.testing.assert_allclose(sel_empty.data, np.empty(shape=(0, 0)))
 

@@ -81,16 +81,11 @@ void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
     spikes.erase(spikes.begin(), begin);
 }
 
-template <typename T>
-void emplace_ids(T& key, NodeID node_id, ElementID element_id);
-
-template <>
-void emplace_ids(NodeID& key, NodeID node_id, ElementID /* element_id */) {
+inline void emplace_ids(NodeID& key, NodeID node_id, ElementID /* element_id */) {
     key = node_id;
 }
 
-template <>
-void emplace_ids(CompartmentID& key, NodeID node_id, ElementID element_id) {
+inline void emplace_ids(CompartmentID& key, NodeID node_id, ElementID element_id) {
     key[0] = node_id;
     key[1] = element_id;
 }
@@ -402,7 +397,7 @@ ReportReader<T>::Population::getNodeIdElementLayout(
 
                 auto offset = result.node_offsets[index];
                 for (auto i = range.first; i < range.second; i++, offset++) {
-                    emplace_ids<T>(result.ids[offset], node_id, element_ids[i]);
+                    emplace_ids(result.ids[offset], node_id, element_ids[i]);
                 }
             }
         }
