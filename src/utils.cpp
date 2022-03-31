@@ -14,7 +14,6 @@
 #include <fstream>
 
 std::string readFile(const std::string& path) {
-
     namespace fs = ghc::filesystem;
 
     if (!fs::is_regular_file(path))
