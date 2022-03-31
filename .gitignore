@@ -1,10 +1,12 @@
 .cache
 .clangd
 build
+spack-build*
 .eggs/
 .tox/
 libsonata.cpython-*.so
 python/__pycache__/
+python/libsonata.egg-info/
 *.pyc
 venv/
 cpp/

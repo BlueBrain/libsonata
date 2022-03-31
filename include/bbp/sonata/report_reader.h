@@ -28,16 +28,6 @@ struct SONATA_API DataFrame {
 using Spike = std::pair<NodeID, double>;
 using Spikes = std::vector<Spike>;
 
-/**
-  const SpikeReader file(filename);
-  auto pops = file.getPopulationNames();
-  for (const auto& data: file[pops.openPopulation(0).get(Selection{12UL, 34UL, 58UL})) {
-      NodeID node_id;
-      double timestamp;
-      std::tie(node_id, timestamp) = data;
-      std::cout << "[" << timestamp << "] " << node_id << std::endl;
-  }
-*/
 class SONATA_API SpikeReader
 {
   public:
@@ -135,14 +125,16 @@ class SONATA_API ReportReader
          * - For Soma report reader, the return value will be the Node ID to which the report
          *   value belongs to.
          * - For Element/full compartment readers, the return value will be an array with 2
-         *   elements, the first element is the Node ID and the second element is the 
+         *   elements, the first element is the Node ID and the second element is the
          *   compartment ID of the given Node.
          *
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
+         * \param block_gap_limit gap limit between each IO block while fetching data from storage
          */
         typename DataFrame<KeyType>::DataType getNodeIdElementIdMapping(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
         /**
          * \param node_ids limit the report to the given selection.
@@ -150,17 +142,22 @@ class SONATA_API ReportReader
          * indicates no limit. \param tstop return voltages occurring on or before tstop.
          * tstop=nonstd::nullopt indicates no limit. \param tstride indicates every how many
          * timesteps we read data. tstride=nonstd::nullopt indicates that all timesteps are read.
+         * \param block_gap_limit gap limit between each IO block while fetching data from storage.
          */
-        DataFrame<KeyType> get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
-                               const nonstd::optional<double>& tstart = nonstd::nullopt,
-                               const nonstd::optional<double>& tstop = nonstd::nullopt,
-                               const nonstd::optional<size_t>& tstride = nonstd::nullopt) const;
+        DataFrame<KeyType> get(
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            const nonstd::optional<double>& tstart = nonstd::nullopt,
+            const nonstd::optional<double>& tstop = nonstd::nullopt,
+            const nonstd::optional<size_t>& tstride = nonstd::nullopt,
+            const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
       private:
         struct NodeIdElementLayout {
             typename DataFrame<KeyType>::DataType ids;
             Selection::Ranges node_ranges;
-            Selection::Range min_max_range;
+            std::vector<uint64_t> node_offsets;
+            std::vector<uint64_t> node_index;
+            Selection::Ranges min_max_blocks;
         };
 
         Population(const H5::File& file, const std::string& populationName);
@@ -173,18 +170,22 @@ class SONATA_API ReportReader
          *
          * \param node_ids limit the report to the given selection. If nullptr, all nodes in the
          * report are used
+         * \param block_gap_limit gap limit between each IO block while fetching data from storage
          */
         NodeIdElementLayout getNodeIdElementLayout(
-            const nonstd::optional<Selection>& node_ids = nonstd::nullopt) const;
+            const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+            const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
-        std::map<NodeID, Selection::Range> node_ranges_;
         H5::Group pop_group_;
-        std::vector<NodeID> nodes_ids_;
+        std::vector<NodeID> node_ids_;
+        std::vector<Selection::Range> node_ranges_;
+        std::vector<uint64_t> node_offsets_;
+        std::vector<uint64_t> node_index_;
         double tstart_, tstop_, tstep_;
         std::vector<std::pair<size_t, double>> times_index_;
         std::string time_units_;
         std::string data_units_;
-        bool nodes_ids_sorted_ = false;
+        bool is_node_ids_sorted_;
 
         friend ReportReader;
     };

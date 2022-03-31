@@ -89,18 +89,23 @@ TEST_CASE("SomaReportReader", "[base]") {
     REQUIRE(data.data == std::vector<float>{3.2f, 4.2f, 3.3f, 4.3f, 3.4f, 4.4f, 3.5f, 4.5f});
 
     auto data_all = pop.get();
-    REQUIRE(data_all.ids == DataFrame<NodeID>::DataType{{1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
-                                                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20}});
+    REQUIRE(data_all.ids == DataFrame<NodeID>::DataType{{10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                         20, 1,  2,  3,  4,  5,  6,  7,  8,  9}});
     REQUIRE(std::vector<float>(data_all.data.begin(), data_all.data.begin() + 10)  == 
-            std::vector<float>{1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f,});
+            std::vector<float>{10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f, 17.0f, 18.0f, 19.0f});
     REQUIRE(std::vector<float>(data_all.data.end() - 10, data_all.data.end()) == 
-            std::vector<float>{11.9f, 12.9f, 13.9f, 14.9f, 15.9f, 16.9f, 17.9f, 18.9f, 19.9f, 20.9f});
+            std::vector<float>{20.9f, 1.9f, 2.9f, 3.9f, 4.9f, 5.9f, 6.9f, 7.9f, 8.9f, 9.9f});
 
     auto data_empty = pop.get(Selection({}));
     REQUIRE(data_empty.data == std::vector<float>{});
 
     auto ids = pop.getNodeIdElementIdMapping(Selection({{3, 5}}));
     REQUIRE(ids == std::vector<NodeID>{3, 4});
+
+    ids = pop.getNodeIdElementIdMapping(Selection({{3, 5}}), 4194304); // >= 1 x GPFS block
+    REQUIRE(ids == std::vector<NodeID>{3, 4});
+
+    REQUIRE_THROWS(pop.getNodeIdElementIdMapping(Selection({{3, 5}}), 4194303)); // < 1 x GPFS block
 }
 
 TEST_CASE("ElementReportReader limits", "[base]") {
@@ -166,4 +171,9 @@ TEST_CASE("ElementReportReader", "[base]") {
 
     auto ids = pop.getNodeIdElementIdMapping(Selection({{3, 5}}));
     REQUIRE(ids == std::vector<CompartmentID>{{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}});
+
+    ids = pop.getNodeIdElementIdMapping(Selection({{3, 5}}), 4194304); // >= 1 x GPFS block
+    REQUIRE(ids == std::vector<CompartmentID>{{3, 5}, {3, 5}, {3, 6}, {3, 6}, {3, 7}, {4, 7}, {4, 8}, {4, 8}, {4, 9}, {4, 9}});
+
+    REQUIRE_THROWS(pop.getNodeIdElementIdMapping(Selection({{3, 5}}), 4194303)); // < 1 x GPFS block
 }
