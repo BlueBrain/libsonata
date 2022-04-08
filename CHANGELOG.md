@@ -9,8 +9,8 @@
 ### Fixed:
  - Bump HighFive to v2.4.0 (#190); fixes errors on archs: aarch64, s390x and ppc64le
  - Update hdf5 to 1.12.1 in linux wheel building (#191)
- - With `-Wp,-D_GLIBCXX_ASSERTIONS`, tests fail with an assertion error of
- - Improve mem. ops. + NodeID-ElementID mapping bindings (#179)
+ - add `-Wp,-D_GLIBCXX_ASSERTIONS`, to more likely find out of bounds memory access
+ - Improve memory operations + NodeID-ElementID mapping bindings (#179)
 
 ## v0.1.11:
 
