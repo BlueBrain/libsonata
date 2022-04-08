@@ -100,9 +100,15 @@ nlohmann::json expandVariables(const nlohmann::json& json,
 
 using Variables = std::map<std::string, std::string>;
 
-// parse variables named like $[a-zA-Z0-9_]* like in manifest sections
-Variables parseManifest(const nlohmann::json& manifest) {
+Variables readVariables(const nlohmann::json& json) {
     Variables variables;
+
+    if (json.find("manifest") == json.end()) {
+        return variables;
+    }
+
+    const auto manifest = json["manifest"];
+
     const std::regex regexVariable(R"(\$[a-zA-Z0-9_]*)");
 
     for (auto it = manifest.begin(); it != manifest.end(); ++it) {
@@ -116,16 +122,6 @@ Variables parseManifest(const nlohmann::json& manifest) {
     }
 
     return variables;
-}
-
-// read variables in manifest section for circuit_config
-Variables readVariables(const nlohmann::json& json) {
-    Variables variables;
-
-    if (json.find("networks") == json.end() || json.find("manifest") == json.end()) {
-        return variables;
-    }
-    return parseManifest(json["manifest"]);
 }
 
 std::string toAbsolute(const fs::path& base, const fs::path& path) {
@@ -488,11 +484,9 @@ class SimulationConfig::Parser
     Parser(const std::string& content, const std::string& basePath)
         : _basePath(fs::absolute(fs::path(basePath)).lexically_normal()) {
         // Parse manifest section and expand JSON string
-        _json = nlohmann::json::parse(content);
-        if (_json.contains("manifest")) {
-            const auto vars = replaceVariables(parseManifest(_json["manifest"]));
-            _json = expandVariables(_json, vars);
-        }
+        const auto rawJson = nlohmann::json::parse(content);
+        const auto vars = replaceVariables(readVariables(rawJson));
+        _json = expandVariables(rawJson, vars);
     }
 
     template <typename Iterator, typename Type, typename SectionName>

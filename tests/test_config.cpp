@@ -325,7 +325,23 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
     }
-
+    SECTION("manifest_network") {
+        auto contents = R"({
+          "manifest": {
+            "$CIRCUIT_DIR": "./circuit"
+          },
+          "network": "$CIRCUIT_DIR/circuit_config.json",
+          "run": {
+            "dt": 0.05,
+            "tstop": 1000
+          }
+        })";
+        namespace fs = ghc::filesystem;
+        const auto basePath = fs::absolute(fs::path("./").parent_path());
+        const auto config = SimulationConfig(contents, basePath);
+        const auto network = fs::absolute(basePath / "circuit" / fs::path("circuit_config.json"));
+        CHECK(config.getNetwork() == network.lexically_normal());
+    }
     SECTION("Exception") {
         {  // No run section
             auto contents = R"({})";

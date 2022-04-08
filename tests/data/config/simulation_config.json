@@ -1,9 +1,7 @@
 {
      "manifest": {
-         "$OUTPUT_DIR": ".",
-         "$INPUT_DIR": "."
+         "$OUTPUT_DIR": "."
      },
-     "network": "$INPUT_DIR/circuit_config.json",
      "run": {
          "tstop": 1000,
          "dt": 0.025,
