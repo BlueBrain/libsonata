@@ -186,9 +186,9 @@ class SONATA_API SimulationConfig
      */
     struct Run {
         /// Biological simulation end time in milliseconds
-        float tstop{};
+        double tstop{};
         /// Integration step duration in milliseconds
-        float dt{};
+        double dt{};
     };
     /**
      * Parameters to override simulator output for spike reports
@@ -208,11 +208,11 @@ class SONATA_API SimulationConfig
         /// Report type. Possible values: "compartment", "summation", "synapse"
         std::string type;
         /// Interval between reporting steps in milliseconds
-        float dt{};
+        double dt{};
         /// Time to step reporting in milliseconds
-        float startTime{};
+        double startTime{};
         /// Time to stop reporting in milliseconds
-        float endTime{};
+        double endTime{};
         /// Report filename. Default is "<report name>_SONATA.h5"
         std::string fileName;
     };
@@ -265,6 +265,8 @@ class SONATA_API SimulationConfig
      */
     const Report& getReport(const std::string& name) const;
 
+    const std::string& getNetwork() const noexcept;
+
   private:
     // JSON string
     const std::string _jsonContent;
@@ -277,6 +279,8 @@ class SONATA_API SimulationConfig
     Output _output;
     // List of reports
     std::unordered_map<std::string, Report> _reports;
+    // Path of circuit config file for the simulation
+    std::string _network;
 
     class Parser;
     friend class Parser;

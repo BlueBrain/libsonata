@@ -561,6 +561,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("json", &SimulationConfig::getJSON)
         .def_property_readonly("run", &SimulationConfig::getRun)
         .def_property_readonly("output", &SimulationConfig::getOutput)
+        .def_property_readonly("network", &SimulationConfig::getNetwork)
         .def("report", &SimulationConfig::getReport, "name"_a);
 
     bindPopulationClass<EdgePopulation>(
