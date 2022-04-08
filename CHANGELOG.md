@@ -1,9 +1,21 @@
 # Changelog
 
+## v0.1.12:
+
+### Added:
+ - Add a check when feeding a directory path to readFile (#188)
+ - Add support for IO-blocks (#183)
+
+### Fixed:
+ - Bump HighFive to v2.4.0 (#190); fixes errors on archs: aarch64, s390x and ppc64le
+ - Update hdf5 to 1.12.1 in linux wheel building (#191)
+ - With `-Wp,-D_GLIBCXX_ASSERTIONS`, tests fail with an assertion error of
+ - Improve mem. ops. + NodeID-ElementID mapping bindings (#179)
+
 ## v0.1.11:
 
 ### Fixed:
- - Prefer building Release mode for python wheels, can control with SONATA_BUILD_TYPE (#176) 
+ - Prefer building Release mode for python wheels, can control with SONATA_BUILD_TYPE (#176)
  - Only do a single read when getting a report frame (#174)
 
 ## v0.1.10:
