@@ -561,31 +561,37 @@ class SimulationConfig::Parser
             if (report.sections.empty()) {
                 report.sections = "soma";
             } else {
-                std::set<std::string> possibleValues {"soma", "axon", "dend", "apic", "all"};
+                std::set<std::string> possibleValues = {"soma", "axon", "dend", "apic", "all"};
                 if (possibleValues.find(report.sections) == possibleValues.end()) {
-                    throw SonataError(fmt::format("Section '{}' not supported ('{}') possible", report.sections, fmt::join(possibleValues, ", ")));
+                    throw SonataError(fmt::format("Section '{}' not supported ('{}') possible",
+                                                  report.sections,
+                                                  fmt::join(possibleValues, ", ")));
                 }
             }
 
             if (report.scaling.empty()) {
                 report.scaling = "area";
             } else {
-                std::set<std::string> possibleValues {"none", "area"};
+                std::set<std::string> possibleValues = {"none", "area"};
                 if (possibleValues.find(report.scaling) == possibleValues.end()) {
-                    throw SonataError(fmt::format("Scaling '{}' not supported ('{}') possible", report.scaling, fmt::join(possibleValues, ", ")));
+                    throw SonataError(fmt::format("Scaling '{}' not supported ('{}') possible",
+                                                  report.scaling,
+                                                  fmt::join(possibleValues, ", ")));
                 }
             }
 
             if (report.compartments.empty()) {
-                if(report.sections == "soma") {
+                if (report.sections == "soma") {
                     report.compartments = "center";
                 } else {
                     report.compartments = "all";
                 }
             } else {
-                std::set<std::string> possibleValues {"center", "all"};
+                std::set<std::string> possibleValues = {"center", "all"};
                 if (possibleValues.find(report.compartments) == possibleValues.end()) {
-                    throw SonataError(fmt::format("Compartments '{}' not supported ('{}') possible", report.compartments, fmt::join(possibleValues, ", ")));
+                    throw SonataError(fmt::format("Compartments '{}' not supported ('{}') possible",
+                                                  report.compartments,
+                                                  fmt::join(possibleValues, ", ")));
                 }
             }
 

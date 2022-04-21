@@ -205,13 +205,16 @@ class SONATA_API SimulationConfig
     struct Report {
         /// Node sets on which to report
         std::string cells;
-        /// Sections on which to report. Possible values: "soma"(default), "axon", "dend", "apic", "all"
+        /// Sections on which to report.
+        /// Possible values: "soma"(default), "axon", "dend", "apic", "all"
         std::string sections;
         /// Report type. Possible values: "compartment", "summation", "synapse"
         std::string type;
-        /// For summation type, specify the handling of density values. Possible values: "none", "area"(default)
+        /// For summation type, specify the handling of density values.
+        /// Possible values: "none", "area"(default)
         std::string scaling;
-        /// For compartment type, select compartments to report. Possible values: "center"(default for sections: soma), "all"(default for other sections)
+        /// For compartment type, select compartments to report.
+        /// Possible values: "center"(default for sections: soma), "all"(default for other sections)
         std::string compartments;
         /// The simulation variable to access
         std::string variableName;
