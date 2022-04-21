@@ -539,9 +539,24 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::class_<SimulationConfig::Report>(m, "Report", "List of parameters of a report")
         .def_readonly("cells", &SimulationConfig::Report::cells, "Node sets on which to report")
+        .def_readonly("sections",
+                      &SimulationConfig::Report::sections,
+                      "Sections on which to report. Possible values are 'soma', 'axon', 'dend', 'apic', 'all'")
         .def_readonly("type",
                       &SimulationConfig::Report::type,
                       "Report type. Possible values are 'compartment', 'summation', 'synapse")
+        .def_readonly("scaling",
+                      &SimulationConfig::Report::scaling,
+                      "For summation type, specify the handling of density values. Possible values are 'none', 'area'")
+        .def_readonly("compartments",
+                      &SimulationConfig::Report::compartments,
+                      "For compartment type, select compartments to report. Possible values are 'center', 'all'")
+        .def_readonly("variable_name",
+                      &SimulationConfig::Report::variableName,
+                      "The simulation variable to access")
+        .def_readonly("unit",
+                      &SimulationConfig::Report::unit,
+                      "Descriptive text of the unit recorded")
         .def_readonly("dt",
                       &SimulationConfig::Report::dt,
                       "Interval between reporting steps in milliseconds")
@@ -551,7 +566,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("end_time",
                       &SimulationConfig::Report::endTime,
                       "Time to stop reporting in milliseconds")
-        .def_readonly("file_name", &SimulationConfig::Report::fileName, "Report file name");
+        .def_readonly("file_name", &SimulationConfig::Report::fileName, "Report file name")
+        .def_readonly("enabled", &SimulationConfig::Report::enabled, "Allows for supressing a report so that is not created");
 
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())

@@ -593,11 +593,19 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.report('soma').cells, 'Mosaic')
         self.assertEqual(self.config.report('soma').type, 'compartment')
+        self.assertEqual(self.config.report('soma').compartments, 'center')
+        self.assertEqual(self.config.report('soma').enabled, True)
         self.assertEqual(self.config.report('compartment').dt, 0.1)
+        self.assertEqual(self.config.report('compartment').sections, 'all')
+        self.assertEqual(self.config.report('compartment').compartments, 'all')
+        self.assertEqual(self.config.report('compartment').enabled, False)
         self.assertEqual(self.config.report('axonal_comp_centers').start_time, 0)
+        self.assertEqual(self.config.report('axonal_comp_centers').compartments, 'center')
+        self.assertEqual(self.config.report('axonal_comp_centers').scaling, 'none')
         self.assertEqual(self.config.report('axonal_comp_centers').file_name,
                          os.path.abspath(os.path.join(PATH, 'config/axon_centers.h5')))
         self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
+        self.assertEqual(self.config.report('cell_imembrane').variable_name, 'i_membrane')
 
         self.assertEqual(self.config.network,
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))

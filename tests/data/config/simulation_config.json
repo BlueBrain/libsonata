@@ -24,8 +24,7 @@
               "dt": 0.1,
               "start_time" : 0,
               "end_time" : 500,
-              "file_name": "soma",
-              "enabled" : true
+              "file_name": "soma"
          },
          "compartment": {
               "cells": "Mosaic",
@@ -37,7 +36,7 @@
               "start_time" : 0,
               "end_time" : 500,
               "file_name": "voltage",
-              "enabled" : true
+              "enabled" : false
          },
          "axonal_comp_centers": {
               "cells": "Mosaic",
@@ -46,6 +45,7 @@
               "variable_name": "v",
               "unit": "mV",
               "compartments": "center",
+              "scaling": "none",
               "dt": 0.1,
               "start_time" : 0,
               "end_time" : 500,
@@ -56,6 +56,7 @@
              "cells": "Column",
              "sections": "soma",
              "type": "summation",
+             "variable_name": "i_membrane",
              "unit": "nA",
              "dt": 0.05,
              "start_time": 0,
