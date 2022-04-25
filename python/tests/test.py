@@ -587,6 +587,7 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.run.tstop, 1000)
         self.assertEqual(self.config.run.dt, 0.025)
+        self.assertEqual(self.config.run.random_seed, 201506)
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/output')))
@@ -611,6 +612,27 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.network,
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
+
+        self.assertEqual(self.config.input('ex_linear').input_type, 'current_clamp')
+        self.assertEqual(self.config.input('ex_linear').module, 'linear')
+        self.assertEqual(self.config.input('ex_linear').input_type, 'current_clamp')
+        self.assertEqual(self.config.input('ex_linear').amp_start, 0.15)
+        self.assertEqual(self.config.input('ex_linear').amp_end, 0.15)
+        self.assertEqual(self.config.input('ex_linear').delay, 0)
+        self.assertEqual(self.config.input('ex_linear').duration, 15)
+        self.assertEqual(self.config.input('ex_linear').node_set, "Column")
+        self.assertEqual(self.config.input('ex_rel_linear').percent_start, 80)
+        self.assertEqual(self.config.input('ex_rel_linear').percent_end, 20)
+        self.assertEqual(self.config.input('ex_pulse').width, 1)
+        self.assertEqual(self.config.input('ex_pulse').frequency, 80)
+        self.assertEqual(self.config.input('ex_noise').mean_percent, 0)
+        self.assertEqual(self.config.input('ex_noise').mean, -1)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').random_seed, self.config.run.random_seed)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').dt, 0.25)
+        self.assertEqual(self.config.input('ex_replay').spike_file,
+                         os.path.abspath(os.path.join(PATH, 'config/replay.dat')))
+        self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
+
 
     def test_json(self):
         temp_config = json.loads(self.config.json)

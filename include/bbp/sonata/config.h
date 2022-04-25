@@ -189,6 +189,8 @@ class SONATA_API SimulationConfig
         double tstop{};
         /// Integration step duration in milliseconds
         double dt{};
+        /// Random seed
+        int random_seed{};
     };
     /**
      * Parameters to override simulator output for spike reports
@@ -236,6 +238,66 @@ class SONATA_API SimulationConfig
         bool enabled = true;
     };
     using ReportMap = std::unordered_map<std::string, Report>;
+
+    struct Input {
+        /// Type of stimulus, possible values: “linear”, “relative_linear”, “pulse”,
+        /// “subthreshold”, “hyperpolarizing”, “synapse_replay”, “seclamp”, “noise”,
+        /// “shot_noise”, “relative_shot_noise”
+        std::string module;
+        /// Type of input, possbile values: “spikes”, ”extracellular_stimulation”,
+        /// ”current_clamp”, ”voltage_clamp”
+        std::string input_type;
+        /// Time when input is activated (ms)
+        double delay{};
+        /// Time duration in ms for how long input is activated
+        double duration{};
+        /// Node set which is affected by input
+        std::string node_set;
+        /// The amount of current initially injected (nA)
+        double amp_start{};
+        /// The final current when a stimulus concludes (nA)
+        double amp_end{};
+        /// The percentage of a cell's threshold current to inject
+        double percent_start{};
+        /// The percentage of a cell's threshold current to inject at the end
+        double percent_end{};
+        /// The length of time each pulse lasts (ms)
+        double width{};
+        /// The frequency of pulse trains (Hz)
+        double frequency{};
+        /// A percentage adjusted from 100 of a cell's threshold current
+        double percent_less{};
+        /// The location of the file with the spike info for injection
+        std::string spike_file;
+        /// The node set to replay spikes from
+        std::string source;
+        /// The membrane voltage the targeted cells should be held at (mV)
+        double voltage{};
+        /// The mean value of current to inject (nA)
+        double mean{-1};
+        /// The mean value of current to inject as a percentage of threshold current
+        double mean_percent{-1};
+        /// The variance around the mean of current to inject in normal distribution
+        double variance{};
+        /// The rise time of the bi-exponential shots (ms)
+        double rise_time{};
+        /// The decay time of the bi-exponential shots (ms)
+        double decay_time{};
+        /// Rate of Poisson events (Hz)
+        int rate{};
+        /// The mean of gamma-distributed amplitudes (nA)
+        double amp_mean{};
+        /// The variance of gamma-distributed amplitudes
+        double amp_var{};
+        /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
+        double amp_cv{};
+        /// std dev of the current to inject as a percent of cell's threshold current
+        double sd_percent{};
+        /// Timestep of the injected current (ms). Default is 0.25 ms
+        double dt{};
+        /// Override the random seed to introduce correlations between cells
+        int random_seed{};
+    };
 
     /**
      * Parses a SONATA JSON simulation configuration file.
@@ -287,6 +349,8 @@ class SONATA_API SimulationConfig
 
     const std::string& getNetwork() const noexcept;
 
+    const Input& getInput(const std::string& name) const;
+
   private:
     // JSON string
     const std::string _jsonContent;
@@ -301,6 +365,8 @@ class SONATA_API SimulationConfig
     ReportMap _reports;
     // Path of circuit config file for the simulation
     std::string _network;
+    // List of inputs
+    std::unordered_map<std::string, Input> _inputs;
 
     class Parser;
     friend class Parser;

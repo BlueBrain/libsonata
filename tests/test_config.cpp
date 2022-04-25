@@ -297,6 +297,7 @@ TEST_CASE("SimulationConfig") {
         using Catch::Matchers::WithinULP;
         CHECK(config.getRun().tstop == 1000);
         CHECK(config.getRun().dt == 0.025);
+        CHECK(config.getRun().random_seed == 201506);
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
@@ -331,6 +332,24 @@ TEST_CASE("SimulationConfig") {
 
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
+
+        CHECK(config.getInput("ex_linear").input_type == "current_clamp");
+        CHECK(config.getInput("ex_linear").module == "linear");
+        CHECK(config.getInput("ex_linear").input_type == "current_clamp");
+        CHECK(config.getInput("ex_linear").amp_start == 0.15);
+        CHECK(config.getInput("ex_linear").amp_end == 0.15);
+        CHECK(config.getInput("ex_linear").delay == 0);
+        CHECK(config.getInput("ex_linear").duration == 15);
+        CHECK(config.getInput("ex_linear").node_set == "Column");
+        CHECK(config.getInput("ex_rel_linear").percent_start == 80);
+        CHECK(config.getInput("ex_rel_linear").percent_end == 20);
+        CHECK(config.getInput("ex_noise").mean_percent == 0);
+        CHECK(config.getInput("ex_noise").mean == -1);
+        CHECK(config.getInput("ex_rel_shotnoise").random_seed == config.getRun().random_seed);
+        CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
+        CHECK(config.getInput("ex_replay").spike_file ==
+              fs::absolute(basePath / fs::path("replay.dat")).lexically_normal());
+        CHECK(config.getInput("ex_replay").source == "ML_afferents");
     }
     SECTION("manifest_network") {
         auto contents = R"({
@@ -339,6 +358,7 @@ TEST_CASE("SimulationConfig") {
           },
           "network": "$CIRCUIT_DIR/circuit_config.json",
           "run": {
+            "random_seed": 12345,
             "dt": 0.05,
             "tstop": 1000
           }
@@ -357,6 +377,7 @@ TEST_CASE("SimulationConfig") {
         {  // No tstop in run section
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05
               }
             })";
@@ -365,7 +386,17 @@ TEST_CASE("SimulationConfig") {
         {  // No dt in run section
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "tstop": 1000
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No random_seed in run section
+            auto contents = R"({
+              "run": {
+                "tstop": 1000,
+                "dt": 0.05
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
@@ -373,6 +404,7 @@ TEST_CASE("SimulationConfig") {
         {  // No reports section
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               }
@@ -382,6 +414,7 @@ TEST_CASE("SimulationConfig") {
         {  // No cells in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -400,6 +433,7 @@ TEST_CASE("SimulationConfig") {
         {  // No type in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -455,6 +489,7 @@ TEST_CASE("SimulationConfig") {
         {  // No dt in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -473,6 +508,7 @@ TEST_CASE("SimulationConfig") {
         {  // No start_time in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -491,6 +527,7 @@ TEST_CASE("SimulationConfig") {
         {  // No end_time in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -617,6 +654,65 @@ TEST_CASE("SimulationConfig") {
                    "dt": 0.05,
                    "start_time": 0,
                    "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // wrong input_type in an input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "linear": {
+                   "input_type": "current",
+                   "module": "linear",
+                   "amp_start": 0.15,
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column"
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // wrong module in an input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "linear": {
+                   "input_type": "current_clamp",
+                   "module": "spike_replay",
+                   "amp_start": 0.15,
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column"
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // no amp_start in a linear input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "linear": {
+                   "input_type": "current_clamp",
+                   "module": "spike_replay",
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column"
                 }
               }
             })";

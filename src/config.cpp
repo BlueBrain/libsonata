@@ -14,6 +14,7 @@
 
 #include <algorithm>  // transform
 #include <cassert>
+#include <experimental/optional>
 #include <fstream>
 #include <memory>
 #include <regex>
@@ -564,6 +565,7 @@ class SimulationConfig::Parser
         SimulationConfig::Run result{};
         parseMandatory(*runIt, "tstop", "run", result.tstop);
         parseMandatory(*runIt, "dt", "run", result.dt);
+        parseMandatory(*runIt, "random_seed", "run", result.random_seed);
         return result;
     }
 
@@ -635,6 +637,98 @@ class SimulationConfig::Parser
         return toAbsolute(_basePath, val);
     }
 
+    std::unordered_map<std::string, SimulationConfig::Input> parseInputs() const {
+        std::unordered_map<std::string, SimulationConfig::Input> result;
+
+        const auto inputsIt = _json.find("inputs");
+        if (inputsIt == _json.end())
+            return result;
+
+        for (auto it = inputsIt->begin(); it != inputsIt->end(); ++it) {
+            auto& input = result[it.key()];
+            auto& valueIt = it.value();
+            const auto debugStr = fmt::format("input {}", it.key());
+            parseMandatory(valueIt, "module", debugStr, input.module);
+            parseMandatory(valueIt, "input_type", debugStr, input.input_type);
+            parseMandatory(valueIt, "delay", debugStr, input.delay);
+            parseMandatory(valueIt, "duration", debugStr, input.duration);
+            parseMandatory(valueIt, "node_set", debugStr, input.node_set);
+
+            const auto moduledebugStr = fmt::format("Unknown module {} for input_type {} in {}",
+                                                    input.module,
+                                                    input.input_type,
+                                                    debugStr);
+            if (input.input_type == "current_clamp") {
+                if (input.module == "linear") {
+                    parseMandatory(valueIt, "amp_start", debugStr, input.amp_start);
+                    parseOptional<double>(valueIt, "amp_end", input.amp_end, input.amp_start);
+                } else if (input.module == "relative_linear") {
+                    parseMandatory(valueIt, "percent_start", debugStr, input.percent_start);
+                    parseOptional<double>(valueIt,
+                                          "percent_end",
+                                          input.percent_end,
+                                          input.percent_start);
+                } else if (input.module == "pulse") {
+                    parseMandatory(valueIt, "amp_start", debugStr, input.amp_start);
+                    parseMandatory(valueIt, "width", debugStr, input.width);
+                    parseMandatory(valueIt, "frequency", debugStr, input.frequency);
+                    parseOptional<double>(valueIt, "amp_end", input.amp_end, input.amp_start);
+                } else if (input.module == "subthreshold") {
+                    parseMandatory(valueIt, "percent_less", debugStr, input.percent_less);
+                } else if (input.module == "noise") {
+                    if (valueIt.find("mean") == valueIt.end() &&
+                        valueIt.find("mean_percent") == valueIt.end()) {
+                        throw SonataError(
+                            fmt::format("could not find mean or mean_percent in {}", debugStr));
+                    }
+                    parseOptional(valueIt, "mean", input.mean);
+                    parseOptional(valueIt, "mean_percent", input.mean_percent);
+                    parseOptional(valueIt, "variance", input.variance);
+                } else if (input.module == "shot_noise") {
+                    parseMandatory(valueIt, "rise_time", debugStr, input.rise_time);
+                    parseMandatory(valueIt, "decay_time", debugStr, input.decay_time);
+                    parseMandatory(valueIt, "random_seed", debugStr, input.random_seed);
+                    parseOptional<double>(valueIt, "dt", input.dt, 0.25);
+                    parseMandatory(valueIt, "rate", debugStr, input.rate);
+                    parseMandatory(valueIt, "amp_mean", debugStr, input.amp_mean);
+                    parseMandatory(valueIt, "amp_var", debugStr, input.amp_var);
+                } else if (input.module == "relative_shot_noise") {
+                    parseMandatory(valueIt, "rise_time", debugStr, input.rise_time);
+                    parseMandatory(valueIt, "decay_time", debugStr, input.decay_time);
+                    parseOptional<int>(valueIt,
+                                       "random_seed",
+                                       input.random_seed,
+                                       parseRun().random_seed);
+                    parseOptional<double>(valueIt, "dt", input.dt, 0.25);
+                    parseMandatory(valueIt, "amp_cv", debugStr, input.amp_cv);
+                    parseMandatory(valueIt, "mean_percent", debugStr, input.mean_percent);
+                    parseMandatory(valueIt, "sd_percent", debugStr, input.sd_percent);
+                } else if (input.module != "hyperpolarizing") {
+                    throw SonataError(moduledebugStr);
+                }
+            } else if (input.input_type == "spikes") {
+                if (input.module == "synapse_replay") {
+                    parseMandatory(valueIt, "spike_file", debugStr, input.spike_file);
+                    input.spike_file = toAbsolute(_basePath, input.spike_file);
+                    parseOptional(valueIt, "source", input.source);
+                } else {
+                    throw SonataError(moduledebugStr);
+                }
+            } else if (input.input_type == "voltage_clamp") {
+                if (input.module == "seclamp") {
+                    parseMandatory(valueIt, "voltage", debugStr, input.voltage);
+                } else {
+                    throw SonataError(moduledebugStr);
+                }
+            } else {
+                throw SonataError(
+                    fmt::format("Unknown input_type {} in {}", input.input_type, debugStr));
+            }
+        }
+
+        return result;
+    }
+
   private:
     const fs::path _basePath;
     nlohmann::json _json;
@@ -648,6 +742,7 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _output = parser.parseOutput();
     _reports = parser.parseReports();
     _network = parser.parseNetwork();
+    _inputs = parser.parseInputs();
 }
 
 SimulationConfig SimulationConfig::fromFile(const std::string& path) {
@@ -680,6 +775,15 @@ const SimulationConfig::Report& SimulationConfig::getReport(const std::string& n
         throw SonataError(
             fmt::format("The report '{}' is not present in the simulation config file", name));
     }
+
+    return it->second;
+}
+
+const SimulationConfig::Input& SimulationConfig::getInput(const std::string& name) const {
+    const auto it = _inputs.find(name);
+    if (it == _inputs.end())
+        throw SonataError(
+            fmt::format("The input '{}' is not present in the simulation config file", name));
 
     return it->second;
 }

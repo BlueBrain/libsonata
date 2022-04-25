@@ -586,6 +586,79 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("center", SimulationConfig::Report::Compartments::center)
         .value("all", SimulationConfig::Report::Compartments::all);
 
+    py::class_<SimulationConfig::Input>(m, "Input", "List of parameters of an input")
+        .def_readonly("module", &SimulationConfig::Input::module, "Type of stimulus")
+        .def_readonly("input_type", &SimulationConfig::Input::input_type, "Type of input")
+        .def_readonly("delay", &SimulationConfig::Input::delay, "Time when input is activated (ms)")
+        .def_readonly("duration",
+                      &SimulationConfig::Input::duration,
+                      "Time duration in ms for how long input is activated")
+        .def_readonly("node_set",
+                      &SimulationConfig::Input::node_set,
+                      "Node set which is affected by input")
+        .def_readonly("amp_start",
+                      &SimulationConfig::Input::amp_start,
+                      "The amount of current initially injected (nA)")
+        .def_readonly("amp_end",
+                      &SimulationConfig::Input::amp_end,
+                      "The final current when a stimulus concludes (nA)")
+        .def_readonly("percent_start",
+                      &SimulationConfig::Input::percent_start,
+                      "The percentage of a cell's threshold current to inject ")
+        .def_readonly("percent_end",
+                      &SimulationConfig::Input::percent_end,
+                      "The percentage of a cell's threshold current to inject at the end")
+        .def_readonly("width",
+                      &SimulationConfig::Input::width,
+                      "The length of time each pulse lasts (ms)")
+        .def_readonly("frequency",
+                      &SimulationConfig::Input::frequency,
+                      "The frequency of pulse trains (Hz)")
+        .def_readonly("percent_less",
+                      &SimulationConfig::Input::percent_less,
+                      "A percentage adjusted from 100 of a cell's threshold current")
+        .def_readonly("spike_file",
+                      &SimulationConfig::Input::spike_file,
+                      "The location of the file with the spike info for injection")
+        .def_readonly("source",
+                      &SimulationConfig::Input::source,
+                      "The node set to replay spikes from")
+        .def_readonly("voltage",
+                      &SimulationConfig::Input::voltage,
+                      "The membrane voltage the targeted cells should be held at (mV)")
+        .def_readonly("mean",
+                      &SimulationConfig::Input::mean,
+                      "The mean value of current to inject (nA)")
+        .def_readonly("mean_percent",
+                      &SimulationConfig::Input::mean_percent,
+                      "The mean value of current to inject as a percentage of threshold current")
+        .def_readonly("variance",
+                      &SimulationConfig::Input::variance,
+                      "The variance around the mean of current to inject in normal distribution")
+        .def_readonly("rise_time",
+                      &SimulationConfig::Input::rise_time,
+                      "The rise time of the bi-exponential shots (ms)")
+        .def_readonly("decay_time",
+                      &SimulationConfig::Input::decay_time,
+                      "The decay time of the bi-exponential shots (ms)")
+        .def_readonly("rate", &SimulationConfig::Input::rate, "Rate of Poisson events (Hz)")
+        .def_readonly("amp_mean",
+                      &SimulationConfig::Input::amp_mean,
+                      "The mean of gamma-distributed amplitudes (nA)")
+        .def_readonly("amp_var",
+                      &SimulationConfig::Input::amp_var,
+                      "The variance of gamma-distributed amplitudes")
+        .def_readonly("amp_cv",
+                      &SimulationConfig::Input::amp_cv,
+                      "The coefficient of variation (sd/mean) of gamma-distributed amplitudes")
+        .def_readonly("sd_percent",
+                      &SimulationConfig::Input::sd_percent,
+                      "std dev of the current to inject as a percent of cell's threshold current")
+        .def_readonly("dt", &SimulationConfig::Input::dt, "Timestep of the injected current (ms)")
+        .def_readonly("random_seed",
+                      &SimulationConfig::Input::random_seed,
+                      "Override the random seed to introduce correlations between cells");
+
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
@@ -595,7 +668,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("run", &SimulationConfig::getRun)
         .def_property_readonly("output", &SimulationConfig::getOutput)
         .def_property_readonly("network", &SimulationConfig::getNetwork)
-        .def("report", &SimulationConfig::getReport, "name"_a);
+        .def("report", &SimulationConfig::getReport, "name"_a)
+        .def("input", &SimulationConfig::getInput, "name"_a);
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")
