@@ -507,6 +507,21 @@ class SimulationConfig::Parser
             buf = element->template get<Type>();
     }
 
+    template <typename Type>
+    bool is_in(const Type& value, const std::initializer_list<Type>& lst) const {
+        return (std::find(std::begin(lst), std::end(lst), value) != std::end(lst));
+    }
+
+    template <typename Type>
+    void checkValidField(const Type& field,
+                         const std::initializer_list<Type>& possibleValues) const {
+        if (!is_in<std::string>(field, possibleValues)) {
+            throw SonataError(fmt::format("Field '{}' not supported ('{}') possible",
+                                          field,
+                                          fmt::join(possibleValues, ", ")));
+        }
+    }
+
     SimulationConfig::Run parseRun() const {
         const auto runIt = _json.find("run");
         if (runIt == _json.end())
@@ -561,23 +576,14 @@ class SimulationConfig::Parser
             if (report.sections.empty()) {
                 report.sections = "soma";
             } else {
-                std::set<std::string> possibleValues = {"soma", "axon", "dend", "apic", "all"};
-                if (possibleValues.find(report.sections) == possibleValues.end()) {
-                    throw SonataError(fmt::format("Section '{}' not supported ('{}') possible",
-                                                  report.sections,
-                                                  fmt::join(possibleValues, ", ")));
-                }
+                checkValidField<std::string>(report.sections,
+                                             {"soma", "axon", "dend", "apic", "all"});
             }
 
             if (report.scaling.empty()) {
                 report.scaling = "area";
             } else {
-                std::set<std::string> possibleValues = {"none", "area"};
-                if (possibleValues.find(report.scaling) == possibleValues.end()) {
-                    throw SonataError(fmt::format("Scaling '{}' not supported ('{}') possible",
-                                                  report.scaling,
-                                                  fmt::join(possibleValues, ", ")));
-                }
+                checkValidField<std::string>(report.scaling, {"none", "area"});
             }
 
             if (report.compartments.empty()) {
@@ -587,12 +593,7 @@ class SimulationConfig::Parser
                     report.compartments = "all";
                 }
             } else {
-                std::set<std::string> possibleValues = {"center", "all"};
-                if (possibleValues.find(report.compartments) == possibleValues.end()) {
-                    throw SonataError(fmt::format("Compartments '{}' not supported ('{}') possible",
-                                                  report.compartments,
-                                                  fmt::join(possibleValues, ", ")));
-                }
+                checkValidField<std::string>(report.compartments, {"center", "all"});
             }
 
             if (report.fileName.empty())
