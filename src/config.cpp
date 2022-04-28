@@ -595,6 +595,10 @@ class SimulationConfig::Parser
                 checkValidField<std::string>(report.compartments, {"center", "all"});
             }
 
+            if (report.unit.empty()) {
+                report.unit = "mV";
+            }
+
             if (report.fileName.empty())
                 report.fileName = it.key() + "_SONATA.h5";
             else {
