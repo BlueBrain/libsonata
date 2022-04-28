@@ -129,6 +129,20 @@ std::string toAbsolute(const fs::path& base, const fs::path& path) {
     return absolute.lexically_normal().string();
 }
 
+template <typename Type>
+bool is_in(const Type& value, const std::initializer_list<Type>& lst) {
+    return (std::find(std::begin(lst), std::end(lst), value) != std::end(lst));
+}
+
+template <typename Type>
+void checkValidField(const Type& field, const std::initializer_list<Type>& possibleValues) {
+    if (!is_in<std::string>(field, possibleValues)) {
+        throw SonataError(fmt::format("Field '{}' not supported ('{}') possible",
+                                      field,
+                                      fmt::join(possibleValues, ", ")));
+    }
+}
+
 }  // namespace
 
 class CircuitConfig::Parser
@@ -505,21 +519,6 @@ class SimulationConfig::Parser
         const auto element = it.find(name);
         if (element != it.end())
             buf = element->template get<Type>();
-    }
-
-    template <typename Type>
-    bool is_in(const Type& value, const std::initializer_list<Type>& lst) const {
-        return (std::find(std::begin(lst), std::end(lst), value) != std::end(lst));
-    }
-
-    template <typename Type>
-    void checkValidField(const Type& field,
-                         const std::initializer_list<Type>& possibleValues) const {
-        if (!is_in<std::string>(field, possibleValues)) {
-            throw SonataError(fmt::format("Field '{}' not supported ('{}') possible",
-                                          field,
-                                          fmt::join(possibleValues, ", ")));
-        }
     }
 
     SimulationConfig::Run parseRun() const {
