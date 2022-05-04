@@ -13,8 +13,8 @@
 #include <bbp/sonata/optional.hpp>
 
 #include <algorithm>  // transform
+#include <bbp/sonata/optional.hpp>
 #include <cassert>
-#include <experimental/optional>
 #include <fstream>
 #include <memory>
 #include <regex>
