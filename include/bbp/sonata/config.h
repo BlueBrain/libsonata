@@ -21,7 +21,6 @@
 #include <bbp/sonata/nodes.h>
 
 #include "common.h"
-#include <nlohmann/json.hpp>
 
 
 namespace bbp {
