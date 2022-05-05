@@ -343,8 +343,8 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getInput("ex_linear").node_set == "Column");
         CHECK(config.getInput("ex_rel_linear").percent_start == 80);
         CHECK(config.getInput("ex_rel_linear").percent_end == 20);
-        CHECK(config.getInput("ex_noise").mean_percent == 0);
-        CHECK(config.getInput("ex_noise").mean == -1);
+        CHECK(config.getInput("ex_noise").noise_current_mode == "mean_percent");
+        CHECK(config.getInput("ex_noise").mean_percent == 0.01);
         CHECK(config.getInput("ex_rel_shotnoise").random_seed == config.getRun().random_seed);
         CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
         CHECK(config.getInput("ex_replay").spike_file ==
@@ -713,6 +713,48 @@ TEST_CASE("SimulationConfig") {
                    "delay": 0,
                    "duration": 15,
                    "node_set":"Column"
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Both mean and mean_percent are given in a noise input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "noise": {
+                   "input_type": "current_clamp",
+                   "module": "noise",
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column",
+                   "mean" : 0.1,
+                   "mean_percent": 0.01,
+                   "variance": 0.001
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No mean or mean_percent are given in a noise input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "noise": {
+                   "input_type": "current_clamp",
+                   "module": "noise",
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column",
+                   "variance": 0.001
                 }
               }
             })";

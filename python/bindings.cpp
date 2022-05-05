@@ -632,6 +632,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("mean_percent",
                       &SimulationConfig::Input::mean_percent,
                       "The mean value of current to inject as a percentage of threshold current")
+        .def_readonly("noise_current_mode",
+                      &SimulationConfig::Input::noise_current_mode,
+                      "The mode of the noise current injection, mean, mean_percent or \'\'")
         .def_readonly("variance",
                       &SimulationConfig::Input::variance,
                       "The variance around the mean of current to inject in normal distribution")

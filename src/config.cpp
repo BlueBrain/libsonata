@@ -676,10 +676,16 @@ class SimulationConfig::Parser
                 } else if (input.module == "subthreshold") {
                     parseMandatory(valueIt, "percent_less", debugStr, input.percent_less);
                 } else if (input.module == "noise") {
-                    if (valueIt.find("mean") == valueIt.end() &&
-                        valueIt.find("mean_percent") == valueIt.end()) {
+                    const auto has_mean = valueIt.find("mean") != valueIt.end();
+                    const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
+                    if (has_mean && has_meanpercent) {
                         throw SonataError(
-                            fmt::format("could not find mean or mean_percent in {}", debugStr));
+                            fmt::format("Both mean and mean_percent are found in {}", debugStr));
+                    } else if (!has_mean && !has_meanpercent) {
+                        throw SonataError(
+                            fmt::format("Could not find mean or mean_percent in {}", debugStr));
+                    } else {
+                        input.noise_current_mode = has_mean ? "mean" : "mean_percent";
                     }
                     parseOptional(valueIt, "mean", input.mean);
                     parseOptional(valueIt, "mean_percent", input.mean_percent);
