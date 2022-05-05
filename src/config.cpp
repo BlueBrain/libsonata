@@ -10,6 +10,7 @@
  *************************************************************************/
 
 #include <bbp/sonata/config.h>
+#include <bbp/sonata/optional.hpp>
 
 #include <algorithm>  // transform
 #include <cassert>
@@ -29,6 +30,27 @@
 
 namespace bbp {
 namespace sonata {
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Sections,
+                             {{SimulationConfig::Report::Sections::invalid, nullptr},
+                              {SimulationConfig::Report::Sections::soma, "soma"},
+                              {SimulationConfig::Report::Sections::axon, "axon"},
+                              {SimulationConfig::Report::Sections::dend, "dend"},
+                              {SimulationConfig::Report::Sections::apic, "apic"},
+                              {SimulationConfig::Report::Sections::all, "all"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Type,
+                             {{SimulationConfig::Report::Type::invalid, nullptr},
+                              {SimulationConfig::Report::Type::compartment, "compartment"},
+                              {SimulationConfig::Report::Type::summation, "summation"},
+                              {SimulationConfig::Report::Type::synapse, "synapse"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Scaling,
+                             {{SimulationConfig::Report::Scaling::invalid, nullptr},
+                              {SimulationConfig::Report::Scaling::none, "none"},
+                              {SimulationConfig::Report::Scaling::area, "area"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Compartments,
+                             {{SimulationConfig::Report::Compartments::invalid, nullptr},
+                              {SimulationConfig::Report::Compartments::center, "center"},
+                              {SimulationConfig::Report::Compartments::all, "all"}})
 
 namespace {
 // to be replaced by std::filesystem once C++17 is used
@@ -136,10 +158,17 @@ bool is_in(const Type& value, const std::initializer_list<Type>& lst) {
 
 template <typename Type>
 void checkValidField(const Type& field, const std::initializer_list<Type>& possibleValues) {
-    if (!is_in<std::string>(field, possibleValues)) {
+    if (!is_in<Type>(field, possibleValues)) {
         throw SonataError(fmt::format("Field '{}' not supported ('{}') possible",
                                       field,
                                       fmt::join(possibleValues, ", ")));
+    }
+}
+
+template <typename Type>
+void checkValidEnum(const Type& field) {
+    if (field == static_cast<Type>(-1)) {
+        throw SonataError(fmt::format("Field not supported"));
     }
 }
 
@@ -503,7 +532,7 @@ class SimulationConfig::Parser
         _json = expandVariables(rawJson, vars);
     }
 
-    template <typename Iterator, typename Type, typename SectionName>
+    template <typename Type, typename Iterator, typename SectionName>
     void parseMandatory(const Iterator& it,
                         const char* name,
                         const SectionName& sn,
@@ -514,11 +543,17 @@ class SimulationConfig::Parser
         buf = element->template get<Type>();
     }
 
-    template <typename Iterator, typename Type>
-    void parseOptional(const Iterator& it, const char* name, Type& buf) const {
+    template <typename Type, typename Iterator>
+    void parseOptional(const Iterator& it,
+                       const char* name,
+                       Type& buf,
+                       nonstd::optional<Type> default_value = nonstd::nullopt) const {
         const auto element = it.find(name);
-        if (element != it.end())
+        if (element != it.end()) {
             buf = element->template get<Type>();
+        } else if (default_value != nonstd::nullopt) {
+            buf = default_value.value();
+        }
     }
 
     SimulationConfig::Run parseRun() const {
@@ -560,51 +595,54 @@ class SimulationConfig::Parser
             auto& valueIt = it.value();
             const auto debugStr = fmt::format("report {}", it.key());
             parseMandatory(valueIt, "cells", debugStr, report.cells);
-            parseOptional(valueIt, "sections", report.sections);
-            parseMandatory(valueIt, "type", debugStr, report.type);
-            parseOptional(valueIt, "scaling", report.scaling);
-            parseOptional(valueIt, "compartments", report.compartments);
+            parseOptional<Report::Sections>(valueIt,
+                                            "sections",
+                                            report.sections,
+                                            Report::Sections::soma);
+            parseMandatory<Report::Type>(valueIt, "type", debugStr, report.type);
+            parseOptional<Report::Scaling>(valueIt,
+                                           "scaling",
+                                           report.scaling,
+                                           Report::Scaling::area);
+            if (report.sections == Report::Sections::soma) {
+                parseOptional<Report::Compartments>(valueIt,
+                                                    "compartments",
+                                                    report.compartments,
+                                                    Report::Compartments::center);
+            } else {
+                parseOptional<Report::Compartments>(valueIt,
+                                                    "compartments",
+                                                    report.compartments,
+                                                    Report::Compartments::all);
+            }
             parseMandatory(valueIt, "variable_name", debugStr, report.variableName);
-            parseOptional(valueIt, "unit", report.unit);
+            parseOptional<std::string>(valueIt, "unit", report.unit, "mV");
             parseMandatory(valueIt, "dt", debugStr, report.dt);
             parseMandatory(valueIt, "start_time", debugStr, report.startTime);
             parseMandatory(valueIt, "end_time", debugStr, report.endTime);
-            parseOptional(valueIt, "file_name", report.fileName);
+            parseOptional<std::string>(valueIt,
+                                       "file_name",
+                                       report.fileName,
+                                       it.key() + "_SONATA.h5");
             parseOptional(valueIt, "enabled", report.enabled);
 
-            if (report.sections.empty()) {
-                report.sections = "soma";
-            } else {
-                checkValidField<std::string>(report.sections,
-                                             {"soma", "axon", "dend", "apic", "all"});
+            checkValidEnum(report.sections);
+            checkValidEnum(report.scaling);
+            checkValidEnum(report.compartments);
+            /*checkValidField<std::string>(report.sections, {"soma", "axon", "dend", "apic",
+            "all"}); checkValidField<std::string>(report.scaling, {"none", "area"});
+            checkValidField<std::string>(report.compartments, {"center", "all"});*/
+
+            // Validate comma separated strings
+            std::regex expr("^\\w+(\\s*,\\s*\\w+)*$");
+            if (!std::regex_match(report.variableName, expr)) {
+                throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
+                                              report.variableName));
             }
 
-            if (report.scaling.empty()) {
-                report.scaling = "area";
-            } else {
-                checkValidField<std::string>(report.scaling, {"none", "area"});
-            }
-
-            if (report.compartments.empty()) {
-                if (report.sections == "soma") {
-                    report.compartments = "center";
-                } else {
-                    report.compartments = "all";
-                }
-            } else {
-                checkValidField<std::string>(report.compartments, {"center", "all"});
-            }
-
-            if (report.unit.empty()) {
-                report.unit = "mV";
-            }
-
-            if (report.fileName.empty())
-                report.fileName = it.key() + "_SONATA.h5";
-            else {
-                const auto extension = fs::path(report.fileName).extension().string();
-                if (extension.empty() || extension != ".h5")
-                    report.fileName += ".h5";
+            const auto extension = fs::path(report.fileName).extension().string();
+            if (extension.empty() || extension != ".h5") {
+                report.fileName += ".h5";
             }
             report.fileName = toAbsolute(_basePath, report.fileName);
         }

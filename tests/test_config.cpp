@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-
 using namespace bbp::sonata;
 
 bool endswith(const std::string haystack, const std::string needle) {
@@ -311,21 +310,21 @@ TEST_CASE("SimulationConfig") {
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
         CHECK(config.getReport("soma").cells == "Mosaic");
-        CHECK(config.getReport("soma").type == "compartment");
-        CHECK(config.getReport("soma").compartments == "center");
+        CHECK(config.getReport("soma").type == SimulationConfig::Report::Type::compartment);
+        CHECK(config.getReport("soma").compartments == SimulationConfig::Report::Compartments::center);
         CHECK(config.getReport("soma").enabled == true);
         CHECK(config.getReport("compartment").dt == 0.1);
-        CHECK(config.getReport("compartment").sections == "all");
-        CHECK(config.getReport("compartment").compartments == "all");
+        CHECK(config.getReport("compartment").sections == SimulationConfig::Report::Sections::all);
+        CHECK(config.getReport("compartment").compartments == SimulationConfig::Report::Compartments::all);
         CHECK(config.getReport("compartment").enabled == false);
         CHECK(config.getReport("axonal_comp_centers").startTime == 0.);
-        CHECK(config.getReport("axonal_comp_centers").compartments == "center");
-        CHECK(config.getReport("axonal_comp_centers").scaling == "none");
+        CHECK(config.getReport("axonal_comp_centers").compartments == SimulationConfig::Report::Compartments::center);
+        CHECK(config.getReport("axonal_comp_centers").scaling == SimulationConfig::Report::Scaling::none);
         const auto axonalFilePath = fs::absolute(basePath / fs::path("axon_centers.h5"));
         CHECK(config.getReport("axonal_comp_centers").fileName ==
               axonalFilePath.lexically_normal());
         CHECK(config.getReport("cell_imembrane").endTime == 500.);
-        CHECK(config.getReport("cell_imembrane").variableName == "i_membrane");
+        CHECK(config.getReport("cell_imembrane").variableName == "i_membrane, IClamp");
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getJSON()));
         CHECK(config.getBasePath() == basePath.lexically_normal());
@@ -425,6 +424,25 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
+                   "type": "typestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": "variablestring,",
                    "type": "typestring",
                    "dt": 0.05,
                    "start_time": 0,

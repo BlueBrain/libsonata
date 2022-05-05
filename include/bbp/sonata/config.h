@@ -21,6 +21,7 @@
 #include <bbp/sonata/nodes.h>
 
 #include "common.h"
+#include <nlohmann/json.hpp>
 
 
 namespace bbp {
@@ -203,19 +204,28 @@ class SONATA_API SimulationConfig
      * List of report parameters collected during the simulation
      */
     struct Report {
+        enum class Sections { invalid = -1, soma, axon, dend, apic, all };
+        enum class Type { invalid = -1, compartment, summation, synapse };
+        enum class Scaling { invalid = -1, none, area };
+        enum Compartments { invalid = -1, center, all };
+
         /// Node sets on which to report
         std::string cells;
         /// Sections on which to report.
         /// Possible values: "soma"(default), "axon", "dend", "apic", "all"
-        std::string sections;
+        Sections sections;
+        // std::string sections;
         /// Report type. Possible values: "compartment", "summation", "synapse"
-        std::string type;
+        Type type;
+        // std::string type;
         /// For summation type, specify the handling of density values.
         /// Possible values: "none", "area"(default)
-        std::string scaling;
+        Scaling scaling;
+        // std::string scaling;
         /// For compartment type, select compartments to report.
         /// Possible values: "center"(default for sections: soma), "all"(default for other sections)
-        std::string compartments;
+        Compartments compartments;
+        // std::string compartments;
         /// The simulation variable to access
         std::string variableName;
         /// Descriptive text of the unit recorded. Not validated for correctness
