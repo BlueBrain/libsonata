@@ -10,6 +10,7 @@
  *************************************************************************/
 
 #include <bbp/sonata/config.h>
+#include <bbp/sonata/optional.hpp>
 
 #include <algorithm>  // transform
 #include <cassert>
@@ -514,11 +515,17 @@ class SimulationConfig::Parser
         buf = element->template get<Type>();
     }
 
-    template <typename Iterator, typename Type>
-    void parseOptional(const Iterator& it, const char* name, Type& buf) const {
+    template <typename Type, typename Iterator>
+    void parseOptional(const Iterator& it,
+                       const char* name,
+                       Type& buf,
+                       nonstd::optional<Type> default_value = nonstd::nullopt) const {
         const auto element = it.find(name);
-        if (element != it.end())
+        if (element != it.end()) {
             buf = element->template get<Type>();
+        } else if (default_value != nonstd::nullopt) {
+            buf = default_value.value();
+        }
     }
 
     SimulationConfig::Run parseRun() const {
@@ -560,51 +567,39 @@ class SimulationConfig::Parser
             auto& valueIt = it.value();
             const auto debugStr = fmt::format("report {}", it.key());
             parseMandatory(valueIt, "cells", debugStr, report.cells);
-            parseOptional(valueIt, "sections", report.sections);
+            parseOptional<std::string>(valueIt, "sections", report.sections, "soma");
             parseMandatory(valueIt, "type", debugStr, report.type);
-            parseOptional(valueIt, "scaling", report.scaling);
-            parseOptional(valueIt, "compartments", report.compartments);
+            parseOptional<std::string>(valueIt, "scaling", report.scaling, "area");
+            if (report.sections == "soma") {
+                parseOptional<std::string>(valueIt, "compartments", report.compartments, "center");
+            } else {
+                parseOptional<std::string>(valueIt, "compartments", report.compartments, "all");
+            }
             parseMandatory(valueIt, "variable_name", debugStr, report.variableName);
-            parseOptional(valueIt, "unit", report.unit);
+            parseOptional<std::string>(valueIt, "unit", report.unit, "mV");
             parseMandatory(valueIt, "dt", debugStr, report.dt);
             parseMandatory(valueIt, "start_time", debugStr, report.startTime);
             parseMandatory(valueIt, "end_time", debugStr, report.endTime);
-            parseOptional(valueIt, "file_name", report.fileName);
+            parseOptional<std::string>(valueIt,
+                                       "file_name",
+                                       report.fileName,
+                                       it.key() + "_SONATA.h5");
             parseOptional(valueIt, "enabled", report.enabled);
 
-            if (report.sections.empty()) {
-                report.sections = "soma";
-            } else {
-                checkValidField<std::string>(report.sections,
-                                             {"soma", "axon", "dend", "apic", "all"});
+            checkValidField<std::string>(report.sections, {"soma", "axon", "dend", "apic", "all"});
+            checkValidField<std::string>(report.scaling, {"none", "area"});
+            checkValidField<std::string>(report.compartments, {"center", "all"});
+
+            // Validate comma separated strings
+            std::regex expr("^\\w+(\\s*,\\s*\\w+)*$");
+            if (!std::regex_match(report.variableName, expr)) {
+                throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
+                                              report.variableName));
             }
 
-            if (report.scaling.empty()) {
-                report.scaling = "area";
-            } else {
-                checkValidField<std::string>(report.scaling, {"none", "area"});
-            }
-
-            if (report.compartments.empty()) {
-                if (report.sections == "soma") {
-                    report.compartments = "center";
-                } else {
-                    report.compartments = "all";
-                }
-            } else {
-                checkValidField<std::string>(report.compartments, {"center", "all"});
-            }
-
-            if (report.unit.empty()) {
-                report.unit = "mV";
-            }
-
-            if (report.fileName.empty())
-                report.fileName = it.key() + "_SONATA.h5";
-            else {
-                const auto extension = fs::path(report.fileName).extension().string();
-                if (extension.empty() || extension != ".h5")
-                    report.fileName += ".h5";
+            const auto extension = fs::path(report.fileName).extension().string();
+            if (extension.empty() || extension != ".h5") {
+                report.fileName += ".h5";
             }
             report.fileName = toAbsolute(_basePath, report.fileName);
         }

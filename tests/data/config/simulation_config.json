@@ -56,7 +56,7 @@
              "cells": "Column",
              "sections": "soma",
              "type": "summation",
-             "variable_name": "i_membrane",
+             "variable_name": "i_membrane, IClamp",
              "unit": "nA",
              "dt": 0.05,
              "start_time": 0,

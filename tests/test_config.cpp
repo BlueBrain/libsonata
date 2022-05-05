@@ -325,7 +325,8 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getReport("axonal_comp_centers").fileName ==
               axonalFilePath.lexically_normal());
         CHECK(config.getReport("cell_imembrane").endTime == 500.);
-        CHECK(config.getReport("cell_imembrane").variableName == "i_membrane");
+        CHECK(config.getReport("cell_imembrane").scaling == "area");
+        CHECK(config.getReport("cell_imembrane").variableName == "i_membrane, IClamp");
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getJSON()));
         CHECK(config.getBasePath() == basePath.lexically_normal());
@@ -425,6 +426,25 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
+                   "type": "typestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": "variablestring,",
                    "type": "typestring",
                    "dt": 0.05,
                    "start_time": 0,
