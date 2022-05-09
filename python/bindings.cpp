@@ -537,8 +537,8 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::Output::spikesFile,
                       "Spike report filename");
 
-    py::class_<SimulationConfig::Report>(m, "Report", "List of parameters of a report")
-        .def_readonly("cells", &SimulationConfig::Report::cells, "Node sets on which to report")
+    py::class_<SimulationConfig::Report> report(m, "Report", "List of parameters of a report");
+    report.def_readonly("cells", &SimulationConfig::Report::cells, "Node sets on which to report")
         .def_readonly("sections",
                       &SimulationConfig::Report::sections,
                       "Sections on which to report. "
@@ -573,6 +573,26 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("enabled",
                       &SimulationConfig::Report::enabled,
                       "Allows for supressing a report so that is not created");
+
+    py::enum_<SimulationConfig::Report::Sections>(report, "Sections")
+        .value("soma", SimulationConfig::Report::Sections::soma)
+        .value("axon", SimulationConfig::Report::Sections::axon)
+        .value("dend", SimulationConfig::Report::Sections::dend)
+        .value("apic", SimulationConfig::Report::Sections::apic)
+        .value("all", SimulationConfig::Report::Sections::all);
+
+    py::enum_<SimulationConfig::Report::Type>(report, "Type")
+        .value("compartment", SimulationConfig::Report::Type::compartment)
+        .value("summation", SimulationConfig::Report::Type::summation)
+        .value("synapse", SimulationConfig::Report::Type::synapse);
+
+    py::enum_<SimulationConfig::Report::Scaling>(report, "Scaling")
+        .value("none", SimulationConfig::Report::Scaling::none)
+        .value("area", SimulationConfig::Report::Scaling::area);
+
+    py::enum_<SimulationConfig::Report::Compartments>(report, "Compartments")
+        .value("center", SimulationConfig::Report::Compartments::center)
+        .value("all", SimulationConfig::Report::Compartments::all);
 
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())

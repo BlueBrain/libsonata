@@ -206,25 +206,21 @@ class SONATA_API SimulationConfig
         enum class Sections { invalid = -1, soma, axon, dend, apic, all };
         enum class Type { invalid = -1, compartment, summation, synapse };
         enum class Scaling { invalid = -1, none, area };
-        enum Compartments { invalid = -1, center, all };
+        enum class Compartments { invalid = -1, center, all };
 
         /// Node sets on which to report
         std::string cells;
         /// Sections on which to report.
         /// Possible values: "soma"(default), "axon", "dend", "apic", "all"
         Sections sections;
-        // std::string sections;
         /// Report type. Possible values: "compartment", "summation", "synapse"
         Type type;
-        // std::string type;
         /// For summation type, specify the handling of density values.
         /// Possible values: "none", "area"(default)
         Scaling scaling;
-        // std::string scaling;
         /// For compartment type, select compartments to report.
         /// Possible values: "center"(default for sections: soma), "all"(default for other sections)
         Compartments compartments;
-        // std::string compartments;
         /// The simulation variable to access
         std::string variableName;
         /// Descriptive text of the unit recorded. Not validated for correctness
