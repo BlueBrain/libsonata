@@ -789,6 +789,34 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("current_clamp", SimulationConfig::InputBase::InputType::current_clamp)
         .value("voltage_clamp", SimulationConfig::InputBase::InputType::voltage_clamp);
 
+    py::class_<SimulationConfig::ConnectionOverride>(m,
+                                                     "ConnectionOverride",
+                                                     "List of parameters of a connection")
+        .def_readonly("source",
+                      &SimulationConfig::ConnectionOverride::source,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, source))
+        .def_readonly("target",
+                      &SimulationConfig::ConnectionOverride::target,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, target))
+        .def_readonly("weight",
+                      &SimulationConfig::ConnectionOverride::weight,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, weight))
+        .def_readonly("spont_minis",
+                      &SimulationConfig::ConnectionOverride::spontMinis,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, spontMinis))
+        .def_readonly("synapse_configure",
+                      &SimulationConfig::ConnectionOverride::synapseConfigure,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, synapseConfigure))
+        .def_readonly("modoverride",
+                      &SimulationConfig::ConnectionOverride::modoverride,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, modoverride))
+        .def_readonly("synapse_delay_override",
+                      &SimulationConfig::ConnectionOverride::synapseDelayOverride,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, synapseDelayOverride))
+        .def_readonly("delay",
+                      &SimulationConfig::ConnectionOverride::delay,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, delay));
+
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
@@ -802,7 +830,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("list_report_names", &SimulationConfig::listReportNames)
         .def_property_readonly("list_input_names", &SimulationConfig::listInputNames)
         .def("report", &SimulationConfig::getReport, "name"_a)
-        .def("input", &SimulationConfig::getInput, "name"_a);
+        .def("input", &SimulationConfig::getInput, "name"_a)
+        .def("connection_override", &SimulationConfig::getConnectionOverride, "name"_a);
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")

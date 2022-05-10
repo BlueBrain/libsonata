@@ -348,9 +348,9 @@ class SONATA_API SimulationConfig
     };
 
     struct InputNoise: public InputBase {
-        /// The mean value of current to inject (nA)
+        /// The mean value of current to inject (nA), default = None
         nonstd::optional<double> mean{nonstd::nullopt};
-        /// The mean value of current to inject as a percentage of threshold current
+        /// The mean value of current to inject as a percentage of threshold current, default = None
         nonstd::optional<double> meanPercent{nonstd::nullopt};
         /// State var to track whether the value of injected noise current is mean or
         /// mean_percent
@@ -403,6 +403,32 @@ class SONATA_API SimulationConfig
                                   InputRelativeShotNoise>;
 
     using InputMap = std::unordered_map<std::string, Input>;
+
+    /**
+     * List of connection parameters to adjust the synaptic strength or other properties of edges
+     *  between two sets of nodes
+     */
+    struct ConnectionOverride {
+        /// node_set specifying presynaptic nodes
+        std::string source;
+        /// node_set specifying postsynaptic nodes
+        std::string target;
+        /// Scalar to adjust synaptic strength, default = 1.
+        double weight{1.};
+        /// Rate to spontaneously trigger the synapses in this connection_override, default = None
+        nonstd::optional<double> spontMinis{nonstd::nullopt};
+        /// Snippet of hoc code to be executed on the synapses in this connection_override
+        std::string synapseConfigure;
+        /// Synapse helper files to instantiate the synapses in this connection_override
+        std::string modoverride;
+        /// Value to override the synaptic delay time originally set in the edge file (ms),
+        /// default = None.
+        nonstd::optional<double> synapseDelayOverride{nonstd::nullopt};
+        /// Adjustments from weight of this connection_override are applied after the specified
+        /// delay has elapsed in ms, default = 0.
+        double delay{0.};
+    };
+    using ConnectionMap = std::unordered_map<std::string, ConnectionOverride>;
 
     /**
      * Parses a SONATA JSON simulation configuration file.
@@ -479,6 +505,14 @@ class SONATA_API SimulationConfig
      */
     const Input& getInput(const std::string& name) const;
 
+    /**
+     * Returns the given connection parameters
+     *
+     * \throws SonataError if the given connection name does not correspond with any existing
+     *         connection.
+     */
+    const ConnectionOverride& getConnectionOverride(const std::string& name) const;
+
   private:
     // JSON string
     const std::string _jsonContent;
@@ -497,6 +531,8 @@ class SONATA_API SimulationConfig
     std::string _network;
     // List of inputs
     InputMap _inputs;
+    // List of connections
+    ConnectionMap _connections;
 
     class Parser;
     friend class Parser;
