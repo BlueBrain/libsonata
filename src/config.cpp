@@ -631,7 +631,7 @@ class SimulationConfig::Parser
             checkValidEnum(report.compartments);
 
             // Validate comma separated strings
-            std::regex expr(R"(\w+(\s*,\s*\w+)*)");
+            std::regex expr(R"(\w+(?:\s*,\s*\w+)*)");
             if (!std::regex_match(report.variableName, expr)) {
                 throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
                                               report.variableName));

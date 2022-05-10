@@ -541,19 +541,14 @@ PYBIND11_MODULE(_libsonata, m) {
     report.def_readonly("cells", &SimulationConfig::Report::cells, "Node sets on which to report")
         .def_readonly("sections",
                       &SimulationConfig::Report::sections,
-                      "Sections on which to report. "
-                      "Possible values are 'soma', 'axon', 'dend', 'apic', 'all'")
-        .def_readonly("type",
-                      &SimulationConfig::Report::type,
-                      "Report type. Possible values are 'compartment', 'summation', 'synapse")
+                      "Sections on which to report. ")
+        .def_readonly("type", &SimulationConfig::Report::type, "Report type.")
         .def_readonly("scaling",
                       &SimulationConfig::Report::scaling,
-                      "For summation type, specify the handling of density values. "
-                      "Possible values are 'none', 'area'")
+                      "For summation type, specify the handling of density values.")
         .def_readonly("compartments",
                       &SimulationConfig::Report::compartments,
-                      "For compartment type, select compartments to report. "
-                      "Possible values are 'center', 'all'")
+                      "For compartment type, select compartments to report.")
         .def_readonly("variable_name",
                       &SimulationConfig::Report::variableName,
                       "The simulation variable to access")

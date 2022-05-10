@@ -210,16 +210,15 @@ class SONATA_API SimulationConfig
 
         /// Node sets on which to report
         std::string cells;
-        /// Sections on which to report.
-        /// Possible values: "soma"(default), "axon", "dend", "apic", "all"
+        /// Sections on which to report. Default value: "soma"
         Sections sections;
-        /// Report type. Possible values: "compartment", "summation", "synapse"
+        /// Report type.
         Type type;
         /// For summation type, specify the handling of density values.
-        /// Possible values: "none", "area"(default)
+        /// Default value: "area"
         Scaling scaling;
         /// For compartment type, select compartments to report.
-        /// Possible values: "center"(default for sections: soma), "all"(default for other sections)
+        /// Default value: "center"(for sections: soma), "all"(for other sections)
         Compartments compartments;
         /// The simulation variable to access
         std::string variableName;
