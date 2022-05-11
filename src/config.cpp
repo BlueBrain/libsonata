@@ -604,17 +604,13 @@ class SimulationConfig::Parser
                                            "scaling",
                                            report.scaling,
                                            Report::Scaling::area);
-            if (report.sections == Report::Sections::soma) {
-                parseOptional<Report::Compartments>(valueIt,
-                                                    "compartments",
-                                                    report.compartments,
-                                                    Report::Compartments::center);
-            } else {
-                parseOptional<Report::Compartments>(valueIt,
-                                                    "compartments",
-                                                    report.compartments,
-                                                    Report::Compartments::all);
-            }
+            parseOptional<Report::Compartments>(valueIt,
+                                                "compartments",
+                                                report.compartments,
+                                                report.sections == Report::Sections::soma
+                                                    ? Report::Compartments::center
+                                                    : Report::Compartments::all);
+
             parseMandatory(valueIt, "variable_name", debugStr, report.variableName);
             parseOptional<std::string>(valueIt, "unit", report.unit, "mV");
             parseMandatory(valueIt, "dt", debugStr, report.dt);
