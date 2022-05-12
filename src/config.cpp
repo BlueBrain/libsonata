@@ -152,23 +152,9 @@ std::string toAbsolute(const fs::path& base, const fs::path& path) {
 }
 
 template <typename Type>
-bool is_in(const Type& value, const std::initializer_list<Type>& lst) {
-    return (std::find(std::begin(lst), std::end(lst), value) != std::end(lst));
-}
-
-template <typename Type>
-void checkValidField(const Type& field, const std::initializer_list<Type>& possibleValues) {
-    if (!is_in<Type>(field, possibleValues)) {
-        throw SonataError(fmt::format("Field '{}' not supported ('{}') possible",
-                                      field,
-                                      fmt::join(possibleValues, ", ")));
-    }
-}
-
-template <typename Type>
-void checkValidEnum(const Type& field) {
+void checkValidEnum(const std::string& field_name, const Type& field) {
     if (field == static_cast<Type>(-1)) {
-        throw SonataError(fmt::format("Field not supported"));
+        throw SonataError(fmt::format("Field in '{}' not supported", field_name));
     }
 }
 
@@ -622,9 +608,10 @@ class SimulationConfig::Parser
                                        it.key() + "_SONATA.h5");
             parseOptional(valueIt, "enabled", report.enabled);
 
-            checkValidEnum(report.sections);
-            checkValidEnum(report.scaling);
-            checkValidEnum(report.compartments);
+            checkValidEnum("sections", report.sections);
+            checkValidEnum("type", report.type);
+            checkValidEnum("scaling", report.scaling);
+            checkValidEnum("compartments", report.compartments);
 
             // Validate comma separated strings
             std::regex expr(R"(\w+(?:\s*,\s*\w+)*)");

@@ -424,7 +424,7 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
-                   "type": "typestring",
+                   "type": "compartment",
                    "dt": 0.05,
                    "start_time": 0,
                    "end_time": 500
@@ -443,7 +443,7 @@ TEST_CASE("SimulationConfig") {
                 "test": {
                    "cells": "nodesetstring",
                    "variable_name": "variablestring,",
-                   "type": "typestring",
+                   "type": "compartment",
                    "dt": 0.05,
                    "start_time": 0,
                    "end_time": 500
@@ -461,7 +461,7 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
-                   "type": "typestring",
+                   "type": "compartment",
                    "variable_name": "variablestring",
                    "start_time": 0,
                    "end_time": 500
@@ -479,7 +479,7 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
-                   "type": "typestring",
+                   "type": "summation",
                    "variable_name": "variablestring",
                    "dt": 0.05,
                    "end_time": 500
@@ -497,7 +497,7 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
-                   "type": "typestring",
+                   "type": "summation",
                    "variable_name": "variablestring",
                    "dt": 0.05,
                    "start_time": 0
@@ -516,7 +516,26 @@ TEST_CASE("SimulationConfig") {
                 "test": {
                    "cells": "nodesetstring",
                    "sections": "none",
-                   "type": "typestring",
+                   "type": "synapse",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Invalid type in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "type": "soma",
                    "variable_name": "variablestring",
                    "dt": 0.05,
                    "start_time": 0,
@@ -536,7 +555,7 @@ TEST_CASE("SimulationConfig") {
                 "test": {
                    "cells": "nodesetstring",
                    "scaling": "linear",
-                   "type": "typestring",
+                   "type": "compartment",
                    "variable_name": "variablestring",
                    "dt": 0.05,
                    "start_time": 0,
@@ -556,7 +575,7 @@ TEST_CASE("SimulationConfig") {
                 "test": {
                    "cells": "nodesetstring",
                    "compartments": "middle",
-                   "type": "typestring",
+                   "type": "compartment",
                    "variable_name": "variablestring",
                    "dt": 0.05,
                    "start_time": 0,
