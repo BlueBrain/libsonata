@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-
 using namespace bbp::sonata;
 
 bool endswith(const std::string haystack, const std::string needle) {
@@ -311,13 +310,21 @@ TEST_CASE("SimulationConfig") {
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
         CHECK(config.getReport("soma").cells == "Mosaic");
-        CHECK(config.getReport("soma").type == "compartment");
+        CHECK(config.getReport("soma").type == SimulationConfig::Report::Type::compartment);
+        CHECK(config.getReport("soma").compartments == SimulationConfig::Report::Compartments::center);
+        CHECK(config.getReport("soma").enabled == true);
         CHECK(config.getReport("compartment").dt == 0.1);
+        CHECK(config.getReport("compartment").sections == SimulationConfig::Report::Sections::all);
+        CHECK(config.getReport("compartment").compartments == SimulationConfig::Report::Compartments::all);
+        CHECK(config.getReport("compartment").enabled == false);
         CHECK(config.getReport("axonal_comp_centers").startTime == 0.);
+        CHECK(config.getReport("axonal_comp_centers").compartments == SimulationConfig::Report::Compartments::center);
+        CHECK(config.getReport("axonal_comp_centers").scaling == SimulationConfig::Report::Scaling::none);
         const auto axonalFilePath = fs::absolute(basePath / fs::path("axon_centers.h5"));
         CHECK(config.getReport("axonal_comp_centers").fileName ==
               axonalFilePath.lexically_normal());
         CHECK(config.getReport("cell_imembrane").endTime == 500.);
+        CHECK(config.getReport("cell_imembrane").variableName == "i_membrane, IClamp");
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getJSON()));
         CHECK(config.getBasePath() == basePath.lexically_normal());
@@ -408,6 +415,43 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
+        {  // No variable_name in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": "variablestring,",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
         {  // No dt in a report object
             auto contents = R"({
               "run": {
@@ -417,7 +461,7 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
-                   "type": "typestring",
+                   "type": "compartment",
                    "variable_name": "variablestring",
                    "start_time": 0,
                    "end_time": 500
@@ -435,7 +479,7 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
-                   "type": "typestring",
+                   "type": "summation",
                    "variable_name": "variablestring",
                    "dt": 0.05,
                    "end_time": 500
@@ -453,10 +497,89 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
-                   "type": "typestring",
+                   "type": "summation",
                    "variable_name": "variablestring",
                    "dt": 0.05,
                    "start_time": 0
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Invalid sections in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "sections": "none",
+                   "type": "synapse",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Invalid type in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "type": "soma",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Invalid scaling in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "scaling": "linear",
+                   "type": "compartment",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Invalid compartments in a report object
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "compartments": "middle",
+                   "type": "compartment",
+                   "variable_name": "variablestring",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
                 }
               }
             })";

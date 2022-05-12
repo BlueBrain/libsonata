@@ -203,10 +203,27 @@ class SONATA_API SimulationConfig
      * List of report parameters collected during the simulation
      */
     struct Report {
+        enum class Sections { invalid = -1, soma, axon, dend, apic, all };
+        enum class Type { invalid = -1, compartment, summation, synapse };
+        enum class Scaling { invalid = -1, none, area };
+        enum class Compartments { invalid = -1, center, all };
+
         /// Node sets on which to report
         std::string cells;
-        /// Report type. Possible values: "compartment", "summation", "synapse"
-        std::string type;
+        /// Sections on which to report. Default value: "soma"
+        Sections sections;
+        /// Report type.
+        Type type;
+        /// For summation type, specify the handling of density values.
+        /// Default value: "area"
+        Scaling scaling;
+        /// For compartment type, select compartments to report.
+        /// Default value: "center"(for sections: soma), "all"(for other sections)
+        Compartments compartments;
+        /// The simulation variable to access
+        std::string variableName;
+        /// Descriptive text of the unit recorded. Not validated for correctness
+        std::string unit;
         /// Interval between reporting steps in milliseconds
         double dt{};
         /// Time to step reporting in milliseconds
@@ -215,6 +232,8 @@ class SONATA_API SimulationConfig
         double endTime{};
         /// Report filename. Default is "<report name>_SONATA.h5"
         std::string fileName;
+        /// Allows for supressing a report so that is not created. Default is true
+        bool enabled = true;
     };
 
     /**
