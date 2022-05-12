@@ -240,13 +240,30 @@ class SONATA_API SimulationConfig
     using ReportMap = std::unordered_map<std::string, Report>;
 
     struct Input {
-        /// Type of stimulus, possible values: “linear”, “relative_linear”, “pulse”,
-        /// “subthreshold”, “hyperpolarizing”, “synapse_replay”, “seclamp”, “noise”,
-        /// “shot_noise”, “relative_shot_noise”
-        std::string module;
-        /// Type of input, possbile values: “spikes”, ”extracellular_stimulation”,
-        /// ”current_clamp”, ”voltage_clamp”
-        std::string input_type;
+        enum class Module {
+            invalid = -1,
+            linear,
+            relative_linear,
+            pulse,
+            subthreshold,
+            hyperpolarizing,
+            synapse_replay,
+            seclamp,
+            noise,
+            shot_noise,
+            relative_shot_noise
+        };
+        enum class InputType {
+            invalid = -1,
+            spikes,
+            extracellular_stimulation,
+            current_clamp,
+            voltage_clamp
+        };
+        /// Type of stimulus
+        Module module;
+        /// Type of input
+        InputType input_type;
         /// Time when input is activated (ms)
         double delay{};
         /// Time duration in ms for how long input is activated

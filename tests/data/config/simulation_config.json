@@ -42,10 +42,19 @@
             "duration": 80,
             "node_set": "Mosaic"
         },
-        "ex_noise": {
+        "ex_noise_meanpercent": {
             "input_type": "current_clamp",
             "module": "noise",
             "mean_percent": 0.01,
+            "variance": 0.001,
+            "delay": 0.0,
+            "duration": 5000.0,
+            "node_set": "Rt_RC"
+        },
+        "ex_noise_mean": {
+            "input_type": "current_clamp",
+            "module": "noise",
+            "mean": 0,
             "variance": 0.001,
             "delay": 0.0,
             "duration": 5000.0,

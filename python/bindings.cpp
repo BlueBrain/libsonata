@@ -586,8 +586,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("center", SimulationConfig::Report::Compartments::center)
         .value("all", SimulationConfig::Report::Compartments::all);
 
-    py::class_<SimulationConfig::Input>(m, "Input", "List of parameters of an input")
-        .def_readonly("module", &SimulationConfig::Input::module, "Type of stimulus")
+    py::class_<SimulationConfig::Input> input(m, "Input", "List of parameters of an input");
+    input.def_readonly("module", &SimulationConfig::Input::module, "Type of stimulus")
         .def_readonly("input_type", &SimulationConfig::Input::input_type, "Type of input")
         .def_readonly("delay", &SimulationConfig::Input::delay, "Time when input is activated (ms)")
         .def_readonly("duration",
@@ -626,15 +626,24 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("voltage",
                       &SimulationConfig::Input::voltage,
                       "The membrane voltage the targeted cells should be held at (mV)")
-        .def_readonly("mean",
-                      &SimulationConfig::Input::mean,
-                      "The mean value of current to inject (nA)")
-        .def_readonly("mean_percent",
-                      &SimulationConfig::Input::mean_percent,
-                      "The mean value of current to inject as a percentage of threshold current")
-        .def_readonly("noise_current_mode",
-                      &SimulationConfig::Input::noise_current_mode,
-                      "The mode of the noise current injection, mean, mean_percent or \'\'")
+        .def_property_readonly(
+            "mean",
+            [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
+                if (input.noise_current_mode == "mean")
+                    return input.mean;
+                else
+                    return nonstd::nullopt;
+            },
+            "The mean value of current to inject (nA)")
+        .def_property_readonly(
+            "mean_percent",
+            [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
+                if (input.noise_current_mode == "mean_percent")
+                    return input.mean_percent;
+                else
+                    return nonstd::nullopt;
+            },
+            "The mean value of current to inject as a percentage of threshold current")
         .def_readonly("variance",
                       &SimulationConfig::Input::variance,
                       "The variance around the mean of current to inject in normal distribution")
@@ -661,6 +670,24 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::Input::random_seed,
                       "Override the random seed to introduce correlations between cells");
+    py::enum_<SimulationConfig::Input::Module>(input, "Module")
+        .value("linear", SimulationConfig::Input::Module::linear)
+        .value("relative_linear", SimulationConfig::Input::Module::relative_linear)
+        .value("pulse", SimulationConfig::Input::Module::pulse)
+        .value("subthreshold", SimulationConfig::Input::Module::subthreshold)
+        .value("hyperpolarizing", SimulationConfig::Input::Module::hyperpolarizing)
+        .value("synapse_replay", SimulationConfig::Input::Module::synapse_replay)
+        .value("seclamp", SimulationConfig::Input::Module::seclamp)
+        .value("noise", SimulationConfig::Input::Module::noise)
+        .value("shot_noise", SimulationConfig::Input::Module::shot_noise)
+        .value("relative_shot_noise", SimulationConfig::Input::Module::relative_shot_noise);
+
+    py::enum_<SimulationConfig::Input::InputType>(input, "InputType")
+        .value("spikes", SimulationConfig::Input::InputType::spikes)
+        .value("extracellular_stimulation",
+               SimulationConfig::Input::InputType::extracellular_stimulation)
+        .value("current_clamp", SimulationConfig::Input::InputType::current_clamp)
+        .value("voltage_clamp", SimulationConfig::Input::InputType::voltage_clamp);
 
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())

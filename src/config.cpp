@@ -53,6 +53,28 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Compartments,
                               {SimulationConfig::Report::Compartments::center, "center"},
                               {SimulationConfig::Report::Compartments::all, "all"}})
 
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Input::Module,
+                             {{SimulationConfig::Input::Module::invalid, nullptr},
+                              {SimulationConfig::Input::Module::linear, "linear"},
+                              {SimulationConfig::Input::Module::relative_linear, "relative_linear"},
+                              {SimulationConfig::Input::Module::pulse, "pulse"},
+                              {SimulationConfig::Input::Module::subthreshold, "subthreshold"},
+                              {SimulationConfig::Input::Module::hyperpolarizing, "hyperpolarizing"},
+                              {SimulationConfig::Input::Module::synapse_replay, "synapse_replay"},
+                              {SimulationConfig::Input::Module::seclamp, "seclamp"},
+                              {SimulationConfig::Input::Module::noise, "noise"},
+                              {SimulationConfig::Input::Module::shot_noise, "shot_noise"},
+                              {SimulationConfig::Input::Module::relative_shot_noise,
+                               "relative_shot_noise"}})
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Input::InputType,
+                             {{SimulationConfig::Input::InputType::invalid, nullptr},
+                              {SimulationConfig::Input::InputType::spikes, "spikes"},
+                              {SimulationConfig::Input::InputType::extracellular_stimulation,
+                               "extracellular_stimulation"},
+                              {SimulationConfig::Input::InputType::current_clamp, "current_clamp"},
+                              {SimulationConfig::Input::InputType::voltage_clamp, "voltage_clamp"}})
+
 namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
@@ -653,29 +675,34 @@ class SimulationConfig::Parser
             parseMandatory(valueIt, "delay", debugStr, input.delay);
             parseMandatory(valueIt, "duration", debugStr, input.duration);
             parseMandatory(valueIt, "node_set", debugStr, input.node_set);
-
-            const auto moduledebugStr = fmt::format("Unknown module {} for input_type {} in {}",
-                                                    input.module,
-                                                    input.input_type,
+            checkValidEnum("module", input.module);
+            checkValidEnum("input_type", input.input_type);
+            const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
                                                     debugStr);
-            if (input.input_type == "current_clamp") {
-                if (input.module == "linear") {
+            switch (input.input_type) {
+            case Input::InputType::current_clamp:
+                switch (input.module) {
+                case Input::Module::linear:
                     parseMandatory(valueIt, "amp_start", debugStr, input.amp_start);
                     parseOptional<double>(valueIt, "amp_end", input.amp_end, input.amp_start);
-                } else if (input.module == "relative_linear") {
+                    break;
+                case Input::Module::relative_linear:
                     parseMandatory(valueIt, "percent_start", debugStr, input.percent_start);
                     parseOptional<double>(valueIt,
                                           "percent_end",
                                           input.percent_end,
                                           input.percent_start);
-                } else if (input.module == "pulse") {
+                    break;
+                case Input::Module::pulse:
                     parseMandatory(valueIt, "amp_start", debugStr, input.amp_start);
                     parseMandatory(valueIt, "width", debugStr, input.width);
                     parseMandatory(valueIt, "frequency", debugStr, input.frequency);
                     parseOptional<double>(valueIt, "amp_end", input.amp_end, input.amp_start);
-                } else if (input.module == "subthreshold") {
+                    break;
+                case Input::Module::subthreshold:
                     parseMandatory(valueIt, "percent_less", debugStr, input.percent_less);
-                } else if (input.module == "noise") {
+                    break;
+                case Input::Module::noise: {
                     const auto has_mean = valueIt.find("mean") != valueIt.end();
                     const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
                     if (has_mean && has_meanpercent) {
@@ -690,15 +717,21 @@ class SimulationConfig::Parser
                     parseOptional(valueIt, "mean", input.mean);
                     parseOptional(valueIt, "mean_percent", input.mean_percent);
                     parseOptional(valueIt, "variance", input.variance);
-                } else if (input.module == "shot_noise") {
+                    break;
+                }
+                case Input::Module::shot_noise:
                     parseMandatory(valueIt, "rise_time", debugStr, input.rise_time);
                     parseMandatory(valueIt, "decay_time", debugStr, input.decay_time);
-                    parseMandatory(valueIt, "random_seed", debugStr, input.random_seed);
+                    parseOptional<int>(valueIt,
+                                       "random_seed",
+                                       input.random_seed,
+                                       parseRun().random_seed);
                     parseOptional<double>(valueIt, "dt", input.dt, 0.25);
                     parseMandatory(valueIt, "rate", debugStr, input.rate);
                     parseMandatory(valueIt, "amp_mean", debugStr, input.amp_mean);
                     parseMandatory(valueIt, "amp_var", debugStr, input.amp_var);
-                } else if (input.module == "relative_shot_noise") {
+                    break;
+                case Input::Module::relative_shot_noise:
                     parseMandatory(valueIt, "rise_time", debugStr, input.rise_time);
                     parseMandatory(valueIt, "decay_time", debugStr, input.decay_time);
                     parseOptional<int>(valueIt,
@@ -709,26 +742,33 @@ class SimulationConfig::Parser
                     parseMandatory(valueIt, "amp_cv", debugStr, input.amp_cv);
                     parseMandatory(valueIt, "mean_percent", debugStr, input.mean_percent);
                     parseMandatory(valueIt, "sd_percent", debugStr, input.sd_percent);
-                } else if (input.module != "hyperpolarizing") {
+                    break;
+                case Input::Module::hyperpolarizing:
+                    break;
+                default:
                     throw SonataError(moduledebugStr);
                 }
-            } else if (input.input_type == "spikes") {
-                if (input.module == "synapse_replay") {
+                break;
+            case Input::InputType::spikes:
+                if (input.module == SimulationConfig::Input::Module::synapse_replay) {
                     parseMandatory(valueIt, "spike_file", debugStr, input.spike_file);
                     input.spike_file = toAbsolute(_basePath, input.spike_file);
                     parseOptional(valueIt, "source", input.source);
                 } else {
                     throw SonataError(moduledebugStr);
                 }
-            } else if (input.input_type == "voltage_clamp") {
-                if (input.module == "seclamp") {
+                break;
+            case Input::InputType::voltage_clamp:
+                if (input.module == Input::Module::seclamp) {
                     parseMandatory(valueIt, "voltage", debugStr, input.voltage);
                 } else {
                     throw SonataError(moduledebugStr);
                 }
-            } else {
-                throw SonataError(
-                    fmt::format("Unknown input_type {} in {}", input.input_type, debugStr));
+                break;
+            case Input::InputType::extracellular_stimulation:
+                break;
+            default:
+                throw SonataError(fmt::format("Unknown input_type in {}", debugStr));
             }
         }
 

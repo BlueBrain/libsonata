@@ -333,9 +333,9 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
 
-        CHECK(config.getInput("ex_linear").input_type == "current_clamp");
-        CHECK(config.getInput("ex_linear").module == "linear");
-        CHECK(config.getInput("ex_linear").input_type == "current_clamp");
+        CHECK(config.getInput("ex_linear").input_type ==
+              SimulationConfig::Input::InputType::current_clamp);
+        CHECK(config.getInput("ex_linear").module == SimulationConfig::Input::Module::linear);
         CHECK(config.getInput("ex_linear").amp_start == 0.15);
         CHECK(config.getInput("ex_linear").amp_end == 0.15);
         CHECK(config.getInput("ex_linear").delay == 0);
@@ -343,8 +343,10 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getInput("ex_linear").node_set == "Column");
         CHECK(config.getInput("ex_rel_linear").percent_start == 80);
         CHECK(config.getInput("ex_rel_linear").percent_end == 20);
-        CHECK(config.getInput("ex_noise").noise_current_mode == "mean_percent");
-        CHECK(config.getInput("ex_noise").mean_percent == 0.01);
+        CHECK(config.getInput("ex_noise_meanpercent").noise_current_mode == "mean_percent");
+        CHECK(config.getInput("ex_noise_meanpercent").mean_percent == 0.01);
+        CHECK(config.getInput("ex_noise_mean").noise_current_mode == "mean");
+        CHECK(config.getInput("ex_noise_mean").mean == 0);
         CHECK(config.getInput("ex_rel_shotnoise").random_seed == config.getRun().random_seed);
         CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
         CHECK(config.getInput("ex_replay").spike_file ==

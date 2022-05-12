@@ -613,9 +613,8 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.network,
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
 
-        self.assertEqual(self.config.input('ex_linear').input_type, 'current_clamp')
-        self.assertEqual(self.config.input('ex_linear').module, 'linear')
-        self.assertEqual(self.config.input('ex_linear').input_type, 'current_clamp')
+        self.assertEqual(self.config.input('ex_linear').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_linear').module.name, 'linear')
         self.assertEqual(self.config.input('ex_linear').amp_start, 0.15)
         self.assertEqual(self.config.input('ex_linear').amp_end, 0.15)
         self.assertEqual(self.config.input('ex_linear').delay, 0)
@@ -625,9 +624,10 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_rel_linear').percent_end, 20)
         self.assertEqual(self.config.input('ex_pulse').width, 1)
         self.assertEqual(self.config.input('ex_pulse').frequency, 80)
-        noise_current_mode = self.config.input('ex_noise').noise_current_mode
-        self.assertEqual(noise_current_mode, "mean_percent")
-        self.assertEqual(getattr(self.config.input('ex_noise'), noise_current_mode), 0.01)
+        self.assertEqual(self.config.input('ex_noise_meanpercent').mean_percent, 0.01)
+        self.assertEqual(self.config.input('ex_noise_meanpercent').mean, None)
+        self.assertEqual(self.config.input('ex_noise_mean').mean, 0)
+        self.assertEqual(self.config.input('ex_noise_mean').mean_percent, None)
         self.assertEqual(self.config.input('ex_rel_shotnoise').random_seed, self.config.run.random_seed)
         self.assertEqual(self.config.input('ex_rel_shotnoise').dt, 0.25)
         self.assertEqual(self.config.input('ex_replay').spike_file,
