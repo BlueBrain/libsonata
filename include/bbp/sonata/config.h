@@ -235,6 +235,7 @@ class SONATA_API SimulationConfig
         /// Allows for supressing a report so that is not created. Default is true
         bool enabled = true;
     };
+    using ReportMap = std::unordered_map<std::string, Report>;
 
     /**
      * Parses a SONATA JSON simulation configuration file.
@@ -297,7 +298,7 @@ class SONATA_API SimulationConfig
     // Output section
     Output _output;
     // List of reports
-    std::unordered_map<std::string, Report> _reports;
+    ReportMap _reports;
     // Path of circuit config file for the simulation
     std::string _network;
 
