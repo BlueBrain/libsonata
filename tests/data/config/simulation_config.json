@@ -12,7 +12,12 @@
     },
     "output": {
          "output_dir": "$OUTPUT_DIR/output",
-         "spikes_file": "out.h5"
+         "spikes_file": "out.h5",
+         "spikes_sort_order": "by_id"
+    },
+    "conditions": {
+     "celsius": 35.0,
+     "synapses_init_deleted": false
     },
     "inputs": {
         "ex_linear": {

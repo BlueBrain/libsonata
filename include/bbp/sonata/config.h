@@ -197,10 +197,35 @@ class SONATA_API SimulationConfig
      * Parameters to override simulator output for spike reports
      */
     struct Output {
+        enum class SpikesSortOrder { invalid = -1, none, by_id, by_time };
+
         /// Spike report file output directory. Default is "output"
         std::string outputDir;
+        /// Filename where console output is written. Default is STDOUT.
+        std::string logFile;
         /// Spike report file name. Default is "out.h5"
         std::string spikesFile;
+        /// The sorting order of the spike report. Default is "by_time"
+        SpikesSortOrder sortOrder;
+    };
+    /**
+     * Parameters defining global experimental conditions.
+     */
+    struct Conditions {
+        /// Temperature of experiment. Default is 34.0
+        float celsius;
+        /// Initial membrane voltage in mV. Default is -80
+        float vInit;
+        /// Synapse at start of simulation are in deleted state. Default is false
+        bool synapsesInitDepleted;
+        /// Extracellular calcium concentration. If not specified, U is set directly as read from
+        /// edges file.
+        float extracellularCalcium;
+        /// Limit spontaneous release to single vesicle when true. Default is false
+        bool minisSingleVesicle;
+        /// Enable legacy behavior to randomize the GABA_A rise time in the helper functions.
+        /// Default is false
+        bool randomizeGabaRiseTime;
     };
     /**
      * List of report parameters collected during the simulation
@@ -359,6 +384,11 @@ class SONATA_API SimulationConfig
     const Output& getOutput() const noexcept;
 
     /**
+     * Returns the Conditions section of the simulation configuration.
+     */
+    const Conditions& getConditions() const noexcept;
+
+    /**
      * Returns the given report parameters.
      *
      * \throws SonataError if the given report name does not correspond with any existing
@@ -382,6 +412,8 @@ class SONATA_API SimulationConfig
     Output _output;
     // List of reports
     ReportMap _reports;
+    // Conditions section
+    Conditions _conditions;
     // Path of circuit config file for the simulation
     std::string _network;
     // List of inputs

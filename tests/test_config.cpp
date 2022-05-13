@@ -307,6 +307,16 @@ TEST_CASE("SimulationConfig") {
         const auto outputPath = fs::absolute(basePath / fs::path("output"));
         CHECK(config.getOutput().outputDir == outputPath.lexically_normal());
         CHECK(config.getOutput().spikesFile == "out.h5");
+        CHECK(config.getOutput().logFile.empty());
+        CHECK(config.getOutput().sortOrder == SimulationConfig::Output::SpikesSortOrder::by_id);
+
+        CHECK_NOTHROW(config.getConditions());
+        CHECK(config.getConditions().celsius == 35.0f);
+        CHECK(config.getConditions().vInit == -80);
+        CHECK(config.getConditions().synapsesInitDepleted == false);
+        CHECK(config.getConditions().extracellularCalcium == std::numeric_limits<float>::lowest());
+        CHECK(config.getConditions().minisSingleVesicle == false);
+        CHECK(config.getConditions().randomizeGabaRiseTime == false);
 
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
@@ -758,6 +768,20 @@ TEST_CASE("SimulationConfig") {
                    "node_set":"Column",
                    "variance": 0.001
                 }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Invalid spikes ordering in the output section
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "output": {
+                "output_dir": "$OUTPUT_DIR/output",
+                "spikes_file": "out.h5",
+                "spikes_sort_order": "invalid-order"
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
