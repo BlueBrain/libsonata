@@ -549,12 +549,9 @@ class SimulationConfig::Parser
         const auto element = it.find(name);
         if (element != it.end()) {
             buf = element->get<Type>();
+            raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
         } else if (default_value != nonstd::nullopt) {
             buf = default_value.value();
-        }
-
-        if (element != it.end()) {
-            raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
         }
     }
 
