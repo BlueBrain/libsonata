@@ -151,13 +151,6 @@ std::string toAbsolute(const fs::path& base, const fs::path& path) {
     return absolute.lexically_normal().string();
 }
 
-template <typename Type>
-void checkValidEnum(const std::string& field_name, const Type& field) {
-    if (field == static_cast<Type>(-1)) {
-        throw SonataError(fmt::format("Field in '{}' not supported", field_name));
-    }
-}
-
 }  // namespace
 
 class CircuitConfig::Parser
@@ -165,7 +158,6 @@ class CircuitConfig::Parser
   public:
     using Subnetworks = std::vector<CircuitConfig::SubnetworkFiles>;
     using PopulationOverrides = std::unordered_map<std::string, PopulationProperties>;
-
 
     Parser(const std::string& contents, const std::string& basePath)
         : _basePath(fs::absolute(fs::path(basePath))) {
@@ -518,25 +510,46 @@ class SimulationConfig::Parser
         _json = expandVariables(rawJson, vars);
     }
 
-    template <typename Type, typename Iterator, typename SectionName>
-    void parseMandatory(const Iterator& it,
-                        const char* name,
-                        const SectionName& sn,
-                        Type& buf) const {
-        const auto element = it.find(name);
-        if (element == it.end())
-            throw SonataError(fmt::format("Could not find '{}' in '{}'", name, sn));
-        buf = element->template get<Type>();
+
+    template <typename Type, typename std::enable_if<std::is_enum<Type>::value>::type* = nullptr>
+    void raiseIfInvalidEnum(const char* name,
+                            const Type& buf,
+                            const std::string& found_value,
+                            std::true_type /* tag */) const {
+        if (buf == Type::invalid) {
+            throw SonataError(fmt::format("Invalid value: '{}' for key '{}'", found_value, name));
+        }
     }
 
-    template <typename Type, typename Iterator>
-    void parseOptional(const Iterator& it,
+    template <typename Type>
+    void raiseIfInvalidEnum(const char* /*unused*/,
+                            const Type& /*unused*/,
+                            const std::string& /*unused*/,
+                            std::false_type /* tag */) const {}
+
+    template <typename Type>
+    void parseMandatory(const nlohmann::json& it,
+                        const char* name,
+                        const std::string& section_name,
+                        Type& buf) const {
+        const auto element = it.find(name);
+        if (element == it.end()) {
+            throw SonataError(fmt::format("Could not find '{}' in '{}'", name, section_name));
+        }
+        buf = element->get<Type>();
+
+        raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
+    }
+
+    template <typename Type>
+    void parseOptional(const nlohmann::json& it,
                        const char* name,
                        Type& buf,
                        nonstd::optional<Type> default_value = nonstd::nullopt) const {
         const auto element = it.find(name);
         if (element != it.end()) {
-            buf = element->template get<Type>();
+            buf = element->get<Type>();
+            raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
         } else if (default_value != nonstd::nullopt) {
             buf = default_value.value();
         }
@@ -544,8 +557,9 @@ class SimulationConfig::Parser
 
     SimulationConfig::Run parseRun() const {
         const auto runIt = _json.find("run");
-        if (runIt == _json.end())
+        if (runIt == _json.end()) {
             throw SonataError("Could not find 'run' section");
+        }
 
         SimulationConfig::Run result{};
         parseMandatory(*runIt, "tstop", "run", result.tstop);
@@ -569,52 +583,38 @@ class SimulationConfig::Parser
         return result;
     }
 
-    std::unordered_map<std::string, SimulationConfig::Report> parseReports() const {
-        std::unordered_map<std::string, SimulationConfig::Report> result;
+    ReportMap parseReports() const {
+        ReportMap result;
 
         const auto reportsIt = _json.find("reports");
-        if (reportsIt == _json.end())
+        if (reportsIt == _json.end()) {
             return result;
+        }
 
         for (auto it = reportsIt->begin(); it != reportsIt->end(); ++it) {
             auto& report = result[it.key()];
-            auto& valueIt = it.value();
-            const auto debugStr = fmt::format("report {}", it.key());
-            parseMandatory(valueIt, "cells", debugStr, report.cells);
-            parseOptional<Report::Sections>(valueIt,
-                                            "sections",
-                                            report.sections,
-                                            Report::Sections::soma);
-            parseMandatory<Report::Type>(valueIt, "type", debugStr, report.type);
-            parseOptional<Report::Scaling>(valueIt,
-                                           "scaling",
-                                           report.scaling,
-                                           Report::Scaling::area);
-            parseOptional<Report::Compartments>(valueIt,
-                                                "compartments",
-                                                report.compartments,
-                                                report.sections == Report::Sections::soma
-                                                    ? Report::Compartments::center
-                                                    : Report::Compartments::all);
+            const auto& valueIt = it.value();
+            const std::string debugStr = "report " + it.key();
 
+            parseMandatory(valueIt, "cells", debugStr, report.cells);
+            parseOptional(valueIt, "sections", report.sections, {Report::Sections::soma});
+            parseMandatory(valueIt, "type", debugStr, report.type);
+            parseOptional(valueIt, "scaling", report.scaling, {Report::Scaling::area});
+            parseOptional(valueIt,
+                          "compartments",
+                          report.compartments,
+                          {report.sections == Report::Sections::soma ? Report::Compartments::center
+                                                                     : Report::Compartments::all});
             parseMandatory(valueIt, "variable_name", debugStr, report.variableName);
-            parseOptional<std::string>(valueIt, "unit", report.unit, "mV");
+            parseOptional(valueIt, "unit", report.unit, {"mV"});
             parseMandatory(valueIt, "dt", debugStr, report.dt);
             parseMandatory(valueIt, "start_time", debugStr, report.startTime);
             parseMandatory(valueIt, "end_time", debugStr, report.endTime);
-            parseOptional<std::string>(valueIt,
-                                       "file_name",
-                                       report.fileName,
-                                       it.key() + "_SONATA.h5");
-            parseOptional(valueIt, "enabled", report.enabled);
-
-            checkValidEnum("sections", report.sections);
-            checkValidEnum("type", report.type);
-            checkValidEnum("scaling", report.scaling);
-            checkValidEnum("compartments", report.compartments);
+            parseOptional(valueIt, "file_name", report.fileName, {it.key() + "_SONATA.h5"});
+            parseOptional(valueIt, "enabled", report.enabled, {true});
 
             // Validate comma separated strings
-            std::regex expr(R"(\w+(?:\s*,\s*\w+)*)");
+            const std::regex expr(R"(\w+(?:\s*,\s*\w+)*)");
             if (!std::regex_match(report.variableName, expr)) {
                 throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
                                               report.variableName));
@@ -630,7 +630,7 @@ class SimulationConfig::Parser
         return result;
     }
 
-    const std::string parseNetwork() const {
+    std::string parseNetwork() const {
         auto val = _json.find("network") != _json.end() ? _json["network"] : "circuit_config.json";
         return toAbsolute(_basePath, val);
     }
@@ -676,9 +676,10 @@ const std::string& SimulationConfig::getNetwork() const noexcept {
 
 const SimulationConfig::Report& SimulationConfig::getReport(const std::string& name) const {
     const auto it = _reports.find(name);
-    if (it == _reports.end())
+    if (it == _reports.end()) {
         throw SonataError(
             fmt::format("The report '{}' is not present in the simulation config file", name));
+    }
 
     return it->second;
 }
