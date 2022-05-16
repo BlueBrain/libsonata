@@ -311,10 +311,10 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getOutput().sortOrder == SimulationConfig::Output::SpikesSortOrder::by_id);
 
         CHECK_NOTHROW(config.getConditions());
-        CHECK(config.getConditions().celsius == 35.0f);
+        CHECK(config.getConditions().celsius == 35.);
         CHECK(config.getConditions().vInit == -80);
         CHECK(config.getConditions().synapsesInitDepleted == false);
-        CHECK(config.getConditions().extracellularCalcium == std::numeric_limits<float>::lowest());
+        CHECK(config.getConditions().extracellularCalcium == std::numeric_limits<double>::lowest());
         CHECK(config.getConditions().minisSingleVesicle == false);
         CHECK(config.getConditions().randomizeGabaRiseTime == false);
 

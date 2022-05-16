@@ -213,14 +213,14 @@ class SONATA_API SimulationConfig
      */
     struct Conditions {
         /// Temperature of experiment. Default is 34.0
-        float celsius;
+        double celsius;
         /// Initial membrane voltage in mV. Default is -80
-        float vInit;
+        double vInit;
         /// Synapse at start of simulation are in deleted state. Default is false
         bool synapsesInitDepleted;
         /// Extracellular calcium concentration. If not specified, U is set directly as read from
         /// edges file.
-        float extracellularCalcium;
+        double extracellularCalcium;
         /// Limit spontaneous release to single vesicle when true. Default is false
         bool minisSingleVesicle;
         /// Enable legacy behavior to randomize the GABA_A rise time in the helper functions.

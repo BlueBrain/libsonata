@@ -562,8 +562,8 @@ PYBIND11_MODULE(_libsonata, m) {
                       "Synapse at start of simulation are in deleted state")
         .def_property_readonly(
             "extracellular_calcium",
-            [](const SimulationConfig::Conditions& conditions) -> nonstd::optional<float> {
-                if (conditions.extracellularCalcium > std::numeric_limits<float>::lowest())
+            [](const SimulationConfig::Conditions& conditions) -> nonstd::optional<double> {
+                if (conditions.extracellularCalcium > std::numeric_limits<double>::lowest())
                     return conditions.extracellularCalcium;
                 else
                     return nonstd::nullopt;

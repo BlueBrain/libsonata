@@ -648,7 +648,7 @@ class SimulationConfig::Parser
         parseOptional(*conditionsIt,
                       "extracellular_calcium",
                       result.extracellularCalcium,
-                      {std::numeric_limits<float>::lowest()});
+                      {std::numeric_limits<double>::lowest()});
         parseOptional(*conditionsIt, "minis_single_vesicle", result.minisSingleVesicle, {false});
         parseOptional(*conditionsIt,
                       "randomize_gaba_rise_time",
