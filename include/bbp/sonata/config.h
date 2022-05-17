@@ -295,8 +295,6 @@ class SONATA_API SimulationConfig
         /// The mean value of current to inject as a percentage of threshold current
         double mean_percent{};
         /// State var to track whether the value of injected noise current is mean or mean_percent
-        std::string noise_current_mode;
-        /// The variance around the mean of current to inject in normal distribution
         double variance{};
         /// The rise time of the bi-exponential shots (ms)
         double rise_time{};

@@ -675,8 +675,6 @@ class SimulationConfig::Parser
             parseMandatory(valueIt, "delay", debugStr, input.delay);
             parseMandatory(valueIt, "duration", debugStr, input.duration);
             parseMandatory(valueIt, "node_set", debugStr, input.node_set);
-            checkValidEnum("module", input.module);
-            checkValidEnum("input_type", input.input_type);
             const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
                                                     debugStr);
             switch (input.input_type) {
@@ -705,17 +703,19 @@ class SimulationConfig::Parser
                 case Input::Module::noise: {
                     const auto has_mean = valueIt.find("mean") != valueIt.end();
                     const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
-                    if (has_mean && has_meanpercent) {
+                    if (has_mean == has_meanpercent) {
                         throw SonataError(
-                            fmt::format("Both mean and mean_percent are found in {}", debugStr));
-                    } else if (!has_mean && !has_meanpercent) {
-                        throw SonataError(
-                            fmt::format("Could not find mean or mean_percent in {}", debugStr));
-                    } else {
-                        input.noise_current_mode = has_mean ? "mean" : "mean_percent";
+                            fmt::format("Either mean or mean_percent should be provided in {}",
+                                        debugStr));
                     }
-                    parseOptional(valueIt, "mean", input.mean);
-                    parseOptional(valueIt, "mean_percent", input.mean_percent);
+                    parseOptional(valueIt,
+                                  "mean",
+                                  input.mean,
+                                  {std::numeric_limits<double>::lowest()});
+                    parseOptional(valueIt,
+                                  "mean_percent",
+                                  input.mean_percent,
+                                  {std::numeric_limits<double>::lowest()});
                     parseOptional(valueIt, "variance", input.variance);
                     break;
                 }

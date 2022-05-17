@@ -629,7 +629,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly(
             "mean",
             [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
-                if (input.noise_current_mode == "mean")
+                if (input.mean > std::numeric_limits<double>::lowest())
                     return input.mean;
                 else
                     return nonstd::nullopt;
@@ -638,7 +638,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly(
             "mean_percent",
             [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
-                if (input.noise_current_mode == "mean_percent")
+                if (input.mean_percent > std::numeric_limits<double>::lowest())
                     return input.mean_percent;
                 else
                     return nonstd::nullopt;
