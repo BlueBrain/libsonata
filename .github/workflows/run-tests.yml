@@ -27,6 +27,12 @@ jobs:
           CXX: ${{ matrix.compiler.CXX }}
         run: |
           ./ci/cpp_test.sh
+      # This step will set up an SSH connection on tmate.io for live debugging.
+      - name: live debug session on failure (manual steps required)
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
+        with:
+            limit-access-to-actor: true
 
   build-linux-python:
     name: Run python tests on ubuntu-18.04
@@ -53,6 +59,13 @@ jobs:
       - name: Build and run unittests
         run: |
             ./ci/python_test.sh
+
+      # This step will set up an SSH connection on tmate.io for live debugging.
+      - name: live debug session on failure (manual steps required)
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
+        with:
+            limit-access-to-actor: true
 
   build-macos:
     name: Run tests on macos
