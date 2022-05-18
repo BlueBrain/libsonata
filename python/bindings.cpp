@@ -132,6 +132,8 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
 #define DOC_SPIKEREADER_POP(x) DOC(bbp, sonata, SpikeReader, Population, x)
 #define DOC_SPIKEREADER(x) DOC(bbp, sonata, SpikeReader, x)
 #define DOC_REPORTREADER_POP(x) DOC(bbp, sonata, ReportReader, Population, x)
+#define DOC_POPULATION_PROPERTIES(x) DOC(bbp, sonata, PopulationProperties, x)
+#define DOC_SIMULATIONCONFIG(x, y) DOC(bbp, sonata, SimulationConfig, x, y)
 
 // Emulating generic lambdas in pre-C++14
 #define DISPATCH_TYPE(dtype, func, ...)                               \
@@ -493,16 +495,16 @@ PYBIND11_MODULE(_libsonata, m) {
     py::class_<PopulationProperties>(m,
                                      "PopulationProperties",
                                      "Stores population-specific network information")
-        .def_readonly("type", &PopulationProperties::type, "Population type")
+        .def_readonly("type", &PopulationProperties::type, DOC_POPULATION_PROPERTIES(type))
         .def_readonly("biophysical_neuron_models_dir",
                       &PopulationProperties::biophysicalNeuronModelsDir,
-                      "Path to the template HOC files defining the E-Mode")
+                      DOC_POPULATION_PROPERTIES(biophysicalNeuronModelsDir))
         .def_readonly("morphologies_dir",
                       &PopulationProperties::morphologiesDir,
-                      "Path to the directory containing the morphologies")
+                      DOC_POPULATION_PROPERTIES(morphologiesDir))
         .def_readonly("alternate_morphology_formats",
                       &PopulationProperties::alternateMorphologyFormats,
-                      "Path to the directory containing the morphologies");
+                      DOC_POPULATION_PROPERTIES(alternateMorphologyFormats));
 
     py::class_<CircuitConfig>(m, "CircuitConfig", "")
         .def(py::init<const std::string&, const std::string&>())
@@ -520,54 +522,49 @@ PYBIND11_MODULE(_libsonata, m) {
     py::class_<SimulationConfig::Run>(m,
                                       "Run",
                                       "Stores parameters defining global simulation settings")
-        .def_readonly("tstop",
-                      &SimulationConfig::Run::tstop,
-                      "Biological simulation end time in milliseconds")
-        .def_readonly("dt",
-                      &SimulationConfig::Run::dt,
-                      "Simulation integration step in milliseconds");
+        .def_readonly("tstop", &SimulationConfig::Run::tstop, DOC_SIMULATIONCONFIG(Run, tstop))
+        .def_readonly("dt", &SimulationConfig::Run::dt, DOC_SIMULATIONCONFIG(Run, dt));
 
-    py::class_<SimulationConfig::Output>(m,
-                                         "Output",
-                                         "Stores overriden parameters of simulation output")
+    py::class_<SimulationConfig::Output>(m, "Output", "Parameters of simulation output")
         .def_readonly("output_dir",
                       &SimulationConfig::Output::outputDir,
-                      "Simulation output directory")
+                      DOC_SIMULATIONCONFIG(Output, outputDir))
         .def_readonly("spikes_file",
                       &SimulationConfig::Output::spikesFile,
-                      "Spike report filename");
+                      DOC_SIMULATIONCONFIG(Output, spikesFile));
 
-    py::class_<SimulationConfig::Report> report(m, "Report", "List of parameters of a report");
-    report.def_readonly("cells", &SimulationConfig::Report::cells, "Node sets on which to report")
+    py::class_<SimulationConfig::Report> report(m, "Report", "Parameters of a report");
+    report
+        .def_readonly("cells",
+                      &SimulationConfig::Report::cells,
+                      DOC_SIMULATIONCONFIG(Report, cells))
         .def_readonly("sections",
                       &SimulationConfig::Report::sections,
-                      "Sections on which to report. ")
-        .def_readonly("type", &SimulationConfig::Report::type, "Report type.")
+                      DOC_SIMULATIONCONFIG(Report, sections))
+        .def_readonly("type", &SimulationConfig::Report::type, DOC_SIMULATIONCONFIG(Report, type))
         .def_readonly("scaling",
                       &SimulationConfig::Report::scaling,
-                      "For summation type, specify the handling of density values.")
+                      DOC_SIMULATIONCONFIG(Report, scaling))
         .def_readonly("compartments",
                       &SimulationConfig::Report::compartments,
-                      "For compartment type, select compartments to report.")
+                      DOC_SIMULATIONCONFIG(Report, compartments))
         .def_readonly("variable_name",
                       &SimulationConfig::Report::variableName,
-                      "The simulation variable to access")
-        .def_readonly("unit",
-                      &SimulationConfig::Report::unit,
-                      "Descriptive text of the unit recorded")
-        .def_readonly("dt",
-                      &SimulationConfig::Report::dt,
-                      "Interval between reporting steps in milliseconds")
+                      DOC_SIMULATIONCONFIG(Report, variableName))
+        .def_readonly("unit", &SimulationConfig::Report::unit, DOC_SIMULATIONCONFIG(Report, unit))
+        .def_readonly("dt", &SimulationConfig::Report::dt, DOC_SIMULATIONCONFIG(Report, dt))
         .def_readonly("start_time",
                       &SimulationConfig::Report::startTime,
-                      "Time to start reporting, in milliseconds")
+                      DOC_SIMULATIONCONFIG(Report, startTime))
         .def_readonly("end_time",
                       &SimulationConfig::Report::endTime,
-                      "Time to stop reporting in milliseconds")
-        .def_readonly("file_name", &SimulationConfig::Report::fileName, "Report file name")
+                      DOC_SIMULATIONCONFIG(Report, endTime))
+        .def_readonly("file_name",
+                      &SimulationConfig::Report::fileName,
+                      DOC_SIMULATIONCONFIG(Report, fileName))
         .def_readonly("enabled",
                       &SimulationConfig::Report::enabled,
-                      "Allows for supressing a report so that is not created");
+                      DOC_SIMULATIONCONFIG(Report, enabled));
 
     py::enum_<SimulationConfig::Report::Sections>(report, "Sections")
         .value("soma", SimulationConfig::Report::Sections::soma)
