@@ -622,6 +622,9 @@ class SimulationConfig::Parser
         SimulationConfig::Output result{};
 
         const auto outputIt = _json.find("output");
+        if (outputIt == _json.end()) {
+            return result;
+        }
         parseOptional(*outputIt, "output_dir", result.outputDir, {"output"});
         parseOptional(*outputIt, "log_file", result.logFile, {""});
         parseOptional(*outputIt, "spikes_file", result.spikesFile, {"out.h5"});
@@ -639,6 +642,9 @@ class SimulationConfig::Parser
         SimulationConfig::Conditions result{};
 
         const auto conditionsIt = _json.find("conditions");
+        if (conditionsIt == _json.end()) {
+            return result;
+        }
         parseOptional(*conditionsIt, "celsius", result.celsius, {34.0});
         parseOptional(*conditionsIt, "v_init", result.vInit, {-80});
         parseOptional(*conditionsIt,
