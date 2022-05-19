@@ -22,5 +22,4 @@ cmake $SONATA_VERSION                                                      \
     -DSONATA_CXX_WARNINGS=ON                                               \
     ../..
 
-make -j
-ctest -VV test
+make -j all test
