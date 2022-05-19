@@ -407,6 +407,18 @@ static const char *__doc_bbp_sonata_ReportReader = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population = R"doc()doc";
 
+static const char *__doc_bbp_sonata_ReportReader_Population_NodeIdElementLayout = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_NodeIdElementLayout_ids = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_NodeIdElementLayout_min_max_blocks = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_NodeIdElementLayout_node_index = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_NodeIdElementLayout_node_offsets = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_NodeIdElementLayout_node_ranges = R"doc()doc";
+
 static const char *__doc_bbp_sonata_ReportReader_Population_Population = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_data_units = R"doc()doc";
@@ -425,7 +437,10 @@ Parameter ``tstop``:
 
 Parameter ``tstride``:
     indicates every how many timesteps we read data.
-    tstride=nonstd::nullopt indicates that all timesteps are read.)doc";
+    tstride=nonstd::nullopt indicates that all timesteps are read.
+
+Parameter ``block_gap_limit``:
+    gap limit between each IO block while fetching data from storage.)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getDataUnits = R"doc(Return the unit of data.)doc";
 
@@ -443,8 +458,21 @@ Parameter ``node_ids``:
     limit the report to the given selection. If nullptr, all nodes in
     the report are used
 
-Parameter ``fn``:
-    lambda applied to all ranges for all node ids)doc";
+Parameter ``block_gap_limit``:
+    gap limit between each IO block while fetching data from storage)doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIdElementLayout =
+R"doc(Return the element IDs for the given selection, alongside the filtered
+node pointers and the range of positions where they fit in the file.
+This latter two are necessary for performance to understand how and
+where to retrieve the data from storage.
+
+Parameter ``node_ids``:
+    limit the report to the given selection. If nullptr, all nodes in
+    the report are used
+
+Parameter ``block_gap_limit``:
+    gap limit between each IO block while fetching data from storage)doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getNodeIds = R"doc(Return all the node ids.)doc";
 
@@ -454,13 +482,15 @@ static const char *__doc_bbp_sonata_ReportReader_Population_getTimeUnits = R"doc
 
 static const char *__doc_bbp_sonata_ReportReader_Population_getTimes = R"doc(Return (tstart, tstop, tstep) of the population)doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_node_ids_from_selection = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_is_node_ids_sorted = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_nodes_ids = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_node_ids = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_nodes_ids_sorted = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_node_index = R"doc()doc";
 
-static const char *__doc_bbp_sonata_ReportReader_Population_nodes_pointers = R"doc()doc";
+static const char *__doc_bbp_sonata_ReportReader_Population_node_offsets = R"doc()doc";
+
+static const char *__doc_bbp_sonata_ReportReader_Population_node_ranges = R"doc()doc";
 
 static const char *__doc_bbp_sonata_ReportReader_Population_pop_group = R"doc()doc";
 
@@ -516,17 +546,73 @@ static const char *__doc_bbp_sonata_SimulationConfig_Parser = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report = R"doc(List of report parameters collected during the simulation)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Compartments = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Compartments_all = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Compartments_center = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Compartments_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Scaling = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Scaling_area = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Scaling_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Scaling_none = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Sections = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Sections_all = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Sections_apic = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Sections_axon = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Sections_dend = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Sections_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Sections_soma = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_compartment = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_summation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_synapse = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Report_cells = R"doc(Node sets on which to report)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Report_compartments =
+R"doc(For compartment type, select compartments to report. Default value:
+"center"(for sections: soma), "all"(for other sections))doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Report_dt = R"doc(Interval between reporting steps in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_enabled = R"doc(Allows for supressing a report so that is not created. Default is true)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_endTime = R"doc(Time to stop reporting in milliseconds)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_fileName = R"doc(Report filename. Default is "<report name>_SONATA.h5")doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Report_scaling =
+R"doc(For summation type, specify the handling of density values. Default
+value: "area")doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_sections = R"doc(Sections on which to report. Default value: "soma")doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Report_startTime = R"doc(Time to step reporting in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc(Report type. Possible values: "compartment", "summation", "synapse")doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc(Report type.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_unit = R"doc(Descriptive text of the unit recorded. Not validated for correctness)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_variableName = R"doc(The simulation variable to access)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defining global simulation settings for spike reports)doc";
 
@@ -556,6 +642,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns
 
 static const char *__doc_bbp_sonata_SimulationConfig_getJSON = R"doc(Returns the JSON content of the simulation config file)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_getNetwork = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_getOutput = R"doc(Returns the Output section of the simulation configuration.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getReport =
@@ -569,6 +657,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_getRun = R"doc(Returns the 
 
 static const char *__doc_bbp_sonata_SimulationConfig_jsonContent = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_network = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_output = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_reports = R"doc()doc";
@@ -579,12 +669,7 @@ static const char *__doc_bbp_sonata_SonataError = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SonataError_SonataError = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SpikeReader =
-R"doc(const SpikeReader file(filename); auto pops =
-file.getPopulationNames(); for (const auto& data:
-file[pops.openPopulation(0).get(Selection{12UL, 34UL, 58UL})) { NodeID
-node_id; double timestamp; std::tie(node_id, timestamp) = data;
-std::cout << "[" << timestamp << "] " << node_id << std::endl; })doc";
+static const char *__doc_bbp_sonata_SpikeReader = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population = R"doc()doc";
 
