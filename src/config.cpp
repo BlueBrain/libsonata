@@ -682,20 +682,17 @@ class SimulationConfig::Parser
                 switch (input.module) {
                 case Input::Module::linear:
                     parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
-                    parseOptional<double>(valueIt, "amp_end", input.ampEnd, input.ampStart);
+                    parseOptional(valueIt, "amp_end", input.ampEnd, {input.ampStart});
                     break;
                 case Input::Module::relative_linear:
                     parseMandatory(valueIt, "percent_start", debugStr, input.percentStart);
-                    parseOptional<double>(valueIt,
-                                          "percent_end",
-                                          input.percentEnd,
-                                          input.percentStart);
+                    parseOptional(valueIt, "percent_end", input.percentEnd, {input.percentStart});
                     break;
                 case Input::Module::pulse:
                     parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
                     parseMandatory(valueIt, "width", debugStr, input.width);
                     parseMandatory(valueIt, "frequency", debugStr, input.frequency);
-                    parseOptional<double>(valueIt, "amp_end", input.ampEnd, input.ampStart);
+                    parseOptional(valueIt, "amp_end", input.ampEnd, {input.ampStart});
                     break;
                 case Input::Module::subthreshold:
                     parseMandatory(valueIt, "percent_less", debugStr, input.percentLess);
@@ -722,11 +719,11 @@ class SimulationConfig::Parser
                 case Input::Module::shot_noise:
                     parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
                     parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
-                    parseOptional<int>(valueIt,
-                                       "random_seed",
-                                       input.randomSeed,
-                                       parseRun().randomSeed);
-                    parseOptional<double>(valueIt, "dt", input.dt, 0.25);
+                    parseOptional(valueIt,
+                                  "random_seed",
+                                  input.randomSeed,
+                                  {parseRun().randomSeed});
+                    parseOptional(valueIt, "dt", input.dt, {0.25});
                     parseMandatory(valueIt, "rate", debugStr, input.rate);
                     parseMandatory(valueIt, "amp_mean", debugStr, input.ampMean);
                     parseMandatory(valueIt, "amp_var", debugStr, input.ampVar);
@@ -734,11 +731,11 @@ class SimulationConfig::Parser
                 case Input::Module::relative_shot_noise:
                     parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
                     parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
-                    parseOptional<int>(valueIt,
-                                       "random_seed",
-                                       input.randomSeed,
-                                       parseRun().randomSeed);
-                    parseOptional<double>(valueIt, "dt", input.dt, 0.25);
+                    parseOptional(valueIt,
+                                  "random_seed",
+                                  input.randomSeed,
+                                  {parseRun().randomSeed});
+                    parseOptional(valueIt, "dt", input.dt, {0.25});
                     parseMandatory(valueIt, "amp_cv", debugStr, input.ampCv);
                     parseMandatory(valueIt, "mean_percent", debugStr, input.meanPercent);
                     parseMandatory(valueIt, "sd_percent", debugStr, input.sdPercent);
