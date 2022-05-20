@@ -174,6 +174,150 @@ std::string toAbsolute(const fs::path& base, const fs::path& path) {
     return absolute.lexically_normal().string();
 }
 
+template <typename Type, typename std::enable_if<std::is_enum<Type>::value>::type* = nullptr>
+void raiseIfInvalidEnum(const char* name,
+                        const Type& buf,
+                        const std::string& found_value,
+                        std::true_type /* tag */) {
+    if (buf == Type::invalid) {
+        throw SonataError(fmt::format("Invalid value: '{}' for key '{}'", found_value, name));
+    }
+}
+
+template <typename Type>
+void raiseIfInvalidEnum(const char* /*unused*/,
+                        const Type& /*unused*/,
+                        const std::string& /*unused*/,
+                        std::false_type /* tag */) {}
+
+template <typename Type>
+void parseMandatory(const nlohmann::json& it,
+                    const char* name,
+                    const std::string& section_name,
+                    Type& buf) {
+    const auto element = it.find(name);
+    if (element == it.end()) {
+        throw SonataError(fmt::format("Could not find '{}' in '{}'", name, section_name));
+    }
+    buf = element->get<Type>();
+
+    raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
+}
+
+template <typename Type>
+void parseOptional(const nlohmann::json& it,
+                   const char* name,
+                   Type& buf,
+                   nonstd::optional<Type> default_value = nonstd::nullopt) {
+    const auto element = it.find(name);
+    if (element != it.end()) {
+        buf = element->get<Type>();
+        raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
+    } else if (default_value != nonstd::nullopt) {
+        buf = default_value.value();
+    }
+}
+
+SimulationConfig::Input::InputParameters parseInputModule(
+    const nlohmann::json& valueIt,
+    const SimulationConfig::Input::Module module,
+    const std::string& basePath,
+    int randomSeed,
+    const std::string& debugStr) {
+    using Input = SimulationConfig::Input;
+
+    const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
+                                            debugStr);
+
+    switch (module) {
+    case Input::Module::linear: {
+        Input::Linear ret;
+        parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
+        parseOptional<double>(valueIt, "amp_end", ret.ampEnd, ret.ampStart);
+        return ret;
+    }
+    case Input::Module::relative_linear: {
+        Input::RelativeLinear ret;
+        parseMandatory(valueIt, "percent_start", debugStr, ret.percentStart);
+        parseOptional<double>(valueIt, "percent_end", ret.percentEnd, ret.percentStart);
+        return ret;
+    }
+    case Input::Module::pulse: {
+        Input::Pulse ret;
+        parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
+        parseMandatory(valueIt, "width", debugStr, ret.width);
+        parseMandatory(valueIt, "frequency", debugStr, ret.frequency);
+        parseOptional<double>(valueIt, "amp_end", ret.ampEnd, ret.ampStart);
+        return ret;
+    }
+    case Input::Module::subthreshold: {
+        Input::Subthreshold ret;
+        parseMandatory(valueIt, "percent_less", debugStr, ret.percentLess);
+        return ret;
+    }
+    case Input::Module::noise: {
+        Input::Noise ret;
+        const auto has_mean = valueIt.find("mean") != valueIt.end();
+        const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
+        if (has_mean == has_meanpercent) {
+            throw SonataError(
+                fmt::format("Either mean or mean_percent should be provided in {}", debugStr));
+        }
+        /* XXX: can't use nlohman for optional
+        parseOptional(valueIt,
+                      "mean",
+                      ret.mean,
+                      {std::numeric_limits<double>::lowest()});
+        parseOptional(valueIt,
+                      "mean_percent",
+                      ret.meanPercent,
+                      {std::numeric_limits<double>::lowest()});
+                      */
+        parseOptional(valueIt, "variance", ret.variance);
+        return ret;
+    }
+    case Input::Module::shot_noise: {
+        Input::ShotNoise ret;
+        parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
+        parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
+        parseOptional<int>(valueIt, "random_seed", ret.randomSeed, randomSeed);
+        parseOptional<double>(valueIt, "dt", ret.dt, 0.25);
+        parseMandatory(valueIt, "rate", debugStr, ret.rate);
+        parseMandatory(valueIt, "amp_mean", debugStr, ret.ampMean);
+        parseMandatory(valueIt, "amp_var", debugStr, ret.ampVar);
+        return ret;
+    }
+    case Input::Module::relative_shot_noise: {
+        Input::RelativeShotNoise ret;
+
+        parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
+        parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
+        parseOptional<int>(valueIt, "random_seed", ret.randomSeed, randomSeed);
+        parseOptional<double>(valueIt, "dt", ret.dt, 0.25);
+        parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
+        parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
+        parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
+        return ret;
+    }
+    case Input::Module::hyperpolarizing:
+        return Input::Hyperpolarizing{};
+    case Input::Module::synapse_replay: {
+        Input::SynapseReplay ret;
+        parseMandatory(valueIt, "spike_file", debugStr, ret.spikeFile);
+        parseOptional(valueIt, "source", ret.source);
+        ret.spikeFile = toAbsolute(basePath, ret.spikeFile);
+        return ret;
+    }
+    case Input::Module::seclamp: {
+        Input::Seclamp ret;
+        parseMandatory(valueIt, "voltage", debugStr, ret.voltage);
+        return ret;
+    }
+    default:
+        throw SonataError(moduledebugStr);
+    }
+}
+
 }  // namespace
 
 class CircuitConfig::Parser
@@ -534,50 +678,6 @@ class SimulationConfig::Parser
     }
 
 
-    template <typename Type, typename std::enable_if<std::is_enum<Type>::value>::type* = nullptr>
-    void raiseIfInvalidEnum(const char* name,
-                            const Type& buf,
-                            const std::string& found_value,
-                            std::true_type /* tag */) const {
-        if (buf == Type::invalid) {
-            throw SonataError(fmt::format("Invalid value: '{}' for key '{}'", found_value, name));
-        }
-    }
-
-    template <typename Type>
-    void raiseIfInvalidEnum(const char* /*unused*/,
-                            const Type& /*unused*/,
-                            const std::string& /*unused*/,
-                            std::false_type /* tag */) const {}
-
-    template <typename Type>
-    void parseMandatory(const nlohmann::json& it,
-                        const char* name,
-                        const std::string& section_name,
-                        Type& buf) const {
-        const auto element = it.find(name);
-        if (element == it.end()) {
-            throw SonataError(fmt::format("Could not find '{}' in '{}'", name, section_name));
-        }
-        buf = element->get<Type>();
-
-        raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
-    }
-
-    template <typename Type>
-    void parseOptional(const nlohmann::json& it,
-                       const char* name,
-                       Type& buf,
-                       nonstd::optional<Type> default_value = nonstd::nullopt) const {
-        const auto element = it.find(name);
-        if (element != it.end()) {
-            buf = element->get<Type>();
-            raiseIfInvalidEnum(name, buf, element->dump(), std::is_enum<Type>());
-        } else if (default_value != nonstd::nullopt) {
-            buf = default_value.value();
-        }
-    }
-
     SimulationConfig::Run parseRun() const {
         const auto runIt = _json.find("run");
         if (runIt == _json.end()) {
@@ -675,95 +775,28 @@ class SimulationConfig::Parser
             parseMandatory(valueIt, "delay", debugStr, input.delay);
             parseMandatory(valueIt, "duration", debugStr, input.duration);
             parseMandatory(valueIt, "node_set", debugStr, input.nodeSet);
-            const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
-                                                    debugStr);
+
+            input.parameters = parseInputModule(valueIt, input.module, _basePath, parseRun().randomSeed, debugStr);
+
             switch (input.inputType) {
             case Input::InputType::current_clamp:
-                switch (input.module) {
-                case Input::Module::linear:
-                    parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
-                    parseOptional<double>(valueIt, "amp_end", input.ampEnd, input.ampStart);
-                    break;
-                case Input::Module::relative_linear:
-                    parseMandatory(valueIt, "percent_start", debugStr, input.percentStart);
-                    parseOptional<double>(valueIt,
-                                          "percent_end",
-                                          input.percentEnd,
-                                          input.percentStart);
-                    break;
-                case Input::Module::pulse:
-                    parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
-                    parseMandatory(valueIt, "width", debugStr, input.width);
-                    parseMandatory(valueIt, "frequency", debugStr, input.frequency);
-                    parseOptional<double>(valueIt, "amp_end", input.ampEnd, input.ampStart);
-                    break;
-                case Input::Module::subthreshold:
-                    parseMandatory(valueIt, "percent_less", debugStr, input.percentLess);
-                    break;
-                case Input::Module::noise: {
-                    const auto has_mean = valueIt.find("mean") != valueIt.end();
-                    const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
-                    if (has_mean == has_meanpercent) {
-                        throw SonataError(
-                            fmt::format("Either mean or mean_percent should be provided in {}",
-                                        debugStr));
-                    }
-                    parseOptional(valueIt,
-                                  "mean",
-                                  input.mean,
-                                  {std::numeric_limits<double>::lowest()});
-                    parseOptional(valueIt,
-                                  "mean_percent",
-                                  input.meanPercent,
-                                  {std::numeric_limits<double>::lowest()});
-                    parseOptional(valueIt, "variance", input.variance);
-                    break;
-                }
-                case Input::Module::shot_noise:
-                    parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
-                    parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
-                    parseOptional<int>(valueIt,
-                                       "random_seed",
-                                       input.randomSeed,
-                                       parseRun().randomSeed);
-                    parseOptional<double>(valueIt, "dt", input.dt, 0.25);
-                    parseMandatory(valueIt, "rate", debugStr, input.rate);
-                    parseMandatory(valueIt, "amp_mean", debugStr, input.ampMean);
-                    parseMandatory(valueIt, "amp_var", debugStr, input.ampVar);
-                    break;
-                case Input::Module::relative_shot_noise:
-                    parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
-                    parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
-                    parseOptional<int>(valueIt,
-                                       "random_seed",
-                                       input.randomSeed,
-                                       parseRun().randomSeed);
-                    parseOptional<double>(valueIt, "dt", input.dt, 0.25);
-                    parseMandatory(valueIt, "amp_cv", debugStr, input.ampCv);
-                    parseMandatory(valueIt, "mean_percent", debugStr, input.meanPercent);
-                    parseMandatory(valueIt, "sd_percent", debugStr, input.sdPercent);
-                    break;
-                case Input::Module::hyperpolarizing:
-                    break;
-                default:
-                    throw SonataError(moduledebugStr);
+                {
+                bool asdf = (nonstd::holds_alternative<Input::Linear>(input.parameters) ||
+                             nonstd::holds_alternative<Input::RelativeLinear>(input.parameters) ||
+                             nonstd::holds_alternative<Input::Pulse>(input.parameters) ||
+                             nonstd::holds_alternative<Input::Subthreshold>(input.parameters) ||
+                             nonstd::holds_alternative<Input::Noise>(input.parameters) ||
+                             nonstd::holds_alternative<Input::ShotNoise>(input.parameters) ||
+                             nonstd::holds_alternative<Input::RelativeShotNoise>(input.parameters)
+                            );
+                assert(asdf);
                 }
                 break;
             case Input::InputType::spikes:
-                if (input.module == SimulationConfig::Input::Module::synapse_replay) {
-                    parseMandatory(valueIt, "spike_file", debugStr, input.spikeFile);
-                    input.spikeFile = toAbsolute(_basePath, input.spikeFile);
-                    parseOptional(valueIt, "source", input.source);
-                } else {
-                    throw SonataError(moduledebugStr);
-                }
+                assert(nonstd::holds_alternative<Input::SynapseReplay>(input.parameters));
                 break;
             case Input::InputType::voltage_clamp:
-                if (input.module == Input::Module::seclamp) {
-                    parseMandatory(valueIt, "voltage", debugStr, input.voltage);
-                } else {
-                    throw SonataError(moduledebugStr);
-                }
+                assert(nonstd::holds_alternative<Input::Seclamp>(input.parameters));
                 break;
             case Input::InputType::extracellular_stimulation:
                 break;

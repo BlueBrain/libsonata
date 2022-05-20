@@ -7,7 +7,9 @@
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/node_sets.h>
 #include <bbp/sonata/nodes.h>
+#include <bbp/sonata/optional.hpp>  //nonstd::optional
 #include <bbp/sonata/report_reader.h>
+#include <bbp/sonata/variant.hpp>  //nonstd::variant
 
 #include "generated/docstrings.h"
 
@@ -323,6 +325,9 @@ struct type_caster<nonstd::optional<T>>: optional_caster<nonstd::optional<T>> {}
 
 template <>
 struct type_caster<nonstd::nullopt_t>: public void_caster<nonstd::nullopt_t> {};
+
+template <typename... Ts>
+struct type_caster<nonstd::variant<Ts...>>: variant_caster<nonstd::variant<Ts...>> {};
 }  // namespace detail
 }  // namespace pybind11
 
@@ -589,6 +594,57 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("center", SimulationConfig::Report::Compartments::center)
         .value("all", SimulationConfig::Report::Compartments::all);
 
+    py::class_<SimulationConfig::Input::Linear>(m, "Linear")
+        .def_readonly("ampStart", &SimulationConfig::Input::Linear::ampStart)
+        .def_readonly("ampEnd", &SimulationConfig::Input::Linear::ampEnd);
+
+    py::class_<SimulationConfig::Input::RelativeLinear>(m, "RelativeLinear")
+        .def_readonly("percentStart", &SimulationConfig::Input::RelativeLinear::percentStart)
+        .def_readonly("percentEnd", &SimulationConfig::Input::RelativeLinear::percentEnd);
+
+    py::class_<SimulationConfig::Input::Pulse>(m, "Pulse")
+        .def_readonly("ampStart", &SimulationConfig::Input::Pulse::ampStart)
+        .def_readonly("ampEnd", &SimulationConfig::Input::Pulse::ampEnd)
+        .def_readonly("width", &SimulationConfig::Input::Pulse::width)
+        .def_readonly("frequency", &SimulationConfig::Input::Pulse::frequency);
+
+    py::class_<SimulationConfig::Input::Subthreshold>(m, "Subthreshold")
+        .def_readonly("percentLess", &SimulationConfig::Input::Subthreshold::percentLess);
+
+    // py::class_<SimulationConfig::Input::Hyperpolarizing>(m,
+
+    py::class_<SimulationConfig::Input::SynapseReplay>(m, "SynapseReplay")
+        .def_readonly("spike_file", &SimulationConfig::Input::SynapseReplay::spikeFile)
+        .def_readonly("source", &SimulationConfig::Input::SynapseReplay::source);
+
+    py::class_<SimulationConfig::Input::Seclamp>(m, "Seclamp")
+        .def_readonly("voltage", &SimulationConfig::Input::Seclamp::voltage);
+
+    /*
+py::class_<SimulationConfig::Input::Noise>(m,
+    nonstd::optional<.def_readonly> SimulationConfig::Input::Noise::mean)
+    nonstd::optional<.def_readonly> SimulationConfig::Input::Noise::meanPercent);
+    .def_readonly variance)
+    */
+
+    py::class_<SimulationConfig::Input::ShotNoise>(m, "ShotNoise")
+        .def_readonly("riseTime", &SimulationConfig::Input::ShotNoise::riseTime)
+        .def_readonly("decayTime", &SimulationConfig::Input::ShotNoise::decayTime)
+        .def_readonly("randomSeed", &SimulationConfig::Input::ShotNoise::randomSeed)
+        .def_readonly("dt", &SimulationConfig::Input::ShotNoise::dt)
+        .def_readonly("rate", &SimulationConfig::Input::ShotNoise::rate)
+        .def_readonly("ampMean", &SimulationConfig::Input::ShotNoise::ampMean)
+        .def_readonly("ampVar", &SimulationConfig::Input::ShotNoise::ampVar);
+
+    py::class_<SimulationConfig::Input::RelativeShotNoise>(m, "RelativeShotNoise")
+        .def_readonly("riseTime", &SimulationConfig::Input::RelativeShotNoise::riseTime)
+        .def_readonly("decayTime", &SimulationConfig::Input::RelativeShotNoise::decayTime)
+        .def_readonly("randomSeed", &SimulationConfig::Input::RelativeShotNoise::randomSeed)
+        .def_readonly("dt", &SimulationConfig::Input::RelativeShotNoise::dt)
+        .def_readonly("ampCv", &SimulationConfig::Input::RelativeShotNoise::ampCv)
+        .def_readonly("sdPercent", &SimulationConfig::Input::RelativeShotNoise::sdPercent)
+        .def_readonly("meanPercent", &SimulationConfig::Input::RelativeShotNoise::meanPercent);
+
     py::class_<SimulationConfig::Input> input(m, "Input", "List of parameters of an input");
     input
         .def_readonly("module",
@@ -604,6 +660,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("node_set",
                       &SimulationConfig::Input::nodeSet,
                       DOC_SIMULATIONCONFIG(Input, nodeSet))
+        .def_readonly("parameters", &SimulationConfig::Input::parameters);
+    // XXX, DOC_SIMULATIONCONFIG(Input, nodeSet))
+    /*
         .def_readonly("amp_start",
                       &SimulationConfig::Input::ampStart,
                       DOC_SIMULATIONCONFIG(Input, ampStart))
@@ -674,6 +733,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::Input::randomSeed,
                       DOC_SIMULATIONCONFIG(Input, randomSeed));
+
+    */
     py::enum_<SimulationConfig::Input::Module>(input, "Module")
         .value("linear", SimulationConfig::Input::Module::linear)
         .value("relative_linear", SimulationConfig::Input::Module::relative_linear)
