@@ -536,6 +536,104 @@ static const char *__doc_bbp_sonata_Selection_ranges_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig = R"doc(Read access to a SONATA simulation config file.)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Input = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_InputType = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_InputType_current_clamp = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_InputType_extracellular_stimulation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_InputType_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_InputType_spikes = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_InputType_voltage_clamp = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_hyperpolarizing = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_linear = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_noise = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_pulse = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_relative_linear = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_relative_shot_noise = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_seclamp = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_shot_noise = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_subthreshold = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_Module_synapse_replay = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_ampCv = R"doc(The coefficient of variation (sd/mean) of gamma-distributed amplitudes)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_ampEnd = R"doc(The final current when a stimulus concludes (nA))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_ampMean = R"doc(The mean of gamma-distributed amplitudes (nA))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_ampStart = R"doc(The amount of current initially injected (nA))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_ampVar = R"doc(The variance of gamma-distributed amplitudes)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_delay = R"doc(Time when input is activated (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_dt = R"doc(Timestep of the injected current (ms). Default is 0.25 ms)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_duration = R"doc(Time duration for how long input is activated (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_frequency = R"doc(The frequency of pulse trains (Hz))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_inputType = R"doc(Type of input)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_mean = R"doc(The mean value of current to inject (nA))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_meanPercent =
+R"doc(The mean value of current to inject as a percentage of threshold
+current)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_module = R"doc(Type of stimulus)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_nodeSet = R"doc(Node set which is affected by input)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_percentEnd = R"doc(The percentage of a cell's threshold current to inject at the end)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_percentLess = R"doc(A percentage adjusted from 100 of a cell's threshold current)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_percentStart = R"doc(The percentage of a cell's threshold current to inject)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_rate = R"doc(Rate of Poisson events (Hz))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_sdPercent =
+R"doc(std dev of the current to inject as a percent of cell's threshold
+current)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_source = R"doc(The node set to replay spikes from)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_spikeFile = R"doc(The location of the file with the spike info for injection)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_variance =
+R"doc(State var to track whether the value of injected noise current is mean
+or mean_percent)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_voltage = R"doc(The membrane voltage the targeted cells should be held at (mV))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Input_width = R"doc(The length of time each pulse lasts (ms))doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Output = R"doc(Parameters to override simulator output for spike reports)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Output_outputDir = R"doc(Spike report file output directory. Default is "output")doc";
@@ -618,6 +716,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defi
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Run_randomSeed = R"doc(Random seed)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
@@ -640,6 +740,8 @@ Throws:
 
 static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_getInput = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_getJSON = R"doc(Returns the JSON content of the simulation config file)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getNetwork = R"doc()doc";
@@ -654,6 +756,8 @@ Throws:
     existing report.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getRun = R"doc(Returns the Run section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_jsonContent = R"doc()doc";
 

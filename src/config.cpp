@@ -587,7 +587,7 @@ class SimulationConfig::Parser
         SimulationConfig::Run result{};
         parseMandatory(*runIt, "tstop", "run", result.tstop);
         parseMandatory(*runIt, "dt", "run", result.dt);
-        parseMandatory(*runIt, "random_seed", "run", result.random_seed);
+        parseMandatory(*runIt, "random_seed", "run", result.randomSeed);
         return result;
     }
 
@@ -659,8 +659,8 @@ class SimulationConfig::Parser
         return toAbsolute(_basePath, val);
     }
 
-    std::unordered_map<std::string, SimulationConfig::Input> parseInputs() const {
-        std::unordered_map<std::string, SimulationConfig::Input> result;
+    InputMap parseInputs() const {
+        InputMap result;
 
         const auto inputsIt = _json.find("inputs");
         if (inputsIt == _json.end())
@@ -671,34 +671,34 @@ class SimulationConfig::Parser
             auto& valueIt = it.value();
             const auto debugStr = fmt::format("input {}", it.key());
             parseMandatory(valueIt, "module", debugStr, input.module);
-            parseMandatory(valueIt, "input_type", debugStr, input.input_type);
+            parseMandatory(valueIt, "input_type", debugStr, input.inputType);
             parseMandatory(valueIt, "delay", debugStr, input.delay);
             parseMandatory(valueIt, "duration", debugStr, input.duration);
-            parseMandatory(valueIt, "node_set", debugStr, input.node_set);
+            parseMandatory(valueIt, "node_set", debugStr, input.nodeSet);
             const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
                                                     debugStr);
-            switch (input.input_type) {
+            switch (input.inputType) {
             case Input::InputType::current_clamp:
                 switch (input.module) {
                 case Input::Module::linear:
-                    parseMandatory(valueIt, "amp_start", debugStr, input.amp_start);
-                    parseOptional<double>(valueIt, "amp_end", input.amp_end, input.amp_start);
+                    parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
+                    parseOptional<double>(valueIt, "amp_end", input.ampEnd, input.ampStart);
                     break;
                 case Input::Module::relative_linear:
-                    parseMandatory(valueIt, "percent_start", debugStr, input.percent_start);
+                    parseMandatory(valueIt, "percent_start", debugStr, input.percentStart);
                     parseOptional<double>(valueIt,
                                           "percent_end",
-                                          input.percent_end,
-                                          input.percent_start);
+                                          input.percentEnd,
+                                          input.percentStart);
                     break;
                 case Input::Module::pulse:
-                    parseMandatory(valueIt, "amp_start", debugStr, input.amp_start);
+                    parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
                     parseMandatory(valueIt, "width", debugStr, input.width);
                     parseMandatory(valueIt, "frequency", debugStr, input.frequency);
-                    parseOptional<double>(valueIt, "amp_end", input.amp_end, input.amp_start);
+                    parseOptional<double>(valueIt, "amp_end", input.ampEnd, input.ampStart);
                     break;
                 case Input::Module::subthreshold:
-                    parseMandatory(valueIt, "percent_less", debugStr, input.percent_less);
+                    parseMandatory(valueIt, "percent_less", debugStr, input.percentLess);
                     break;
                 case Input::Module::noise: {
                     const auto has_mean = valueIt.find("mean") != valueIt.end();
@@ -714,34 +714,34 @@ class SimulationConfig::Parser
                                   {std::numeric_limits<double>::lowest()});
                     parseOptional(valueIt,
                                   "mean_percent",
-                                  input.mean_percent,
+                                  input.meanPercent,
                                   {std::numeric_limits<double>::lowest()});
                     parseOptional(valueIt, "variance", input.variance);
                     break;
                 }
                 case Input::Module::shot_noise:
-                    parseMandatory(valueIt, "rise_time", debugStr, input.rise_time);
-                    parseMandatory(valueIt, "decay_time", debugStr, input.decay_time);
+                    parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
+                    parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
                     parseOptional<int>(valueIt,
                                        "random_seed",
-                                       input.random_seed,
-                                       parseRun().random_seed);
+                                       input.randomSeed,
+                                       parseRun().randomSeed);
                     parseOptional<double>(valueIt, "dt", input.dt, 0.25);
                     parseMandatory(valueIt, "rate", debugStr, input.rate);
-                    parseMandatory(valueIt, "amp_mean", debugStr, input.amp_mean);
-                    parseMandatory(valueIt, "amp_var", debugStr, input.amp_var);
+                    parseMandatory(valueIt, "amp_mean", debugStr, input.ampMean);
+                    parseMandatory(valueIt, "amp_var", debugStr, input.ampVar);
                     break;
                 case Input::Module::relative_shot_noise:
-                    parseMandatory(valueIt, "rise_time", debugStr, input.rise_time);
-                    parseMandatory(valueIt, "decay_time", debugStr, input.decay_time);
+                    parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
+                    parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
                     parseOptional<int>(valueIt,
                                        "random_seed",
-                                       input.random_seed,
-                                       parseRun().random_seed);
+                                       input.randomSeed,
+                                       parseRun().randomSeed);
                     parseOptional<double>(valueIt, "dt", input.dt, 0.25);
-                    parseMandatory(valueIt, "amp_cv", debugStr, input.amp_cv);
-                    parseMandatory(valueIt, "mean_percent", debugStr, input.mean_percent);
-                    parseMandatory(valueIt, "sd_percent", debugStr, input.sd_percent);
+                    parseMandatory(valueIt, "amp_cv", debugStr, input.ampCv);
+                    parseMandatory(valueIt, "mean_percent", debugStr, input.meanPercent);
+                    parseMandatory(valueIt, "sd_percent", debugStr, input.sdPercent);
                     break;
                 case Input::Module::hyperpolarizing:
                     break;
@@ -751,8 +751,8 @@ class SimulationConfig::Parser
                 break;
             case Input::InputType::spikes:
                 if (input.module == SimulationConfig::Input::Module::synapse_replay) {
-                    parseMandatory(valueIt, "spike_file", debugStr, input.spike_file);
-                    input.spike_file = toAbsolute(_basePath, input.spike_file);
+                    parseMandatory(valueIt, "spike_file", debugStr, input.spikeFile);
+                    input.spikeFile = toAbsolute(_basePath, input.spikeFile);
                     parseOptional(valueIt, "source", input.source);
                 } else {
                     throw SonataError(moduledebugStr);

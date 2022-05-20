@@ -297,7 +297,7 @@ TEST_CASE("SimulationConfig") {
         using Catch::Matchers::WithinULP;
         CHECK(config.getRun().tstop == 1000);
         CHECK(config.getRun().dt == 0.025);
-        CHECK(config.getRun().random_seed == 201506);
+        CHECK(config.getRun().randomSeed == 201506);
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
@@ -333,25 +333,25 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
 
-        CHECK(config.getInput("ex_linear").input_type ==
+        CHECK(config.getInput("ex_linear").inputType ==
               SimulationConfig::Input::InputType::current_clamp);
         CHECK(config.getInput("ex_linear").module == SimulationConfig::Input::Module::linear);
-        CHECK(config.getInput("ex_linear").amp_start == 0.15);
-        CHECK(config.getInput("ex_linear").amp_end == 0.15);
+        CHECK(config.getInput("ex_linear").ampStart == 0.15);
+        CHECK(config.getInput("ex_linear").ampEnd == 0.15);
         CHECK(config.getInput("ex_linear").delay == 0);
         CHECK(config.getInput("ex_linear").duration == 15);
-        CHECK(config.getInput("ex_linear").node_set == "Column");
-        CHECK(config.getInput("ex_rel_linear").percent_start == 80);
-        CHECK(config.getInput("ex_rel_linear").percent_end == 20);
+        CHECK(config.getInput("ex_linear").nodeSet == "Column");
+        CHECK(config.getInput("ex_rel_linear").percentStart == 80);
+        CHECK(config.getInput("ex_rel_linear").percentEnd == 20);
         CHECK(config.getInput("ex_noise_meanpercent").mean ==
               std::numeric_limits<double>::lowest());
-        CHECK(config.getInput("ex_noise_meanpercent").mean_percent == 0.01);
+        CHECK(config.getInput("ex_noise_meanpercent").meanPercent == 0.01);
         CHECK(config.getInput("ex_noise_mean").mean == 0);
-        CHECK(config.getInput("ex_noise_mean").mean_percent ==
+        CHECK(config.getInput("ex_noise_mean").meanPercent ==
               std::numeric_limits<double>::lowest());
-        CHECK(config.getInput("ex_rel_shotnoise").random_seed == config.getRun().random_seed);
+        CHECK(config.getInput("ex_rel_shotnoise").randomSeed == config.getRun().randomSeed);
         CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
-        CHECK(config.getInput("ex_replay").spike_file ==
+        CHECK(config.getInput("ex_replay").spikeFile ==
               fs::absolute(basePath / fs::path("replay.dat")).lexically_normal());
         CHECK(config.getInput("ex_replay").source == "ML_afferents");
     }

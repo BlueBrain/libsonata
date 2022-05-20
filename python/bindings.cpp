@@ -523,7 +523,10 @@ PYBIND11_MODULE(_libsonata, m) {
                                       "Run",
                                       "Stores parameters defining global simulation settings")
         .def_readonly("tstop", &SimulationConfig::Run::tstop, DOC_SIMULATIONCONFIG(Run, tstop))
-        .def_readonly("dt", &SimulationConfig::Run::dt, DOC_SIMULATIONCONFIG(Run, dt));
+        .def_readonly("dt", &SimulationConfig::Run::dt, DOC_SIMULATIONCONFIG(Run, dt))
+        .def_readonly("random_seed",
+                      &SimulationConfig::Run::randomSeed,
+                      DOC_SIMULATIONCONFIG(Run, randomSeed));
 
     py::class_<SimulationConfig::Output>(m, "Output", "Parameters of simulation output")
         .def_readonly("output_dir",
@@ -587,45 +590,48 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("all", SimulationConfig::Report::Compartments::all);
 
     py::class_<SimulationConfig::Input> input(m, "Input", "List of parameters of an input");
-    input.def_readonly("module", &SimulationConfig::Input::module, "Type of stimulus")
-        .def_readonly("input_type", &SimulationConfig::Input::input_type, "Type of input")
-        .def_readonly("delay", &SimulationConfig::Input::delay, "Time when input is activated (ms)")
+    input
+        .def_readonly("module",
+                      &SimulationConfig::Input::module,
+                      DOC_SIMULATIONCONFIG(Input, module))
+        .def_readonly("input_type",
+                      &SimulationConfig::Input::inputType,
+                      DOC_SIMULATIONCONFIG(Input, inputType))
+        .def_readonly("delay", &SimulationConfig::Input::delay, DOC_SIMULATIONCONFIG(Input, delay))
         .def_readonly("duration",
                       &SimulationConfig::Input::duration,
-                      "Time duration in ms for how long input is activated")
+                      DOC_SIMULATIONCONFIG(Input, duration))
         .def_readonly("node_set",
-                      &SimulationConfig::Input::node_set,
-                      "Node set which is affected by input")
+                      &SimulationConfig::Input::nodeSet,
+                      DOC_SIMULATIONCONFIG(Input, nodeSet))
         .def_readonly("amp_start",
-                      &SimulationConfig::Input::amp_start,
-                      "The amount of current initially injected (nA)")
+                      &SimulationConfig::Input::ampStart,
+                      DOC_SIMULATIONCONFIG(Input, ampStart))
         .def_readonly("amp_end",
-                      &SimulationConfig::Input::amp_end,
-                      "The final current when a stimulus concludes (nA)")
+                      &SimulationConfig::Input::ampEnd,
+                      DOC_SIMULATIONCONFIG(Input, ampEnd))
         .def_readonly("percent_start",
-                      &SimulationConfig::Input::percent_start,
-                      "The percentage of a cell's threshold current to inject ")
+                      &SimulationConfig::Input::percentStart,
+                      DOC_SIMULATIONCONFIG(Input, percentStart))
         .def_readonly("percent_end",
-                      &SimulationConfig::Input::percent_end,
-                      "The percentage of a cell's threshold current to inject at the end")
-        .def_readonly("width",
-                      &SimulationConfig::Input::width,
-                      "The length of time each pulse lasts (ms)")
+                      &SimulationConfig::Input::percentEnd,
+                      DOC_SIMULATIONCONFIG(Input, percentEnd))
+        .def_readonly("width", &SimulationConfig::Input::width, DOC_SIMULATIONCONFIG(Input, width))
         .def_readonly("frequency",
                       &SimulationConfig::Input::frequency,
-                      "The frequency of pulse trains (Hz)")
+                      DOC_SIMULATIONCONFIG(Input, frequency))
         .def_readonly("percent_less",
-                      &SimulationConfig::Input::percent_less,
-                      "A percentage adjusted from 100 of a cell's threshold current")
+                      &SimulationConfig::Input::percentLess,
+                      DOC_SIMULATIONCONFIG(Input, percentLess))
         .def_readonly("spike_file",
-                      &SimulationConfig::Input::spike_file,
-                      "The location of the file with the spike info for injection")
+                      &SimulationConfig::Input::spikeFile,
+                      DOC_SIMULATIONCONFIG(Input, spikeFile))
         .def_readonly("source",
                       &SimulationConfig::Input::source,
-                      "The node set to replay spikes from")
+                      DOC_SIMULATIONCONFIG(Input, source))
         .def_readonly("voltage",
                       &SimulationConfig::Input::voltage,
-                      "The membrane voltage the targeted cells should be held at (mV)")
+                      DOC_SIMULATIONCONFIG(Input, voltage))
         .def_property_readonly(
             "mean",
             [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
@@ -634,42 +640,40 @@ PYBIND11_MODULE(_libsonata, m) {
                 else
                     return nonstd::nullopt;
             },
-            "The mean value of current to inject (nA)")
+            DOC_SIMULATIONCONFIG(Input, mean))
         .def_property_readonly(
             "mean_percent",
             [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
-                if (input.mean_percent > std::numeric_limits<double>::lowest())
-                    return input.mean_percent;
+                if (input.meanPercent > std::numeric_limits<double>::lowest())
+                    return input.meanPercent;
                 else
                     return nonstd::nullopt;
             },
-            "The mean value of current to inject as a percentage of threshold current")
+            DOC_SIMULATIONCONFIG(Input, meanPercent))
         .def_readonly("variance",
                       &SimulationConfig::Input::variance,
-                      "The variance around the mean of current to inject in normal distribution")
+                      DOC_SIMULATIONCONFIG(Input, variance))
         .def_readonly("rise_time",
-                      &SimulationConfig::Input::rise_time,
-                      "The rise time of the bi-exponential shots (ms)")
+                      &SimulationConfig::Input::riseTime,
+                      DOC_SIMULATIONCONFIG(Input, riseTime))
         .def_readonly("decay_time",
-                      &SimulationConfig::Input::decay_time,
-                      "The decay time of the bi-exponential shots (ms)")
+                      &SimulationConfig::Input::decayTime,
+                      DOC_SIMULATIONCONFIG(Input, decayTime))
         .def_readonly("rate", &SimulationConfig::Input::rate, "Rate of Poisson events (Hz)")
         .def_readonly("amp_mean",
-                      &SimulationConfig::Input::amp_mean,
-                      "The mean of gamma-distributed amplitudes (nA)")
+                      &SimulationConfig::Input::ampMean,
+                      DOC_SIMULATIONCONFIG(Input, ampMean))
         .def_readonly("amp_var",
-                      &SimulationConfig::Input::amp_var,
-                      "The variance of gamma-distributed amplitudes")
-        .def_readonly("amp_cv",
-                      &SimulationConfig::Input::amp_cv,
-                      "The coefficient of variation (sd/mean) of gamma-distributed amplitudes")
+                      &SimulationConfig::Input::ampVar,
+                      DOC_SIMULATIONCONFIG(Input, ampVar))
+        .def_readonly("amp_cv", &SimulationConfig::Input::ampCv, DOC_SIMULATIONCONFIG(Input, ampCv))
         .def_readonly("sd_percent",
-                      &SimulationConfig::Input::sd_percent,
-                      "std dev of the current to inject as a percent of cell's threshold current")
-        .def_readonly("dt", &SimulationConfig::Input::dt, "Timestep of the injected current (ms)")
+                      &SimulationConfig::Input::sdPercent,
+                      DOC_SIMULATIONCONFIG(Input, sdPercent))
+        .def_readonly("dt", &SimulationConfig::Input::dt, DOC_SIMULATIONCONFIG(Input, dt))
         .def_readonly("random_seed",
-                      &SimulationConfig::Input::random_seed,
-                      "Override the random seed to introduce correlations between cells");
+                      &SimulationConfig::Input::randomSeed,
+                      DOC_SIMULATIONCONFIG(Input, randomSeed));
     py::enum_<SimulationConfig::Input::Module>(input, "Module")
         .value("linear", SimulationConfig::Input::Module::linear)
         .value("relative_linear", SimulationConfig::Input::Module::relative_linear)
