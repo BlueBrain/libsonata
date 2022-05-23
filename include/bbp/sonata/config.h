@@ -19,6 +19,7 @@
 
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
+#include <bbp/sonata/optional.hpp>
 
 #include "common.h"
 #include "optional.hpp"
@@ -239,6 +240,7 @@ class SONATA_API SimulationConfig
         /// Allows for supressing a report so that is not created. Default is true
         bool enabled = true;
     };
+
     using ReportMap = std::unordered_map<std::string, Report>;
 
     struct Input {
@@ -255,6 +257,7 @@ class SONATA_API SimulationConfig
             shot_noise,
             relative_shot_noise
         };
+
         enum class InputType {
             invalid = -1,
             spikes,
@@ -350,7 +353,6 @@ class SONATA_API SimulationConfig
             /// The mean value of current to inject as a percentage of threshold current
             double meanPercent{};
         };
-
         /// Type of stimulus
         Module module;
         /// Type of input

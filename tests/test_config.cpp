@@ -424,6 +424,27 @@ TEST_CASE("SimulationConfig") {
             CHECK(endswith(params.spikeFile, "replay.dat"));
             CHECK(params.source == "ML_afferents");
         }
+        /* XXX
+        CHECK(config.getInput("ex_linear").inputType ==
+              SimulationConfig::Input::InputType::current_clamp);
+        CHECK(config.getInput("ex_linear").module == SimulationConfig::Input::Module::linear);
+        CHECK(config.getInput("ex_linear").ampStart == 0.15);
+        CHECK(config.getInput("ex_linear").ampEnd == 0.15);
+        CHECK(config.getInput("ex_linear").delay == 0);
+        CHECK(config.getInput("ex_linear").duration == 15);
+        CHECK(config.getInput("ex_linear").nodeSet == "Column");
+        CHECK(config.getInput("ex_rel_linear").percentStart == 80);
+        CHECK(config.getInput("ex_rel_linear").percentEnd == 20);
+        CHECK(config.getInput("ex_noise_meanpercent").mean == nonstd::nullopt);
+        CHECK(config.getInput("ex_noise_meanpercent").meanPercent == 0.01);
+        CHECK(config.getInput("ex_noise_mean").mean == 0);
+        CHECK(config.getInput("ex_noise_mean").meanPercent == nonstd::nullopt);
+        CHECK(config.getInput("ex_rel_shotnoise").randomSeed == config.getRun().randomSeed);
+        CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
+        CHECK(config.getInput("ex_replay").spikeFile ==
+              fs::absolute(basePath / fs::path("replay.dat")).lexically_normal());
+        CHECK(config.getInput("ex_replay").source == "ML_afferents");
+        */
     }
     SECTION("manifest_network") {
         auto contents = R"({

@@ -28,6 +28,28 @@
 #include "population.hpp"
 #include "utils.h"
 
+// Add a specialization of adl_serializer to the nlohmann namespace for conversion from/to
+// nonstd::optional
+namespace nlohmann {
+template <typename T>
+struct adl_serializer<nonstd::optional<T>> {
+    static void to_json(json& j, const nonstd::optional<T>& opt) {
+        if (opt == nonstd::nullopt) {
+            j = nullptr;
+        } else {
+            j = *opt;
+        }
+    }
+
+    static void from_json(const json& j, nonstd::optional<T>& opt) {
+        if (j.is_null()) {
+            opt = nonstd::nullopt;
+        } else {
+            opt = j.get<T>();
+        }
+    }
+};
+}  // namespace nlohmann
 
 namespace bbp {
 namespace sonata {

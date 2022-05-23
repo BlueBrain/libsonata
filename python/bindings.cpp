@@ -709,6 +709,12 @@ py::class_<SimulationConfig::Input::Noise>(m,
                     return nonstd::nullopt;
             },
             DOC_SIMULATIONCONFIG(Input, meanPercent))
+=======
+        .def_readonly("mean", &SimulationConfig::Input::mean, DOC_SIMULATIONCONFIG(Input, mean))
+        .def_readonly("mean_percent",
+                      &SimulationConfig::Input::meanPercent,
+                      DOC_SIMULATIONCONFIG(Input, meanPercent))
+>>>>>>> origin/master
         .def_readonly("variance",
                       &SimulationConfig::Input::variance,
                       DOC_SIMULATIONCONFIG(Input, variance))
@@ -733,6 +739,7 @@ py::class_<SimulationConfig::Input::Noise>(m,
         .def_readonly("random_seed",
                       &SimulationConfig::Input::randomSeed,
                       DOC_SIMULATIONCONFIG(Input, randomSeed));
+<<<<<<< HEAD
 
     */
     py::enum_<SimulationConfig::Input::Module>(input, "Module")
