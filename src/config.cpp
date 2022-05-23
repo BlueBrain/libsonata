@@ -651,10 +651,7 @@ class SimulationConfig::Parser
                       "synapses_init_depleted",
                       result.synapsesInitDepleted,
                       {false});
-        parseOptional(*conditionsIt,
-                      "extracellular_calcium",
-                      result.extracellularCalcium,
-                      {std::numeric_limits<double>::lowest()});
+        parseOptional(*conditionsIt, "extracellular_calcium", result.extracellularCalcium);
         parseOptional(*conditionsIt, "minis_single_vesicle", result.minisSingleVesicle, {false});
         parseOptional(*conditionsIt,
                       "randomize_gaba_rise_time",

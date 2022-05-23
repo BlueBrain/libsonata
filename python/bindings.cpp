@@ -528,17 +528,20 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::Run::randomSeed,
                       DOC_SIMULATIONCONFIG(Run, randomSeed));
 
-    py::class_<SimulationConfig::Output>(m, "Output", "Parameters of simulation output")
+    py::class_<SimulationConfig::Output> output(m, "Output", "Parameters of simulation output");
+    output
         .def_readonly("output_dir",
                       &SimulationConfig::Output::outputDir,
                       DOC_SIMULATIONCONFIG(Output, outputDir))
         .def_readonly("spikes_file",
                       &SimulationConfig::Output::spikesFile,
-                      DOC_SIMULATIONCONFIG(Output, spikesFile));
+                      DOC_SIMULATIONCONFIG(Output, spikesFile))
         .def_readonly("log_file",
                       &SimulationConfig::Output::logFile,
                       DOC_SIMULATIONCONFIG(Output, logFile))
-        .def_readonly("spikes_file", &SimulationConfig::Output::spikesFile, DOC_SIMULATIONCONFIG(Output, spikesFile))
+        .def_readonly("spikes_file",
+                      &SimulationConfig::Output::spikesFile,
+                      DOC_SIMULATIONCONFIG(Output, spikesFile))
         .def_readonly("spikes_sort_order",
                       &SimulationConfig::Output::sortOrder,
                       DOC_SIMULATIONCONFIG(Output, sortOrder));
@@ -553,29 +556,22 @@ PYBIND11_MODULE(_libsonata, m) {
                                              "Parameters defining global experimental conditions")
         .def_readonly("celsius",
                       &SimulationConfig::Conditions::celsius,
-                      "Temperature of experiment")
+                      DOC_SIMULATIONCONFIG(Conditions, celsius))
         .def_readonly("v_init",
                       &SimulationConfig::Conditions::vInit,
-                      "Initial membrane voltage in mV")
+                      DOC_SIMULATIONCONFIG(Conditions, vInit))
         .def_readonly("synapses_init_depleted",
                       &SimulationConfig::Conditions::synapsesInitDepleted,
-                      "Synapse at start of simulation are in deleted state")
-        .def_property_readonly(
-            "extracellular_calcium",
-            [](const SimulationConfig::Conditions& conditions) -> nonstd::optional<double> {
-                if (conditions.extracellularCalcium > std::numeric_limits<double>::lowest())
-                    return conditions.extracellularCalcium;
-                else
-                    return nonstd::nullopt;
-            },
-            "Extracellular calcium concentration")
+                      DOC_SIMULATIONCONFIG(Conditions, synapsesInitDepleted))
+        .def_readonly("extracellular_calcium",
+                      &SimulationConfig::Conditions::extracellularCalcium,
+                      DOC_SIMULATIONCONFIG(Conditions, extracellularCalcium))
         .def_readonly("minis_single_vesicle",
                       &SimulationConfig::Conditions::minisSingleVesicle,
-                      "Limit spontaneous release to single vesicle")
-        .def_readonly(
-            "randomize_gaba_rise_time",
-            &SimulationConfig::Conditions::randomizeGabaRiseTime,
-            "Enable legacy behavior to randomize the GABA_A rise time in the helper functions");
+                      DOC_SIMULATIONCONFIG(Conditions, minisSingleVesicle))
+        .def_readonly("randomize_gaba_rise_time",
+                      &SimulationConfig::Conditions::randomizeGabaRiseTime,
+                      DOC_SIMULATIONCONFIG(Conditions, randomizeGabaRiseTime));
 
     py::class_<SimulationConfig::Report> report(m, "Report", "Parameters of a report");
     report

@@ -536,6 +536,26 @@ static const char *__doc_bbp_sonata_Selection_ranges_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig = R"doc(Read access to a SONATA simulation config file.)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions = R"doc(Parameters defining global experimental conditions.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_celsius = R"doc(Temperature of experiment. Default is 34.0)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_extracellularCalcium =
+R"doc(Extracellular calcium concentration, to be applied to the synapse
+uHill parameter to scale the U parameter of synapses. Default is None.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_minisSingleVesicle =
+R"doc(Limit spontaneous release to single vesicle when true. Default is
+false)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_randomizeGabaRiseTime =
+R"doc(Enable legacy behavior to randomize the GABA_A rise time in the helper
+functions. Default is false)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_synapsesInitDepleted = R"doc(Synapse at start of simulation are in deleted state. Default is false)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_vInit = R"doc(Initial membrane voltage in mV. Default is -80)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Input = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Input_InputType = R"doc()doc";
@@ -636,7 +656,21 @@ static const char *__doc_bbp_sonata_SimulationConfig_Input_width = R"doc(The len
 
 static const char *__doc_bbp_sonata_SimulationConfig_Output = R"doc(Parameters to override simulator output for spike reports)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Output_SpikesSortOrder = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_SpikesSortOrder_by_id = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_SpikesSortOrder_by_time = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_SpikesSortOrder_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_SpikesSortOrder_none = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_logFile = R"doc(Filename where console output is written. Default is STDOUT.)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Output_outputDir = R"doc(Spike report file output directory. Default is "output")doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Output_sortOrder = R"doc(The sorting order of the spike report. Default is "by_time")doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Output_spikesFile = R"doc(Spike report file name. Default is "out.h5")doc";
 
@@ -729,6 +763,8 @@ Throws:
 
 static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_conditions = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_fromFile =
 R"doc(Loads a SONATA JSON simulation config file from disk and returns a
 CircuitConfig object which parses it.
@@ -739,6 +775,8 @@ Throws:
     (in any depth))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getConditions = R"doc(Returns the Conditions section of the simulation configuration.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getInput = R"doc()doc";
 

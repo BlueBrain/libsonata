@@ -314,7 +314,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConditions().celsius == 35.);
         CHECK(config.getConditions().vInit == -80);
         CHECK(config.getConditions().synapsesInitDepleted == false);
-        CHECK(config.getConditions().extracellularCalcium == std::numeric_limits<double>::lowest());
+        CHECK(config.getConditions().extracellularCalcium == nonstd::nullopt);
         CHECK(config.getConditions().minisSingleVesicle == false);
         CHECK(config.getConditions().randomizeGabaRiseTime == false);
 
