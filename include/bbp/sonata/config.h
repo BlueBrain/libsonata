@@ -348,10 +348,10 @@ class SONATA_API SimulationConfig
             double dt{};
             /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
             double ampCv{};
-            /// std dev of the current to inject as a percent of cell's threshold current
-            double sdPercent{};
             /// The mean value of current to inject as a percentage of threshold current
             double meanPercent{};
+            /// std dev of the current to inject as a percent of cell's threshold current
+            double sdPercent{};
         };
         /// Type of stimulus
         Module module;

@@ -615,24 +615,30 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.input('ex_linear').input_type.name, 'current_clamp')
         self.assertEqual(self.config.input('ex_linear').module.name, 'linear')
-        self.assertEqual(self.config.input('ex_linear').amp_start, 0.15)
-        self.assertEqual(self.config.input('ex_linear').amp_end, 0.15)
         self.assertEqual(self.config.input('ex_linear').delay, 0)
         self.assertEqual(self.config.input('ex_linear').duration, 15)
         self.assertEqual(self.config.input('ex_linear').node_set, "Column")
-        self.assertEqual(self.config.input('ex_rel_linear').percent_start, 80)
-        self.assertEqual(self.config.input('ex_rel_linear').percent_end, 20)
-        self.assertEqual(self.config.input('ex_pulse').width, 1)
-        self.assertEqual(self.config.input('ex_pulse').frequency, 80)
-        self.assertEqual(self.config.input('ex_noise_meanpercent').mean_percent, 0.01)
-        self.assertEqual(self.config.input('ex_noise_meanpercent').mean, None)
-        self.assertEqual(self.config.input('ex_noise_mean').mean, 0)
-        self.assertEqual(self.config.input('ex_noise_mean').mean_percent, None)
-        self.assertEqual(self.config.input('ex_rel_shotnoise').random_seed, self.config.run.random_seed)
-        self.assertEqual(self.config.input('ex_rel_shotnoise').dt, 0.25)
-        self.assertEqual(self.config.input('ex_replay').spike_file,
+        self.assertEqual(self.config.input('ex_linear').parameters.amp_start, 0.15)
+        self.assertEqual(self.config.input('ex_linear').parameters.amp_end, 0.15)
+
+        self.assertEqual(self.config.input('ex_rel_linear').parameters.percent_start, 80)
+        self.assertEqual(self.config.input('ex_rel_linear').parameters.percent_end, 20)
+
+        self.assertEqual(self.config.input('ex_pulse').parameters.width, 1)
+        self.assertEqual(self.config.input('ex_pulse').parameters.frequency, 80)
+
+        self.assertEqual(self.config.input('ex_noise_meanpercent').parameters.mean_percent, 0.01)
+        self.assertEqual(self.config.input('ex_noise_meanpercent').parameters.mean, None)
+
+        self.assertEqual(self.config.input('ex_noise_mean').parameters.mean, 0)
+        self.assertEqual(self.config.input('ex_noise_mean').parameters.mean_percent, None)
+
+        self.assertEqual(self.config.input('ex_rel_shotnoise').parameters.random_seed, self.config.run.random_seed)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').parameters.dt, 0.25)
+
+        self.assertEqual(self.config.input('ex_replay').parameters.spike_file,
                          os.path.abspath(os.path.join(PATH, 'config/replay.dat')))
-        self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
+        self.assertEqual(self.config.input('ex_replay').parameters.source, "ML_afferents")
 
 
     def test_json(self):

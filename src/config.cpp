@@ -279,22 +279,17 @@ SimulationConfig::Input::InputParameters parseInputModule(
     }
     case Input::Module::noise: {
         Input::Noise ret;
-        const auto has_mean = valueIt.find("mean") != valueIt.end();
-        const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
-        if (has_mean == has_meanpercent) {
+        const auto mean = valueIt.find("mean");
+        const auto mean_percent = valueIt.find("mean_percent");
+
+        if (mean != valueIt.end() && mean_percent == valueIt.end()) {
+            parseOptional(valueIt, "mean", ret.mean);
+        } else if (mean == valueIt.end() && mean_percent != valueIt.end()) {
+            parseOptional(valueIt, "mean_percent", ret.meanPercent);
+        } else {
             throw SonataError(
                 fmt::format("Either mean or mean_percent should be provided in {}", debugStr));
         }
-        /* XXX: can't use nlohman for optional
-        parseOptional(valueIt,
-                      "mean",
-                      ret.mean,
-                      {std::numeric_limits<double>::lowest()});
-        parseOptional(valueIt,
-                      "mean_percent",
-                      ret.meanPercent,
-                      {std::numeric_limits<double>::lowest()});
-                      */
         parseOptional(valueIt, "variance", ret.variance);
         return ret;
     }
@@ -785,12 +780,13 @@ class SimulationConfig::Parser
         InputMap result;
 
         const auto inputsIt = _json.find("inputs");
-        if (inputsIt == _json.end())
+        if (inputsIt == _json.end()) {
             return result;
+        }
 
         for (auto it = inputsIt->begin(); it != inputsIt->end(); ++it) {
             auto& input = result[it.key()];
-            auto& valueIt = it.value();
+            const auto& valueIt = it.value();
             const auto debugStr = fmt::format("input {}", it.key());
             parseMandatory(valueIt, "module", debugStr, input.module);
             parseMandatory(valueIt, "input_type", debugStr, input.inputType);
@@ -803,15 +799,13 @@ class SimulationConfig::Parser
             switch (input.inputType) {
             case Input::InputType::current_clamp:
                 {
-                bool asdf = (nonstd::holds_alternative<Input::Linear>(input.parameters) ||
-                             nonstd::holds_alternative<Input::RelativeLinear>(input.parameters) ||
-                             nonstd::holds_alternative<Input::Pulse>(input.parameters) ||
-                             nonstd::holds_alternative<Input::Subthreshold>(input.parameters) ||
-                             nonstd::holds_alternative<Input::Noise>(input.parameters) ||
-                             nonstd::holds_alternative<Input::ShotNoise>(input.parameters) ||
-                             nonstd::holds_alternative<Input::RelativeShotNoise>(input.parameters)
-                            );
-                assert(asdf);
+                assert(nonstd::holds_alternative<Input::Linear>(input.parameters) ||
+                       nonstd::holds_alternative<Input::RelativeLinear>(input.parameters) ||
+                       nonstd::holds_alternative<Input::Pulse>(input.parameters) ||
+                       nonstd::holds_alternative<Input::Subthreshold>(input.parameters) ||
+                       nonstd::holds_alternative<Input::Noise>(input.parameters) ||
+                       nonstd::holds_alternative<Input::ShotNoise>(input.parameters) ||
+                       nonstd::holds_alternative<Input::RelativeShotNoise>(input.parameters));
                 }
                 break;
             case Input::InputType::spikes:
@@ -882,9 +876,10 @@ const SimulationConfig::Report& SimulationConfig::getReport(const std::string& n
 
 const SimulationConfig::Input& SimulationConfig::getInput(const std::string& name) const {
     const auto it = _inputs.find(name);
-    if (it == _inputs.end())
+    if (it == _inputs.end()) {
         throw SonataError(
             fmt::format("The input '{}' is not present in the simulation config file", name));
+    }
 
     return it->second;
 }

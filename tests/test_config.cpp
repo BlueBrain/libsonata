@@ -381,7 +381,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.nodeSet == "Rt_RC");
 
             const auto params = nonstd::get<SimulationConfig::Input::Noise>(input.parameters);
-            //XXX: CHECK(params.meanPercent == 0.01);
+            CHECK(params.meanPercent.value() == 0.01);
             CHECK(params.variance == 0.001);
         }
         {
@@ -393,7 +393,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.nodeSet == "Rt_RC");
 
             const auto params = nonstd::get<SimulationConfig::Input::Noise>(input.parameters);
-            //XXX: CHECK(params.mean == 0);
+            CHECK(params.mean.value() == 0);
             CHECK(params.variance == 0.001);
         }
         {
