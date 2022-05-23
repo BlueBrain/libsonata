@@ -343,12 +343,10 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getInput("ex_linear").nodeSet == "Column");
         CHECK(config.getInput("ex_rel_linear").percentStart == 80);
         CHECK(config.getInput("ex_rel_linear").percentEnd == 20);
-        CHECK(config.getInput("ex_noise_meanpercent").mean ==
-              std::numeric_limits<double>::lowest());
+        CHECK(config.getInput("ex_noise_meanpercent").mean == nonstd::nullopt);
         CHECK(config.getInput("ex_noise_meanpercent").meanPercent == 0.01);
         CHECK(config.getInput("ex_noise_mean").mean == 0);
-        CHECK(config.getInput("ex_noise_mean").meanPercent ==
-              std::numeric_limits<double>::lowest());
+        CHECK(config.getInput("ex_noise_mean").meanPercent == nonstd::nullopt);
         CHECK(config.getInput("ex_rel_shotnoise").randomSeed == config.getRun().randomSeed);
         CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
         CHECK(config.getInput("ex_replay").spikeFile ==

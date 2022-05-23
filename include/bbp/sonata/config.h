@@ -19,6 +19,7 @@
 
 #include <bbp/sonata/edges.h>
 #include <bbp/sonata/nodes.h>
+#include <bbp/sonata/optional.hpp>
 
 #include "common.h"
 
@@ -291,9 +292,9 @@ class SONATA_API SimulationConfig
         /// The membrane voltage the targeted cells should be held at (mV)
         double voltage{};
         /// The mean value of current to inject (nA)
-        double mean{};
+        nonstd::optional<double> mean{nonstd::nullopt};
         /// The mean value of current to inject as a percentage of threshold current
-        double meanPercent{};
+        nonstd::optional<double> meanPercent{nonstd::nullopt};
         /// State var to track whether the value of injected noise current is mean or mean_percent
         double variance{};
         /// The rise time of the bi-exponential shots (ms)

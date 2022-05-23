@@ -632,24 +632,10 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("voltage",
                       &SimulationConfig::Input::voltage,
                       DOC_SIMULATIONCONFIG(Input, voltage))
-        .def_property_readonly(
-            "mean",
-            [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
-                if (input.mean > std::numeric_limits<double>::lowest())
-                    return input.mean;
-                else
-                    return nonstd::nullopt;
-            },
-            DOC_SIMULATIONCONFIG(Input, mean))
-        .def_property_readonly(
-            "mean_percent",
-            [](const SimulationConfig::Input& input) -> nonstd::optional<double> {
-                if (input.meanPercent > std::numeric_limits<double>::lowest())
-                    return input.meanPercent;
-                else
-                    return nonstd::nullopt;
-            },
-            DOC_SIMULATIONCONFIG(Input, meanPercent))
+        .def_readonly("mean", &SimulationConfig::Input::mean, DOC_SIMULATIONCONFIG(Input, mean))
+        .def_readonly("mean_percent",
+                      &SimulationConfig::Input::meanPercent,
+                      DOC_SIMULATIONCONFIG(Input, meanPercent))
         .def_readonly("variance",
                       &SimulationConfig::Input::variance,
                       DOC_SIMULATIONCONFIG(Input, variance))
