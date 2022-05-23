@@ -13,6 +13,7 @@
 #include <bbp/sonata/optional.hpp>
 
 #include <algorithm>  // transform
+#include <bbp/sonata/optional.hpp>
 #include <cassert>
 #include <fstream>
 #include <memory>
@@ -27,6 +28,28 @@
 #include "population.hpp"
 #include "utils.h"
 
+// Add a specialization of adl_serializer to the nlohmann namespace for conversion from/to
+// nonstd::optional
+namespace nlohmann {
+template <typename T>
+struct adl_serializer<nonstd::optional<T>> {
+    static void to_json(json& j, const nonstd::optional<T>& opt) {
+        if (opt == nonstd::nullopt) {
+            j = nullptr;
+        } else {
+            j = *opt;
+        }
+    }
+
+    static void from_json(const json& j, nonstd::optional<T>& opt) {
+        if (j.is_null()) {
+            opt = nonstd::nullopt;
+        } else {
+            opt = j.get<T>();
+        }
+    }
+};
+}  // namespace nlohmann
 
 namespace bbp {
 namespace sonata {
@@ -51,6 +74,28 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Compartments,
                              {{SimulationConfig::Report::Compartments::invalid, nullptr},
                               {SimulationConfig::Report::Compartments::center, "center"},
                               {SimulationConfig::Report::Compartments::all, "all"}})
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Input::Module,
+                             {{SimulationConfig::Input::Module::invalid, nullptr},
+                              {SimulationConfig::Input::Module::linear, "linear"},
+                              {SimulationConfig::Input::Module::relative_linear, "relative_linear"},
+                              {SimulationConfig::Input::Module::pulse, "pulse"},
+                              {SimulationConfig::Input::Module::subthreshold, "subthreshold"},
+                              {SimulationConfig::Input::Module::hyperpolarizing, "hyperpolarizing"},
+                              {SimulationConfig::Input::Module::synapse_replay, "synapse_replay"},
+                              {SimulationConfig::Input::Module::seclamp, "seclamp"},
+                              {SimulationConfig::Input::Module::noise, "noise"},
+                              {SimulationConfig::Input::Module::shot_noise, "shot_noise"},
+                              {SimulationConfig::Input::Module::relative_shot_noise,
+                               "relative_shot_noise"}})
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Input::InputType,
+                             {{SimulationConfig::Input::InputType::invalid, nullptr},
+                              {SimulationConfig::Input::InputType::spikes, "spikes"},
+                              {SimulationConfig::Input::InputType::extracellular_stimulation,
+                               "extracellular_stimulation"},
+                              {SimulationConfig::Input::InputType::current_clamp, "current_clamp"},
+                              {SimulationConfig::Input::InputType::voltage_clamp, "voltage_clamp"}})
 
 namespace {
 // to be replaced by std::filesystem once C++17 is used
@@ -564,6 +609,7 @@ class SimulationConfig::Parser
         SimulationConfig::Run result{};
         parseMandatory(*runIt, "tstop", "run", result.tstop);
         parseMandatory(*runIt, "dt", "run", result.dt);
+        parseMandatory(*runIt, "random_seed", "run", result.randomSeed);
         return result;
     }
 
@@ -635,6 +681,113 @@ class SimulationConfig::Parser
         return toAbsolute(_basePath, val);
     }
 
+    InputMap parseInputs() const {
+        InputMap result;
+
+        const auto inputsIt = _json.find("inputs");
+        if (inputsIt == _json.end())
+            return result;
+
+        for (auto it = inputsIt->begin(); it != inputsIt->end(); ++it) {
+            auto& input = result[it.key()];
+            auto& valueIt = it.value();
+            const auto debugStr = fmt::format("input {}", it.key());
+            parseMandatory(valueIt, "module", debugStr, input.module);
+            parseMandatory(valueIt, "input_type", debugStr, input.inputType);
+            parseMandatory(valueIt, "delay", debugStr, input.delay);
+            parseMandatory(valueIt, "duration", debugStr, input.duration);
+            parseMandatory(valueIt, "node_set", debugStr, input.nodeSet);
+            const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
+                                                    debugStr);
+            switch (input.inputType) {
+            case Input::InputType::current_clamp:
+                switch (input.module) {
+                case Input::Module::linear:
+                    parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
+                    parseOptional(valueIt, "amp_end", input.ampEnd, {input.ampStart});
+                    break;
+                case Input::Module::relative_linear:
+                    parseMandatory(valueIt, "percent_start", debugStr, input.percentStart);
+                    parseOptional(valueIt, "percent_end", input.percentEnd, {input.percentStart});
+                    break;
+                case Input::Module::pulse:
+                    parseMandatory(valueIt, "amp_start", debugStr, input.ampStart);
+                    parseMandatory(valueIt, "width", debugStr, input.width);
+                    parseMandatory(valueIt, "frequency", debugStr, input.frequency);
+                    parseOptional(valueIt, "amp_end", input.ampEnd, {input.ampStart});
+                    break;
+                case Input::Module::subthreshold:
+                    parseMandatory(valueIt, "percent_less", debugStr, input.percentLess);
+                    break;
+                case Input::Module::noise: {
+                    const auto has_mean = valueIt.find("mean") != valueIt.end();
+                    const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
+                    if (has_mean == has_meanpercent) {
+                        throw SonataError(
+                            fmt::format("Either mean or mean_percent should be provided in {}",
+                                        debugStr));
+                    }
+                    parseOptional(valueIt, "mean", input.mean);
+                    parseOptional(valueIt, "mean_percent", input.meanPercent);
+                    parseOptional(valueIt, "variance", input.variance);
+                    break;
+                }
+                case Input::Module::shot_noise:
+                    parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
+                    parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
+                    parseOptional(valueIt,
+                                  "random_seed",
+                                  input.randomSeed,
+                                  {parseRun().randomSeed});
+                    parseOptional(valueIt, "dt", input.dt, {0.25});
+                    parseMandatory(valueIt, "rate", debugStr, input.rate);
+                    parseMandatory(valueIt, "amp_mean", debugStr, input.ampMean);
+                    parseMandatory(valueIt, "amp_var", debugStr, input.ampVar);
+                    break;
+                case Input::Module::relative_shot_noise:
+                    parseMandatory(valueIt, "rise_time", debugStr, input.riseTime);
+                    parseMandatory(valueIt, "decay_time", debugStr, input.decayTime);
+                    parseOptional(valueIt,
+                                  "random_seed",
+                                  input.randomSeed,
+                                  {parseRun().randomSeed});
+                    parseOptional(valueIt, "dt", input.dt, {0.25});
+                    parseMandatory(valueIt, "amp_cv", debugStr, input.ampCv);
+                    parseMandatory(valueIt, "mean_percent", debugStr, input.meanPercent);
+                    parseMandatory(valueIt, "sd_percent", debugStr, input.sdPercent);
+                    break;
+                case Input::Module::hyperpolarizing:
+                    break;
+                default:
+                    throw SonataError(moduledebugStr);
+                }
+                break;
+            case Input::InputType::spikes:
+                if (input.module == SimulationConfig::Input::Module::synapse_replay) {
+                    parseMandatory(valueIt, "spike_file", debugStr, input.spikeFile);
+                    input.spikeFile = toAbsolute(_basePath, input.spikeFile);
+                    parseOptional(valueIt, "source", input.source);
+                } else {
+                    throw SonataError(moduledebugStr);
+                }
+                break;
+            case Input::InputType::voltage_clamp:
+                if (input.module == Input::Module::seclamp) {
+                    parseMandatory(valueIt, "voltage", debugStr, input.voltage);
+                } else {
+                    throw SonataError(moduledebugStr);
+                }
+                break;
+            case Input::InputType::extracellular_stimulation:
+                break;
+            default:
+                throw SonataError(fmt::format("Unknown input_type in {}", debugStr));
+            }
+        }
+
+        return result;
+    }
+
   private:
     const fs::path _basePath;
     nlohmann::json _json;
@@ -648,6 +801,7 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _output = parser.parseOutput();
     _reports = parser.parseReports();
     _network = parser.parseNetwork();
+    _inputs = parser.parseInputs();
 }
 
 SimulationConfig SimulationConfig::fromFile(const std::string& path) {
@@ -680,6 +834,15 @@ const SimulationConfig::Report& SimulationConfig::getReport(const std::string& n
         throw SonataError(
             fmt::format("The report '{}' is not present in the simulation config file", name));
     }
+
+    return it->second;
+}
+
+const SimulationConfig::Input& SimulationConfig::getInput(const std::string& name) const {
+    const auto it = _inputs.find(name);
+    if (it == _inputs.end())
+        throw SonataError(
+            fmt::format("The input '{}' is not present in the simulation config file", name));
 
     return it->second;
 }

@@ -523,7 +523,10 @@ PYBIND11_MODULE(_libsonata, m) {
                                       "Run",
                                       "Stores parameters defining global simulation settings")
         .def_readonly("tstop", &SimulationConfig::Run::tstop, DOC_SIMULATIONCONFIG(Run, tstop))
-        .def_readonly("dt", &SimulationConfig::Run::dt, DOC_SIMULATIONCONFIG(Run, dt));
+        .def_readonly("dt", &SimulationConfig::Run::dt, DOC_SIMULATIONCONFIG(Run, dt))
+        .def_readonly("random_seed",
+                      &SimulationConfig::Run::randomSeed,
+                      DOC_SIMULATIONCONFIG(Run, randomSeed));
 
     py::class_<SimulationConfig::Output>(m, "Output", "Parameters of simulation output")
         .def_readonly("output_dir",
@@ -586,6 +589,96 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("center", SimulationConfig::Report::Compartments::center)
         .value("all", SimulationConfig::Report::Compartments::all);
 
+    py::class_<SimulationConfig::Input> input(m, "Input", "List of parameters of an input");
+    input
+        .def_readonly("module",
+                      &SimulationConfig::Input::module,
+                      DOC_SIMULATIONCONFIG(Input, module))
+        .def_readonly("input_type",
+                      &SimulationConfig::Input::inputType,
+                      DOC_SIMULATIONCONFIG(Input, inputType))
+        .def_readonly("delay", &SimulationConfig::Input::delay, DOC_SIMULATIONCONFIG(Input, delay))
+        .def_readonly("duration",
+                      &SimulationConfig::Input::duration,
+                      DOC_SIMULATIONCONFIG(Input, duration))
+        .def_readonly("node_set",
+                      &SimulationConfig::Input::nodeSet,
+                      DOC_SIMULATIONCONFIG(Input, nodeSet))
+        .def_readonly("amp_start",
+                      &SimulationConfig::Input::ampStart,
+                      DOC_SIMULATIONCONFIG(Input, ampStart))
+        .def_readonly("amp_end",
+                      &SimulationConfig::Input::ampEnd,
+                      DOC_SIMULATIONCONFIG(Input, ampEnd))
+        .def_readonly("percent_start",
+                      &SimulationConfig::Input::percentStart,
+                      DOC_SIMULATIONCONFIG(Input, percentStart))
+        .def_readonly("percent_end",
+                      &SimulationConfig::Input::percentEnd,
+                      DOC_SIMULATIONCONFIG(Input, percentEnd))
+        .def_readonly("width", &SimulationConfig::Input::width, DOC_SIMULATIONCONFIG(Input, width))
+        .def_readonly("frequency",
+                      &SimulationConfig::Input::frequency,
+                      DOC_SIMULATIONCONFIG(Input, frequency))
+        .def_readonly("percent_less",
+                      &SimulationConfig::Input::percentLess,
+                      DOC_SIMULATIONCONFIG(Input, percentLess))
+        .def_readonly("spike_file",
+                      &SimulationConfig::Input::spikeFile,
+                      DOC_SIMULATIONCONFIG(Input, spikeFile))
+        .def_readonly("source",
+                      &SimulationConfig::Input::source,
+                      DOC_SIMULATIONCONFIG(Input, source))
+        .def_readonly("voltage",
+                      &SimulationConfig::Input::voltage,
+                      DOC_SIMULATIONCONFIG(Input, voltage))
+        .def_readonly("mean", &SimulationConfig::Input::mean, DOC_SIMULATIONCONFIG(Input, mean))
+        .def_readonly("mean_percent",
+                      &SimulationConfig::Input::meanPercent,
+                      DOC_SIMULATIONCONFIG(Input, meanPercent))
+        .def_readonly("variance",
+                      &SimulationConfig::Input::variance,
+                      DOC_SIMULATIONCONFIG(Input, variance))
+        .def_readonly("rise_time",
+                      &SimulationConfig::Input::riseTime,
+                      DOC_SIMULATIONCONFIG(Input, riseTime))
+        .def_readonly("decay_time",
+                      &SimulationConfig::Input::decayTime,
+                      DOC_SIMULATIONCONFIG(Input, decayTime))
+        .def_readonly("rate", &SimulationConfig::Input::rate, "Rate of Poisson events (Hz)")
+        .def_readonly("amp_mean",
+                      &SimulationConfig::Input::ampMean,
+                      DOC_SIMULATIONCONFIG(Input, ampMean))
+        .def_readonly("amp_var",
+                      &SimulationConfig::Input::ampVar,
+                      DOC_SIMULATIONCONFIG(Input, ampVar))
+        .def_readonly("amp_cv", &SimulationConfig::Input::ampCv, DOC_SIMULATIONCONFIG(Input, ampCv))
+        .def_readonly("sd_percent",
+                      &SimulationConfig::Input::sdPercent,
+                      DOC_SIMULATIONCONFIG(Input, sdPercent))
+        .def_readonly("dt", &SimulationConfig::Input::dt, DOC_SIMULATIONCONFIG(Input, dt))
+        .def_readonly("random_seed",
+                      &SimulationConfig::Input::randomSeed,
+                      DOC_SIMULATIONCONFIG(Input, randomSeed));
+    py::enum_<SimulationConfig::Input::Module>(input, "Module")
+        .value("linear", SimulationConfig::Input::Module::linear)
+        .value("relative_linear", SimulationConfig::Input::Module::relative_linear)
+        .value("pulse", SimulationConfig::Input::Module::pulse)
+        .value("subthreshold", SimulationConfig::Input::Module::subthreshold)
+        .value("hyperpolarizing", SimulationConfig::Input::Module::hyperpolarizing)
+        .value("synapse_replay", SimulationConfig::Input::Module::synapse_replay)
+        .value("seclamp", SimulationConfig::Input::Module::seclamp)
+        .value("noise", SimulationConfig::Input::Module::noise)
+        .value("shot_noise", SimulationConfig::Input::Module::shot_noise)
+        .value("relative_shot_noise", SimulationConfig::Input::Module::relative_shot_noise);
+
+    py::enum_<SimulationConfig::Input::InputType>(input, "InputType")
+        .value("spikes", SimulationConfig::Input::InputType::spikes)
+        .value("extracellular_stimulation",
+               SimulationConfig::Input::InputType::extracellular_stimulation)
+        .value("current_clamp", SimulationConfig::Input::InputType::current_clamp)
+        .value("voltage_clamp", SimulationConfig::Input::InputType::voltage_clamp);
+
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
@@ -595,7 +688,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("run", &SimulationConfig::getRun)
         .def_property_readonly("output", &SimulationConfig::getOutput)
         .def_property_readonly("network", &SimulationConfig::getNetwork)
-        .def("report", &SimulationConfig::getReport, "name"_a);
+        .def("report", &SimulationConfig::getReport, "name"_a)
+        .def("input", &SimulationConfig::getInput, "name"_a);
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")

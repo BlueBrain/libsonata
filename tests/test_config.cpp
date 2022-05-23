@@ -297,6 +297,7 @@ TEST_CASE("SimulationConfig") {
         using Catch::Matchers::WithinULP;
         CHECK(config.getRun().tstop == 1000);
         CHECK(config.getRun().dt == 0.025);
+        CHECK(config.getRun().randomSeed == 201506);
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
@@ -331,6 +332,26 @@ TEST_CASE("SimulationConfig") {
 
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
+
+        CHECK(config.getInput("ex_linear").inputType ==
+              SimulationConfig::Input::InputType::current_clamp);
+        CHECK(config.getInput("ex_linear").module == SimulationConfig::Input::Module::linear);
+        CHECK(config.getInput("ex_linear").ampStart == 0.15);
+        CHECK(config.getInput("ex_linear").ampEnd == 0.15);
+        CHECK(config.getInput("ex_linear").delay == 0);
+        CHECK(config.getInput("ex_linear").duration == 15);
+        CHECK(config.getInput("ex_linear").nodeSet == "Column");
+        CHECK(config.getInput("ex_rel_linear").percentStart == 80);
+        CHECK(config.getInput("ex_rel_linear").percentEnd == 20);
+        CHECK(config.getInput("ex_noise_meanpercent").mean == nonstd::nullopt);
+        CHECK(config.getInput("ex_noise_meanpercent").meanPercent == 0.01);
+        CHECK(config.getInput("ex_noise_mean").mean == 0);
+        CHECK(config.getInput("ex_noise_mean").meanPercent == nonstd::nullopt);
+        CHECK(config.getInput("ex_rel_shotnoise").randomSeed == config.getRun().randomSeed);
+        CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
+        CHECK(config.getInput("ex_replay").spikeFile ==
+              fs::absolute(basePath / fs::path("replay.dat")).lexically_normal());
+        CHECK(config.getInput("ex_replay").source == "ML_afferents");
     }
     SECTION("manifest_network") {
         auto contents = R"({
@@ -339,6 +360,7 @@ TEST_CASE("SimulationConfig") {
           },
           "network": "$CIRCUIT_DIR/circuit_config.json",
           "run": {
+            "random_seed": 12345,
             "dt": 0.05,
             "tstop": 1000
           }
@@ -357,6 +379,7 @@ TEST_CASE("SimulationConfig") {
         {  // No tstop in run section
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05
               }
             })";
@@ -365,7 +388,17 @@ TEST_CASE("SimulationConfig") {
         {  // No dt in run section
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "tstop": 1000
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No random_seed in run section
+            auto contents = R"({
+              "run": {
+                "tstop": 1000,
+                "dt": 0.05
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
@@ -373,6 +406,7 @@ TEST_CASE("SimulationConfig") {
         {  // No reports section
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               }
@@ -382,6 +416,7 @@ TEST_CASE("SimulationConfig") {
         {  // No cells in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -400,6 +435,7 @@ TEST_CASE("SimulationConfig") {
         {  // No type in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -455,6 +491,7 @@ TEST_CASE("SimulationConfig") {
         {  // No dt in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -473,6 +510,7 @@ TEST_CASE("SimulationConfig") {
         {  // No start_time in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -491,6 +529,7 @@ TEST_CASE("SimulationConfig") {
         {  // No end_time in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -617,6 +656,107 @@ TEST_CASE("SimulationConfig") {
                    "dt": 0.05,
                    "start_time": 0,
                    "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // wrong input_type in an input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "linear": {
+                   "input_type": "current",
+                   "module": "linear",
+                   "amp_start": 0.15,
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column"
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // wrong module in an input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "linear": {
+                   "input_type": "current_clamp",
+                   "module": "spike_replay",
+                   "amp_start": 0.15,
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column"
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // no amp_start in a linear input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "linear": {
+                   "input_type": "current_clamp",
+                   "module": "spike_replay",
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column"
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Both mean and mean_percent are given in a noise input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "noise": {
+                   "input_type": "current_clamp",
+                   "module": "noise",
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column",
+                   "mean" : 0.1,
+                   "mean_percent": 0.01,
+                   "variance": 0.001
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // No mean or mean_percent are given in a noise input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "noise": {
+                   "input_type": "current_clamp",
+                   "module": "noise",
+                   "delay": 0,
+                   "duration": 15,
+                   "node_set":"Column",
+                   "variance": 0.001
                 }
               }
             })";
