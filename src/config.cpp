@@ -282,14 +282,23 @@ SimulationConfig::Input::InputParameters parseInputModule(
         const auto mean = valueIt.find("mean");
         const auto mean_percent = valueIt.find("mean_percent");
 
-        if (mean != valueIt.end() && mean_percent == valueIt.end()) {
+        if (mean != valueIt.end()) {
             parseOptional(valueIt, "mean", ret.mean);
-        } else if (mean == valueIt.end() && mean_percent != valueIt.end()) {
-            parseOptional(valueIt, "mean_percent", ret.meanPercent);
-        } else {
-            throw SonataError(
-                fmt::format("Either mean or mean_percent should be provided in {}", debugStr));
         }
+
+        if (mean_percent != valueIt.end()) {
+            parseOptional(valueIt, "mean_percent", ret.meanPercent);
+        }
+
+        if (ret.mean.has_value() && ret.meanPercent.has_value()) {
+            throw SonataError(
+                fmt::format("Both `mean` or `mean_percent` have values in {}", debugStr));
+        } else if (!ret.mean.has_value() && !ret.meanPercent.has_value()) {
+            throw SonataError(
+                fmt::format("One of `mean` or `mean_percent` need to have a value in {}",
+                            debugStr));
+        }
+
         parseOptional(valueIt, "variance", ret.variance);
         return ret;
     }
@@ -805,7 +814,8 @@ class SimulationConfig::Parser
                        nonstd::holds_alternative<Input::Subthreshold>(input.parameters) ||
                        nonstd::holds_alternative<Input::Noise>(input.parameters) ||
                        nonstd::holds_alternative<Input::ShotNoise>(input.parameters) ||
-                       nonstd::holds_alternative<Input::RelativeShotNoise>(input.parameters));
+                       nonstd::holds_alternative<Input::RelativeShotNoise>(input.parameters) ||
+                       nonstd::holds_alternative<Input::Hyperpolarizing>(input.parameters));
                 }
                 break;
             case Input::InputType::spikes:

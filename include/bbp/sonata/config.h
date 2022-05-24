@@ -312,9 +312,9 @@ class SONATA_API SimulationConfig
 
         struct Noise {
             /// The mean value of current to inject (nA)
-            nonstd::optional<double> mean{};
+            nonstd::optional<double> mean{nonstd::nullopt};
             /// The mean value of current to inject as a percentage of threshold current
-            nonstd::optional<double> meanPercent{};
+            nonstd::optional<double> meanPercent{nonstd::nullopt};
             /// State var to track whether the value of injected noise current is mean or
             /// mean_percent
             double variance{};
