@@ -541,8 +541,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_Conditions = R"doc(Paramete
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_celsius = R"doc(Temperature of experiment. Default is 34.0)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_extracellularCalcium =
-R"doc(Extracellular calcium concentration, to be applied to the synapse
-uHill parameter to scale the U parameter of synapses. Default is None.)doc";
+R"doc(Extracellular calcium concentration, being applied to the synapse
+uHill parameter in order to scale the U parameter of synapses. Default
+is None.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_minisSingleVesicle =
 R"doc(Limit spontaneous release to single vesicle when true. Default is
@@ -552,7 +553,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_Conditions_randomizeGabaRis
 R"doc(Enable legacy behavior to randomize the GABA_A rise time in the helper
 functions. Default is false)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Conditions_synapsesInitDepleted = R"doc(Synapse at start of simulation are in deleted state. Default is false)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_synapsesInitDepleted = R"doc(Synapse at start of simulation are in depleted state. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_vInit = R"doc(Initial membrane voltage in mV. Default is -80)doc";
 

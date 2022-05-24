@@ -752,7 +752,7 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
-        {  // No mean or mean_percent are given in a noise input object
+        {  // No valuable mean or mean_percent are given in a noise input object
             auto contents = R"({
               "run": {
                 "random_seed": 12345,
@@ -766,7 +766,8 @@ TEST_CASE("SimulationConfig") {
                    "delay": 0,
                    "duration": 15,
                    "node_set":"Column",
-                   "variance": 0.001
+                   "variance": 0.001,
+                   "mean" : null
                 }
               }
             })";

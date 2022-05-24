@@ -216,7 +216,7 @@ class SONATA_API SimulationConfig
         double celsius;
         /// Initial membrane voltage in mV. Default is -80
         double vInit;
-        /// Synapse at start of simulation are in deleted state. Default is false
+        /// Synapse at start of simulation are in depleted state. Default is false
         bool synapsesInitDepleted;
         /// Extracellular calcium concentration, being applied to the synapse uHill parameter in
         /// order to scale the U parameter of synapses. Default is None.

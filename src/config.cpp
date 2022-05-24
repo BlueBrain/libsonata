@@ -752,15 +752,17 @@ class SimulationConfig::Parser
                     parseMandatory(valueIt, "percent_less", debugStr, input.percentLess);
                     break;
                 case Input::Module::noise: {
-                    const auto has_mean = valueIt.find("mean") != valueIt.end();
-                    const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
-                    if (has_mean == has_meanpercent) {
+                    if (valueIt.find("mean") != valueIt.end()) {
+                        parseOptional(valueIt, "mean", input.mean);
+                    }
+                    if (valueIt.find("mean_percent") != valueIt.end()) {
+                        parseOptional(valueIt, "mean_percent", input.meanPercent);
+                    }
+                    if (input.mean.has_value() == input.meanPercent.has_value()) {
                         throw SonataError(
                             fmt::format("Either mean or mean_percent should be provided in {}",
                                         debugStr));
                     }
-                    parseOptional(valueIt, "mean", input.mean);
-                    parseOptional(valueIt, "mean_percent", input.meanPercent);
                     parseOptional(valueIt, "variance", input.variance);
                     break;
                 }
