@@ -533,13 +533,50 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::Run::randomSeed,
                       DOC_SIMULATIONCONFIG(Run, randomSeed));
 
-    py::class_<SimulationConfig::Output>(m, "Output", "Parameters of simulation output")
+    py::class_<SimulationConfig::Output> output(m, "Output", "Parameters of simulation output");
+    output
         .def_readonly("output_dir",
                       &SimulationConfig::Output::outputDir,
                       DOC_SIMULATIONCONFIG(Output, outputDir))
         .def_readonly("spikes_file",
                       &SimulationConfig::Output::spikesFile,
-                      DOC_SIMULATIONCONFIG(Output, spikesFile));
+                      DOC_SIMULATIONCONFIG(Output, spikesFile))
+        .def_readonly("log_file",
+                      &SimulationConfig::Output::logFile,
+                      DOC_SIMULATIONCONFIG(Output, logFile))
+        .def_readonly("spikes_file",
+                      &SimulationConfig::Output::spikesFile,
+                      DOC_SIMULATIONCONFIG(Output, spikesFile))
+        .def_readonly("spikes_sort_order",
+                      &SimulationConfig::Output::sortOrder,
+                      DOC_SIMULATIONCONFIG(Output, sortOrder));
+
+    py::enum_<SimulationConfig::Output::SpikesSortOrder>(output, "SpikesSortOrder")
+        .value("none", SimulationConfig::Output::SpikesSortOrder::none)
+        .value("by_id", SimulationConfig::Output::SpikesSortOrder::by_id)
+        .value("by_time", SimulationConfig::Output::SpikesSortOrder::by_time);
+
+    py::class_<SimulationConfig::Conditions>(m,
+                                             "Conditions",
+                                             "Parameters defining global experimental conditions")
+        .def_readonly("celsius",
+                      &SimulationConfig::Conditions::celsius,
+                      DOC_SIMULATIONCONFIG(Conditions, celsius))
+        .def_readonly("v_init",
+                      &SimulationConfig::Conditions::vInit,
+                      DOC_SIMULATIONCONFIG(Conditions, vInit))
+        .def_readonly("synapses_init_depleted",
+                      &SimulationConfig::Conditions::synapsesInitDepleted,
+                      DOC_SIMULATIONCONFIG(Conditions, synapsesInitDepleted))
+        .def_readonly("extracellular_calcium",
+                      &SimulationConfig::Conditions::extracellularCalcium,
+                      DOC_SIMULATIONCONFIG(Conditions, extracellularCalcium))
+        .def_readonly("minis_single_vesicle",
+                      &SimulationConfig::Conditions::minisSingleVesicle,
+                      DOC_SIMULATIONCONFIG(Conditions, minisSingleVesicle))
+        .def_readonly("randomize_gaba_rise_time",
+                      &SimulationConfig::Conditions::randomizeGabaRiseTime,
+                      DOC_SIMULATIONCONFIG(Conditions, randomizeGabaRiseTime));
 
     py::class_<SimulationConfig::Report> report(m, "Report", "Parameters of a report");
     report
@@ -760,6 +797,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("json", &SimulationConfig::getJSON)
         .def_property_readonly("run", &SimulationConfig::getRun)
         .def_property_readonly("output", &SimulationConfig::getOutput)
+        .def_property_readonly("conditions", &SimulationConfig::getConditions)
         .def_property_readonly("network", &SimulationConfig::getNetwork)
         .def("report", &SimulationConfig::getReport, "name"_a)
         .def("input", &SimulationConfig::getInput, "name"_a);

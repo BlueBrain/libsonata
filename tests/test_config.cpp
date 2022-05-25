@@ -313,6 +313,16 @@ TEST_CASE("SimulationConfig") {
         const auto outputPath = fs::absolute(basePath / fs::path("output"));
         CHECK(config.getOutput().outputDir == outputPath.lexically_normal());
         CHECK(config.getOutput().spikesFile == "out.h5");
+        CHECK(config.getOutput().logFile.empty());
+        CHECK(config.getOutput().sortOrder == SimulationConfig::Output::SpikesSortOrder::by_id);
+
+        CHECK_NOTHROW(config.getConditions());
+        CHECK(config.getConditions().celsius == 35.);
+        CHECK(config.getConditions().vInit == -80);
+        CHECK(config.getConditions().synapsesInitDepleted == false);
+        CHECK(config.getConditions().extracellularCalcium == nonstd::nullopt);
+        CHECK(config.getConditions().minisSingleVesicle == false);
+        CHECK(config.getConditions().randomizeGabaRiseTime == false);
 
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
@@ -847,7 +857,7 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
-        {  // No mean or mean_percent are given in a noise input object
+        {  // No valuable mean or mean_percent are given in a noise input object
             auto contents = R"({
               "run": {
                 "random_seed": 12345,
@@ -861,7 +871,8 @@ TEST_CASE("SimulationConfig") {
                    "delay": 0,
                    "duration": 15,
                    "node_set":"Column",
-                   "variance": 0.001
+                   "variance": 0.001,
+                   "mean" : null
                 }
               }
             })";
@@ -883,6 +894,20 @@ TEST_CASE("SimulationConfig") {
                    "input_type": "Does_not_exist",
                    "module": "hyperpolarization"
                 }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Invalid spikes ordering in the output section
+            auto contents = R"({
+              "run": {
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "output": {
+                "output_dir": "$OUTPUT_DIR/output",
+                "spikes_file": "out.h5",
+                "spikes_sort_order": "invalid-order"
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);

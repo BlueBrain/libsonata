@@ -12,7 +12,12 @@
     },
     "output": {
          "output_dir": "$OUTPUT_DIR/output",
-         "spikes_file": "out.h5"
+         "spikes_file": "out.h5",
+         "spikes_sort_order": "by_id"
+    },
+    "conditions": {
+     "celsius": 35.0,
+     "synapses_init_deleted": false
     },
     "inputs": {
         "ex_linear": {
@@ -49,6 +54,33 @@
             "delay": 10,
             "duration": 80,
             "node_set": "Mosaic"
+        },
+        "ex_shotnoise": {
+            "input_type": "current_clamp",
+            "module": "shot_noise",
+            "delay": 0,
+            "duration": 1000,
+            "decay_time": 4,
+            "rise_time": 0.4,
+            "amp_mean": 70,
+            "amp_var": 40,
+            "rate": 4,
+            "node_set": "L5E"
+        },
+        "ex_hyperpolarizing": {
+            "input_type": "current_clamp",
+            "module": "hyperpolarizing",
+            "delay": 0,
+            "duration": 1000,
+            "node_set": "L5E"
+        },
+        "ex_seclamp": {
+            "input_type": "voltage_clamp",
+            "module": "seclamp",
+            "delay": 0,
+            "duration": 1000,
+            "node_set": "L5E",
+            "voltage": 1.1
         },
         "ex_noise_meanpercent": {
             "input_type": "current_clamp",
