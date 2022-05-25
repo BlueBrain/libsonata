@@ -339,140 +339,123 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
 
+        using InputType = SimulationConfig::InputBase::InputType;
+        using Module = SimulationConfig::InputBase::Module;
         {
-            const auto input = config.getInput("ex_linear");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::linear);
+            const auto input = nonstd::get<SimulationConfig::InputLinear>(config.getInput("ex_linear"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::linear);
             CHECK(input.delay == 0);
             CHECK(input.duration == 15);
             CHECK(input.nodeSet == "Column");
-
-            const auto params = nonstd::get<SimulationConfig::Input::Linear>(input.parameters);
-            CHECK(params.ampStart == 0.15);
-            CHECK(params.ampEnd == 0.15);
+            CHECK(input.ampStart == 0.15);
+            CHECK(input.ampEnd == 0.15);
         }
         {
-            const auto input = config.getInput("ex_rel_linear");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::relative_linear);
+            const auto input = nonstd::get<SimulationConfig::InputRelativeLinear>(config.getInput("ex_rel_linear"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::relative_linear);
             CHECK(input.delay == 0);
             CHECK(input.duration == 1000);
             CHECK(input.nodeSet == "Column");
-
-            const auto params = nonstd::get<SimulationConfig::Input::RelativeLinear>(input.parameters);
-            CHECK(params.percentStart == 80);
-            CHECK(params.percentEnd == 20);
+            CHECK(input.percentStart == 80);
+            CHECK(input.percentEnd == 20);
         }
         {
-            const auto input = config.getInput("ex_pulse");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::pulse);
+            const auto input = nonstd::get<SimulationConfig::InputPulse>(config.getInput("ex_pulse"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::pulse);
             CHECK(input.delay == 10);
             CHECK(input.duration == 80);
             CHECK(input.nodeSet == "Mosaic");
 
-            const auto params = nonstd::get<SimulationConfig::Input::Pulse>(input.parameters);
-            CHECK(params.frequency == 80);
-            CHECK(params.ampStart == 2);
-            CHECK(params.width == 1);
+            CHECK(input.frequency == 80);
+            CHECK(input.ampStart == 2);
+            CHECK(input.width == 1);
         }
         {
-            const auto input = config.getInput("ex_subthreshold");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::subthreshold);
+            const auto input = nonstd::get<SimulationConfig::InputSubthreshold>(config.getInput("ex_subthreshold"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::subthreshold);
             CHECK(input.delay == 10);
             CHECK(input.duration == 80);
             CHECK(input.nodeSet == "Mosaic");
-
-            const auto params = nonstd::get<SimulationConfig::Input::Subthreshold>(input.parameters);
-            CHECK(params.percentLess == 80);
+            CHECK(input.percentLess == 80);
         }
         {
-            const auto input = config.getInput("ex_noise_meanpercent");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::noise);
+            const auto input = nonstd::get<SimulationConfig::InputNoise>(config.getInput("ex_noise_meanpercent"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::noise);
             CHECK(input.delay == 0);
             CHECK(input.duration == 5000);
             CHECK(input.nodeSet == "Rt_RC");
-
-            const auto params = nonstd::get<SimulationConfig::Input::Noise>(input.parameters);
-            CHECK(params.meanPercent.value() == 0.01);
-            CHECK(params.variance == 0.001);
+            CHECK(input.meanPercent.value() == 0.01);
+            CHECK(input.variance == 0.001);
         }
         {
-            const auto input = config.getInput("ex_noise_mean");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::noise);
+            const auto input = nonstd::get<SimulationConfig::InputNoise>(config.getInput("ex_noise_mean"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::noise);
             CHECK(input.delay == 0);
             CHECK(input.duration == 5000);
             CHECK(input.nodeSet == "Rt_RC");
-
-            const auto params = nonstd::get<SimulationConfig::Input::Noise>(input.parameters);
-            CHECK(params.mean.value() == 0);
-            CHECK(params.variance == 0.001);
+            CHECK(input.mean.value() == 0);
+            CHECK(input.variance == 0.001);
         }
         {
-            const auto input = config.getInput("ex_shotnoise");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::shot_noise);
+            const auto input = nonstd::get<SimulationConfig::InputShotNoise>(config.getInput("ex_shotnoise"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::shot_noise);
             CHECK(input.delay == 0);
             CHECK(input.duration == 1000);
             CHECK(input.nodeSet == "L5E");
-
-            const auto params = nonstd::get<SimulationConfig::Input::ShotNoise>(input.parameters);
-            CHECK(params.ampMean == 70);
-            CHECK(params.ampVar == 40);
-            CHECK(params.rate == 4);
-            CHECK(params.randomSeed == 201506);
-            CHECK(params.riseTime == 0.4);
-            CHECK(params.decayTime == 4);
+            CHECK(input.ampMean == 70);
+            CHECK(input.ampVar == 40);
+            CHECK(input.rate == 4);
+            CHECK(input.randomSeed == 201506);
+            CHECK(input.riseTime == 0.4);
+            CHECK(input.decayTime == 4);
         }
         {
-            const auto input = config.getInput("ex_rel_shotnoise");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::relative_shot_noise);
+            const auto input = nonstd::get<SimulationConfig::InputRelativeShotNoise>(config.getInput("ex_rel_shotnoise"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::relative_shot_noise);
             CHECK(input.delay == 0);
             CHECK(input.duration == 1000);
             CHECK(input.nodeSet == "L5E");
-
-            const auto params = nonstd::get<SimulationConfig::Input::RelativeShotNoise>(input.parameters);
-            CHECK(params.ampCv == 0.63);
-            CHECK(params.meanPercent == 70);
-            CHECK(params.sdPercent == 40);
-            CHECK(params.randomSeed == 201506);
-            CHECK(params.riseTime == 0.4);
-            CHECK(params.decayTime == 4);
+            CHECK(input.ampCv == 0.63);
+            CHECK(input.meanPercent == 70);
+            CHECK(input.sdPercent == 40);
+            CHECK(input.randomSeed == 201506);
+            CHECK(input.riseTime == 0.4);
+            CHECK(input.decayTime == 4);
         }
         {
-            const auto input = config.getInput("ex_hyperpolarizing");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::current_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::hyperpolarizing);
+            const auto input = nonstd::get<SimulationConfig::InputHyperpolarizing>(config.getInput("ex_hyperpolarizing"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::hyperpolarizing);
             CHECK(input.delay == 0);
             CHECK(input.duration == 1000);
             CHECK(input.nodeSet == "L5E");
         }
         {
-            const auto input = config.getInput("ex_replay");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::spikes);
-            CHECK(input.module == SimulationConfig::Input::Module::synapse_replay);
+            const auto input = nonstd::get<SimulationConfig::InputSynapseReplay>(config.getInput("ex_replay"));
+            CHECK(input.inputType == InputType::spikes);
+            CHECK(input.module == Module::synapse_replay);
             CHECK(input.delay == 0);
             CHECK(input.duration == 40000);
             CHECK(input.nodeSet == "Column");
-
-            const auto params = nonstd::get<SimulationConfig::Input::SynapseReplay>(input.parameters);
-            CHECK(endswith(params.spikeFile, "replay.dat"));
-            CHECK(params.source == "ML_afferents");
+            CHECK(endswith(input.spikeFile, "replay.dat"));
+            CHECK(input.source == "ML_afferents");
         }
         {
-            const auto input = config.getInput("ex_seclamp");
-            CHECK(input.inputType == SimulationConfig::Input::InputType::voltage_clamp);
-            CHECK(input.module == SimulationConfig::Input::Module::seclamp);
+            const auto input = nonstd::get<SimulationConfig::InputSeclamp>(config.getInput("ex_seclamp"));
+            CHECK(input.inputType == InputType::voltage_clamp);
+            CHECK(input.module == Module::seclamp);
             CHECK(input.delay == 0);
             CHECK(input.duration == 1000.);
             CHECK(input.nodeSet == "L5E");
-
-            const auto params = nonstd::get<SimulationConfig::Input::Seclamp>(input.parameters);
-            CHECK(params.voltage == 1.1);
+            CHECK(input.voltage == 1.1);
         }
     }
     SECTION("manifest_network") {

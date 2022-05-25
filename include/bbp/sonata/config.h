@@ -243,7 +243,7 @@ class SONATA_API SimulationConfig
 
     using ReportMap = std::unordered_map<std::string, Report>;
 
-    struct Input {
+    struct InputBase {
         enum class Module {
             invalid = -1,
             linear,
@@ -266,93 +266,6 @@ class SONATA_API SimulationConfig
             voltage_clamp
         };
 
-        struct Linear {
-            /// The amount of current initially injected (nA)
-            double ampStart{};
-            /// The final current when a stimulus concludes (nA)
-            double ampEnd{};
-        };
-
-        struct RelativeLinear {
-            /// The percentage of a cell's threshold current to inject
-            double percentStart{};
-            /// The percentage of a cell's threshold current to inject at the end
-            double percentEnd{};
-        };
-
-        struct Pulse {
-            /// The amount of current initially injected (nA)
-            double ampStart{};
-            /// The final current when a stimulus concludes (nA)
-            double ampEnd{};
-            /// The length of time each pulse lasts (ms)
-            double width{};
-            /// The frequency of pulse trains (Hz)
-            double frequency{};
-        };
-
-        struct Subthreshold {
-            /// A percentage adjusted from 100 of a cell's threshold current
-            double percentLess{};
-        };
-
-        struct Hyperpolarizing {};
-
-        struct SynapseReplay {
-            /// The location of the file with the spike info for injection
-            std::string spikeFile;
-            /// The node set to replay spikes from
-            std::string source;
-        };
-
-        struct Seclamp {
-            /// The membrane voltage the targeted cells should be held at (mV)
-            double voltage{};
-        };
-
-        struct Noise {
-            /// The mean value of current to inject (nA)
-            nonstd::optional<double> mean{nonstd::nullopt};
-            /// The mean value of current to inject as a percentage of threshold current
-            nonstd::optional<double> meanPercent{nonstd::nullopt};
-            /// State var to track whether the value of injected noise current is mean or
-            /// mean_percent
-            double variance{};
-        };
-
-        struct ShotNoise {
-            /// The rise time of the bi-exponential shots (ms)
-            double riseTime{};
-            /// The decay time of the bi-exponential shots (ms)
-            double decayTime{};
-            /// Override the random seed to introduce correlations between cells
-            int randomSeed{};
-            /// Timestep of the injected current (ms). Default is 0.25 ms
-            double dt{};
-            /// Rate of Poisson events (Hz)
-            int rate{};
-            /// The mean of gamma-distributed amplitudes (nA)
-            double ampMean{};
-            /// The variance of gamma-distributed amplitudes
-            double ampVar{};
-        };
-
-        struct RelativeShotNoise {
-            /// The rise time of the bi-exponential shots (ms)
-            double riseTime{};
-            /// The decay time of the bi-exponential shots (ms)
-            double decayTime{};
-            /// Override the random seed to introduce correlations between cells
-            int randomSeed{};
-            /// Timestep of the injected current (ms). Default is 0.25 ms
-            double dt{};
-            /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
-            double ampCv{};
-            /// The mean value of current to inject as a percentage of threshold current
-            double meanPercent{};
-            /// std dev of the current to inject as a percent of cell's threshold current
-            double sdPercent{};
-        };
         /// Type of stimulus
         Module module;
         /// Type of input
@@ -363,20 +276,106 @@ class SONATA_API SimulationConfig
         double duration{};
         /// Node set which is affected by input
         std::string nodeSet;
-
-        using InputParameters = nonstd::variant<Linear,
-                                                RelativeLinear,
-                                                Pulse,
-                                                Subthreshold,
-                                                Hyperpolarizing,
-                                                SynapseReplay,
-                                                Seclamp,
-                                                Noise,
-                                                ShotNoise,
-                                                RelativeShotNoise>;
-        InputParameters parameters;
-
     };
+
+    struct InputLinear: public InputBase {
+        /// The amount of current initially injected (nA)
+        double ampStart{};
+        /// The final current when a stimulus concludes (nA)
+        double ampEnd{};
+    };
+
+    struct InputRelativeLinear: public InputBase {
+        /// The percentage of a cell's threshold current to inject
+        double percentStart{};
+        /// The percentage of a cell's threshold current to inject at the end
+        double percentEnd{};
+    };
+
+    struct InputPulse: public InputBase {
+        /// The amount of current initially injected (nA)
+        double ampStart{};
+        /// The final current when a stimulus concludes (nA)
+        double ampEnd{};
+        /// The length of time each pulse lasts (ms)
+        double width{};
+        /// The frequency of pulse trains (Hz)
+        double frequency{};
+    };
+
+    struct InputSubthreshold: public InputBase {
+        /// A percentage adjusted from 100 of a cell's threshold current
+        double percentLess{};
+    };
+
+    struct InputHyperpolarizing: public InputBase {};
+
+    struct InputSynapseReplay: public InputBase {
+        /// The location of the file with the spike info for injection
+        std::string spikeFile;
+        /// The node set to replay spikes from
+        std::string source;
+    };
+
+    struct InputSeclamp: public InputBase {
+        /// The membrane voltage the targeted cells should be held at (mV)
+        double voltage{};
+    };
+
+    struct InputNoise: public InputBase {
+        /// The mean value of current to inject (nA)
+        nonstd::optional<double> mean{nonstd::nullopt};
+        /// The mean value of current to inject as a percentage of threshold current
+        nonstd::optional<double> meanPercent{nonstd::nullopt};
+        /// State var to track whether the value of injected noise current is mean or
+        /// mean_percent
+        double variance{};
+    };
+
+    struct InputShotNoise: public InputBase {
+        /// The rise time of the bi-exponential shots (ms)
+        double riseTime{};
+        /// The decay time of the bi-exponential shots (ms)
+        double decayTime{};
+        /// Override the random seed to introduce correlations between cells
+        int randomSeed{};
+        /// Timestep of the injected current (ms). Default is 0.25 ms
+        double dt{};
+        /// Rate of Poisson events (Hz)
+        int rate{};
+        /// The mean of gamma-distributed amplitudes (nA)
+        double ampMean{};
+        /// The variance of gamma-distributed amplitudes
+        double ampVar{};
+    };
+
+    struct InputRelativeShotNoise: public InputBase {
+        /// The rise time of the bi-exponential shots (ms)
+        double riseTime{};
+        /// The decay time of the bi-exponential shots (ms)
+        double decayTime{};
+        /// Override the random seed to introduce correlations between cells
+        int randomSeed{};
+        /// Timestep of the injected current (ms). Default is 0.25 ms
+        double dt{};
+        /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
+        double ampCv{};
+        /// The mean value of current to inject as a percentage of threshold current
+        double meanPercent{};
+        /// std dev of the current to inject as a percent of cell's threshold current
+        double sdPercent{};
+    };
+
+    using Input = nonstd::variant<InputLinear,
+                                  InputRelativeLinear,
+                                  InputPulse,
+                                  InputSubthreshold,
+                                  InputHyperpolarizing,
+                                  InputSynapseReplay,
+                                  InputSeclamp,
+                                  InputNoise,
+                                  InputShotNoise,
+                                  InputRelativeShotNoise>;
 
     using InputMap = std::unordered_map<std::string, Input>;
 

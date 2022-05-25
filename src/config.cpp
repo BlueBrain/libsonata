@@ -75,27 +75,28 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Compartments,
                               {SimulationConfig::Report::Compartments::center, "center"},
                               {SimulationConfig::Report::Compartments::all, "all"}})
 
-NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Input::Module,
-                             {{SimulationConfig::Input::Module::invalid, nullptr},
-                              {SimulationConfig::Input::Module::linear, "linear"},
-                              {SimulationConfig::Input::Module::relative_linear, "relative_linear"},
-                              {SimulationConfig::Input::Module::pulse, "pulse"},
-                              {SimulationConfig::Input::Module::subthreshold, "subthreshold"},
-                              {SimulationConfig::Input::Module::hyperpolarizing, "hyperpolarizing"},
-                              {SimulationConfig::Input::Module::synapse_replay, "synapse_replay"},
-                              {SimulationConfig::Input::Module::seclamp, "seclamp"},
-                              {SimulationConfig::Input::Module::noise, "noise"},
-                              {SimulationConfig::Input::Module::shot_noise, "shot_noise"},
-                              {SimulationConfig::Input::Module::relative_shot_noise,
-                               "relative_shot_noise"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    SimulationConfig::InputBase::Module,
+    {{SimulationConfig::InputBase::Module::invalid, nullptr},
+     {SimulationConfig::InputBase::Module::linear, "linear"},
+     {SimulationConfig::InputBase::Module::relative_linear, "relative_linear"},
+     {SimulationConfig::InputBase::Module::pulse, "pulse"},
+     {SimulationConfig::InputBase::Module::subthreshold, "subthreshold"},
+     {SimulationConfig::InputBase::Module::hyperpolarizing, "hyperpolarizing"},
+     {SimulationConfig::InputBase::Module::synapse_replay, "synapse_replay"},
+     {SimulationConfig::InputBase::Module::seclamp, "seclamp"},
+     {SimulationConfig::InputBase::Module::noise, "noise"},
+     {SimulationConfig::InputBase::Module::shot_noise, "shot_noise"},
+     {SimulationConfig::InputBase::Module::relative_shot_noise, "relative_shot_noise"}})
 
-NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Input::InputType,
-                             {{SimulationConfig::Input::InputType::invalid, nullptr},
-                              {SimulationConfig::Input::InputType::spikes, "spikes"},
-                              {SimulationConfig::Input::InputType::extracellular_stimulation,
-                               "extracellular_stimulation"},
-                              {SimulationConfig::Input::InputType::current_clamp, "current_clamp"},
-                              {SimulationConfig::Input::InputType::voltage_clamp, "voltage_clamp"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    SimulationConfig::InputBase::InputType,
+    {{SimulationConfig::InputBase::InputType::invalid, nullptr},
+     {SimulationConfig::InputBase::InputType::spikes, "spikes"},
+     {SimulationConfig::InputBase::InputType::extracellular_stimulation,
+      "extracellular_stimulation"},
+     {SimulationConfig::InputBase::InputType::current_clamp, "current_clamp"},
+     {SimulationConfig::InputBase::InputType::voltage_clamp, "voltage_clamp"}})
 
 namespace {
 // to be replaced by std::filesystem once C++17 is used
@@ -240,45 +241,56 @@ void parseOptional(const nlohmann::json& it,
     }
 }
 
-SimulationConfig::Input::InputParameters parseInputModule(
-    const nlohmann::json& valueIt,
-    const SimulationConfig::Input::Module module,
-    const std::string& basePath,
-    int randomSeed,
-    const std::string& debugStr) {
-    using Input = SimulationConfig::Input;
+SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
+                                         const SimulationConfig::InputBase::Module module,
+                                         const std::string& basePath,
+                                         int randomSeed,
+                                         const std::string& debugStr) {
+    using Module = SimulationConfig::InputBase::Module;
 
     const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
                                             debugStr);
+    const auto parseCommon = [&](auto& input) {
+        input.module = module;
+        parseMandatory(valueIt, "input_type", debugStr, input.inputType);
+        parseMandatory(valueIt, "delay", debugStr, input.delay);
+        parseMandatory(valueIt, "duration", debugStr, input.duration);
+        parseMandatory(valueIt, "node_set", debugStr, input.nodeSet);
+    };
 
     switch (module) {
-    case Input::Module::linear: {
-        Input::Linear ret;
+    case Module::linear: {
+        SimulationConfig::InputLinear ret;
+        parseCommon(ret);
         parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
         parseOptional<double>(valueIt, "amp_end", ret.ampEnd, ret.ampStart);
         return ret;
     }
-    case Input::Module::relative_linear: {
-        Input::RelativeLinear ret;
+    case Module::relative_linear: {
+        SimulationConfig::InputRelativeLinear ret;
+        parseCommon(ret);
         parseMandatory(valueIt, "percent_start", debugStr, ret.percentStart);
         parseOptional<double>(valueIt, "percent_end", ret.percentEnd, ret.percentStart);
         return ret;
     }
-    case Input::Module::pulse: {
-        Input::Pulse ret;
+    case Module::pulse: {
+        SimulationConfig::InputPulse ret;
+        parseCommon(ret);
         parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
         parseMandatory(valueIt, "width", debugStr, ret.width);
         parseMandatory(valueIt, "frequency", debugStr, ret.frequency);
         parseOptional<double>(valueIt, "amp_end", ret.ampEnd, ret.ampStart);
         return ret;
     }
-    case Input::Module::subthreshold: {
-        Input::Subthreshold ret;
+    case Module::subthreshold: {
+        SimulationConfig::InputSubthreshold ret;
+        parseCommon(ret);
         parseMandatory(valueIt, "percent_less", debugStr, ret.percentLess);
         return ret;
     }
-    case Input::Module::noise: {
-        Input::Noise ret;
+    case Module::noise: {
+        SimulationConfig::InputNoise ret;
+        parseCommon(ret);
         const auto mean = valueIt.find("mean");
         const auto mean_percent = valueIt.find("mean_percent");
 
@@ -302,8 +314,9 @@ SimulationConfig::Input::InputParameters parseInputModule(
         parseOptional(valueIt, "variance", ret.variance);
         return ret;
     }
-    case Input::Module::shot_noise: {
-        Input::ShotNoise ret;
+    case Module::shot_noise: {
+        SimulationConfig::InputShotNoise ret;
+        parseCommon(ret);
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
         parseOptional<int>(valueIt, "random_seed", ret.randomSeed, randomSeed);
@@ -313,8 +326,9 @@ SimulationConfig::Input::InputParameters parseInputModule(
         parseMandatory(valueIt, "amp_var", debugStr, ret.ampVar);
         return ret;
     }
-    case Input::Module::relative_shot_noise: {
-        Input::RelativeShotNoise ret;
+    case Module::relative_shot_noise: {
+        SimulationConfig::InputRelativeShotNoise ret;
+        parseCommon(ret);
 
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
@@ -325,17 +339,22 @@ SimulationConfig::Input::InputParameters parseInputModule(
         parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
         return ret;
     }
-    case Input::Module::hyperpolarizing:
-        return Input::Hyperpolarizing{};
-    case Input::Module::synapse_replay: {
-        Input::SynapseReplay ret;
+    case Module::hyperpolarizing: {
+        SimulationConfig::InputHyperpolarizing ret;
+        parseCommon(ret);
+        return ret;
+    }
+    case Module::synapse_replay: {
+        SimulationConfig::InputSynapseReplay ret;
+        parseCommon(ret);
         parseMandatory(valueIt, "spike_file", debugStr, ret.spikeFile);
         parseOptional(valueIt, "source", ret.source);
         ret.spikeFile = toAbsolute(basePath, ret.spikeFile);
         return ret;
     }
-    case Input::Module::seclamp: {
-        Input::Seclamp ret;
+    case Module::seclamp: {
+        SimulationConfig::InputSeclamp ret;
+        parseCommon(ret);
         parseMandatory(valueIt, "voltage", debugStr, ret.voltage);
         return ret;
     }
@@ -794,37 +813,36 @@ class SimulationConfig::Parser
         }
 
         for (auto it = inputsIt->begin(); it != inputsIt->end(); ++it) {
-            auto& input = result[it.key()];
             const auto& valueIt = it.value();
             const auto debugStr = fmt::format("input {}", it.key());
-            parseMandatory(valueIt, "module", debugStr, input.module);
-            parseMandatory(valueIt, "input_type", debugStr, input.inputType);
-            parseMandatory(valueIt, "delay", debugStr, input.delay);
-            parseMandatory(valueIt, "duration", debugStr, input.duration);
-            parseMandatory(valueIt, "node_set", debugStr, input.nodeSet);
 
-            input.parameters = parseInputModule(valueIt, input.module, _basePath, parseRun().randomSeed, debugStr);
+            InputBase::Module module;
+            parseMandatory(valueIt, "module", debugStr, module);
 
-            switch (input.inputType) {
-            case Input::InputType::current_clamp:
-                {
-                assert(nonstd::holds_alternative<Input::Linear>(input.parameters) ||
-                       nonstd::holds_alternative<Input::RelativeLinear>(input.parameters) ||
-                       nonstd::holds_alternative<Input::Pulse>(input.parameters) ||
-                       nonstd::holds_alternative<Input::Subthreshold>(input.parameters) ||
-                       nonstd::holds_alternative<Input::Noise>(input.parameters) ||
-                       nonstd::holds_alternative<Input::ShotNoise>(input.parameters) ||
-                       nonstd::holds_alternative<Input::RelativeShotNoise>(input.parameters) ||
-                       nonstd::holds_alternative<Input::Hyperpolarizing>(input.parameters));
-                }
+            const auto input =
+                parseInputModule(valueIt, module, _basePath, parseRun().randomSeed, debugStr);
+            result[it.key()] = input;
+
+            auto inputType = nonstd::visit([](const auto& v) { return v.inputType; }, input);
+
+            switch (inputType) {
+            case InputBase::InputType::current_clamp: {
+                assert(nonstd::holds_alternative<SimulationConfig::InputLinear>(input) ||
+                       nonstd::holds_alternative<SimulationConfig::InputRelativeLinear>(input) ||
+                       nonstd::holds_alternative<SimulationConfig::InputPulse>(input) ||
+                       nonstd::holds_alternative<SimulationConfig::InputSubthreshold>(input) ||
+                       nonstd::holds_alternative<SimulationConfig::InputNoise>(input) ||
+                       nonstd::holds_alternative<SimulationConfig::InputShotNoise>(input) ||
+                       nonstd::holds_alternative<SimulationConfig::InputRelativeShotNoise>(input) ||
+                       nonstd::holds_alternative<SimulationConfig::InputHyperpolarizing>(input));
+            } break;
+            case InputBase::InputType::spikes:
+                assert(nonstd::holds_alternative<SimulationConfig::InputSynapseReplay>(input));
                 break;
-            case Input::InputType::spikes:
-                assert(nonstd::holds_alternative<Input::SynapseReplay>(input.parameters));
+            case InputBase::InputType::voltage_clamp:
+                assert(nonstd::holds_alternative<SimulationConfig::InputSeclamp>(input));
                 break;
-            case Input::InputType::voltage_clamp:
-                assert(nonstd::holds_alternative<Input::Seclamp>(input.parameters));
-                break;
-            case Input::InputType::extracellular_stimulation:
+            case InputBase::InputType::extracellular_stimulation:
                 break;
             default:
                 throw SonataError(fmt::format("Unknown input_type in {}", debugStr));
