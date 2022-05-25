@@ -74,6 +74,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Compartments,
                              {{SimulationConfig::Report::Compartments::invalid, nullptr},
                               {SimulationConfig::Report::Compartments::center, "center"},
                               {SimulationConfig::Report::Compartments::all, "all"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Output::SpikesSortOrder,
+                             {{SimulationConfig::Output::SpikesSortOrder::invalid, nullptr},
+                              {SimulationConfig::Output::SpikesSortOrder::none, "none"},
+                              {SimulationConfig::Output::SpikesSortOrder::by_id, "by_id"},
+                              {SimulationConfig::Output::SpikesSortOrder::by_time, "by_time"}})
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Input::Module,
                              {{SimulationConfig::Input::Module::invalid, nullptr},
@@ -615,16 +620,43 @@ class SimulationConfig::Parser
 
     SimulationConfig::Output parseOutput() const {
         SimulationConfig::Output result{};
-        result.outputDir = "output";
-        result.spikesFile = "out.h5";
 
         const auto outputIt = _json.find("output");
-        if (outputIt != _json.end()) {
-            parseOptional(*outputIt, "output_dir", result.outputDir);
-            parseOptional(*outputIt, "spikes_file", result.spikesFile);
+        if (outputIt == _json.end()) {
+            return result;
         }
+        parseOptional(*outputIt, "output_dir", result.outputDir, {"output"});
+        parseOptional(*outputIt, "log_file", result.logFile, {""});
+        parseOptional(*outputIt, "spikes_file", result.spikesFile, {"out.h5"});
+        parseOptional(*outputIt,
+                      "spikes_sort_order",
+                      result.sortOrder,
+                      {Output::SpikesSortOrder::by_time});
 
         result.outputDir = toAbsolute(_basePath, result.outputDir);
+
+        return result;
+    }
+
+    SimulationConfig::Conditions parseConditions() const {
+        SimulationConfig::Conditions result{};
+
+        const auto conditionsIt = _json.find("conditions");
+        if (conditionsIt == _json.end()) {
+            return result;
+        }
+        parseOptional(*conditionsIt, "celsius", result.celsius, {34.0});
+        parseOptional(*conditionsIt, "v_init", result.vInit, {-80});
+        parseOptional(*conditionsIt,
+                      "synapses_init_depleted",
+                      result.synapsesInitDepleted,
+                      {false});
+        parseOptional(*conditionsIt, "extracellular_calcium", result.extracellularCalcium);
+        parseOptional(*conditionsIt, "minis_single_vesicle", result.minisSingleVesicle, {false});
+        parseOptional(*conditionsIt,
+                      "randomize_gaba_rise_time",
+                      result.randomizeGabaRiseTime,
+                      {false});
 
         return result;
     }
@@ -720,15 +752,17 @@ class SimulationConfig::Parser
                     parseMandatory(valueIt, "percent_less", debugStr, input.percentLess);
                     break;
                 case Input::Module::noise: {
-                    const auto has_mean = valueIt.find("mean") != valueIt.end();
-                    const auto has_meanpercent = valueIt.find("mean_percent") != valueIt.end();
-                    if (has_mean == has_meanpercent) {
+                    if (valueIt.find("mean") != valueIt.end()) {
+                        parseOptional(valueIt, "mean", input.mean);
+                    }
+                    if (valueIt.find("mean_percent") != valueIt.end()) {
+                        parseOptional(valueIt, "mean_percent", input.meanPercent);
+                    }
+                    if (input.mean.has_value() == input.meanPercent.has_value()) {
                         throw SonataError(
                             fmt::format("Either mean or mean_percent should be provided in {}",
                                         debugStr));
                     }
-                    parseOptional(valueIt, "mean", input.mean);
-                    parseOptional(valueIt, "mean_percent", input.meanPercent);
                     parseOptional(valueIt, "variance", input.variance);
                     break;
                 }
@@ -799,6 +833,7 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     const Parser parser(content, basePath);
     _run = parser.parseRun();
     _output = parser.parseOutput();
+    _conditions = parser.parseConditions();
     _reports = parser.parseReports();
     _network = parser.parseNetwork();
     _inputs = parser.parseInputs();
@@ -822,6 +857,10 @@ const SimulationConfig::Run& SimulationConfig::getRun() const noexcept {
 
 const SimulationConfig::Output& SimulationConfig::getOutput() const noexcept {
     return _output;
+}
+
+const SimulationConfig::Conditions& SimulationConfig::getConditions() const noexcept {
+    return _conditions;
 }
 
 const std::string& SimulationConfig::getNetwork() const noexcept {

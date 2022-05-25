@@ -14,7 +14,7 @@ from libsonata import (EdgeStorage, NodeStorage,
                        CircuitConfig, SimulationConfig
                        )
 
-from libsonata._libsonata import Report
+from libsonata._libsonata import Report, Output
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, '../../tests/data')
@@ -592,6 +592,15 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/output')))
         self.assertEqual(self.config.output.spikes_file, 'out.h5')
+        self.assertEqual(self.config.output.log_file, '')
+        self.assertEqual(self.config.output.spikes_sort_order, Output.SpikesSortOrder.by_id)
+
+        self.assertEqual(self.config.conditions.celsius, 35.0)
+        self.assertEqual(self.config.conditions.v_init, -80)
+        self.assertEqual(self.config.conditions.synapses_init_depleted, False)
+        self.assertEqual(self.config.conditions.extracellular_calcium, None)
+        self.assertEqual(self.config.conditions.minis_single_vesicle, False)
+        self.assertEqual(self.config.conditions.randomize_gaba_rise_time, False)
 
         self.assertEqual(self.config.report('soma').cells, 'Mosaic')
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
@@ -624,6 +633,10 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_rel_linear').percent_end, 20)
         self.assertEqual(self.config.input('ex_pulse').width, 1)
         self.assertEqual(self.config.input('ex_pulse').frequency, 80)
+        self.assertEqual(self.config.input('ex_subthreshold').percent_less, 80)
+        self.assertEqual(self.config.input('ex_shotnoise').rise_time, 0.4)
+        self.assertEqual(self.config.input('ex_shotnoise').amp_mean, 70)
+        self.assertEqual(self.config.input('ex_hyperpolarizing').duration, 1000)        
         self.assertEqual(self.config.input('ex_noise_meanpercent').mean_percent, 0.01)
         self.assertEqual(self.config.input('ex_noise_meanpercent').mean, None)
         self.assertEqual(self.config.input('ex_noise_mean').mean, 0)
@@ -633,6 +646,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_replay').spike_file,
                          os.path.abspath(os.path.join(PATH, 'config/replay.dat')))
         self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
+        self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
 
     def test_json(self):
