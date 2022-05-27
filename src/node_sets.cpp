@@ -80,12 +80,7 @@ class NodeSets
 
 
     std::set<std::string> names() const {
-        std::set<std::string> ret;
-        std::transform(begin(node_sets_),
-                       end(node_sets_),
-                       std::inserter(ret, ret.begin()),
-                       [](decltype(node_sets_)::value_type const& pair) { return pair.first; });
-        return ret;
+        return getMapKeys(node_sets_);
     }
 
     std::string toJSON() const {

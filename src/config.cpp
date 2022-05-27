@@ -12,7 +12,6 @@
 #include <bbp/sonata/config.h>
 #include <bbp/sonata/optional.hpp>
 
-#include <algorithm>  // transform
 #include <bbp/sonata/optional.hpp>
 #include <cassert>
 #include <fstream>
@@ -867,6 +866,10 @@ const std::string& SimulationConfig::getNetwork() const noexcept {
     return _network;
 }
 
+std::set<std::string> SimulationConfig::listReportNames() const {
+    return getMapKeys(_reports);
+}
+
 const SimulationConfig::Report& SimulationConfig::getReport(const std::string& name) const {
     const auto it = _reports.find(name);
     if (it == _reports.end()) {
@@ -875,6 +878,10 @@ const SimulationConfig::Report& SimulationConfig::getReport(const std::string& n
     }
 
     return it->second;
+}
+
+std::set<std::string> SimulationConfig::listInputNames() const {
+    return getMapKeys(_inputs);
 }
 
 const SimulationConfig::Input& SimulationConfig::getInput(const std::string& name) const {
