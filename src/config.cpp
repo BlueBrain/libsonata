@@ -268,14 +268,14 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputLinear ret;
         parseCommon(ret);
         parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
-        parseOptional<double>(valueIt, "amp_end", ret.ampEnd, ret.ampStart);
+        parseOptional(valueIt, "amp_end", ret.ampEnd, {ret.ampStart});
         return ret;
     }
     case Module::relative_linear: {
         SimulationConfig::InputRelativeLinear ret;
         parseCommon(ret);
         parseMandatory(valueIt, "percent_start", debugStr, ret.percentStart);
-        parseOptional<double>(valueIt, "percent_end", ret.percentEnd, ret.percentStart);
+        parseOptional(valueIt, "percent_end", ret.percentEnd, {ret.percentStart});
         return ret;
     }
     case Module::pulse: {
@@ -284,7 +284,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
         parseMandatory(valueIt, "width", debugStr, ret.width);
         parseMandatory(valueIt, "frequency", debugStr, ret.frequency);
-        parseOptional<double>(valueIt, "amp_end", ret.ampEnd, ret.ampStart);
+        parseOptional(valueIt, "amp_end", ret.ampEnd, {ret.ampStart});
         return ret;
     }
     case Module::subthreshold: {
@@ -324,8 +324,8 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseCommon(ret);
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
-        parseOptional<int>(valueIt, "random_seed", ret.randomSeed, randomSeed);
-        parseOptional<double>(valueIt, "dt", ret.dt, 0.25);
+        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "rate", debugStr, ret.rate);
         parseMandatory(valueIt, "amp_mean", debugStr, ret.ampMean);
         parseMandatory(valueIt, "amp_var", debugStr, ret.ampVar);
@@ -337,8 +337,8 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
 
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
-        parseOptional<int>(valueIt, "random_seed", ret.randomSeed, randomSeed);
-        parseOptional<double>(valueIt, "dt", ret.dt, 0.25);
+        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
         parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
