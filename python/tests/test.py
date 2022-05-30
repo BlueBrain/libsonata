@@ -537,6 +537,59 @@ def test_path_ctor():
     NodeSets.from_file(path / 'node_sets.json')
     CircuitConfig.from_file(path / 'config/circuit_config.json')
 
+def test_shadowing_morphs():
+    contents = {
+        "manifest": {
+            "$BASE_DIR": "./",
+            },
+        "components": {
+            "biophysical_neuron_models_dir": "/biophysical_neuron_models",
+            "alternate_morphologies": {
+                "h5v1": "/morphologies/h5"
+                }
+            },
+        "networks": {
+            "edges": [
+                {
+                    "edges_file": "$BASE_DIR/edges1.h5",
+                    "populations": {
+                        "edges-AB": {
+                            "morphologies_dir": "/my/custom/morphologies/dir"
+                            }
+                        }
+                    }
+                ],
+            "nodes":[]
+            }
+        }
+    cc = CircuitConfig(json.dumps(contents), PATH)
+    pp = cc.edge_population_properties('edges-AB')
+    assert pp.alternate_morphology_formats == {'h5v1': '/morphologies/h5'}
+    assert pp.biophysical_neuron_models_dir == "/biophysical_neuron_models"
+    assert pp.morphologies_dir == "/my/custom/morphologies/dir"
+
+    contents = {
+        "manifest": {
+            "$BASE_DIR": "./",
+            },
+        "networks": {
+            "edges": [
+                {
+                    "edges_file": "$BASE_DIR/edges1.h5",
+                    "populations": {
+                        "edges-AB": {
+                            "morphologies_dir": "/my/custom/morphologies/dir"
+                            }
+                        }
+                    }
+                ],
+            "nodes":[]
+            }
+        }
+    cc = CircuitConfig(json.dumps(contents), PATH)
+    pp = cc.edge_population_properties('edges-AB')
+    assert pp.morphologies_dir == "/my/custom/morphologies/dir"
+
 
 class TestCircuitConfig(unittest.TestCase):
     def setUp(self):
@@ -673,6 +726,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_subthreshold').percent_less, 80)
         self.assertEqual(self.config.input('ex_shotnoise').rise_time, 0.4)
         self.assertEqual(self.config.input('ex_shotnoise').amp_mean, 70)
+
         self.assertEqual(self.config.input('ex_hyperpolarizing').duration, 1000)
 
         self.assertEqual(self.config.input('ex_noise_meanpercent').mean_percent, 0.01)
