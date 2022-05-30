@@ -490,6 +490,8 @@ TEST_CASE("SimulationConfig") {
               "ex_subthreshold"
               });
 
+        CHECK(config.listConnectionOverrideNames() ==
+              std::set<std::string>{"ConL3Exc-Uni", "GABAB_erev"});
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").source == "Excitatory");
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").target == "Mosaic");
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").weight == 1);

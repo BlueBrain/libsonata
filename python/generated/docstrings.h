@@ -887,6 +887,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_jsonContent = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_listConnectionOverrideNames = R"doc(Returns the names of the connection_overrides)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_listInputNames = R"doc(Returns the names of the reports)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listReportNames = R"doc(Returns the names of the reports)doc";

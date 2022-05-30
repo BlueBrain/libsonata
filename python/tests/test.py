@@ -704,6 +704,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
         self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
+        self.assertEqual(self.config.list_connection_override_names, {"ConL3Exc-Uni", "GABAB_erev"})
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').source, 'Excitatory')
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').target, 'Mosaic')
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').weight, 1)

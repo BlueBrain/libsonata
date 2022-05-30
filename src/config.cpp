@@ -988,6 +988,10 @@ const SimulationConfig::Input& SimulationConfig::getInput(const std::string& nam
     return it->second;
 }
 
+std::set<std::string> SimulationConfig::listConnectionOverrideNames() const {
+    return getMapKeys(_connections);
+}
+
 const SimulationConfig::ConnectionOverride& SimulationConfig::getConnectionOverride(
     const std::string& name) const {
     const auto it = _connections.find(name);

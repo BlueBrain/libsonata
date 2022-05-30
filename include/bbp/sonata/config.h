@@ -508,6 +508,11 @@ class SONATA_API SimulationConfig
     const Input& getInput(const std::string& name) const;
 
     /**
+     * Returns the names of the connection_overrides
+     */
+    std::set<std::string> listConnectionOverrideNames() const;
+
+    /**
      * Returns the given connection parameters
      *
      * \throws SonataError if the given connection name does not correspond with any existing
