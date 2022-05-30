@@ -602,6 +602,9 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.conditions.minis_single_vesicle, False)
         self.assertEqual(self.config.conditions.randomize_gaba_rise_time, False)
 
+        self.assertEqual(self.config.list_report_names,
+                         { "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
+
         self.assertEqual(self.config.report('soma').cells, 'Mosaic')
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
         self.assertEqual(self.config.report('soma').compartments, Report.Compartments.center)
@@ -621,6 +624,21 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.network,
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
+
+        self.assertEqual(self.config.list_input_names,
+                         {"ex_extracellular_stimulation",
+                          "ex_hyperpolarizing",
+                          "ex_linear",
+                          "ex_noise_mean",
+                          "ex_noise_meanpercent",
+                          "ex_pulse",
+                          "ex_rel_linear",
+                          "ex_rel_shotnoise",
+                          "ex_replay",
+                          "ex_seclamp",
+                          "ex_shotnoise",
+                          "ex_subthreshold"
+                          })
 
         self.assertEqual(self.config.input('ex_linear').input_type.name, 'current_clamp')
         self.assertEqual(self.config.input('ex_linear').module.name, 'linear')

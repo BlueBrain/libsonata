@@ -374,6 +374,11 @@ class SONATA_API SimulationConfig
     const std::string& getJSON() const noexcept;
 
     /**
+     * Returns circuit config file associated with this simulation config
+     */
+    const std::string& getNetwork() const noexcept;
+
+    /**
      * Returns the Run section of the simulation configuration.
      */
     const Run& getRun() const noexcept;
@@ -389,6 +394,11 @@ class SONATA_API SimulationConfig
     const Conditions& getConditions() const noexcept;
 
     /**
+     * Returns the names of the reports
+     */
+    std::set<std::string> listReportNames() const;
+
+    /**
      * Returns the given report parameters.
      *
      * \throws SonataError if the given report name does not correspond with any existing
@@ -396,8 +406,16 @@ class SONATA_API SimulationConfig
      */
     const Report& getReport(const std::string& name) const;
 
-    const std::string& getNetwork() const noexcept;
+    /**
+     * Returns the names of the reports
+     */
+    std::set<std::string> listInputNames() const;
 
+    /**
+     * Returns the given input parameters.
+     *
+     * \throws SonataError if the given input name does not exist
+     */
     const Input& getInput(const std::string& name) const;
 
   private:

@@ -320,6 +320,13 @@ TEST_CASE("SimulationConfig") {
 
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
+        CHECK(config.listReportNames() == std::set<std::string>{
+              "axonal_comp_centers",
+              "cell_imembrane",
+              "compartment",
+              "soma"
+              });
+
         CHECK(config.getReport("soma").cells == "Mosaic");
         CHECK(config.getReport("soma").type == SimulationConfig::Report::Type::compartment);
         CHECK(config.getReport("soma").compartments == SimulationConfig::Report::Compartments::center);
@@ -343,6 +350,21 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
 
+        CHECK(config.listInputNames() == std::set<std::string>{
+              "ex_extracellular_stimulation",
+              "ex_hyperpolarizing",
+              "ex_linear",
+              "ex_noise_mean",
+              "ex_noise_meanpercent",
+              "ex_pulse",
+              "ex_rel_linear",
+              "ex_rel_shotnoise",
+              "ex_replay",
+              "ex_seclamp",
+              "ex_shotnoise",
+              "ex_subthreshold"
+              });
+
         CHECK(config.getInput("ex_linear").inputType ==
               SimulationConfig::Input::InputType::current_clamp);
         CHECK(config.getInput("ex_linear").module == SimulationConfig::Input::Module::linear);
@@ -362,7 +384,9 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getInput("ex_replay").spikeFile ==
               fs::absolute(basePath / fs::path("replay.dat")).lexically_normal());
         CHECK(config.getInput("ex_replay").source == "ML_afferents");
+
     }
+
     SECTION("manifest_network") {
         auto contents = R"({
           "manifest": {
