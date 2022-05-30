@@ -497,11 +497,13 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").modoverride == "GluSynapse");
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").delay == 0.5);
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseDelayOverride == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseConfigure == nonstd::nullopt);
         CHECK(config.getConnectionOverride("GABAB_erev").spontMinis == nonstd::nullopt);
         CHECK(config.getConnectionOverride("GABAB_erev").synapseDelayOverride == 0.5);
         CHECK(config.getConnectionOverride("GABAB_erev").delay == 0);
         CHECK(config.getConnectionOverride("GABAB_erev").synapseConfigure ==
               "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77");
+        CHECK(config.getConnectionOverride("GABAB_erev").modoverride == nonstd::nullopt);
     }
 
     SECTION("manifest_network") {

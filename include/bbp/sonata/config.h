@@ -417,10 +417,12 @@ class SONATA_API SimulationConfig
         double weight{1.};
         /// Rate to spontaneously trigger the synapses in this connection_override, default = None
         nonstd::optional<double> spontMinis{nonstd::nullopt};
-        /// Snippet of hoc code to be executed on the synapses in this connection_override
-        std::string synapseConfigure;
-        /// Synapse helper files to instantiate the synapses in this connection_override
-        std::string modoverride;
+        /// Snippet of hoc code to be executed on the synapses in this connection_override, default
+        /// = None
+        nonstd::optional<std::string> synapseConfigure{nonstd::nullopt};
+        /// Synapse helper files to instantiate the synapses in this connection_override, default =
+        /// None
+        nonstd::optional<std::string> modoverride{nonstd::nullopt};
         /// Value to override the synaptic delay time originally set in the edge file (ms),
         /// default = None.
         nonstd::optional<double> synapseDelayOverride{nonstd::nullopt};

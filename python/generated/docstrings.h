@@ -569,7 +569,7 @@ the specified delay has elapsed in ms, default = 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_modoverride =
 R"doc(Synapse helper files to instantiate the synapses in this
-connection_override)doc";
+connection_override, default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_source = R"doc(node_set specifying presynaptic nodes)doc";
 
@@ -579,7 +579,7 @@ connection_override, default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_synapseConfigure =
 R"doc(Snippet of hoc code to be executed on the synapses in this
-connection_override)doc";
+connection_override, default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_synapseDelayOverride =
 R"doc(Value to override the synaptic delay time originally set in the edge
@@ -854,6 +854,13 @@ Throws:
 static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getConditions = R"doc(Returns the Conditions section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getConnectionOverride =
+R"doc(Returns the given connection parameters
+
+Throws:
+    SonataError if the given connection name does not correspond with
+    any existing connection.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getInput =
 R"doc(Returns the given input parameters.

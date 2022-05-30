@@ -711,10 +711,11 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').modoverride, 'GluSynapse')
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').delay, 0.5)
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_delay_override, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_configure, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').spont_minis, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').synapse_delay_override, 0.5)
         self.assertEqual(self.config.connection_override('GABAB_erev').delay, 0)
-        self.assertEqual(self.config.connection_override('GABAB_erev').modoverride, '')
+        self.assertEqual(self.config.connection_override('GABAB_erev').modoverride, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').synapse_configure, '%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77')
 
     def test_json(self):
