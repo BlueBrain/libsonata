@@ -326,6 +326,13 @@ TEST_CASE("SimulationConfig") {
 
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
+        CHECK(config.listReportNames() == std::set<std::string>{
+              "axonal_comp_centers",
+              "cell_imembrane",
+              "compartment",
+              "soma"
+              });
+
         CHECK(config.getReport("soma").cells == "Mosaic");
         CHECK(config.getReport("soma").type == SimulationConfig::Report::Type::compartment);
         CHECK(config.getReport("soma").compartments == SimulationConfig::Report::Compartments::center);
@@ -467,7 +474,23 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.nodeSet == "L5E");
             CHECK(input.voltage == 1.1);
         }
+
+        CHECK(config.listInputNames() == std::set<std::string>{
+              "ex_extracellular_stimulation",
+              "ex_hyperpolarizing",
+              "ex_linear",
+              "ex_noise_mean",
+              "ex_noise_meanpercent",
+              "ex_pulse",
+              "ex_rel_linear",
+              "ex_rel_shotnoise",
+              "ex_replay",
+              "ex_seclamp",
+              "ex_shotnoise",
+              "ex_subthreshold"
+              });
     }
+
     SECTION("manifest_network") {
         auto contents = R"({
           "manifest": {

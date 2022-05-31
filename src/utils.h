@@ -9,7 +9,13 @@
 
 #pragma once
 
+#include <algorithm>  // std::transform
+#include <iterator>   // std::inserter
+#include <map>
+#include <set>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <bbp/sonata/population.h>
@@ -28,4 +34,13 @@ bbp::sonata::Selection _getMatchingSelection(const std::vector<T>& values, Unary
         ++id;
     }
     return Selection::fromValues(ids);
+}
+
+template <typename T>
+std::set<std::string> getMapKeys(const T& map) {
+    std::set<std::string> ret;
+    std::transform(map.begin(), map.end(), std::inserter(ret, ret.end()), [](const auto& pair) {
+        return pair.first;
+    });
+    return ret;
 }

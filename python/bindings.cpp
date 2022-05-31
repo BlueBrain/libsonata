@@ -799,6 +799,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("output", &SimulationConfig::getOutput)
         .def_property_readonly("conditions", &SimulationConfig::getConditions)
         .def_property_readonly("network", &SimulationConfig::getNetwork)
+        .def_property_readonly("list_report_names", &SimulationConfig::listReportNames)
+        .def_property_readonly("list_input_names", &SimulationConfig::listInputNames)
         .def("report", &SimulationConfig::getReport, "name"_a)
         .def("input", &SimulationConfig::getInput, "name"_a);
 
