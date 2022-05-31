@@ -14,8 +14,12 @@
 
 using namespace bbp::sonata;
 
-bool endswith(const std::string haystack, const std::string needle) {
+bool endswith(const std::string& haystack, const std::string& needle) {
     return std::equal(needle.rbegin(), needle.rend(), haystack.rbegin());
+}
+
+bool contains(const std::string& haystack, const std::string& needle) {
+    return haystack.find(needle) != std::string::npos;
 }
 
 TEST_CASE("CircuitConfig") {
@@ -210,10 +214,10 @@ TEST_CASE("CircuitConfig") {
                 "edges":[]
               }
             })";
-            CHECK(CircuitConfig(contents, "./")
-                      .getNodePopulationProperties("nodes-A")
-                      .alternateMorphologyFormats["h5v1"]
-                      .find("morphologies/h5") != std::string::npos);
+            CHECK(contains(CircuitConfig(contents, "./")
+                           .getNodePopulationProperties("nodes-A")
+                           .alternateMorphologyFormats["h5v1"],
+                           "morphologies/h5"));
         }
 
         {  // Node population with overriden properties return correct information
@@ -251,9 +255,10 @@ TEST_CASE("CircuitConfig") {
                 "edges":[]
               }
             })";
-            CHECK(CircuitConfig(contents, "./")
-                      .getNodePopulationProperties("nodes-A")
-                      .morphologiesDir.find("/my/custom/morpholgoies/dir") != std::string::npos);
+            CHECK(contains(CircuitConfig(contents, "./")
+                           .getNodePopulationProperties("nodes-A")
+                           .morphologiesDir,
+                           "/my/custom/morpholgoies/dir"));
         }
 
         {  // Edge population with overriden properties return correct information
@@ -283,9 +288,10 @@ TEST_CASE("CircuitConfig") {
                 "nodes":[]
               }
             })";
-            CHECK(CircuitConfig(contents, "./")
-                      .getEdgePopulationProperties("edges-AB")
-                      .morphologiesDir.find("/my/custom/morpholgoies/dir") != std::string::npos);
+            CHECK(contains(CircuitConfig(contents, "./")
+                           .getEdgePopulationProperties("edges-AB")
+                           .morphologiesDir,
+                           "/my/custom/morpholgoies/dir"));
         }
     }
 }
@@ -350,6 +356,125 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
 
+        using InputType = SimulationConfig::InputBase::InputType;
+        using Module = SimulationConfig::InputBase::Module;
+        {
+            const auto input = nonstd::get<SimulationConfig::InputLinear>(config.getInput("ex_linear"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::linear);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 15);
+            CHECK(input.nodeSet == "Column");
+            CHECK(input.ampStart == 0.15);
+            CHECK(input.ampEnd == 0.15);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputRelativeLinear>(config.getInput("ex_rel_linear"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::relative_linear);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 1000);
+            CHECK(input.nodeSet == "Column");
+            CHECK(input.percentStart == 80);
+            CHECK(input.percentEnd == 20);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputPulse>(config.getInput("ex_pulse"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::pulse);
+            CHECK(input.delay == 10);
+            CHECK(input.duration == 80);
+            CHECK(input.nodeSet == "Mosaic");
+
+            CHECK(input.frequency == 80);
+            CHECK(input.ampStart == 2);
+            CHECK(input.width == 1);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputSubthreshold>(config.getInput("ex_subthreshold"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::subthreshold);
+            CHECK(input.delay == 10);
+            CHECK(input.duration == 80);
+            CHECK(input.nodeSet == "Mosaic");
+            CHECK(input.percentLess == 80);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputNoise>(config.getInput("ex_noise_meanpercent"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::noise);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 5000);
+            CHECK(input.nodeSet == "Rt_RC");
+            CHECK(input.meanPercent.value() == 0.01);
+            CHECK(input.variance == 0.001);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputNoise>(config.getInput("ex_noise_mean"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::noise);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 5000);
+            CHECK(input.nodeSet == "Rt_RC");
+            CHECK(input.mean.value() == 0);
+            CHECK(input.variance == 0.001);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputShotNoise>(config.getInput("ex_shotnoise"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::shot_noise);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 1000);
+            CHECK(input.nodeSet == "L5E");
+            CHECK(input.ampMean == 70);
+            CHECK(input.ampVar == 40);
+            CHECK(input.rate == 4);
+            CHECK(input.randomSeed == 201506);
+            CHECK(input.riseTime == 0.4);
+            CHECK(input.decayTime == 4);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputRelativeShotNoise>(config.getInput("ex_rel_shotnoise"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::relative_shot_noise);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 1000);
+            CHECK(input.nodeSet == "L5E");
+            CHECK(input.ampCv == 0.63);
+            CHECK(input.meanPercent == 70);
+            CHECK(input.sdPercent == 40);
+            CHECK(input.randomSeed == 201506);
+            CHECK(input.riseTime == 0.4);
+            CHECK(input.decayTime == 4);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputHyperpolarizing>(config.getInput("ex_hyperpolarizing"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::hyperpolarizing);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 1000);
+            CHECK(input.nodeSet == "L5E");
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputSynapseReplay>(config.getInput("ex_replay"));
+            CHECK(input.inputType == InputType::spikes);
+            CHECK(input.module == Module::synapse_replay);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 40000);
+            CHECK(input.nodeSet == "Column");
+            CHECK(endswith(input.spikeFile, "replay.dat"));
+            CHECK(input.source == "ML_afferents");
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputSeclamp>(config.getInput("ex_seclamp"));
+            CHECK(input.inputType == InputType::voltage_clamp);
+            CHECK(input.module == Module::seclamp);
+            CHECK(input.delay == 0);
+            CHECK(input.duration == 1000.);
+            CHECK(input.nodeSet == "L5E");
+            CHECK(input.voltage == 1.1);
+        }
+
         CHECK(config.listInputNames() == std::set<std::string>{
               "ex_extracellular_stimulation",
               "ex_hyperpolarizing",
@@ -364,27 +489,6 @@ TEST_CASE("SimulationConfig") {
               "ex_shotnoise",
               "ex_subthreshold"
               });
-
-        CHECK(config.getInput("ex_linear").inputType ==
-              SimulationConfig::Input::InputType::current_clamp);
-        CHECK(config.getInput("ex_linear").module == SimulationConfig::Input::Module::linear);
-        CHECK(config.getInput("ex_linear").ampStart == 0.15);
-        CHECK(config.getInput("ex_linear").ampEnd == 0.15);
-        CHECK(config.getInput("ex_linear").delay == 0);
-        CHECK(config.getInput("ex_linear").duration == 15);
-        CHECK(config.getInput("ex_linear").nodeSet == "Column");
-        CHECK(config.getInput("ex_rel_linear").percentStart == 80);
-        CHECK(config.getInput("ex_rel_linear").percentEnd == 20);
-        CHECK(config.getInput("ex_noise_meanpercent").mean == nonstd::nullopt);
-        CHECK(config.getInput("ex_noise_meanpercent").meanPercent == 0.01);
-        CHECK(config.getInput("ex_noise_mean").mean == 0);
-        CHECK(config.getInput("ex_noise_mean").meanPercent == nonstd::nullopt);
-        CHECK(config.getInput("ex_rel_shotnoise").randomSeed == config.getRun().randomSeed);
-        CHECK(config.getInput("ex_rel_shotnoise").dt == 0.25);
-        CHECK(config.getInput("ex_replay").spikeFile ==
-              fs::absolute(basePath / fs::path("replay.dat")).lexically_normal());
-        CHECK(config.getInput("ex_replay").source == "ML_afferents");
-
     }
 
     SECTION("manifest_network") {
@@ -405,6 +509,7 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / "circuit" / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
     }
+
     SECTION("Exception") {
         {  // No run section
             auto contents = R"({})";
@@ -735,6 +840,25 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
+        {  // wrong input_type for module in an input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                  "ex_hyperpolarizing": {
+                      "input_type": "voltage_clamp",
+                      "module": "hyperpolarizing",
+                      "delay": 0,
+                      "duration": 1000,
+                      "node_set": "L5E"
+                  }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
         {  // no amp_start in a linear input object
             auto contents = R"({
               "run": {
@@ -792,6 +916,26 @@ TEST_CASE("SimulationConfig") {
                    "node_set":"Column",
                    "variance": 0.001,
                    "mean" : null
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        { // mising input
+            const auto config = SimulationConfig::fromFile("./data/config/simulation_config.json");
+            CHECK_THROWS_AS(config.getInput("does_not_exist"), SonataError);
+        }
+        {  // non-existant input_type
+            const auto* contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                "noise": {
+                   "input_type": "Does_not_exist",
+                   "module": "hyperpolarization"
                 }
               }
             })";

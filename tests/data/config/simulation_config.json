@@ -101,6 +101,18 @@
             "duration": 5000.0,
             "node_set": "Rt_RC"
         },
+        "ex_shotnoise": {
+            "input_type": "current_clamp",
+            "module": "shot_noise",
+            "delay": 0,
+            "duration": 1000,
+            "decay_time": 4,
+            "rise_time": 0.4,
+            "amp_mean": 70,
+            "amp_var": 40,
+            "rate": 4,
+            "node_set": "L5E"
+        },
         "ex_rel_shotnoise": {
             "input_type": "current_clamp",
             "module": "relative_shot_noise",
@@ -112,6 +124,21 @@
             "mean_percent": 70,
             "sd_percent": 40,
             "node_set": "L5E"
+        },
+        "ex_hyperpolarizing": {
+            "input_type": "current_clamp",
+            "module": "hyperpolarizing",
+            "delay": 0,
+            "duration": 1000,
+            "node_set": "L5E"
+        },
+        "ex_seclamp": {
+            "input_type": "voltage_clamp",
+            "module": "seclamp",
+            "delay": 0,
+            "duration": 1000,
+            "node_set": "L5E",
+            "voltage": 1.1
         },
         "ex_replay": {
             "input_type": "spikes",
