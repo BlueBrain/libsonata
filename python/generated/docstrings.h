@@ -557,8 +557,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_Conditions_synapsesInitDepl
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_vInit = R"doc(Initial membrane voltage in mV. Default is -80)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputBase = R"doc()doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride =
 R"doc(List of connection parameters to adjust the synaptic strength or other
 properties of edges between two sets of nodes)doc";
@@ -589,7 +587,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_target =
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_weight = R"doc(Scalar to adjust synaptic strength, default = 1.)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Input = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputBase = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_InputType = R"doc()doc";
 
@@ -647,15 +645,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputLinear_ampStart = R"do
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputNoise = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_mean = R"doc(The mean value of current to inject (nA))doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_mean = R"doc(The mean value of current to inject (nA), default = None)doc";
 
-<<<<<<< HEAD
 static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_meanPercent =
-=======
-static const char *__doc_bbp_sonata_SimulationConfig_Input_mean = R"doc(The mean value of current to inject (nA), default = None)doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Input_meanPercent =
->>>>>>> 149eb9a... Parse connection_overrides section
 R"doc(The mean value of current to inject as a percentage of threshold
 current, default = None)doc";
 
