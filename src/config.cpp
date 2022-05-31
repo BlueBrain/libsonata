@@ -252,8 +252,6 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
                                          const std::string& debugStr) {
     using Module = SimulationConfig::InputBase::Module;
 
-    const auto moduledebugStr = fmt::format("Unknown module for the input_type in {}",
-                                            debugStr);
     const auto parseCommon = [&](auto& input) {
         input.module = module;
         parseMandatory(valueIt, "input_type", debugStr, input.inputType);
@@ -307,12 +305,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         }
 
         if (ret.mean.has_value() && ret.meanPercent.has_value()) {
-            throw SonataError(
-                fmt::format("Both `mean` or `mean_percent` have values in {}", debugStr));
+            throw SonataError("Both `mean` or `mean_percent` have values in " + debugStr);
         } else if (!ret.mean.has_value() && !ret.meanPercent.has_value()) {
-            throw SonataError(
-                fmt::format("One of `mean` or `mean_percent` need to have a value in {}",
-                            debugStr));
+            throw SonataError("One of `mean` or `mean_percent` need to have a value in " +
+                              debugStr);
         }
 
         parseOptional(valueIt, "variance", ret.variance);
@@ -363,7 +359,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         return ret;
     }
     default:
-        throw SonataError(moduledebugStr);
+        throw SonataError("Unknown module for the input_type in " + debugStr);
     }
 }
 
@@ -854,24 +850,38 @@ class SimulationConfig::Parser
                 parseInputModule(valueIt, module, _basePath, parseRun().randomSeed, debugStr);
             result[it.key()] = input;
 
-            auto inputType = nonstd::visit([](const auto& v) { return v.inputType; }, input);
+            auto mismatchingModuleInputType = [&it]() {
+                const auto module_name = it->find("module")->get<std::string>();
+                const auto input_type = it->find("input_type")->get<std::string>();
+                throw SonataError(
+                    fmt::format("An `input` has module `{}` and input_type `{}` which mismatch",
+                                module_name,
+                                input_type));
+            };
 
+            auto inputType = nonstd::visit([](const auto& v) { return v.inputType; }, input);
             switch (inputType) {
             case InputBase::InputType::current_clamp: {
-                assert(nonstd::holds_alternative<SimulationConfig::InputLinear>(input) ||
-                       nonstd::holds_alternative<SimulationConfig::InputRelativeLinear>(input) ||
-                       nonstd::holds_alternative<SimulationConfig::InputPulse>(input) ||
-                       nonstd::holds_alternative<SimulationConfig::InputSubthreshold>(input) ||
-                       nonstd::holds_alternative<SimulationConfig::InputNoise>(input) ||
-                       nonstd::holds_alternative<SimulationConfig::InputShotNoise>(input) ||
-                       nonstd::holds_alternative<SimulationConfig::InputRelativeShotNoise>(input) ||
-                       nonstd::holds_alternative<SimulationConfig::InputHyperpolarizing>(input));
+                if (!(nonstd::holds_alternative<SimulationConfig::InputLinear>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputRelativeLinear>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputPulse>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputSubthreshold>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputNoise>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputShotNoise>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputRelativeShotNoise>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputHyperpolarizing>(input))) {
+                    mismatchingModuleInputType();
+                }
             } break;
             case InputBase::InputType::spikes:
-                assert(nonstd::holds_alternative<SimulationConfig::InputSynapseReplay>(input));
+                if (!nonstd::holds_alternative<SimulationConfig::InputSynapseReplay>(input)) {
+                    mismatchingModuleInputType();
+                }
                 break;
             case InputBase::InputType::voltage_clamp:
-                assert(nonstd::holds_alternative<SimulationConfig::InputSeclamp>(input));
+                if (!nonstd::holds_alternative<SimulationConfig::InputSeclamp>(input)) {
+                    mismatchingModuleInputType();
+                }
                 break;
             case InputBase::InputType::extracellular_stimulation:
                 break;

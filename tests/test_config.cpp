@@ -509,6 +509,7 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / "circuit" / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
     }
+
     SECTION("Exception") {
         {  // No run section
             auto contents = R"({})";
@@ -835,6 +836,25 @@ TEST_CASE("SimulationConfig") {
                    "duration": 15,
                    "node_set":"Column"
                 }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // wrong input_type for module in an input object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs": {
+                  "ex_hyperpolarizing": {
+                      "input_type": "voltage_clamp",
+                      "module": "hyperpolarizing",
+                      "delay": 0,
+                      "duration": 1000,
+                      "node_set": "L5E"
+                  }
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
