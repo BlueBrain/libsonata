@@ -91,7 +91,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
      {SimulationConfig::InputBase::Module::seclamp, "seclamp"},
      {SimulationConfig::InputBase::Module::noise, "noise"},
      {SimulationConfig::InputBase::Module::shot_noise, "shot_noise"},
-     {SimulationConfig::InputBase::Module::relative_shot_noise, "relative_shot_noise"}})
+     {SimulationConfig::InputBase::Module::relative_shot_noise, "relative_shot_noise"},
+     {SimulationConfig::InputBase::Module::absolute_shot_noise, "absolute_shot_noise"},
+     {SimulationConfig::InputBase::Module::ornstein_uhlenbeck, "ornstein_uhlenbeck"},
+     {SimulationConfig::InputBase::Module::relative_ornstein_uhlenbeck,
+      "relative_ornstein_uhlenbeck"}})
 
 NLOHMANN_JSON_SERIALIZE_ENUM(
     SimulationConfig::InputBase::InputType,
@@ -100,7 +104,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
      {SimulationConfig::InputBase::InputType::extracellular_stimulation,
       "extracellular_stimulation"},
      {SimulationConfig::InputBase::InputType::current_clamp, "current_clamp"},
-     {SimulationConfig::InputBase::InputType::voltage_clamp, "voltage_clamp"}})
+     {SimulationConfig::InputBase::InputType::voltage_clamp, "voltage_clamp"},
+     {SimulationConfig::InputBase::InputType::conductance, "conductance"}})
 
 namespace {
 // to be replaced by std::filesystem once C++17 is used
@@ -339,6 +344,19 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
         return ret;
     }
+    case Module::absolute_shot_noise: {
+        SimulationConfig::InputAbsoluteShotNoise ret;
+        parseCommon(ret);
+
+        parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
+        parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
+        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "dt", ret.dt, {0.25});
+        parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
+        parseMandatory(valueIt, "mean", debugStr, ret.mean);
+        parseMandatory(valueIt, "sigma", debugStr, ret.sigma);
+        return ret;
+    }
     case Module::hyperpolarizing: {
         SimulationConfig::InputHyperpolarizing ret;
         parseCommon(ret);
@@ -356,6 +374,30 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputSeclamp ret;
         parseCommon(ret);
         parseMandatory(valueIt, "voltage", debugStr, ret.voltage);
+        return ret;
+    }
+    case Module::ornstein_uhlenbeck: {
+        SimulationConfig::InputOrnsteinUhlenbeck ret;
+        parseCommon(ret);
+        parseMandatory(valueIt, "tau", debugStr, ret.tau);
+        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "dt", ret.dt, {0.25});
+
+        parseMandatory(valueIt, "mean", debugStr, ret.mean);
+        parseMandatory(valueIt, "sigma", debugStr, ret.sigma);
+        return ret;
+    }
+    case Module::relative_ornstein_uhlenbeck: {
+        SimulationConfig::InputRelativeOrnsteinUhlenbeck ret;
+        parseCommon(ret);
+        parseMandatory(valueIt, "tau", debugStr, ret.tau);
+        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "dt", ret.dt, {0.25});
+
+        parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
+        parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
         return ret;
     }
     default:
@@ -722,7 +764,6 @@ class SimulationConfig::Parser
         _json = expandVariables(rawJson, vars);
     }
 
-
     SimulationConfig::Run parseRun() const {
         const auto runIt = _json.find("run");
         if (runIt == _json.end()) {
@@ -869,7 +910,11 @@ class SimulationConfig::Parser
                       nonstd::holds_alternative<SimulationConfig::InputNoise>(input) ||
                       nonstd::holds_alternative<SimulationConfig::InputShotNoise>(input) ||
                       nonstd::holds_alternative<SimulationConfig::InputRelativeShotNoise>(input) ||
-                      nonstd::holds_alternative<SimulationConfig::InputHyperpolarizing>(input))) {
+                      nonstd::holds_alternative<SimulationConfig::InputAbsoluteShotNoise>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputHyperpolarizing>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputOrnsteinUhlenbeck>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputRelativeOrnsteinUhlenbeck>(
+                          input))) {
                     mismatchingModuleInputType();
                 }
             } break;
@@ -884,6 +929,16 @@ class SimulationConfig::Parser
                 }
                 break;
             case InputBase::InputType::extracellular_stimulation:
+                break;
+            case InputBase::InputType::conductance:
+                if (!(nonstd::holds_alternative<SimulationConfig::InputShotNoise>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputRelativeShotNoise>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputAbsoluteShotNoise>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputOrnsteinUhlenbeck>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputRelativeOrnsteinUhlenbeck>(
+                          input))) {
+                    mismatchingModuleInputType();
+                }
                 break;
             default:
                 throw SonataError(fmt::format("Unknown input_type in {}", debugStr));

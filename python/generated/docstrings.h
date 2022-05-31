@@ -557,9 +557,27 @@ static const char *__doc_bbp_sonata_SimulationConfig_Conditions_synapsesInitDepl
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_vInit = R"doc(Initial membrane voltage in mV. Default is -80)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_ampCv = R"doc(The coefficient of variation (sd/mean) of gamma-distributed amplitudes)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_mean = R"doc(Signal mean in nA (current_clamp) or uS (conductance).)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_sigma = R"doc(signal std dev in nA (current_clamp) or uS (conductance).)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_InputType = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputBase_InputType_conductance = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_InputType_current_clamp = R"doc()doc";
 
@@ -573,6 +591,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputBase_InputType_voltage
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_absolute_shot_noise = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_hyperpolarizing = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_invalid = R"doc()doc";
@@ -581,9 +601,13 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_linear = R
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_noise = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_ornstein_uhlenbeck = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_pulse = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_linear = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_ornstein_uhlenbeck = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_shot_noise = R"doc()doc";
 
@@ -625,6 +649,20 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_variance =
 R"doc(State var to track whether the value of injected noise current is mean
 or mean_percent)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_mean = R"doc(Signal mean in nA (current_clamp) or uS (conductance))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_sigma = R"doc(Signal std dev in nA (current_clamp) or uS (conductance))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_tau = R"doc(Relaxation time constant in ms)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_ampEnd = R"doc(The final current when a stimulus concludes (nA))doc";
@@ -641,25 +679,43 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear_percent
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear_percentStart = R"doc(The percentage of a cell's threshold current to inject)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_meanPercent =
+R"doc(Signal mean as percentage of a cell’s threshold current
+(current_clamp) or inverse input resistance (conductance))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_sdPercent =
+R"doc(Signal std dev as percentage of a cell’s threshold current
+(current_clamp) or inverse input resistance (conductance))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_tau = R"doc(Relaxation time constant in ms)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_ampCv = R"doc(The coefficient of variation (sd/mean) of gamma-distributed amplitudes)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_dt = R"doc(Timestep of the injected current (ms). Default is 0.25 ms)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_meanPercent =
-R"doc(The mean value of current to inject as a percentage of threshold
-current)doc";
+R"doc(Signal mean as percentage of a cell’s threshold current
+(current_clamp) or inverse input resistance (conductance))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_sdPercent =
-R"doc(std dev of the current to inject as a percent of cell's threshold
-current)doc";
+R"doc(signal std dev as percentage of a cell’s threshold current
+(current_clamp) or inverse input resistance (conductance).)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp = R"doc()doc";
 
@@ -667,13 +723,17 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_voltage = R"do
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_ampMean = R"doc(The mean of gamma-distributed amplitudes (nA))doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_ampMean =
+R"doc(The mean of gamma-distributed amplitudes in nA (current_clamp) or uS
+(conductance))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_ampVar = R"doc(The variance of gamma-distributed amplitudes)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_ampVar =
+R"doc(The variance of gamma-distributed amplitudes in nA^2 (current_clamp)
+or uS^2 (conductance))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_dt = R"doc(Timestep of the injected current (ms). Default is 0.25 ms)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
 

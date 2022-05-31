@@ -474,21 +474,51 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.nodeSet == "L5E");
             CHECK(input.voltage == 1.1);
         }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputAbsoluteShotNoise>(
+                config.getInput("ex_abs_shotnoise"));
+            CHECK(input.inputType == InputType::conductance);
+            CHECK(input.module == Module::absolute_shot_noise);
+            CHECK(input.ampCv == 0.63);
+            CHECK(input.mean == 50);
+            CHECK(input.sigma == 5);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputOrnsteinUhlenbeck>(
+                config.getInput("ex_OU"));
+            CHECK(input.inputType == InputType::conductance);
+            CHECK(input.module == Module::ornstein_uhlenbeck);
+            CHECK(input.tau == 2.8);
+            CHECK(input.reversal == 10);
+            CHECK(input.mean == 50);
+            CHECK(input.sigma == 5);
+        }
+        {
+            const auto input = nonstd::get<SimulationConfig::InputRelativeOrnsteinUhlenbeck>(
+                config.getInput("ex_rel_OU"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::relative_ornstein_uhlenbeck);
+            CHECK(input.tau == 2.8);
+            CHECK(input.reversal == 0);
+            CHECK(input.meanPercent == 70);
+            CHECK(input.sdPercent == 10);
+        }
 
-        CHECK(config.listInputNames() == std::set<std::string>{
-              "ex_extracellular_stimulation",
-              "ex_hyperpolarizing",
-              "ex_linear",
-              "ex_noise_mean",
-              "ex_noise_meanpercent",
-              "ex_pulse",
-              "ex_rel_linear",
-              "ex_rel_shotnoise",
-              "ex_replay",
-              "ex_seclamp",
-              "ex_shotnoise",
-              "ex_subthreshold"
-              });
+        CHECK(config.listInputNames() == std::set<std::string>{"ex_abs_shotnoise",
+                                                               "ex_extracellular_stimulation",
+                                                               "ex_hyperpolarizing",
+                                                               "ex_linear",
+                                                               "ex_noise_mean",
+                                                               "ex_noise_meanpercent",
+                                                               "ex_OU",
+                                                               "ex_pulse",
+                                                               "ex_rel_linear",
+                                                               "ex_rel_OU",
+                                                               "ex_rel_shotnoise",
+                                                               "ex_replay",
+                                                               "ex_seclamp",
+                                                               "ex_shotnoise",
+                                                               "ex_subthreshold"});
     }
 
     SECTION("manifest_network") {

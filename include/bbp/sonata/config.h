@@ -280,7 +280,10 @@ class SONATA_API SimulationConfig
             seclamp,
             noise,
             shot_noise,
-            relative_shot_noise
+            relative_shot_noise,
+            absolute_shot_noise,
+            ornstein_uhlenbeck,
+            relative_ornstein_uhlenbeck
         };
 
         enum class InputType {
@@ -288,7 +291,8 @@ class SONATA_API SimulationConfig
             spikes,
             extracellular_stimulation,
             current_clamp,
-            voltage_clamp
+            voltage_clamp,
+            conductance
         };
 
         /// Type of stimulus
@@ -364,13 +368,14 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells
         int randomSeed{};
-        /// Timestep of the injected current (ms). Default is 0.25 ms
+        /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// Rate of Poisson events (Hz)
         int rate{};
-        /// The mean of gamma-distributed amplitudes (nA)
+        /// The mean of gamma-distributed amplitudes in nA (current_clamp) or uS (conductance)
         double ampMean{};
-        /// The variance of gamma-distributed amplitudes
+        /// The variance of gamma-distributed amplitudes in nA^2 (current_clamp) or uS^2
+        /// (conductance)
         double ampVar{};
     };
 
@@ -381,13 +386,64 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells
         int randomSeed{};
-        /// Timestep of the injected current (ms). Default is 0.25 ms
+        /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
         double ampCv{};
-        /// The mean value of current to inject as a percentage of threshold current
+        /// Signal mean as percentage of a cell’s threshold current (current_clamp) or inverse input
+        /// resistance (conductance)
         double meanPercent{};
-        /// std dev of the current to inject as a percent of cell's threshold current
+        /// signal std dev as percentage of a cell’s threshold current (current_clamp) or inverse
+        /// input resistance (conductance).
+        double sdPercent{};
+    };
+
+    struct InputAbsoluteShotNoise: public InputBase {
+        /// The rise time of the bi-exponential shots (ms)
+        double riseTime{};
+        /// The decay time of the bi-exponential shots (ms)
+        double decayTime{};
+        /// Override the random seed to introduce correlations between cells
+        int randomSeed{};
+        /// Timestep of generated signal in ms. Default is 0.25 ms
+        double dt{};
+        /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
+        double ampCv{};
+        /// Signal mean in nA (current_clamp) or uS (conductance).
+        double mean{};
+        /// signal std dev in nA (current_clamp) or uS (conductance).
+        double sigma{};
+    };
+
+    struct InputOrnsteinUhlenbeck: public InputBase {
+        /// Relaxation time constant in ms
+        double tau{};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
+        /// Timestep of generated signal in ms. Default is 0.25 ms
+        double dt{};
+        /// Override the random seed to introduce correlations between cells
+        int randomSeed{};
+        /// Signal mean in nA (current_clamp) or uS (conductance)
+        double mean{};
+        /// Signal std dev in nA (current_clamp) or uS (conductance)
+        double sigma{};
+    };
+
+    struct InputRelativeOrnsteinUhlenbeck: public InputBase {
+        /// Relaxation time constant in ms
+        double tau{};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
+        /// Timestep of generated signal in ms. Default is 0.25 ms
+        double dt{};
+        /// Override the random seed to introduce correlations between cells
+        int randomSeed{};
+        /// Signal mean as percentage of a cell’s threshold current (current_clamp) or inverse input
+        /// resistance (conductance)
+        double meanPercent{};
+        /// Signal std dev as percentage of a cell’s threshold current (current_clamp) or inverse
+        /// input resistance (conductance)
         double sdPercent{};
     };
 
@@ -400,7 +456,10 @@ class SONATA_API SimulationConfig
                                   InputSeclamp,
                                   InputNoise,
                                   InputShotNoise,
-                                  InputRelativeShotNoise>;
+                                  InputRelativeShotNoise,
+                                  InputAbsoluteShotNoise,
+                                  InputOrnsteinUhlenbeck,
+                                  InputRelativeOrnsteinUhlenbeck>;
 
     using InputMap = std::unordered_map<std::string, Input>;
 

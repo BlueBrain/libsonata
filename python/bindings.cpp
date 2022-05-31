@@ -770,6 +770,72 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputRelativeShotNoise::meanPercent,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, meanPercent));
 
+    py::class_<SimulationConfig::InputAbsoluteShotNoise, SimulationConfig::InputBase>(
+        m, "AbsoluteShotNoise")
+        .def_readonly("rise_time",
+                      &SimulationConfig::InputAbsoluteShotNoise::riseTime,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, riseTime))
+        .def_readonly("decay_time",
+                      &SimulationConfig::InputAbsoluteShotNoise::decayTime,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, decayTime))
+        .def_readonly("random_seed",
+                      &SimulationConfig::InputAbsoluteShotNoise::randomSeed,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, randomSeed))
+        .def_readonly("dt",
+                      &SimulationConfig::InputAbsoluteShotNoise::dt,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, dt))
+        .def_readonly("amp_cv",
+                      &SimulationConfig::InputAbsoluteShotNoise::ampCv,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, ampCv))
+        .def_readonly("mean",
+                      &SimulationConfig::InputAbsoluteShotNoise::mean,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, mean))
+        .def_readonly("sigma",
+                      &SimulationConfig::InputAbsoluteShotNoise::sigma,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, sigma));
+
+    py::class_<SimulationConfig::InputOrnsteinUhlenbeck, SimulationConfig::InputBase>(
+        m, "OrnsteinUhlenbeck")
+        .def_readonly("tau",
+                      &SimulationConfig::InputOrnsteinUhlenbeck::tau,
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, tau))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputOrnsteinUhlenbeck::reversal,
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, reversal))
+        .def_readonly("dt",
+                      &SimulationConfig::InputOrnsteinUhlenbeck::dt,
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, dt))
+        .def_readonly("random_seed",
+                      &SimulationConfig::InputOrnsteinUhlenbeck::randomSeed,
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, randomSeed))
+        .def_readonly("mean",
+                      &SimulationConfig::InputOrnsteinUhlenbeck::mean,
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, mean))
+        .def_readonly("sigma",
+                      &SimulationConfig::InputOrnsteinUhlenbeck::sigma,
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, sigma));
+
+    py::class_<SimulationConfig::InputRelativeOrnsteinUhlenbeck, SimulationConfig::InputBase>(
+        m, "RelativeOrnsteinUhlenbeck")
+        .def_readonly("tau",
+                      &SimulationConfig::InputRelativeOrnsteinUhlenbeck::tau,
+                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, tau))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputRelativeOrnsteinUhlenbeck::reversal,
+                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, reversal))
+        .def_readonly("dt",
+                      &SimulationConfig::InputRelativeOrnsteinUhlenbeck::dt,
+                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, dt))
+        .def_readonly("random_seed",
+                      &SimulationConfig::InputRelativeOrnsteinUhlenbeck::randomSeed,
+                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, randomSeed))
+        .def_readonly("mean_percent",
+                      &SimulationConfig::InputRelativeOrnsteinUhlenbeck::meanPercent,
+                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, meanPercent))
+        .def_readonly("sd_percent",
+                      &SimulationConfig::InputRelativeOrnsteinUhlenbeck::sdPercent,
+                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, sdPercent));
+
     py::enum_<SimulationConfig::InputBase::Module>(inputBase, "Module")
         .value("linear", SimulationConfig::InputBase::Module::linear)
         .value("relative_linear", SimulationConfig::InputBase::Module::relative_linear)
@@ -780,14 +846,19 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("seclamp", SimulationConfig::InputBase::Module::seclamp)
         .value("noise", SimulationConfig::InputBase::Module::noise)
         .value("shot_noise", SimulationConfig::InputBase::Module::shot_noise)
-        .value("relative_shot_noise", SimulationConfig::InputBase::Module::relative_shot_noise);
+        .value("relative_shot_noise", SimulationConfig::InputBase::Module::relative_shot_noise)
+        .value("absolute_shot_noise", SimulationConfig::InputBase::Module::absolute_shot_noise)
+        .value("ornstein_uhlenbeck", SimulationConfig::InputBase::Module::ornstein_uhlenbeck)
+        .value("relative_ornstein_uhlenbeck",
+               SimulationConfig::InputBase::Module::relative_ornstein_uhlenbeck);
 
     py::enum_<SimulationConfig::InputBase::InputType>(inputBase, "InputType")
         .value("spikes", SimulationConfig::InputBase::InputType::spikes)
         .value("extracellular_stimulation",
                SimulationConfig::InputBase::InputType::extracellular_stimulation)
         .value("current_clamp", SimulationConfig::InputBase::InputType::current_clamp)
-        .value("voltage_clamp", SimulationConfig::InputBase::InputType::voltage_clamp);
+        .value("voltage_clamp", SimulationConfig::InputBase::InputType::voltage_clamp)
+        .value("conductance", SimulationConfig::InputBase::InputType::conductance);
 
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())

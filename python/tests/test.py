@@ -626,13 +626,16 @@ class TestSimulationConfig(unittest.TestCase):
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
 
         self.assertEqual(self.config.list_input_names,
-                         {"ex_extracellular_stimulation",
+                         {"ex_abs_shotnoise",
+                          "ex_extracellular_stimulation",
                           "ex_hyperpolarizing",
                           "ex_linear",
                           "ex_noise_mean",
                           "ex_noise_meanpercent",
+                          "ex_OU",
                           "ex_pulse",
                           "ex_rel_linear",
+                          "ex_rel_OU",
                           "ex_rel_shotnoise",
                           "ex_replay",
                           "ex_seclamp",
@@ -704,6 +707,23 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
         self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
+        self.assertEqual(self.config.input('ex_abs_shotnoise').input_type.name, "conductance")
+        self.assertEqual(self.config.input('ex_abs_shotnoise').amp_cv, 0.63)
+        self.assertEqual(self.config.input('ex_abs_shotnoise').mean, 50)
+        self.assertEqual(self.config.input('ex_abs_shotnoise').sigma, 5)
+
+        self.assertEqual(self.config.input('ex_OU').module.name, "ornstein_uhlenbeck")
+        self.assertEqual(self.config.input('ex_OU').input_type.name, "conductance")
+        self.assertEqual(self.config.input('ex_OU').tau, 2.8)
+        self.assertEqual(self.config.input('ex_OU').reversal, 10)
+        self.assertEqual(self.config.input('ex_OU').mean, 50)
+        self.assertEqual(self.config.input('ex_OU').sigma, 5)
+
+        self.assertEqual(self.config.input('ex_rel_OU').input_type.name, "current_clamp")
+        self.assertEqual(self.config.input('ex_rel_OU').tau, 2.8)
+        self.assertEqual(self.config.input('ex_rel_OU').reversal, 0)
+        self.assertEqual(self.config.input('ex_rel_OU').mean_percent, 70)
+        self.assertEqual(self.config.input('ex_rel_OU').sd_percent, 10)
 
     def test_json(self):
         temp_config = json.loads(self.config.json)
