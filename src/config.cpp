@@ -585,13 +585,22 @@ class CircuitConfig::PopulationResolver
         for (const auto& subNetwork : src) {
             for (const auto& population : subNetwork.populations) {
                 const auto it = populations.find(population);
-                if (it == populations.end() ||
-                    (it != populations.end() && it->second.type == "biophysical" &&
-                     it->second.morphologiesDir.empty())) {
-                    throw SonataError(
-                        fmt::format("Node population '{}' is defined as 'biophysical' "
-                                    "but does not define 'morphology_dir'",
-                                    population));
+                if (it == populations.end()) {
+                    continue;
+                }
+
+                if (it->second.type == "biophysical") {
+                    if (it->second.morphologiesDir.empty()) {
+                        throw SonataError(
+                            fmt::format("Node population '{}' is defined as 'biophysical' "
+                                        "but does not define 'morphology_dir'",
+                                        population));
+                    } else if (it->second.biophysicalNeuronModelsDir.empty()) {
+                        throw SonataError(
+                            fmt::format("Node population '{}' is defined as 'biophysical' "
+                                        "but does not define 'biophysical_neuron_models_dir'",
+                                        population));
+                    }
                 }
             }
         }
@@ -643,9 +652,7 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
     updateDefaultProperties(_edgePopulationProperties, "chemical_synapse");
 
-    if (_components.morphologiesDir.empty()) {
-        PopulationResolver::checkBiophysicalPopulations(_networkNodes, _nodePopulationProperties);
-    }
+    PopulationResolver::checkBiophysicalPopulations(_networkNodes, _nodePopulationProperties);
 }
 
 CircuitConfig CircuitConfig::fromFile(const std::string& path) {
