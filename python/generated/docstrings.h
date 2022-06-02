@@ -557,6 +557,36 @@ static const char *__doc_bbp_sonata_SimulationConfig_Conditions_synapsesInitDepl
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_vInit = R"doc(Initial membrane voltage in mV. Default is -80)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride =
+R"doc(List of connection parameters to adjust the synaptic strength or other
+properties of edges between two sets of nodes)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_delay =
+R"doc(Adjustments from weight of this connection_override are applied after
+the specified delay has elapsed in ms, default = 0.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_modoverride =
+R"doc(Synapse helper files to instantiate the synapses in this
+connection_override, default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_source = R"doc(node_set specifying presynaptic nodes)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_spontMinis =
+R"doc(Rate to spontaneously trigger the synapses in this
+connection_override, default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_synapseConfigure =
+R"doc(Snippet of hoc code to be executed on the synapses in this
+connection_override, default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_synapseDelayOverride =
+R"doc(Value to override the synaptic delay time originally set in the edge
+file (ms), default = None.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_target = R"doc(node_set specifying postsynaptic nodes)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_weight = R"doc(Scalar to adjust synaptic strength, default = 1.)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_ampCv = R"doc(The coefficient of variation (sd/mean) of gamma-distributed amplitudes)doc";
@@ -639,11 +669,11 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputLinear_ampStart = R"do
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputNoise = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_mean = R"doc(The mean value of current to inject (nA))doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_mean = R"doc(The mean value of current to inject (nA), default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_meanPercent =
 R"doc(The mean value of current to inject as a percentage of threshold
-current)doc";
+current, default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_variance =
 R"doc(State var to track whether the value of injected noise current is mean
@@ -862,6 +892,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_conditions = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_connections = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_fromFile =
 R"doc(Loads a SONATA JSON simulation config file from disk and returns a
 CircuitConfig object which parses it.
@@ -874,6 +906,13 @@ Throws:
 static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getConditions = R"doc(Returns the Conditions section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getConnectionOverride =
+R"doc(Returns the given connection parameters
+
+Throws:
+    SonataError if the given connection name does not correspond with
+    any existing connection.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getInput =
 R"doc(Returns the given input parameters.
@@ -899,6 +938,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_getRun = R"doc(Returns the 
 static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_jsonContent = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_listConnectionOverrideNames = R"doc(Returns the names of the connection_overrides)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listInputNames = R"doc(Returns the names of the reports)doc";
 

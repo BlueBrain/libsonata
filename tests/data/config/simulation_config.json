@@ -191,6 +191,23 @@
             "node_set": "Column"
         }
     },
+    "connection_overrides": {
+        "ConL3Exc-Uni": {
+            "source": "Excitatory",
+            "target": "Mosaic",
+            "weight": 1.0,
+            "spont_minis": 0.01,
+            "modoverride": "GluSynapse",
+            "delay" : 0.5
+        },
+        "GABAB_erev": {
+            "source": "Inhibitory",
+            "target": "Mosaic",
+            "weight": 1.0,
+            "synapse_delay_override": 0.5,
+            "synapse_configure": "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77"
+        }
+    },
     "reports": {
          "soma": {
               "cells": "Mosaic",
