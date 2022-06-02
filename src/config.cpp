@@ -896,7 +896,29 @@ class SimulationConfig::Parser
                 throw SonataError(fmt::format("Unknown input_type in {}", debugStr));
             }
         }
+        return result;
+    }
 
+    ConnectionMap parseConnectionOverrides() const {
+        ConnectionMap result;
+
+        const auto connIt = _json.find("connection_overrides");
+        if (connIt == _json.end())
+            return result;
+
+        for (auto it = connIt->begin(); it != connIt->end(); ++it) {
+            auto& connect = result[it.key()];
+            auto& valueIt = it.value();
+            const auto debugStr = fmt::format("connection_override {}", it.key());
+            parseMandatory(valueIt, "source", debugStr, connect.source);
+            parseMandatory(valueIt, "target", debugStr, connect.target);
+            parseOptional(valueIt, "weight", connect.weight);
+            parseOptional(valueIt, "spont_minis", connect.spontMinis);
+            parseOptional(valueIt, "synapse_configure", connect.synapseConfigure);
+            parseOptional(valueIt, "modoverride", connect.modoverride);
+            parseOptional(valueIt, "synapse_delay_override", connect.synapseDelayOverride);
+            parseOptional(valueIt, "delay", connect.delay);
+        }
         return result;
     }
 
@@ -915,6 +937,7 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _reports = parser.parseReports();
     _network = parser.parseNetwork();
     _inputs = parser.parseInputs();
+    _connections = parser.parseConnectionOverrides();
 }
 
 SimulationConfig SimulationConfig::fromFile(const std::string& path) {
@@ -969,7 +992,21 @@ const SimulationConfig::Input& SimulationConfig::getInput(const std::string& nam
         throw SonataError(
             fmt::format("The input '{}' is not present in the simulation config file", name));
     }
+    return it->second;
+}
 
+std::set<std::string> SimulationConfig::listConnectionOverrideNames() const {
+    return getMapKeys(_connections);
+}
+
+const SimulationConfig::ConnectionOverride& SimulationConfig::getConnectionOverride(
+    const std::string& name) const {
+    const auto it = _connections.find(name);
+    if (it == _connections.end()) {
+        throw SonataError(
+            fmt::format("The connection_override '{}' is not present in the simulation config file",
+                        name));
+    }
     return it->second;
 }
 

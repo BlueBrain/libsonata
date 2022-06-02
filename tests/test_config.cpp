@@ -489,6 +489,23 @@ TEST_CASE("SimulationConfig") {
               "ex_shotnoise",
               "ex_subthreshold"
               });
+
+        CHECK(config.listConnectionOverrideNames() ==
+              std::set<std::string>{"ConL3Exc-Uni", "GABAB_erev"});
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").source == "Excitatory");
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").target == "Mosaic");
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").weight == 1);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").spontMinis == 0.01);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").modoverride == "GluSynapse");
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").delay == 0.5);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseDelayOverride == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseConfigure == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("GABAB_erev").spontMinis == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("GABAB_erev").synapseDelayOverride == 0.5);
+        CHECK(config.getConnectionOverride("GABAB_erev").delay == 0);
+        CHECK(config.getConnectionOverride("GABAB_erev").synapseConfigure ==
+              "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77");
+        CHECK(config.getConnectionOverride("GABAB_erev").modoverride == nonstd::nullopt);
     }
 
     SECTION("manifest_network") {
@@ -951,6 +968,23 @@ TEST_CASE("SimulationConfig") {
                 "output_dir": "$OUTPUT_DIR/output",
                 "spikes_file": "out.h5",
                 "spikes_sort_order": "invalid-order"
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {
+            // Missing mandatory parameter in a connection_override object
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "connection_overrides": {
+                "connect1": {
+                   "source": "Excitatory",
+                   "weight": 1
+                }
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);

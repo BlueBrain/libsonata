@@ -758,6 +758,20 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
         self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
+        self.assertEqual(self.config.list_connection_override_names, {"ConL3Exc-Uni", "GABAB_erev"})
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').source, 'Excitatory')
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').target, 'Mosaic')
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').weight, 1)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').spont_minis, 0.01)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').modoverride, 'GluSynapse')
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').delay, 0.5)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_delay_override, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_configure, None)
+        self.assertEqual(self.config.connection_override('GABAB_erev').spont_minis, None)
+        self.assertEqual(self.config.connection_override('GABAB_erev').synapse_delay_override, 0.5)
+        self.assertEqual(self.config.connection_override('GABAB_erev').delay, 0)
+        self.assertEqual(self.config.connection_override('GABAB_erev').modoverride, None)
+        self.assertEqual(self.config.connection_override('GABAB_erev').synapse_configure, '%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77')
 
     def test_json(self):
         temp_config = json.loads(self.config.json)
