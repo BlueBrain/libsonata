@@ -491,6 +491,8 @@ class SONATA_API SimulationConfig
     };
     using ConnectionMap = std::unordered_map<std::string, ConnectionOverride>;
 
+    enum class SimulatorType { invalid = -1, NEURON, CORENEURON };
+
     /**
      * Parses a SONATA JSON simulation configuration file.
      *
@@ -579,6 +581,23 @@ class SONATA_API SimulationConfig
      */
     const ConnectionOverride& getConnectionOverride(const std::string& name) const;
 
+    /**
+     * Returns the name of simulator, default = NEURON
+     * \throws SonataError if the given value is neither NEURON nor CORENEURON
+     */
+    const SimulationConfig::SimulatorType& getTargetSimulator() const;
+
+    /**
+     * Returns the path of node sets file overriding node_sets_file provided in _network,
+     * default is empty in case of no setting in _network
+     */
+    const std::string& getNodeSetsFile() const noexcept;
+
+    /**
+     * Returns the name of node set to be instantiated for the simulation, default = None
+     */
+    const nonstd::optional<std::string>& getNodeSet() const noexcept;
+
   private:
     // JSON string
     const std::string _jsonContent;
@@ -599,6 +618,12 @@ class SONATA_API SimulationConfig
     InputMap _inputs;
     // List of connections
     ConnectionMap _connections;
+    // Name of simulator
+    SimulatorType _targetSimulator;
+    // Path of node sets file
+    std::string _nodeSetsFile;
+    // Name of node set
+    nonstd::optional<std::string> _nodeSet{nonstd::nullopt};
 
     class Parser;
     friend class Parser;

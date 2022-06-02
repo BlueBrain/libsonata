@@ -888,6 +888,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::ConnectionOverride::delay,
                       DOC_SIMULATIONCONFIG(ConnectionOverride, delay));
 
+    py::enum_<SimulationConfig::SimulatorType>(inputBase, "SimulatorType")
+        .value("NEURON", SimulationConfig::SimulatorType::NEURON)
+        .value("CORENEURON", SimulationConfig::SimulatorType::CORENEURON);
+
     py::class_<SimulationConfig>(m, "SimulationConfig", "")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
@@ -898,6 +902,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("output", &SimulationConfig::getOutput)
         .def_property_readonly("conditions", &SimulationConfig::getConditions)
         .def_property_readonly("network", &SimulationConfig::getNetwork)
+        .def_property_readonly("target_simulator", &SimulationConfig::getTargetSimulator)
+        .def_property_readonly("node_sets_file", &SimulationConfig::getNodeSetsFile)
+        .def_property_readonly("node_set", &SimulationConfig::getNodeSet)
         .def_property_readonly("list_report_names", &SimulationConfig::listReportNames)
         .def_property_readonly("list_input_names", &SimulationConfig::listInputNames)
         .def_property_readonly("list_connection_override_names",
