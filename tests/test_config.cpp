@@ -128,7 +128,8 @@ TEST_CASE("CircuitConfig") {
                     "nodes_file": "$NETWORK_DIR/nodes1.h5",
                     "populations": {
                       "nodes-A": {
-                        "type": "biophysical"
+                        "type": "biophysical",
+                        "biophysical_neuron_models_dir": "a/fake/dir"
                       },
                       "nodes-B": {
                         "type": "virtualnode"
@@ -142,13 +143,13 @@ TEST_CASE("CircuitConfig") {
             CHECK_THROWS_AS(CircuitConfig(contents, "./"), SonataError);
         }
 
-        {  // Biophysical population with morphology dir
+        {  // Biophysical population without `biophysical_neuron_models_dir`
             auto contents = R"({
               "manifest": {
                 "$NETWORK_DIR": "./data"
               },
               "components": {
-                "morphologies_dir": ""
+                "morphologies_dir": "a/fake/dir"
               },
               "networks": {
                 "nodes": [
@@ -156,8 +157,7 @@ TEST_CASE("CircuitConfig") {
                     "nodes_file": "$NETWORK_DIR/nodes1.h5",
                     "populations": {
                       "nodes-A": {
-                        "type": "biophysical",
-                        "morphologies_dir": "/a/custom/morphology/path"
+                        "type": "biophysical"
                       },
                       "nodes-B": {
                         "type": "virtualnode"
@@ -168,7 +168,7 @@ TEST_CASE("CircuitConfig") {
                 "edges":[]
               }
             })";
-            CHECK_NOTHROW(CircuitConfig(contents, "./"));
+            CHECK_THROWS_AS(CircuitConfig(contents, "./"), SonataError);
         }
 
         {  // No node file defined for node subnetwork
