@@ -525,70 +525,18 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         self.assertEqual(new, ns.toJSON())
 
 
-def test_path_ctor():
-    #  make sure constructors that take file paths can use pathlib.Path
-    path = pathlib.Path(PATH)
+class TestMisc(unittest.TestCase):
+    def test_path_ctor(self):
+        #  make sure constructors that take file paths can use pathlib.Path
+        path = pathlib.Path(PATH)
 
-    NodeStorage(path / 'nodes1.h5')
-    EdgeStorage(path / 'edges1.h5')
-    SpikeReader(path / 'spikes.h5')
-    SomaReportReader(path / 'somas.h5')
-    ElementReportReader(path / 'elements.h5')
-    NodeSets.from_file(path / 'node_sets.json')
-    CircuitConfig.from_file(path / 'config/circuit_config.json')
-
-def test_shadowing_morphs():
-    contents = {
-        "manifest": {
-            "$BASE_DIR": "./",
-            },
-        "components": {
-            "biophysical_neuron_models_dir": "/biophysical_neuron_models",
-            "alternate_morphologies": {
-                "h5v1": "/morphologies/h5"
-                }
-            },
-        "networks": {
-            "edges": [
-                {
-                    "edges_file": "$BASE_DIR/edges1.h5",
-                    "populations": {
-                        "edges-AB": {
-                            "morphologies_dir": "/my/custom/morphologies/dir"
-                            }
-                        }
-                    }
-                ],
-            "nodes":[]
-            }
-        }
-    cc = CircuitConfig(json.dumps(contents), PATH)
-    pp = cc.edge_population_properties('edges-AB')
-    assert pp.alternate_morphology_formats == {'h5v1': '/morphologies/h5'}
-    assert pp.biophysical_neuron_models_dir == "/biophysical_neuron_models"
-    assert pp.morphologies_dir == "/my/custom/morphologies/dir"
-
-    contents = {
-        "manifest": {
-            "$BASE_DIR": "./",
-            },
-        "networks": {
-            "edges": [
-                {
-                    "edges_file": "$BASE_DIR/edges1.h5",
-                    "populations": {
-                        "edges-AB": {
-                            "morphologies_dir": "/my/custom/morphologies/dir"
-                            }
-                        }
-                    }
-                ],
-            "nodes":[]
-            }
-        }
-    cc = CircuitConfig(json.dumps(contents), PATH)
-    pp = cc.edge_population_properties('edges-AB')
-    assert pp.morphologies_dir == "/my/custom/morphologies/dir"
+        NodeStorage(path / 'nodes1.h5')
+        EdgeStorage(path / 'edges1.h5')
+        SpikeReader(path / 'spikes.h5')
+        SomaReportReader(path / 'somas.h5')
+        ElementReportReader(path / 'elements.h5')
+        NodeSets.from_file(path / 'node_sets.json')
+        CircuitConfig.from_file(path / 'config/circuit_config.json')
 
 
 class TestCircuitConfig(unittest.TestCase):
@@ -628,6 +576,92 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertTrue(edge_prop.morphologies_dir.endswith('morphologies'))
         self.assertTrue(edge_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
         self.assertEqual(edge_prop.alternate_morphology_formats, {})
+
+    def test_shadowing_morphs(self):
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "biophysical_neuron_models_dir": "/biophysical_neuron_models",
+                "alternate_morphologies": {
+                    "h5v1": "/morphologies/h5"
+                    }
+                },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "morphologies_dir": "/my/custom/morphologies/dir"
+                                }
+                            }
+                        }
+                    ],
+                "edges": []
+                }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        pp = cc.node_population_properties('nodes-A')
+        assert pp.alternate_morphology_formats == {'h5v1': '/morphologies/h5'}
+        assert pp.biophysical_neuron_models_dir == "/biophysical_neuron_models"
+        assert pp.morphologies_dir == "/my/custom/morphologies/dir"
+        assert pp.alternate_morphology_formats == {'h5v1': '/morphologies/h5'}
+
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "biophysical_neuron_models_dir": "/some/dir",
+                                "morphologies_dir": "/my/custom/morphologies/dir"
+                                }
+                            }
+                        }
+                    ],
+                "edges": []
+                }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        pp = cc.node_population_properties('nodes-A')
+        assert pp.morphologies_dir == "/my/custom/morphologies/dir"
+
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "type": "biophysical",
+                                "biophysical_neuron_models_dir": "/some/dir",
+                                "alternate_morphologies": {
+                                    "h5v1": "/my/custom/morphologies/dir",
+                                    "neurolucida-asc": "/my/custom/morphologies/dir"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                "edges": []
+                }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        pp = cc.node_population_properties('nodes-A')
+        assert pp.morphologies_dir == ""
+        assert pp.alternate_morphology_formats == {
+            'neurolucida-asc': '/my/custom/morphologies/dir',
+            'h5v1': '/my/custom/morphologies/dir',
+            }
 
 
 class TestSimulationConfig(unittest.TestCase):
