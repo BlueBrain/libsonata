@@ -637,10 +637,12 @@ class CircuitConfig::PopulationResolver
                 }
 
                 if (it->second.type == "biophysical") {
-                    if (it->second.morphologiesDir.empty()) {
+                    if (it->second.morphologiesDir.empty() &&
+                        it->second.alternateMorphologyFormats.empty()) {
                         throw SonataError(
                             fmt::format("Node population '{}' is defined as 'biophysical' "
-                                        "but does not define 'morphology_dir'",
+                                        "but does not define 'morphologies_dir' or "
+                                        "'alternateMorphologyFormats'",
                                         population));
                     } else if (it->second.biophysicalNeuronModelsDir.empty()) {
                         throw SonataError(
