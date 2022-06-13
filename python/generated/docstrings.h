@@ -888,6 +888,14 @@ Throws:
     SonataError on: - Ill-formed JSON - Missing mandatory entries (in
     any depth))doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_SimulatorType = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_SimulatorType_CORENEURON = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_SimulatorType_NEURON = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_SimulatorType_invalid = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_conditions = R"doc()doc";
@@ -924,6 +932,14 @@ static const char *__doc_bbp_sonata_SimulationConfig_getJSON = R"doc(Returns the
 
 static const char *__doc_bbp_sonata_SimulationConfig_getNetwork = R"doc(Returns circuit config file associated with this simulation config)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_getNodeSet =
+R"doc(Returns the name of node set to be instantiated for the simulation,
+default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getNodeSetsFile =
+R"doc(Returns the path of node sets file overriding node_sets_file provided
+in _network, default is empty in case of no setting in _network)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_getOutput = R"doc(Returns the Output section of the simulation configuration.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getReport =
@@ -934,6 +950,12 @@ Throws:
     existing report.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getRun = R"doc(Returns the Run section of the simulation configuration.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getTargetSimulator =
+R"doc(Returns the name of simulator, default = NEURON
+
+Throws:
+    SonataError if the given value is neither NEURON nor CORENEURON)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
 
@@ -947,11 +969,17 @@ static const char *__doc_bbp_sonata_SimulationConfig_listReportNames = R"doc(Ret
 
 static const char *__doc_bbp_sonata_SimulationConfig_network = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_nodeSet = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_nodeSetsFile = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_output = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_reports = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_run = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_targetSimulator = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SonataError = R"doc()doc";
 

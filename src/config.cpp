@@ -107,6 +107,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
      {SimulationConfig::InputBase::InputType::voltage_clamp, "voltage_clamp"},
      {SimulationConfig::InputBase::InputType::conductance, "conductance"}})
 
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::SimulatorType,
+                             {{SimulationConfig::SimulatorType::invalid, nullptr},
+                              {SimulationConfig::SimulatorType::NEURON, "NEURON"},
+                              {SimulationConfig::SimulatorType::CORENEURON, "CORENEURON"}})
+
 namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
@@ -875,8 +880,39 @@ class SimulationConfig::Parser
     }
 
     std::string parseNetwork() const {
-        auto val = _json.find("network") != _json.end() ? _json["network"] : "circuit_config.json";
+        auto val = _json.value("network", "circuit_config.json");
         return toAbsolute(_basePath, val);
+    }
+
+    SimulationConfig::SimulatorType parseTargetSimulator() const {
+        SimulationConfig::SimulatorType val;
+        parseOptional(_json, "target_simulator", val, {SimulationConfig::SimulatorType::NEURON});
+        return val;
+    }
+
+    std::string parseNodeSetsFile() const noexcept {
+        std::string val;
+        if (_json.contains("node_sets_file")) {
+            val = _json["node_sets_file"];
+            return toAbsolute(_basePath, val);
+        } else {
+            try {
+                const auto circuitFile = parseNetwork();
+                const auto conf = CircuitConfig::fromFile(circuitFile);
+                return conf.getNodeSetsPath();
+            } catch (...) {
+                // Don't throw CircuitConfig exceptions in SimulationConfig and return empty string
+                return val;
+            }
+        }
+    }
+
+    nonstd::optional<std::string> parseNodeSet() const {
+        if (_json.contains("node_set")) {
+            return {_json["node_set"]};
+        } else {
+            return nonstd::nullopt;
+        }
     }
 
     InputMap parseInputs() const {
@@ -993,6 +1029,9 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _network = parser.parseNetwork();
     _inputs = parser.parseInputs();
     _connections = parser.parseConnectionOverrides();
+    _targetSimulator = parser.parseTargetSimulator();
+    _nodeSetsFile = parser.parseNodeSetsFile();
+    _nodeSet = parser.parseNodeSet();
 }
 
 SimulationConfig SimulationConfig::fromFile(const std::string& path) {
@@ -1063,6 +1102,18 @@ const SimulationConfig::ConnectionOverride& SimulationConfig::getConnectionOverr
                         name));
     }
     return it->second;
+}
+
+const SimulationConfig::SimulatorType& SimulationConfig::getTargetSimulator() const {
+    return _targetSimulator;
+}
+
+const std::string& SimulationConfig::getNodeSetsFile() const noexcept {
+    return _nodeSetsFile;
+}
+
+const nonstd::optional<std::string>& SimulationConfig::getNodeSet() const noexcept {
+    return _nodeSet;
 }
 
 }  // namespace sonata
