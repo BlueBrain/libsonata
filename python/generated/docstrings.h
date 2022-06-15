@@ -881,6 +881,14 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run_randomSeed = R"doc(Rand
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeThreshold = R"doc(The spike detection threshold. Default is -30mV)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeLocation = R"doc(The spike detection location. Can be either ‘soma’ or 'AIS'. Default is 'soma')doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod = R"doc(Selects the NEURON/CoreNEURON integration method. This parameter sets the NEURON global variable h.secondorder. Default 0 ('euler'))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_forwardSkip = R"doc(Run without Stimulus or Reports for given duration prior to t=0 using a timestep computed as dt=0.1*forward_skip. Default = None)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
 R"doc(Parses a SONATA JSON simulation configuration file.
 

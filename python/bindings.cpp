@@ -524,14 +524,35 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("edge_population_properties", &CircuitConfig::getEdgePopulationProperties, "name"_a)
         .def_property_readonly("expanded_json", &CircuitConfig::getExpandedJSON);
 
-    py::class_<SimulationConfig::Run>(m,
-                                      "Run",
-                                      "Stores parameters defining global simulation settings")
-        .def_readonly("tstop", &SimulationConfig::Run::tstop, DOC_SIMULATIONCONFIG(Run, tstop))
+    py::class_<SimulationConfig::Run> run(m,
+                                          "Run",
+                                          "Stores parameters defining global simulation settings");
+    run.def_readonly("tstop", &SimulationConfig::Run::tstop, DOC_SIMULATIONCONFIG(Run, tstop))
         .def_readonly("dt", &SimulationConfig::Run::dt, DOC_SIMULATIONCONFIG(Run, dt))
         .def_readonly("random_seed",
                       &SimulationConfig::Run::randomSeed,
-                      DOC_SIMULATIONCONFIG(Run, randomSeed));
+                      DOC_SIMULATIONCONFIG(Run, randomSeed))
+        .def_readonly("spike_threshold",
+                      &SimulationConfig::Run::spikeThreshold,
+                      DOC_SIMULATIONCONFIG(Run, spikeThreshold))
+        .def_readonly("spike_location",
+                      &SimulationConfig::Run::spikeLocation,
+                      DOC_SIMULATIONCONFIG(Run, spikeLocation))
+        .def_readonly("integration_method",
+                      &SimulationConfig::Run::integrationMethod,
+                      DOC_SIMULATIONCONFIG(Run, integrationMethod))
+        .def_readonly("forward_skip",
+                      &SimulationConfig::Run::forwardSkip,
+                      DOC_SIMULATIONCONFIG(Run, forwardSkip));
+
+    py::enum_<SimulationConfig::Run::SpikeLocation>(run, "SpikeLocation")
+        .value("soma", SimulationConfig::Run::SpikeLocation::soma)
+        .value("AIS", SimulationConfig::Run::SpikeLocation::AIS);
+
+    py::enum_<SimulationConfig::Run::IntegrationMethod>(run, "IntegrationMethod")
+        .value("euler", SimulationConfig::Run::IntegrationMethod::euler)
+        .value("nicholson", SimulationConfig::Run::IntegrationMethod::nicholson)
+        .value("nicholson_ion", SimulationConfig::Run::IntegrationMethod::nicholson_ion);
 
     py::class_<SimulationConfig::Output> output(m, "Output", "Parameters of simulation output");
     output

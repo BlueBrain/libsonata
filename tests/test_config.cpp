@@ -304,6 +304,10 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().tstop == 1000);
         CHECK(config.getRun().dt == 0.025);
         CHECK(config.getRun().randomSeed == 201506);
+        CHECK(config.getRun().spikeThreshold == -30);
+        CHECK(config.getRun().spikeLocation == SimulationConfig::Run::SpikeLocation::AIS);
+        CHECK(config.getRun().integrationMethod == SimulationConfig::Run::IntegrationMethod::nicholson_ion);
+        CHECK(config.getRun().forwardSkip == 500);
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
@@ -592,6 +596,28 @@ TEST_CASE("SimulationConfig") {
               "run": {
                 "tstop": 1000,
                 "dt": 0.05
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong spike_location in a run object
+            auto contents = R"({
+              "run": {
+                "tstop": 1000,
+                "dt": 0.05,
+                "random_seed": 12345,
+                "spike_location": "axon"
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong integration_method in a run object
+            auto contents = R"({
+              "run": {
+                "tstop": 1000,
+                "dt": 0.05,
+                "random_seed": 12345,
+                "integration_method": 4
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
