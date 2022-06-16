@@ -847,7 +847,7 @@ class SimulationConfig::Parser
             const auto& valueIt = it.value();
             const std::string debugStr = "report " + it.key();
 
-            parseOptional(valueIt, "cells", report.cells, {parseNodeSet()});
+            parseOptional(valueIt, "cells", report.cells, parseNodeSet());
             parseOptional(valueIt, "sections", report.sections, {Report::Sections::soma});
             parseMandatory(valueIt, "type", debugStr, report.type);
             parseOptional(valueIt, "scaling", report.scaling, {Report::Scaling::area});
