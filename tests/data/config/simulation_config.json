@@ -212,7 +212,6 @@
     },
     "reports": {
          "soma": {
-              "cells": "Mosaic",
               "sections": "soma",
               "type": "compartment",
               "variable_name": "v",

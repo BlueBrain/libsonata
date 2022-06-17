@@ -337,7 +337,7 @@ TEST_CASE("SimulationConfig") {
               "soma"
               });
 
-        CHECK(config.getReport("soma").cells == "Mosaic");
+        CHECK(config.getReport("soma").cells == "Column");
         CHECK(config.getReport("soma").type == SimulationConfig::Report::Type::compartment);
         CHECK(config.getReport("soma").compartments == SimulationConfig::Report::Compartments::center);
         CHECK(config.getReport("soma").enabled == true);

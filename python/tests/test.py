@@ -696,7 +696,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.list_report_names,
                          { "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
 
-        self.assertEqual(self.config.report('soma').cells, 'Mosaic')
+        self.assertEqual(self.config.report('soma').cells, 'Column')
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
         self.assertEqual(self.config.report('soma').compartments, Report.Compartments.center)
         self.assertEqual(self.config.report('soma').enabled, True)
