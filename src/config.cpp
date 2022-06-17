@@ -53,6 +53,22 @@ struct adl_serializer<nonstd::optional<T>> {
 namespace bbp {
 namespace sonata {
 
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::SpikeLocation,
+                             {{SimulationConfig::Run::SpikeLocation::invalid, nullptr},
+                              {SimulationConfig::Run::SpikeLocation::soma, "soma"},
+                              {SimulationConfig::Run::SpikeLocation::AIS, "AIS"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::IntegrationMethod,
+                             {{SimulationConfig::Run::IntegrationMethod::invalid, nullptr},
+                              {SimulationConfig::Run::IntegrationMethod::euler, 0},
+                              {SimulationConfig::Run::IntegrationMethod::nicholson, 1},
+                              {SimulationConfig::Run::IntegrationMethod::nicholson_ion, 2}})
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Output::SpikesSortOrder,
+                             {{SimulationConfig::Output::SpikesSortOrder::invalid, nullptr},
+                              {SimulationConfig::Output::SpikesSortOrder::none, "none"},
+                              {SimulationConfig::Output::SpikesSortOrder::by_id, "by_id"},
+                              {SimulationConfig::Output::SpikesSortOrder::by_time, "by_time"}})
+
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Sections,
                              {{SimulationConfig::Report::Sections::invalid, nullptr},
                               {SimulationConfig::Report::Sections::soma, "soma"},
@@ -73,11 +89,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Compartments,
                              {{SimulationConfig::Report::Compartments::invalid, nullptr},
                               {SimulationConfig::Report::Compartments::center, "center"},
                               {SimulationConfig::Report::Compartments::all, "all"}})
-NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Output::SpikesSortOrder,
-                             {{SimulationConfig::Output::SpikesSortOrder::invalid, nullptr},
-                              {SimulationConfig::Output::SpikesSortOrder::none, "none"},
-                              {SimulationConfig::Output::SpikesSortOrder::by_id, "by_id"},
-                              {SimulationConfig::Output::SpikesSortOrder::by_time, "by_time"}})
 
 NLOHMANN_JSON_SERIALIZE_ENUM(
     SimulationConfig::InputBase::Module,
@@ -788,6 +799,13 @@ class SimulationConfig::Parser
         parseMandatory(*runIt, "tstop", "run", result.tstop);
         parseMandatory(*runIt, "dt", "run", result.dt);
         parseMandatory(*runIt, "random_seed", "run", result.randomSeed);
+        parseOptional(*runIt, "spike_threshold", result.spikeThreshold, {-30});
+        parseOptional(*runIt, "spike_location", result.spikeLocation, {Run::SpikeLocation::soma});
+        parseOptional(*runIt,
+                      "integration_method",
+                      result.integrationMethod,
+                      {Run::IntegrationMethod::euler});
+        parseOptional(*runIt, "forward_skip", result.forwardSkip);
         return result;
     }
 

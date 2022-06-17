@@ -14,7 +14,7 @@ from libsonata import (EdgeStorage, NodeStorage,
                        CircuitConfig, SimulationConfig
                        )
 
-from libsonata._libsonata import Report, Output
+from libsonata._libsonata import Report, Output, Run
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, '../../tests/data')
@@ -675,6 +675,10 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.tstop, 1000)
         self.assertEqual(self.config.run.dt, 0.025)
         self.assertEqual(self.config.run.random_seed, 201506)
+        self.assertEqual(self.config.run.spike_threshold, -30)
+        self.assertEqual(self.config.run.spike_location, Run.SpikeLocation.AIS)
+        self.assertEqual(self.config.run.integration_method, Run.IntegrationMethod.nicholson_ion)
+        self.assertEqual(self.config.run.forward_skip, 500)
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/output')))

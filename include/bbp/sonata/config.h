@@ -188,12 +188,25 @@ class SONATA_API SimulationConfig
      * Parameters defining global simulation settings for spike reports
      */
     struct Run {
+        enum class SpikeLocation { invalid = -1, soma, AIS };
+        enum class IntegrationMethod { invalid = -1, euler, nicholson, nicholson_ion };
+
         /// Biological simulation end time in milliseconds
         double tstop{};
         /// Integration step duration in milliseconds
         double dt{};
         /// Random seed
         int randomSeed{};
+        /// The spike detection threshold. Default is -30mV
+        int spikeThreshold;
+        /// The spike detection location. Can be either ‘soma’ or 'AIS'. Default is 'soma'
+        SpikeLocation spikeLocation;
+        /// Selects the NEURON/CoreNEURON integration method. This parameter sets the NEURON
+        /// global variable h.secondorder. Default 0 ('euler')
+        IntegrationMethod integrationMethod;
+        /// Run without Stimulus or Reports for given duration prior to t=0
+        /// using a timestep computed as dt=0.1*forward_skip. Default = None
+        nonstd::optional<int> forwardSkip{nonstd::nullopt};
     };
     /**
      * Parameters to override simulator output for spike reports
