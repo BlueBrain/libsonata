@@ -577,6 +577,30 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertTrue(edge_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
         self.assertEqual(edge_prop.alternate_morphology_formats, {})
 
+
+    def test_biophysical_properties_raises(self):
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "morphologies_dir": "some/morph/dir",
+            },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": { }  # nothing overridden;
+                                            # missing biophysical_neuron_models_dir
+                        }
+                    }],
+                "edges": []
+                }
+            }
+        self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
+
+
     def test_shadowing_morphs(self):
         contents = {
             "manifest": {

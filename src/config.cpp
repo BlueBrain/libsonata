@@ -558,9 +558,6 @@ class CircuitConfig::Parser
             // Iterate over all defined populations
             for (auto it = populationsIt->begin(); it != populationsIt->end(); ++it) {
                 const auto& popData = it.value();
-                if (popData.empty()) {
-                    continue;
-                }
 
                 PopulationProperties& popProperties = output[it.key()];
 
