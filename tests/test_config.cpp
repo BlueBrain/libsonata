@@ -314,8 +314,8 @@ TEST_CASE("SimulationConfig") {
             fs::path("./data/config/simulation_config.json").parent_path());
 
         CHECK_NOTHROW(config.getOutput());
-        const auto outputPath = fs::absolute(basePath / fs::path("output"));
-        CHECK(config.getOutput().outputDir == outputPath.lexically_normal());
+        const auto outputPath = fs::absolute(basePath / "some/path/output");
+        CHECK(config.getOutput().outputDir == (outputPath).lexically_normal());
         CHECK(config.getOutput().spikesFile == "out.h5");
         CHECK(config.getOutput().logFile.empty());
         CHECK(config.getOutput().sortOrder == SimulationConfig::Output::SpikesSortOrder::by_id);
@@ -354,7 +354,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getReport("cell_imembrane").endTime == 500.);
         CHECK(config.getReport("cell_imembrane").variableName == "i_membrane, IClamp");
 
-        CHECK_NOTHROW(nlohmann::json::parse(config.getJSON()));
+        CHECK_NOTHROW(nlohmann::json::parse(config.getExpandedJSON()));
         CHECK(config.getBasePath() == basePath.lexically_normal());
 
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));

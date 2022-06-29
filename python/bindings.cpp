@@ -918,7 +918,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_static("from_file",
                     [](py::object path) { return SimulationConfig::fromFile(py::str(path)); })
         .def_property_readonly("base_path", &SimulationConfig::getBasePath)
-        .def_property_readonly("json", &SimulationConfig::getJSON)
+        .def_property_readonly("expanded_json", &SimulationConfig::getExpandedJSON)
         .def_property_readonly("run", &SimulationConfig::getRun)
         .def_property_readonly("output", &SimulationConfig::getOutput)
         .def_property_readonly("conditions", &SimulationConfig::getConditions)

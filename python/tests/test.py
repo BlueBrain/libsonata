@@ -691,7 +691,7 @@ class TestCircuitConfig(unittest.TestCase):
 class TestSimulationConfig(unittest.TestCase):
     def setUp(self):
         self.config = SimulationConfig.from_file(
-                        os.path.join(PATH, 'config/simulation_config.json'))
+                        os.path.join(PATH, 'config', 'simulation_config.json'))
 
     def test_basic(self):
         self.assertEqual(self.config.base_path, os.path.abspath(os.path.join(PATH, 'config')))
@@ -705,7 +705,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.forward_skip, 500)
 
         self.assertEqual(self.config.output.output_dir,
-                         os.path.abspath(os.path.join(PATH, 'config/output')))
+                         os.path.abspath(os.path.join(PATH, 'config/some/path/output')))
         self.assertEqual(self.config.output.spikes_file, 'out.h5')
         self.assertEqual(self.config.output.log_file, '')
         self.assertEqual(self.config.output.spikes_sort_order, Output.SpikesSortOrder.by_id)
@@ -860,9 +860,9 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.connection_override('GABAB_erev').modoverride, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').synapse_configure, '%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77')
 
-    def test_json(self):
-        temp_config = json.loads(self.config.json)
-        self.assertEqual(temp_config['run']['tstop'], 1000)
+    def test_expanded_json(self):
+        config = json.loads(self.config.expanded_json)
+        self.assertEqual(config['output']['output_dir'], 'some/path/output')
 
 
 if __name__ == '__main__':
