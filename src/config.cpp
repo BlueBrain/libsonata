@@ -588,7 +588,7 @@ class CircuitConfig::Parser
         return parsePopulationProperties<EdgePopulation>("edge");
     }
 
-    std::string getExpandedJSON() {
+    std::string getExpandedJSON() const {
         return _json.dump();
     }
 
@@ -1030,15 +1030,19 @@ class SimulationConfig::Parser
         return result;
     }
 
+    std::string getExpandedJSON() const {
+        return _json.dump();
+    }
+
   private:
     const fs::path _basePath;
     nlohmann::json _json;
 };
 
 SimulationConfig::SimulationConfig(const std::string& content, const std::string& basePath)
-    : _jsonContent(content)
-    , _basePath(fs::absolute(basePath).lexically_normal().string()) {
+    : _basePath(fs::absolute(basePath).lexically_normal().string()) {
     const Parser parser(content, basePath);
+    _expandedJSON = parser.getExpandedJSON();
     _run = parser.parseRun();
     _output = parser.parseOutput();
     _conditions = parser.parseConditions();
@@ -1057,10 +1061,6 @@ SimulationConfig SimulationConfig::fromFile(const std::string& path) {
 
 const std::string& SimulationConfig::getBasePath() const noexcept {
     return _basePath;
-}
-
-const std::string& SimulationConfig::getJSON() const noexcept {
-    return _jsonContent;
 }
 
 const SimulationConfig::Run& SimulationConfig::getRun() const noexcept {
@@ -1131,6 +1131,10 @@ const std::string& SimulationConfig::getNodeSetsFile() const noexcept {
 
 const nonstd::optional<std::string>& SimulationConfig::getNodeSet() const noexcept {
     return _nodeSet;
+}
+
+const std::string& SimulationConfig::getExpandedJSON() const {
+    return _expandedJSON;
 }
 
 }  // namespace sonata

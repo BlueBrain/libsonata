@@ -611,11 +611,17 @@ class SONATA_API SimulationConfig
      */
     const nonstd::optional<std::string>& getNodeSet() const noexcept;
 
+    /**
+     * Returns the configuration file JSON whose variables have been expanded by the
+     * manifest entries.
+     */
+    const std::string& getExpandedJSON() const;
+
   private:
     // JSON string
-    const std::string _jsonContent;
+    std::string _expandedJSON;
     // Base path of the simulation config file
-    const std::string _basePath;
+    std::string _basePath;
 
     // Run section
     Run _run;

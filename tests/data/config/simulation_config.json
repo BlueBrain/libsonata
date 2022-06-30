@@ -1,6 +1,6 @@
 {
      "manifest": {
-         "$OUTPUT_DIR": "."
+         "$OUTPUT_DIR": "./some/path"
      },
      "target_simulator": "CORENEURON",
      "node_set" : "Column",
