@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.13:
+
+### Added:
+ - Parse SimulationConfig #197, #203, #207, #208, #210, others
+
+### Fixed:
+ - throw if biophysical_neuron_models_dir is missing for biophysical population (#206)
+ - for `biophysical` node populations, don't raise error if alternate_morphologies exists (#209)
+
 ## v0.1.12:
 
 ### Added:
