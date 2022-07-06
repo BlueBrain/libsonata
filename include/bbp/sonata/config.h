@@ -29,6 +29,8 @@
 namespace bbp {
 namespace sonata {
 
+using variantValueType = nonstd::variant<bool, std::string, int, double>;
+
 /**
  * Stores population-specific network information.
  */
@@ -241,6 +243,11 @@ class SONATA_API SimulationConfig
         /// Enable legacy behavior to randomize the GABA_A rise time in the helper functions.
         /// Default is false
         bool randomizeGabaRiseTime;
+        /// Properties to assign values to variables in synapse MOD files.
+        /// The format is a dictionary with keys being the SUFFIX names and values being
+        /// dictionaries of variables' names and values.
+        std::unordered_map<std::string, std::unordered_map<std::string, variantValueType>>
+            mechanisms;
     };
     /**
      * List of report parameters collected during the simulation

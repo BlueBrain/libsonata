@@ -327,6 +327,14 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConditions().extracellularCalcium == nonstd::nullopt);
         CHECK(config.getConditions().minisSingleVesicle == false);
         CHECK(config.getConditions().randomizeGabaRiseTime == false);
+        CHECK(config.getConditions().mechanisms.size() == 2);
+        auto itr = config.getConditions().mechanisms.find("ProbAMPANMDA_EMS");
+        CHECK(itr != config.getConditions().mechanisms.end());
+        CHECK(nonstd::get<bool>(itr->second.find("property1")->second) == false);
+        CHECK(nonstd::get<int>(itr->second.find("property2")->second) == -1);
+        itr = config.getConditions().mechanisms.find("GluSynapse");
+        CHECK(nonstd::get<double>(itr->second.find("property3")->second) == 0.025);
+        CHECK(nonstd::get<std::string>(itr->second.find("property4")->second) == "test");
 
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
