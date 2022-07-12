@@ -18,8 +18,18 @@
          "spikes_sort_order": "by_id"
     },
     "conditions": {
-     "celsius": 35.0,
-     "synapses_init_deleted": false
+      "celsius": 35.0,
+      "synapses_init_depleted": false,
+      "mechanisms": {
+        "ProbAMPANMDA_EMS": {
+          "property1": false,
+          "property2": -1
+        },
+        "GluSynapse" : {
+          "property3": 0.025,
+          "property4": "test"
+        }
+      }
     },
     "inputs": {
         "ex_linear": {

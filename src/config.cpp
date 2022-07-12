@@ -421,6 +421,40 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
     }
 }
 
+void parseConditionsMechanisms(
+    const nlohmann::json& it,
+    std::unordered_map<std::string, std::unordered_map<std::string, variantValueType>>& buf) {
+    const auto mechIt = it.find("mechanisms");
+    if (mechIt == it.end()) {
+        return;
+    }
+    for (auto& scopeIt : mechIt->items()) {
+        std::unordered_map<std::string, variantValueType> map_vars;
+        for (auto& varIt : scopeIt.value().items()) {
+            variantValueType res_val;
+            switch (varIt.value().type()) {
+            case nlohmann::json::value_t::boolean:
+                res_val = varIt.value().get<bool>();
+                break;
+            case nlohmann::json::value_t::string:
+                res_val = varIt.value().get<std::string>();
+                break;
+            case nlohmann::json::value_t::number_float:
+                res_val = varIt.value().get<double>();
+                break;
+            case nlohmann::json::value_t::number_integer:
+            case nlohmann::json::value_t::number_unsigned:
+                res_val = varIt.value().get<int>();
+                break;
+            default:
+                throw SonataError("Value type not supported");
+            }
+            map_vars.insert({varIt.key(), res_val});
+        }
+        buf.insert({scopeIt.key(), map_vars});
+    }
+}
+
 }  // namespace
 
 class CircuitConfig::Parser
@@ -845,7 +879,7 @@ class SimulationConfig::Parser
                       "randomize_gaba_rise_time",
                       result.randomizeGabaRiseTime,
                       {false});
-
+        parseConditionsMechanisms(*conditionsIt, result.mechanisms);
         return result;
     }
 

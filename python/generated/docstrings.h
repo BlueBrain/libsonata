@@ -545,6 +545,11 @@ R"doc(Extracellular calcium concentration, being applied to the synapse
 uHill parameter in order to scale the U parameter of synapses. Default
 is None.)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_mechanisms =
+R"doc(Properties to assign values to variables in synapse MOD files. The
+format is a dictionary with keys being the SUFFIX names and values
+being dictionaries of variables' names and values.)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_minisSingleVesicle =
 R"doc(Limit spontaneous release to single vesicle when true. Default is
 false)doc";
@@ -875,19 +880,43 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_variableName = R"doc
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defining global simulation settings for spike reports)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_euler = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_nicholson = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_nicholson_ion = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_AIS = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_soma = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_forwardSkip =
+R"doc(Run without Stimulus or Reports for given duration prior to t=0 using
+a timestep computed as dt=0.1*forward_skip. Default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod =
+R"doc(Selects the NEURON/CoreNEURON integration method. This parameter sets
+the NEURON global variable h.secondorder. Default 0 ('euler'))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_randomSeed = R"doc(Random seed)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeLocation =
+R"doc(The spike detection location. Can be either ‘soma’ or 'AIS'. Default
+is 'soma')doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeThreshold = R"doc(The spike detection threshold. Default is -30mV)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeLocation = R"doc(The spike detection location. Can be either ‘soma’ or 'AIS'. Default is 'soma')doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod = R"doc(Selects the NEURON/CoreNEURON integration method. This parameter sets the NEURON global variable h.secondorder. Default 0 ('euler'))doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_forwardSkip = R"doc(Run without Stimulus or Reports for given duration prior to t=0 using a timestep computed as dt=0.1*forward_skip. Default = None)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
 R"doc(Parses a SONATA JSON simulation configuration file.
@@ -910,6 +939,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_conditions = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_connections = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_expandedJSON = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_fromFile =
 R"doc(Loads a SONATA JSON simulation config file from disk and returns a
 CircuitConfig object which parses it.
@@ -929,6 +960,10 @@ R"doc(Returns the given connection parameters
 Throws:
     SonataError if the given connection name does not correspond with
     any existing connection.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getExpandedJSON =
+R"doc(Returns the configuration file JSON whose variables have been expanded
+by the manifest entries.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getInput =
 R"doc(Returns the given input parameters.
@@ -966,8 +1001,6 @@ Throws:
     SonataError if the given value is neither NEURON nor CORENEURON)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_jsonContent = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listConnectionOverrideNames = R"doc(Returns the names of the connection_overrides)doc";
 

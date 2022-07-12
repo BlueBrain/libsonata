@@ -597,7 +597,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(Conditions, minisSingleVesicle))
         .def_readonly("randomize_gaba_rise_time",
                       &SimulationConfig::Conditions::randomizeGabaRiseTime,
-                      DOC_SIMULATIONCONFIG(Conditions, randomizeGabaRiseTime));
+                      DOC_SIMULATIONCONFIG(Conditions, randomizeGabaRiseTime))
+        .def_readonly("mechanisms",
+                      &SimulationConfig::Conditions::mechanisms,
+                      DOC_SIMULATIONCONFIG(Conditions, mechanisms));
 
     py::class_<SimulationConfig::Report> report(m, "Report", "Parameters of a report");
     report

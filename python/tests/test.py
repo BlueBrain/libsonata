@@ -716,6 +716,10 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.conditions.extracellular_calcium, None)
         self.assertEqual(self.config.conditions.minis_single_vesicle, False)
         self.assertEqual(self.config.conditions.randomize_gaba_rise_time, False)
+        self.assertEqual(self.config.conditions.mechanisms, {'ProbAMPANMDA_EMS': {'property2': -1,
+                                                                                  'property1': False},
+                                                             'GluSynapse': {'property4': 'test',
+                                                                            'property3': 0.025}})
 
         self.assertEqual(self.config.list_report_names,
                          { "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
