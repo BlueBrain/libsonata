@@ -722,7 +722,7 @@ class TestSimulationConfig(unittest.TestCase):
                                                                             'property3': 0.025}})
 
         self.assertEqual(self.config.list_report_names,
-                         { "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
+                         { "adex", "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
 
         self.assertEqual(self.config.report('soma').cells, 'Column')
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
@@ -740,6 +740,8 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
         self.assertEqual(self.config.report('cell_imembrane').type.name, 'summation')
         self.assertEqual(self.config.report('cell_imembrane').variable_name, 'i_membrane, IClamp')
+        self.assertEqual(self.config.report('adex').type.name, 'point_neuron')
+        self.assertEqual(self.config.report('adex').variable_name, 'AdEx.V_M, v')
 
         self.assertEqual(self.config.network,
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
@@ -829,6 +831,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_replay').spike_file,
                          os.path.abspath(os.path.join(PATH, 'config/replay.dat')))
         self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
+        self.assertEqual(self.config.input('ex_replay').connection_type.name, "point_neuron")
         self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
         self.assertEqual(self.config.input('ex_abs_shotnoise').input_type.name, "conductance")
@@ -858,11 +861,15 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').delay, 0.5)
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_delay_override, None)
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_configure, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').neuromod_dtc, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').neuromod_strength, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').spont_minis, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').synapse_delay_override, 0.5)
         self.assertEqual(self.config.connection_override('GABAB_erev').delay, 0)
         self.assertEqual(self.config.connection_override('GABAB_erev').modoverride, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').synapse_configure, '%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77')
+        self.assertEqual(self.config.connection_override('GABAB_erev').neuromod_dtc, 100) 
+        self.assertEqual(self.config.connection_override('GABAB_erev').neuromod_strength, 0.75) 
 
     def test_expanded_json(self):
         config = json.loads(self.config.expanded_json)

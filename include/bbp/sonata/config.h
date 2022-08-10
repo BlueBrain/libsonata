@@ -254,7 +254,7 @@ class SONATA_API SimulationConfig
      */
     struct Report {
         enum class Sections { invalid = -1, soma, axon, dend, apic, all };
-        enum class Type { invalid = -1, compartment, summation, synapse };
+        enum class Type { invalid = -1, compartment, summation, synapse, point_neuron };
         enum class Scaling { invalid = -1, none, area };
         enum class Compartments { invalid = -1, center, all };
 
@@ -360,10 +360,23 @@ class SONATA_API SimulationConfig
     struct InputHyperpolarizing: public InputBase {};
 
     struct InputSynapseReplay: public InputBase {
+        enum class ConnectionType {
+            invalid = -1,
+            chemical,
+            electrical,
+            synapse_astrocyte,
+            endfoot,
+            neuromodulatory,
+            point_neuron
+        };
+
         /// The location of the file with the spike info for injection
         std::string spikeFile;
         /// The node set to replay spikes from
         std::string source;
+        /// Type of the connectivity between the source and target of the injection, default =
+        /// chemical
+        ConnectionType connectionType;
     };
 
     struct InputSeclamp: public InputBase {
@@ -508,6 +521,12 @@ class SONATA_API SimulationConfig
         /// Adjustments from weight of this connection_override are applied after the specified
         /// delay has elapsed in ms, default = 0.
         double delay{0.};
+        /// To override the neuromod_dtc values between the selected source and target neurons for
+        /// the neuromodulatory projection
+        nonstd::optional<double> neuromodDtc{nonstd::nullopt};
+        /// To override the neuromod_strength values between the selected source and target neurons
+        /// for the neuromodulatory projection
+        nonstd::optional<double> neuromodStrength{nonstd::nullopt};
     };
     using ConnectionMap = std::unordered_map<std::string, ConnectionOverride>;
 

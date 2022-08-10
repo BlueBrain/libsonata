@@ -655,7 +655,8 @@ PYBIND11_MODULE(_libsonata, m) {
     py::enum_<SimulationConfig::Report::Type>(report, "Type")
         .value("compartment", SimulationConfig::Report::Type::compartment)
         .value("summation", SimulationConfig::Report::Type::summation)
-        .value("synapse", SimulationConfig::Report::Type::synapse);
+        .value("synapse", SimulationConfig::Report::Type::synapse)
+        .value("point_neuron", SimulationConfig::Report::Type::point_neuron);
 
     py::enum_<SimulationConfig::Report::Scaling>(report, "Scaling")
         .value("none", SimulationConfig::Report::Scaling::none)
@@ -722,14 +723,18 @@ PYBIND11_MODULE(_libsonata, m) {
     py::class_<SimulationConfig::InputHyperpolarizing, SimulationConfig::InputBase>(
         m, "Hyperpolarizing");
 
-    py::class_<SimulationConfig::InputSynapseReplay, SimulationConfig::InputBase>(m,
-                                                                                  "SynapseReplay")
+    py::class_<SimulationConfig::InputSynapseReplay, SimulationConfig::InputBase>
+        inputSynapseReplay(m, "SynapseReplay");
+    inputSynapseReplay
         .def_readonly("spike_file",
                       &SimulationConfig::InputSynapseReplay::spikeFile,
                       DOC_SIMULATIONCONFIG(InputSynapseReplay, spikeFile))
         .def_readonly("source",
                       &SimulationConfig::InputSynapseReplay::source,
-                      DOC_SIMULATIONCONFIG(InputSynapseReplay, source));
+                      DOC_SIMULATIONCONFIG(InputSynapseReplay, source))
+        .def_readonly("connection_type",
+                      &SimulationConfig::InputSynapseReplay::connectionType,
+                      DOC_SIMULATIONCONFIG(InputSynapseReplay, connectionType));
 
     py::class_<SimulationConfig::InputSeclamp, SimulationConfig::InputBase>(m, "Seclamp")
         .def_readonly("voltage",
@@ -884,6 +889,17 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("voltage_clamp", SimulationConfig::InputBase::InputType::voltage_clamp)
         .value("conductance", SimulationConfig::InputBase::InputType::conductance);
 
+    py::enum_<SimulationConfig::InputSynapseReplay::ConnectionType>(inputSynapseReplay,
+                                                                    "ConnectionType")
+        .value("chemical", SimulationConfig::InputSynapseReplay::ConnectionType::chemical)
+        .value("electrical", SimulationConfig::InputSynapseReplay::ConnectionType::electrical)
+        .value("synapse_astrocyte",
+               SimulationConfig::InputSynapseReplay::ConnectionType::synapse_astrocyte)
+        .value("endfoot", SimulationConfig::InputSynapseReplay::ConnectionType::endfoot)
+        .value("neuromodulatory",
+               SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory)
+        .value("point_neuron", SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron);
+
     py::class_<SimulationConfig::ConnectionOverride>(m,
                                                      "ConnectionOverride",
                                                      "List of parameters of a connection")
@@ -910,14 +926,16 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(ConnectionOverride, synapseDelayOverride))
         .def_readonly("delay",
                       &SimulationConfig::ConnectionOverride::delay,
-                      DOC_SIMULATIONCONFIG(ConnectionOverride, delay));
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, delay))
+        .def_readonly("neuromod_dtc",
+                      &SimulationConfig::ConnectionOverride::neuromodDtc,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodDtc))
+        .def_readonly("neuromod_strength",
+                      &SimulationConfig::ConnectionOverride::neuromodStrength,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodStrength));
 
-    py::enum_<SimulationConfig::SimulatorType>(inputBase, "SimulatorType")
-        .value("NEURON", SimulationConfig::SimulatorType::NEURON)
-        .value("CORENEURON", SimulationConfig::SimulatorType::CORENEURON);
-
-    py::class_<SimulationConfig>(m, "SimulationConfig", "")
-        .def(py::init<const std::string&, const std::string&>())
+    py::class_<SimulationConfig> simConf(m, "SimulationConfig", "");
+    simConf.def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
                     [](py::object path) { return SimulationConfig::fromFile(py::str(path)); })
         .def_property_readonly("base_path", &SimulationConfig::getBasePath)
@@ -936,6 +954,10 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("report", &SimulationConfig::getReport, "name"_a)
         .def("input", &SimulationConfig::getInput, "name"_a)
         .def("connection_override", &SimulationConfig::getConnectionOverride, "name"_a);
+
+    py::enum_<SimulationConfig::SimulatorType>(simConf, "SimulatorType")
+        .value("NEURON", SimulationConfig::SimulatorType::NEURON)
+        .value("CORENEURON", SimulationConfig::SimulatorType::CORENEURON);
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")

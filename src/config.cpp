@@ -80,7 +80,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Type,
                              {{SimulationConfig::Report::Type::invalid, nullptr},
                               {SimulationConfig::Report::Type::compartment, "compartment"},
                               {SimulationConfig::Report::Type::summation, "summation"},
-                              {SimulationConfig::Report::Type::synapse, "synapse"}})
+                              {SimulationConfig::Report::Type::synapse, "synapse"},
+                              {SimulationConfig::Report::Type::point_neuron, "point_neuron"}})
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Scaling,
                              {{SimulationConfig::Report::Scaling::invalid, nullptr},
                               {SimulationConfig::Report::Scaling::none, "none"},
@@ -122,6 +123,16 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::SimulatorType,
                              {{SimulationConfig::SimulatorType::invalid, nullptr},
                               {SimulationConfig::SimulatorType::NEURON, "NEURON"},
                               {SimulationConfig::SimulatorType::CORENEURON, "CORENEURON"}})
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    SimulationConfig::InputSynapseReplay::ConnectionType,
+    {{SimulationConfig::InputSynapseReplay::ConnectionType::invalid, nullptr},
+     {SimulationConfig::InputSynapseReplay::ConnectionType::chemical, "chemcal"},
+     {SimulationConfig::InputSynapseReplay::ConnectionType::electrical, "electrical"},
+     {SimulationConfig::InputSynapseReplay::ConnectionType::synapse_astrocyte, "synapse_astrocyte"},
+     {SimulationConfig::InputSynapseReplay::ConnectionType::endfoot, "endfoot"},
+     {SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory, "neuromodulatory"},
+     {SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron, "point_neuron"}})
 
 namespace {
 // to be replaced by std::filesystem once C++17 is used
@@ -384,6 +395,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "spike_file", debugStr, ret.spikeFile);
         parseOptional(valueIt, "source", ret.source);
         ret.spikeFile = toAbsolute(basePath, ret.spikeFile);
+        parseOptional(valueIt,
+                      "connection_type",
+                      ret.connectionType,
+                      {SimulationConfig::InputSynapseReplay::ConnectionType::chemical});
         return ret;
     }
     case Module::seclamp: {
@@ -914,7 +929,7 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "enabled", report.enabled, {true});
 
             // Validate comma separated strings
-            const std::regex expr(R"(\w+(?:\s*,\s*\w+)*)");
+            const std::regex expr(R"(\w+.*(?:\s*,\s*\w+)*)");
             if (!std::regex_match(report.variableName, expr)) {
                 throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
                                               report.variableName));
@@ -1060,6 +1075,8 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "modoverride", connect.modoverride);
             parseOptional(valueIt, "synapse_delay_override", connect.synapseDelayOverride);
             parseOptional(valueIt, "delay", connect.delay);
+            parseOptional(valueIt, "neuromod_dtc", connect.neuromodDtc);
+            parseOptional(valueIt, "neuromod_strength", connect.neuromodStrength);
         }
         return result;
     }

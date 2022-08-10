@@ -574,6 +574,14 @@ static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_modoverr
 R"doc(Synapse helper files to instantiate the synapses in this
 connection_override, default = None)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodDtc =
+R"doc(To override the neuromod_dtc values between the selected source and
+target neurons for the neuromodulatory projection)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodStrength =
+R"doc(To override the neuromod_strength values between the selected source
+and target neurons for the neuromodulatory projection)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_source = R"doc(node_set specifying presynaptic nodes)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_spontMinis =
@@ -781,6 +789,26 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputSubthreshold = R"doc()
 static const char *__doc_bbp_sonata_SimulationConfig_InputSubthreshold_percentLess = R"doc(A percentage adjusted from 100 of a cell's threshold current)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_chemical = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_electrical = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_endfoot = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_neuromodulatory = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_point_neuron = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_synapse_astrocyte = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_connectionType =
+R"doc(Type of the connectivity between the source and target of the
+injection, default = chemical)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_source = R"doc(The node set to replay spikes from)doc";
 

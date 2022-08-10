@@ -171,7 +171,8 @@
             "duration": 40000.0,
             "spike_file": "replay.dat",
             "source": "ML_afferents",
-            "node_set": "Column"
+            "node_set": "Column",
+            "connection_type": "point_neuron"
         },
         "ex_extracellular_stimulation": {
             "input_type": "extracellular_stimulation",
@@ -217,7 +218,9 @@
             "target": "Mosaic",
             "weight": 1.0,
             "synapse_delay_override": 0.5,
-            "synapse_configure": "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77"
+            "synapse_configure": "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77",
+            "neuromod_dtc": 100, 
+            "neuromod_strength": 0.75
         }
     },
     "reports": {
@@ -267,6 +270,15 @@
              "start_time": 0,
              "end_time": 500,
              "enabled": true
+         },
+         "adex": {
+             "cells": "cells2377",
+             "type": "point_neuron",
+             "variable_name": "AdEx.V_M, v",
+             "unit": "mV",
+             "dt": 0.025,
+             "start_time": 0,
+             "end_time": 2100
          }
     }
 }
