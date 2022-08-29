@@ -802,7 +802,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_Connecti
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_neuromodulatory = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_point_neuron = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_point_neuron_tsodyks_markram = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_synapse_astrocyte = R"doc()doc";
 
@@ -873,6 +873,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_Type = R"doc()doc";
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_compartment = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_point_neuron = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_summation = R"doc()doc";
 

@@ -132,7 +132,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
      {SimulationConfig::InputSynapseReplay::ConnectionType::synapse_astrocyte, "synapse_astrocyte"},
      {SimulationConfig::InputSynapseReplay::ConnectionType::endfoot, "endfoot"},
      {SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory, "neuromodulatory"},
-     {SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron, "point_neuron"}})
+     {SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron_tsodyks_markram,
+      "point_neuron_tsodyks_markram"}})
 
 namespace {
 // to be replaced by std::filesystem once C++17 is used

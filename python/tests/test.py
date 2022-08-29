@@ -831,7 +831,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_replay').spike_file,
                          os.path.abspath(os.path.join(PATH, 'config/replay.dat')))
         self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
-        self.assertEqual(self.config.input('ex_replay').connection_type.name, "point_neuron")
+        self.assertEqual(self.config.input('ex_replay').connection_type.name, "point_neuron_tsodyks_markram")
         self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
         self.assertEqual(self.config.input('ex_abs_shotnoise').input_type.name, "conductance")

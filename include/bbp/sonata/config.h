@@ -367,7 +367,7 @@ class SONATA_API SimulationConfig
             synapse_astrocyte,
             endfoot,
             neuromodulatory,
-            point_neuron
+            point_neuron_tsodyks_markram
         };
 
         /// The location of the file with the spike info for injection

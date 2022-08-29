@@ -172,7 +172,7 @@
             "spike_file": "replay.dat",
             "source": "ML_afferents",
             "node_set": "Column",
-            "connection_type": "point_neuron"
+            "connection_type": "point_neuron_tsodyks_markram"
         },
         "ex_extracellular_stimulation": {
             "input_type": "extracellular_stimulation",

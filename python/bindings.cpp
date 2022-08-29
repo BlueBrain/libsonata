@@ -898,7 +898,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("endfoot", SimulationConfig::InputSynapseReplay::ConnectionType::endfoot)
         .value("neuromodulatory",
                SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory)
-        .value("point_neuron", SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron);
+        .value("point_neuron_tsodyks_markram",
+               SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron_tsodyks_markram);
 
     py::class_<SimulationConfig::ConnectionOverride>(m,
                                                      "ConnectionOverride",

@@ -479,8 +479,9 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.nodeSet == "Column");
             CHECK(endswith(input.spikeFile, "replay.dat"));
             CHECK(input.source == "ML_afferents");
-            CHECK(input.connectionType ==
-                  SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron);
+            CHECK(
+                input.connectionType ==
+                SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron_tsodyks_markram);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputSeclamp>(config.getInput("ex_seclamp"));
