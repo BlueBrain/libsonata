@@ -883,7 +883,7 @@ class SimulationConfig::Parser
         return result;
     }
 
-    ReportMap parseReports() const {
+    ReportMap parseReports(const SimulationConfig::Output& output) const {
         ReportMap result;
 
         const auto reportsIt = _json.find("reports");
@@ -924,7 +924,7 @@ class SimulationConfig::Parser
             if (extension.empty() || extension != ".h5") {
                 report.fileName += ".h5";
             }
-            report.fileName = toAbsolute(_basePath, report.fileName);
+            report.fileName = toAbsolute(output.outputDir, report.fileName);
         }
 
         return result;
@@ -1080,7 +1080,7 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _run = parser.parseRun();
     _output = parser.parseOutput();
     _conditions = parser.parseConditions();
-    _reports = parser.parseReports();
+    _reports = parser.parseReports(_output);
     _network = parser.parseNetwork();
     _inputs = parser.parseInputs();
     _connections = parser.parseConnectionOverrides();
