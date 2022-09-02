@@ -736,7 +736,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.report('axonal_comp_centers').compartments, Report.Compartments.center)
         self.assertEqual(self.config.report('axonal_comp_centers').scaling, Report.Scaling.none)
         self.assertEqual(self.config.report('axonal_comp_centers').file_name,
-                         os.path.abspath(os.path.join(PATH, 'config/axon_centers.h5')))
+                         os.path.abspath(os.path.join(self.config.output.output_dir, 'axon_centers.h5')))
         self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
         self.assertEqual(self.config.report('cell_imembrane').type.name, 'summation')
         self.assertEqual(self.config.report('cell_imembrane').variable_name, 'i_membrane, IClamp')

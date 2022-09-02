@@ -356,7 +356,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getReport("axonal_comp_centers").startTime == 0.);
         CHECK(config.getReport("axonal_comp_centers").compartments == SimulationConfig::Report::Compartments::center);
         CHECK(config.getReport("axonal_comp_centers").scaling == SimulationConfig::Report::Scaling::none);
-        const auto axonalFilePath = fs::absolute(basePath / fs::path("axon_centers.h5"));
+        const auto axonalFilePath = fs::absolute(config.getOutput().outputDir / fs::path("axon_centers.h5"));
         CHECK(config.getReport("axonal_comp_centers").fileName ==
               axonalFilePath.lexically_normal());
         CHECK(config.getReport("cell_imembrane").endTime == 500.);
