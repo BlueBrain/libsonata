@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.14:
+
+### Fixed:
+ - Bump pybind11 from v2.5.0 to v2.10.0; supports python 3.11
+
 ## v0.1.13:
 
 ### Added:
