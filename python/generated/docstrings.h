@@ -574,11 +574,11 @@ static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_modoverr
 R"doc(Synapse helper files to instantiate the synapses in this
 connection_override, default = None)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodDtc =
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodulationDtc =
 R"doc(To override the neuromod_dtc values between the selected source and
 target neurons for the neuromodulatory projection)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodStrength =
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodulationStrength =
 R"doc(To override the neuromod_strength values between the selected source
 and target neurons for the neuromodulatory projection)doc";
 
@@ -802,8 +802,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_Connecti
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_neuromodulatory = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_point_neuron_tsodyks_markram = R"doc()doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_ConnectionType_synapse_astrocyte = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_connectionType =
@@ -873,8 +871,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_Type = R"doc()doc";
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_compartment = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_invalid = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_point_neuron = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_summation = R"doc()doc";
 

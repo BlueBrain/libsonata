@@ -80,8 +80,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Type,
                              {{SimulationConfig::Report::Type::invalid, nullptr},
                               {SimulationConfig::Report::Type::compartment, "compartment"},
                               {SimulationConfig::Report::Type::summation, "summation"},
-                              {SimulationConfig::Report::Type::synapse, "synapse"},
-                              {SimulationConfig::Report::Type::point_neuron, "point_neuron"}})
+                              {SimulationConfig::Report::Type::synapse, "synapse"}})
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Scaling,
                              {{SimulationConfig::Report::Scaling::invalid, nullptr},
                               {SimulationConfig::Report::Scaling::none, "none"},
@@ -131,9 +130,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
      {SimulationConfig::InputSynapseReplay::ConnectionType::electrical, "electrical"},
      {SimulationConfig::InputSynapseReplay::ConnectionType::synapse_astrocyte, "synapse_astrocyte"},
      {SimulationConfig::InputSynapseReplay::ConnectionType::endfoot, "endfoot"},
-     {SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory, "neuromodulatory"},
-     {SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron_tsodyks_markram,
-      "point_neuron_tsodyks_markram"}})
+     {SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory, "neuromodulatory"}})
 
 namespace {
 // to be replaced by std::filesystem once C++17 is used
@@ -1076,8 +1073,8 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "modoverride", connect.modoverride);
             parseOptional(valueIt, "synapse_delay_override", connect.synapseDelayOverride);
             parseOptional(valueIt, "delay", connect.delay);
-            parseOptional(valueIt, "neuromod_dtc", connect.neuromodDtc);
-            parseOptional(valueIt, "neuromod_strength", connect.neuromodStrength);
+            parseOptional(valueIt, "neuromodulation_dtc", connect.neuromodulationDtc);
+            parseOptional(valueIt, "neuromodulation_strength", connect.neuromodulationStrength);
         }
         return result;
     }

@@ -254,7 +254,7 @@ class SONATA_API SimulationConfig
      */
     struct Report {
         enum class Sections { invalid = -1, soma, axon, dend, apic, all };
-        enum class Type { invalid = -1, compartment, summation, synapse, point_neuron };
+        enum class Type { invalid = -1, compartment, summation, synapse };
         enum class Scaling { invalid = -1, none, area };
         enum class Compartments { invalid = -1, center, all };
 
@@ -366,8 +366,7 @@ class SONATA_API SimulationConfig
             electrical,
             synapse_astrocyte,
             endfoot,
-            neuromodulatory,
-            point_neuron_tsodyks_markram
+            neuromodulatory
         };
 
         /// The location of the file with the spike info for injection
@@ -523,10 +522,10 @@ class SONATA_API SimulationConfig
         double delay{0.};
         /// To override the neuromod_dtc values between the selected source and target neurons for
         /// the neuromodulatory projection
-        nonstd::optional<double> neuromodDtc{nonstd::nullopt};
+        nonstd::optional<double> neuromodulationDtc{nonstd::nullopt};
         /// To override the neuromod_strength values between the selected source and target neurons
         /// for the neuromodulatory projection
-        nonstd::optional<double> neuromodStrength{nonstd::nullopt};
+        nonstd::optional<double> neuromodulationStrength{nonstd::nullopt};
     };
     using ConnectionMap = std::unordered_map<std::string, ConnectionOverride>;
 

@@ -655,8 +655,7 @@ PYBIND11_MODULE(_libsonata, m) {
     py::enum_<SimulationConfig::Report::Type>(report, "Type")
         .value("compartment", SimulationConfig::Report::Type::compartment)
         .value("summation", SimulationConfig::Report::Type::summation)
-        .value("synapse", SimulationConfig::Report::Type::synapse)
-        .value("point_neuron", SimulationConfig::Report::Type::point_neuron);
+        .value("synapse", SimulationConfig::Report::Type::synapse);
 
     py::enum_<SimulationConfig::Report::Scaling>(report, "Scaling")
         .value("none", SimulationConfig::Report::Scaling::none)
@@ -897,9 +896,7 @@ PYBIND11_MODULE(_libsonata, m) {
                SimulationConfig::InputSynapseReplay::ConnectionType::synapse_astrocyte)
         .value("endfoot", SimulationConfig::InputSynapseReplay::ConnectionType::endfoot)
         .value("neuromodulatory",
-               SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory)
-        .value("point_neuron_tsodyks_markram",
-               SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron_tsodyks_markram);
+               SimulationConfig::InputSynapseReplay::ConnectionType::neuromodulatory);
 
     py::class_<SimulationConfig::ConnectionOverride>(m,
                                                      "ConnectionOverride",
@@ -928,12 +925,12 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("delay",
                       &SimulationConfig::ConnectionOverride::delay,
                       DOC_SIMULATIONCONFIG(ConnectionOverride, delay))
-        .def_readonly("neuromod_dtc",
-                      &SimulationConfig::ConnectionOverride::neuromodDtc,
-                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodDtc))
-        .def_readonly("neuromod_strength",
-                      &SimulationConfig::ConnectionOverride::neuromodStrength,
-                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodStrength));
+        .def_readonly("neuromodulation_dtc",
+                      &SimulationConfig::ConnectionOverride::neuromodulationDtc,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodulationDtc))
+        .def_readonly("neuromodulation_strength",
+                      &SimulationConfig::ConnectionOverride::neuromodulationStrength,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodulationStrength));
 
     py::class_<SimulationConfig> simConf(m, "SimulationConfig", "");
     simConf.def(py::init<const std::string&, const std::string&>())

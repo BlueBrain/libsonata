@@ -338,9 +338,9 @@ TEST_CASE("SimulationConfig") {
 
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
-        CHECK(config.listReportNames() ==
-              std::set<std::string>{
-                  "adex", "axonal_comp_centers", "cell_imembrane", "compartment", "soma"});
+        CHECK(
+            config.listReportNames() ==
+            std::set<std::string>{"axonal_comp_centers", "cell_imembrane", "compartment", "soma"});
 
         CHECK(config.getReport("soma").cells == "Column");
         CHECK(config.getReport("soma").type == SimulationConfig::Report::Type::compartment);
@@ -358,8 +358,6 @@ TEST_CASE("SimulationConfig") {
               axonalFilePath.lexically_normal());
         CHECK(config.getReport("cell_imembrane").endTime == 500.);
         CHECK(config.getReport("cell_imembrane").variableName == "i_membrane, IClamp");
-        CHECK(config.getReport("adex").type == SimulationConfig::Report::Type::point_neuron);
-        CHECK(config.getReport("adex").variableName == "AdEx.V_M, v");
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getExpandedJSON()));
         CHECK(config.getBasePath() == basePath.lexically_normal());
@@ -479,9 +477,8 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.nodeSet == "Column");
             CHECK(endswith(input.spikeFile, "replay.dat"));
             CHECK(input.source == "ML_afferents");
-            CHECK(
-                input.connectionType ==
-                SimulationConfig::InputSynapseReplay::ConnectionType::point_neuron_tsodyks_markram);
+            CHECK(input.connectionType ==
+                  SimulationConfig::InputSynapseReplay::ConnectionType::electrical);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputSeclamp>(config.getInput("ex_seclamp"));
@@ -548,16 +545,17 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").delay == 0.5);
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseDelayOverride == nonstd::nullopt);
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseConfigure == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodDtc == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodStrength == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodulationDtc == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodulationStrength ==
+              nonstd::nullopt);
         CHECK(config.getConnectionOverride("GABAB_erev").spontMinis == nonstd::nullopt);
         CHECK(config.getConnectionOverride("GABAB_erev").synapseDelayOverride == 0.5);
         CHECK(config.getConnectionOverride("GABAB_erev").delay == 0);
         CHECK(config.getConnectionOverride("GABAB_erev").synapseConfigure ==
               "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77");
         CHECK(config.getConnectionOverride("GABAB_erev").modoverride == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("GABAB_erev").neuromodDtc == 100);
-        CHECK(config.getConnectionOverride("GABAB_erev").neuromodStrength == 0.75);
+        CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationDtc == 100);
+        CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationStrength == 0.75);
     }
 
     SECTION("manifest_network") {
