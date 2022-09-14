@@ -552,6 +552,9 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConnectionOverride("GABAB_erev").synapseConfigure ==
               "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77");
         CHECK(config.getConnectionOverride("GABAB_erev").modoverride == nonstd::nullopt);
+
+        CHECK(config.getMetaData().size() == 2);
+        CHECK(config.getBetaFeatures().size() == 4);
     }
 
     SECTION("manifest_network") {
