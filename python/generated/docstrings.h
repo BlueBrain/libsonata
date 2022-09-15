@@ -550,10 +550,6 @@ R"doc(Properties to assign values to variables in synapse MOD files. The
 format is a dictionary with keys being the SUFFIX names and values
 being dictionaries of variables' names and values.)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Conditions_minisSingleVesicle =
-R"doc(Limit spontaneous release to single vesicle when true. Default is
-false)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_randomizeGabaRiseTime =
 R"doc(Enable legacy behavior to randomize the GABA_A rise time in the helper
 functions. Default is false)doc";
@@ -573,6 +569,14 @@ the specified delay has elapsed in ms, default = 0.)doc";
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_modoverride =
 R"doc(Synapse helper files to instantiate the synapses in this
 connection_override, default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodulationDtc =
+R"doc(To override the neuromod_dtc values between the selected source and
+target neurons for the neuromodulatory projection. Given in ms.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodulationStrength =
+R"doc(To override the neuromod_strength values between the selected source
+and target neurons for the neuromodulatory projection. Given in muM.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_source = R"doc(node_set specifying presynaptic nodes)doc";
 
@@ -754,6 +758,8 @@ R"doc(signal std dev as percentage of a cell’s threshold current
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_rs = R"doc(The series resistance (Mohm), default is 0.01 Mohm)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_voltage = R"doc(The membrane voltage the targeted cells should be held at (mV))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise = R"doc()doc";
@@ -900,13 +906,17 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_soma = R"
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run_forwardSkip =
-R"doc(Run without Stimulus or Reports for given duration prior to t=0 using
-a timestep computed as dt=0.1*forward_skip. Default = None)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod =
 R"doc(Selects the NEURON/CoreNEURON integration method. This parameter sets
 the NEURON global variable h.secondorder. Default 0 ('euler'))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_ionchannelSeed =
+R"doc(A non-negative integer used for seeding stochastic ion channels,
+default is 0.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_minisSeed =
+R"doc(A non-negative integer used for seeding the Poisson processes that
+drives the minis, default is 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_randomSeed = R"doc(Random seed)doc";
 
@@ -915,6 +925,14 @@ R"doc(The spike detection location. Can be either ‘soma’ or 'AIS'. Default
 is 'soma')doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeThreshold = R"doc(The spike detection threshold. Default is -30mV)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_stimulusSeed =
+R"doc(A non-negative integer used for seeding noise stimuli and any other
+future stochastic stimuli, default is 0.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_synapseSeed =
+R"doc(A non-negative integer used for seeding stochastic synapses, default
+is 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
 

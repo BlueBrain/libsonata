@@ -390,6 +390,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputSeclamp ret;
         parseCommon(ret);
         parseMandatory(valueIt, "voltage", debugStr, ret.voltage);
+        parseOptional(valueIt, "rs", ret.rs, {0.01});
         return ret;
     }
     case Module::ornstein_uhlenbeck: {
@@ -836,7 +837,10 @@ class SimulationConfig::Parser
                       "integration_method",
                       result.integrationMethod,
                       {Run::IntegrationMethod::euler});
-        parseOptional(*runIt, "forward_skip", result.forwardSkip);
+        parseOptional(*runIt, "stimulus_seed", result.stimulusSeed, {0});
+        parseOptional(*runIt, "ionchannel_seed", result.ionchannelSeed, {0});
+        parseOptional(*runIt, "minis_seed", result.minisSeed, {0});
+        parseOptional(*runIt, "synapse_seed", result.synapseSeed, {0});
         return result;
     }
 
@@ -874,7 +878,6 @@ class SimulationConfig::Parser
                       result.synapsesInitDepleted,
                       {false});
         parseOptional(*conditionsIt, "extracellular_calcium", result.extracellularCalcium);
-        parseOptional(*conditionsIt, "minis_single_vesicle", result.minisSingleVesicle, {false});
         parseOptional(*conditionsIt,
                       "randomize_gaba_rise_time",
                       result.randomizeGabaRiseTime,
@@ -914,7 +917,7 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "enabled", report.enabled, {true});
 
             // Validate comma separated strings
-            const std::regex expr(R"(\w+(?:\s*,\s*\w+)*)");
+            const std::regex expr(R"(\w+.*(?:\s*,\s*\w+)*)");
             if (!std::regex_match(report.variableName, expr)) {
                 throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
                                               report.variableName));
@@ -1060,6 +1063,8 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "modoverride", connect.modoverride);
             parseOptional(valueIt, "synapse_delay_override", connect.synapseDelayOverride);
             parseOptional(valueIt, "delay", connect.delay);
+            parseOptional(valueIt, "neuromodulation_dtc", connect.neuromodulationDtc);
+            parseOptional(valueIt, "neuromodulation_strength", connect.neuromodulationStrength);
         }
         return result;
     }
