@@ -14,6 +14,7 @@
 #include <bbp/sonata/population.h>
 
 #include <fmt/format.h>
+
 #include <highfive/H5File.hpp>
 
 namespace bbp {
@@ -83,15 +84,22 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
 
 template <typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
-    std::vector<T> result(selection.flatSize());
-
-    T* dst = result.data();
-    for (const Selection::Range& range : selection.ranges()) {
-        assert(range.first < range.second);
-        auto chunkSize = static_cast<size_t>(range.second - range.first);
-        dset.select({static_cast<size_t>(range.first)}, {chunkSize}).read(dst);
-        dst += chunkSize;
+    if (selection.ranges().size() == 1) {
+        return _readChunk<T>(dset, selection.ranges().front());
     }
+
+    size_t size = selection.flatSize();
+
+    std::vector<size_t> ids;
+    ids.reserve(size);
+    for (const auto& range : selection.ranges()) {
+        for (auto v = range.first; v < range.second; ++v) {
+            ids.emplace_back(v);
+        }
+    }
+
+    std::vector<T> result(size);
+    dset.select(HighFive::ElementSet{ids}).read(result.data());
 
     return result;
 }
