@@ -108,16 +108,15 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
                    std::back_inserter(ids_sorted),
                    [&ids](size_t i) { return static_cast<size_t>(ids[i]); });
 
-    std::vector<T> result(ids_sorted.size());
-    dset.select(HighFive::ElementSet{ids_sorted}).read(result.data());
+    std::vector<T> linear_result(ids_sorted.size());
+    dset.select(HighFive::ElementSet{ids_sorted}).read(linear_result.data());
 
-    std::vector<T> result1;
-    result1.resize(ids_sorted.size());
+    std::vector<T> result(ids_sorted.size());
     for (size_t i = 0; i < ids_sorted.size(); ++i) {
-        result1[ids_index[i]] = result[i];
+        result[ids_index[i]] = linear_result[i];
     }
 
-    return result1;
+    return result;
 }
 
 }  // unnamed namespace
