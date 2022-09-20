@@ -13,6 +13,11 @@
 
 #include <bbp/sonata/population.h>
 
+#include <algorithm>  // stable_sort, transform
+#include <iterator>   // back_inserter
+#include <numeric>    // iota
+#include <vector>
+
 #include <fmt/format.h>
 
 #include <highfive/H5File.hpp>
@@ -88,20 +93,31 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
         return _readChunk<T>(dset, selection.ranges().front());
     }
 
-    size_t size = selection.flatSize();
+    const auto ids = selection.flatten();
 
-    std::vector<size_t> ids;
-    ids.reserve(size);
-    for (const auto& range : selection.ranges()) {
-        for (auto v = range.first; v < range.second; ++v) {
-            ids.emplace_back(v);
-        }
+    std::vector<std::size_t> ids_index(ids.size());
+    std::iota(ids_index.begin(), ids_index.end(), std::size_t(0));
+    std::stable_sort(ids_index.begin(), ids_index.end(), [&ids](size_t i0, size_t i1) {
+        return ids[i0] < ids[i1];
+    });
+
+    std::vector<std::size_t> ids_sorted;
+    ids_sorted.reserve(ids.size());
+    std::transform(ids_index.begin(),
+                   ids_index.end(),
+                   std::back_inserter(ids_sorted),
+                   [&ids](size_t i) { return static_cast<size_t>(ids[i]); });
+
+    std::vector<T> result(ids_sorted.size());
+    dset.select(HighFive::ElementSet{ids_sorted}).read(result.data());
+
+    std::vector<T> result1;
+    result1.resize(ids_sorted.size());
+    for (size_t i = 0; i < ids_sorted.size(); ++i) {
+        result1[ids_index[i]] = result[i];
     }
 
-    std::vector<T> result(size);
-    dset.select(HighFive::ElementSet{ids}).read(result.data());
-
-    return result;
+    return result1;
 }
 
 }  // unnamed namespace
