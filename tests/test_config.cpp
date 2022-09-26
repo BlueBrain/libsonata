@@ -491,7 +491,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.duration == 1000.);
             CHECK(input.nodeSet == "L5E");
             CHECK(input.voltage == 1.1);
-            CHECK(input.rs == 0.5);
+            CHECK(input.seriesResistance == 0.5);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputAbsoluteShotNoise>(

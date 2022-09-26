@@ -375,7 +375,7 @@ class SONATA_API SimulationConfig
         /// The membrane voltage the targeted cells should be held at (mV)
         double voltage{};
         /// The series resistance (Mohm), default is 0.01 Mohm
-        double rs{};
+        double seriesResistance{};
     };
 
     struct InputNoise: public InputBase {

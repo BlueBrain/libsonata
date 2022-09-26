@@ -758,7 +758,7 @@ R"doc(signal std dev as percentage of a cell’s threshold current
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_rs = R"doc(The series resistance (Mohm), default is 0.01 Mohm)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_seriesResistance = R"doc(The series resistance (Mohm), default is 0.01 Mohm)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_voltage = R"doc(The membrane voltage the targeted cells should be held at (mV))doc";
 

@@ -97,7 +97,7 @@
             "duration": 1000,
             "node_set": "L5E",
             "voltage": 1.1,
-            "rs": 0.5
+            "series_resistance": 0.5
         },
         "ex_noise_meanpercent": {
             "input_type": "current_clamp",

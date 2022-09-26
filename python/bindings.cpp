@@ -741,9 +741,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("voltage",
                       &SimulationConfig::InputSeclamp::voltage,
                       DOC_SIMULATIONCONFIG(InputSeclamp, voltage))
-        .def_readonly("rs",
-                      &SimulationConfig::InputSeclamp::rs,
-                      DOC_SIMULATIONCONFIG(InputSeclamp, rs));
+        .def_readonly("series_resistance",
+                      &SimulationConfig::InputSeclamp::seriesResistance,
+                      DOC_SIMULATIONCONFIG(InputSeclamp, seriesResistance));
 
     py::class_<SimulationConfig::InputNoise, SimulationConfig::InputBase>(m, "Noise")
         .def_readonly("mean",

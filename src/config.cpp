@@ -390,7 +390,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputSeclamp ret;
         parseCommon(ret);
         parseMandatory(valueIt, "voltage", debugStr, ret.voltage);
-        parseOptional(valueIt, "rs", ret.rs, {0.01});
+        parseOptional(valueIt, "series_resistance", ret.seriesResistance, {0.01});
         return ret;
     }
     case Module::ornstein_uhlenbeck: {

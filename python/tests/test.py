@@ -852,7 +852,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_rel_OU').sd_percent, 10)
 
         self.assertEqual(self.config.input('ex_seclamp').voltage, 1.1)
-        self.assertEqual(self.config.input('ex_seclamp').rs, 0.5)
+        self.assertEqual(self.config.input('ex_seclamp').series_resistance, 0.5)
 
         self.assertEqual(self.config.list_connection_override_names, {"ConL3Exc-Uni", "GABAB_erev"})
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').source, 'Excitatory')
