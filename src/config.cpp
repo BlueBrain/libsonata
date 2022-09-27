@@ -475,7 +475,7 @@ void parseConditionsModifications(const nlohmann::json& it,
         parseMandatory(valueIt, "type", debugStr, type);
         switch (type) {
         case SimulationConfig::ModificationBase::ModificationType::TTX: {
-            SimulationConfig::ModificationBase result;
+            SimulationConfig::ModificationTTX result;
             result.type = type;
             parseMandatory(valueIt, "node_set", debugStr, result.nodeSet);
             buf[mIt.key()] = result;

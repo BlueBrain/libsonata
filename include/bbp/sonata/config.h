@@ -235,6 +235,8 @@ class SONATA_API SimulationConfig
         ModificationType type;
     };
 
+    struct ModificationTTX: public ModificationBase {};
+
     struct ModificationConfigureAllSections: public ModificationBase {
         /// For “ConfigureAllSections” manipulation, a snippet of python code to perform one or more
         /// assignments involving section attributes, for all sections that have all the referenced
@@ -242,7 +244,7 @@ class SONATA_API SimulationConfig
         std::string sectionConfigure;
     };
 
-    using Modification = nonstd::variant<ModificationBase, ModificationConfigureAllSections>;
+    using Modification = nonstd::variant<ModificationTTX, ModificationConfigureAllSections>;
 
     using ModificationMap = std::unordered_map<std::string, Modification>;
 

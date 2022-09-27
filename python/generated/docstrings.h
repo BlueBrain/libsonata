@@ -822,6 +822,8 @@ perform one or more assignments involving section attributes, for all
 sections that have all the referenced attributes. The format is
 "%s.xxxx; %s.xxxx; ...".)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_ModificationTTX = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Output = R"doc(Parameters to override simulator output for spike reports)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Output_SpikesSortOrder = R"doc()doc";

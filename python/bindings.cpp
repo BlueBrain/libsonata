@@ -618,6 +618,9 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::ModificationBase::type,
                       DOC_SIMULATIONCONFIG(ModificationBase, type));
 
+    py::class_<SimulationConfig::ModificationTTX, SimulationConfig::ModificationBase>(
+        m, "ModificationTTX");
+
     py::class_<SimulationConfig::ModificationConfigureAllSections,
                SimulationConfig::ModificationBase>(m, "ModificationConfigureAllSections")
         .def_readonly("section_configure",

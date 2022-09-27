@@ -337,7 +337,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(nonstd::get<std::string>(itr->second.find("property4")->second) == "test");
         CHECK(config.getConditions().listModificationNames() ==
               std::set<std::string>{"applyTTX", "no_SK_E2"});
-        const auto TTX = nonstd::get<SimulationConfig::ModificationBase>(
+        const auto TTX = nonstd::get<SimulationConfig::ModificationTTX>(
             config.getConditions().getModification("applyTTX"));
         const auto configAllSects = nonstd::get<SimulationConfig::ModificationConfigureAllSections>(
             config.getConditions().getModification("no_SK_E2"));
