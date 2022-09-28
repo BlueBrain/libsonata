@@ -882,7 +882,10 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc(Report 
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_unit = R"doc(Descriptive text of the unit recorded. Not validated for correctness)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_variableName = R"doc(The simulation variable to access)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_variableName =
+R"doc(The simulation variable to access. The variables available are model
+dependent, and the format is comma separated variable list, such as
+"AdEx.V_M, v", "i_membrane, IClamp".)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defining global simulation settings for spike reports)doc";
 

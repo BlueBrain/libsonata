@@ -917,7 +917,7 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "enabled", report.enabled, {true});
 
             // Validate comma separated strings
-            const std::regex expr(R"(\w+.*(?:\s*,\s*\w+)*)");
+            const std::regex expr(R"(\w+(\.+\w+)?(?:\s*,\s*\w+(\.+\w+)?)*)");
             if (!std::regex_match(report.variableName, expr)) {
                 throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
                                               report.variableName));

@@ -693,6 +693,7 @@ TEST_CASE("SimulationConfig") {
         {  // No variable_name in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -708,9 +709,10 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
-        {  // Wrong variable_name in a report object
+        {  // Wrong variable_name in a report object: no variable after ",
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -718,6 +720,46 @@ TEST_CASE("SimulationConfig") {
                 "test": {
                    "cells": "nodesetstring",
                    "variable_name": "variablestring,",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object: leading '.'
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": ".V_M, V",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object: more than one '.' in a name
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": "AdEx.V_M.foo, V",
                    "type": "compartment",
                    "dt": 0.05,
                    "start_time": 0,
