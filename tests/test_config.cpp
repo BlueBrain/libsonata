@@ -709,7 +709,7 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
-        {  // Wrong variable_name in a report object: no variable after ",
+        {  // Wrong variable_name in a report object: no variable after ','
             auto contents = R"({
               "run": {
                 "random_seed": 12345,
