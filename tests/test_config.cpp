@@ -307,7 +307,10 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().spikeThreshold == -30);
         CHECK(config.getRun().spikeLocation == SimulationConfig::Run::SpikeLocation::AIS);
         CHECK(config.getRun().integrationMethod == SimulationConfig::Run::IntegrationMethod::nicholson_ion);
-        CHECK(config.getRun().forwardSkip == 500);
+        CHECK(config.getRun().stimulusSeed == 111);
+        CHECK(config.getRun().ionchannelSeed == 222);
+        CHECK(config.getRun().minisSeed == 333);
+        CHECK(config.getRun().synapseSeed == 444);
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
@@ -325,7 +328,6 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConditions().vInit == -80);
         CHECK(config.getConditions().synapsesInitDepleted == false);
         CHECK(config.getConditions().extracellularCalcium == nonstd::nullopt);
-        CHECK(config.getConditions().minisSingleVesicle == false);
         CHECK(config.getConditions().randomizeGabaRiseTime == false);
         CHECK(config.getConditions().mechanisms.size() == 2);
         auto itr = config.getConditions().mechanisms.find("ProbAMPANMDA_EMS");
@@ -489,6 +491,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.duration == 1000.);
             CHECK(input.nodeSet == "L5E");
             CHECK(input.voltage == 1.1);
+            CHECK(input.seriesResistance == 0.5);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputAbsoluteShotNoise>(
@@ -546,18 +549,23 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").delay == 0.5);
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseDelayOverride == nonstd::nullopt);
         CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseConfigure == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodulationDtc == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodulationStrength ==
+              nonstd::nullopt);
         CHECK(config.getConnectionOverride("GABAB_erev").spontMinis == nonstd::nullopt);
         CHECK(config.getConnectionOverride("GABAB_erev").synapseDelayOverride == 0.5);
         CHECK(config.getConnectionOverride("GABAB_erev").delay == 0);
         CHECK(config.getConnectionOverride("GABAB_erev").synapseConfigure ==
               "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77");
         CHECK(config.getConnectionOverride("GABAB_erev").modoverride == nonstd::nullopt);
+        CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationDtc == 100);
+        CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationStrength == 0.75);
 
         CHECK(config.getMetaData().size() == 2);
         CHECK(config.getBetaFeatures().size() == 4);
     }
 
-    SECTION("manifest_network") {
+    SECTION("manifest_network_run") {
         auto contents = R"({
           "manifest": {
             "$CIRCUIT_DIR": "./circuit"
@@ -577,6 +585,10 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getTargetSimulator() == SimulationConfig::SimulatorType::NEURON);  // default
         CHECK(config.getNodeSetsFile() == "");  // network file is not readable so default empty
         CHECK(config.getNodeSet() == nonstd::nullopt);  // default
+        CHECK(config.getRun().stimulusSeed == 0);
+        CHECK(config.getRun().ionchannelSeed == 0);
+        CHECK(config.getRun().minisSeed == 0);
+        CHECK(config.getRun().synapseSeed == 0);
     }
 
     SECTION("Exception") {
@@ -684,6 +696,7 @@ TEST_CASE("SimulationConfig") {
         {  // No variable_name in a report object
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -699,9 +712,10 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
-        {  // Wrong variable_name in a report object
+        {  // Wrong variable_name in a report object: no variable after ','
             auto contents = R"({
               "run": {
+                "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
               },
@@ -709,6 +723,66 @@ TEST_CASE("SimulationConfig") {
                 "test": {
                    "cells": "nodesetstring",
                    "variable_name": "variablestring,",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object: leading '.'
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": ".V_M, V",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object: more than one '.' in a name
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": "AdEx..foo, V",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object: more than one '.' in a name
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
+                   "variable_name": "AdEx.V_M.foo, V",
                    "type": "compartment",
                    "dt": 0.05,
                    "start_time": 0,

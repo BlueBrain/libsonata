@@ -702,7 +702,10 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.spike_threshold, -30)
         self.assertEqual(self.config.run.spike_location, Run.SpikeLocation.AIS)
         self.assertEqual(self.config.run.integration_method, Run.IntegrationMethod.nicholson_ion)
-        self.assertEqual(self.config.run.forward_skip, 500)
+        self.assertEqual(self.config.run.stimulus_seed, 111)
+        self.assertEqual(self.config.run.ionchannel_seed, 222)
+        self.assertEqual(self.config.run.minis_seed, 333)
+        self.assertEqual(self.config.run.synapse_seed, 444)
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/some/path/output')))
@@ -714,7 +717,6 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.conditions.v_init, -80)
         self.assertEqual(self.config.conditions.synapses_init_depleted, False)
         self.assertEqual(self.config.conditions.extracellular_calcium, None)
-        self.assertEqual(self.config.conditions.minis_single_vesicle, False)
         self.assertEqual(self.config.conditions.randomize_gaba_rise_time, False)
         self.assertEqual(self.config.conditions.mechanisms, {'ProbAMPANMDA_EMS': {'property2': -1,
                                                                                   'property1': False},
@@ -849,6 +851,9 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_rel_OU').mean_percent, 70)
         self.assertEqual(self.config.input('ex_rel_OU').sd_percent, 10)
 
+        self.assertEqual(self.config.input('ex_seclamp').voltage, 1.1)
+        self.assertEqual(self.config.input('ex_seclamp').series_resistance, 0.5)
+
         self.assertEqual(self.config.list_connection_override_names, {"ConL3Exc-Uni", "GABAB_erev"})
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').source, 'Excitatory')
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').target, 'Mosaic')
@@ -858,11 +863,15 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').delay, 0.5)
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_delay_override, None)
         self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_configure, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').neuromodulation_dtc, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').neuromodulation_strength, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').spont_minis, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').synapse_delay_override, 0.5)
         self.assertEqual(self.config.connection_override('GABAB_erev').delay, 0)
         self.assertEqual(self.config.connection_override('GABAB_erev').modoverride, None)
         self.assertEqual(self.config.connection_override('GABAB_erev').synapse_configure, '%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77')
+        self.assertEqual(self.config.connection_override('GABAB_erev').neuromodulation_dtc, 100)
+        self.assertEqual(self.config.connection_override('GABAB_erev').neuromodulation_strength, 0.75)
 
         self.assertEqual(self.config.metadata, {'sim_version': '1', 'note': 'first attempt of simulation'})
         self.assertEqual(self.config.beta_features, {'v_str': 'abcd', 'v_int': 10, 'v_float': 0.5, 'v_bool': False})
@@ -870,6 +879,26 @@ class TestSimulationConfig(unittest.TestCase):
     def test_expanded_json(self):
         config = json.loads(self.config.expanded_json)
         self.assertEqual(config['output']['output_dir'], 'some/path/output')
+
+    def test_run(self):
+        contents = """
+        {
+          "manifest": {
+            "$CIRCUIT_DIR": "./circuit"
+          },
+          "network": "$CIRCUIT_DIR/circuit_config.json",
+          "run": {
+            "random_seed": 12345,
+            "dt": 0.05,
+            "tstop": 1000
+          }
+        }
+        """
+        conf = SimulationConfig(contents, "./")
+        self.assertEqual(conf.run.stimulus_seed, 0)
+        self.assertEqual(conf.run.ionchannel_seed, 0)
+        self.assertEqual(conf.run.minis_seed, 0)
+        self.assertEqual(conf.run.synapse_seed, 0)
 
 
 if __name__ == '__main__':

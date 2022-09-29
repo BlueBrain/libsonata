@@ -18,6 +18,10 @@
          "tstop": 1000,
          "dt": 0.025,
          "random_seed": 201506,
+         "stimulus_seed": 111,
+         "ionchannel_seed": 222,
+         "minis_seed": 333,
+         "synapse_seed": 444,
          "spike_location": "AIS",
          "integration_method" : 2,
          "forward_skip": 500
@@ -102,7 +106,8 @@
             "delay": 0,
             "duration": 1000,
             "node_set": "L5E",
-            "voltage": 1.1
+            "voltage": 1.1,
+            "series_resistance": 0.5
         },
         "ex_noise_meanpercent": {
             "input_type": "current_clamp",
@@ -122,18 +127,6 @@
             "delay": 0.0,
             "duration": 5000.0,
             "node_set": "Rt_RC"
-        },
-        "ex_shotnoise": {
-            "input_type": "current_clamp",
-            "module": "shot_noise",
-            "delay": 0,
-            "duration": 1000,
-            "decay_time": 4,
-            "rise_time": 0.4,
-            "amp_mean": 70,
-            "amp_var": 40,
-            "rate": 4,
-            "node_set": "L5E"
         },
         "ex_rel_shotnoise": {
             "input_type": "current_clamp",
@@ -158,21 +151,6 @@
             "mean": 50,
             "sigma": 5,
             "node_set": "L5E"
-        },
-        "ex_hyperpolarizing": {
-            "input_type": "current_clamp",
-            "module": "hyperpolarizing",
-            "delay": 0,
-            "duration": 1000,
-            "node_set": "L5E"
-        },
-        "ex_seclamp": {
-            "input_type": "voltage_clamp",
-            "module": "seclamp",
-            "delay": 0,
-            "duration": 1000,
-            "node_set": "L5E",
-            "voltage": 1.1
         },
         "ex_replay": {
             "input_type": "spikes",
@@ -227,7 +205,9 @@
             "target": "Mosaic",
             "weight": 1.0,
             "synapse_delay_override": 0.5,
-            "synapse_configure": "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77"
+            "synapse_configure": "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77",
+            "neuromodulation_dtc": 100,
+            "neuromodulation_strength": 0.75
         }
     },
     "reports": {
@@ -257,7 +237,7 @@
               "cells": "Mosaic",
               "sections": "axon",
               "type": "compartment",
-              "variable_name": "v",
+              "variable_name": "AdEx.V_M,v",
               "unit": "mV",
               "compartments": "center",
               "scaling": "none",
