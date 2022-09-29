@@ -206,9 +206,16 @@ class SONATA_API SimulationConfig
         /// Selects the NEURON/CoreNEURON integration method. This parameter sets the NEURON
         /// global variable h.secondorder. Default 0 ('euler')
         IntegrationMethod integrationMethod;
-        /// Run without Stimulus or Reports for given duration prior to t=0
-        /// using a timestep computed as dt=0.1*forward_skip. Default = None
-        nonstd::optional<int> forwardSkip{nonstd::nullopt};
+        /// A non-negative integer used for seeding noise stimuli and any other future stochastic
+        /// stimuli, default is 0.
+        int stimulusSeed;
+        /// A non-negative integer used for seeding stochastic ion channels, default is 0.
+        int ionchannelSeed;
+        /// A non-negative integer used for seeding the Poisson processes that drives the minis,
+        /// default is 0.
+        int minisSeed;
+        /// A non-negative integer used for seeding stochastic synapses, default is 0.
+        int synapseSeed;
     };
     /**
      * Parameters to override simulator output for spike reports
@@ -261,8 +268,6 @@ class SONATA_API SimulationConfig
         /// Extracellular calcium concentration, being applied to the synapse uHill parameter in
         /// order to scale the U parameter of synapses. Default is None.
         nonstd::optional<double> extracellularCalcium{nonstd::nullopt};
-        /// Limit spontaneous release to single vesicle when true. Default is false
-        bool minisSingleVesicle;
         /// Enable legacy behavior to randomize the GABA_A rise time in the helper functions.
         /// Default is false
         bool randomizeGabaRiseTime;
@@ -301,7 +306,9 @@ class SONATA_API SimulationConfig
         /// For compartment type, select compartments to report.
         /// Default value: "center"(for sections: soma), "all"(for other sections)
         Compartments compartments;
-        /// The simulation variable to access
+        /// The simulation variable to access. The variables available are model dependent. For
+        /// summation type, it supports multiple variables by comma separated strings. E.g. “ina”,
+        /// "AdEx.V_M, v", "i_membrane, IClamp".
         std::string variableName;
         /// Descriptive text of the unit recorded. Not validated for correctness
         std::string unit;
@@ -400,6 +407,8 @@ class SONATA_API SimulationConfig
     struct InputSeclamp: public InputBase {
         /// The membrane voltage the targeted cells should be held at (mV)
         double voltage{};
+        /// The series resistance (Mohm), default is 0.01 Mohm
+        double seriesResistance{};
     };
 
     struct InputNoise: public InputBase {
@@ -539,6 +548,12 @@ class SONATA_API SimulationConfig
         /// Adjustments from weight of this connection_override are applied after the specified
         /// delay has elapsed in ms, default = 0.
         double delay{0.};
+        /// To override the neuromod_dtc values between the selected source and target neurons for
+        /// the neuromodulatory projection. Given in ms.
+        nonstd::optional<double> neuromodulationDtc{nonstd::nullopt};
+        /// To override the neuromod_strength values between the selected source and target neurons
+        /// for the neuromodulatory projection. Given in muM.
+        nonstd::optional<double> neuromodulationStrength{nonstd::nullopt};
     };
     using ConnectionMap = std::unordered_map<std::string, ConnectionOverride>;
 
@@ -554,7 +569,7 @@ class SONATA_API SimulationConfig
     SimulationConfig(const std::string& content, const std::string& basePath);
 
     /**
-     * Loads a SONATA JSON simulation config file from disk and returns a CircuitConfig object
+     * Loads a SONATA JSON simulation config file from disk and returns a SimulationConfig object
      * which parses it.
      *
      * \throws SonataError on:
@@ -608,7 +623,7 @@ class SONATA_API SimulationConfig
     const Report& getReport(const std::string& name) const;
 
     /**
-     * Returns the names of the reports
+     * Returns the names of the inputs
      */
     std::set<std::string> listInputNames() const;
 
@@ -650,6 +665,17 @@ class SONATA_API SimulationConfig
     const nonstd::optional<std::string>& getNodeSet() const noexcept;
 
     /**
+     * Returns the metadata section
+     */
+    const std::unordered_map<std::string, std::string>& getMetaData() const noexcept;
+
+
+    /**
+     * Returns the beta_features section
+     */
+    const std::unordered_map<std::string, variantValueType>& getBetaFeatures() const noexcept;
+
+    /**
      * Returns the configuration file JSON whose variables have been expanded by the
      * manifest entries.
      */
@@ -681,6 +707,10 @@ class SONATA_API SimulationConfig
     std::string _nodeSetsFile;
     // Name of node set
     nonstd::optional<std::string> _nodeSet{nonstd::nullopt};
+    // Remarks on the simulation
+    std::unordered_map<std::string, std::string> _metaData;
+    // Variables for a new feature in development, to be moved to other sections once in production
+    std::unordered_map<std::string, variantValueType> _betaFeatures;
 
     class Parser;
     friend class Parser;

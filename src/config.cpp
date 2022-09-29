@@ -273,6 +273,26 @@ void parseOptional(const nlohmann::json& it,
     }
 }
 
+void parseVariantType(const nlohmann::json& it, variantValueType& var) {
+    switch (it.type()) {
+    case nlohmann::json::value_t::boolean:
+        var = it.get<bool>();
+        break;
+    case nlohmann::json::value_t::string:
+        var = it.get<std::string>();
+        break;
+    case nlohmann::json::value_t::number_float:
+        var = it.get<double>();
+        break;
+    case nlohmann::json::value_t::number_integer:
+    case nlohmann::json::value_t::number_unsigned:
+        var = it.get<int>();
+        break;
+    default:
+        throw SonataError("Value type not supported");
+    }
+}
+
 SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
                                          const SimulationConfig::InputBase::Module module,
                                          const std::string& basePath,
@@ -397,6 +417,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputSeclamp ret;
         parseCommon(ret);
         parseMandatory(valueIt, "voltage", debugStr, ret.voltage);
+        parseOptional(valueIt, "series_resistance", ret.seriesResistance, {0.01});
         return ret;
     }
     case Module::ornstein_uhlenbeck: {
@@ -439,23 +460,7 @@ void parseConditionsMechanisms(
         std::unordered_map<std::string, variantValueType> map_vars;
         for (auto& varIt : scopeIt.value().items()) {
             variantValueType res_val;
-            switch (varIt.value().type()) {
-            case nlohmann::json::value_t::boolean:
-                res_val = varIt.value().get<bool>();
-                break;
-            case nlohmann::json::value_t::string:
-                res_val = varIt.value().get<std::string>();
-                break;
-            case nlohmann::json::value_t::number_float:
-                res_val = varIt.value().get<double>();
-                break;
-            case nlohmann::json::value_t::number_integer:
-            case nlohmann::json::value_t::number_unsigned:
-                res_val = varIt.value().get<int>();
-                break;
-            default:
-                throw SonataError("Value type not supported");
-            }
+            parseVariantType(varIt.value(), res_val);
             map_vars.insert({varIt.key(), res_val});
         }
         buf.insert({scopeIt.key(), map_vars});
@@ -876,7 +881,10 @@ class SimulationConfig::Parser
                       "integration_method",
                       result.integrationMethod,
                       {Run::IntegrationMethod::euler});
-        parseOptional(*runIt, "forward_skip", result.forwardSkip);
+        parseOptional(*runIt, "stimulus_seed", result.stimulusSeed, {0});
+        parseOptional(*runIt, "ionchannel_seed", result.ionchannelSeed, {0});
+        parseOptional(*runIt, "minis_seed", result.minisSeed, {0});
+        parseOptional(*runIt, "synapse_seed", result.synapseSeed, {0});
         return result;
     }
 
@@ -914,7 +922,6 @@ class SimulationConfig::Parser
                       result.synapsesInitDepleted,
                       {false});
         parseOptional(*conditionsIt, "extracellular_calcium", result.extracellularCalcium);
-        parseOptional(*conditionsIt, "minis_single_vesicle", result.minisSingleVesicle, {false});
         parseOptional(*conditionsIt,
                       "randomize_gaba_rise_time",
                       result.randomizeGabaRiseTime,
@@ -954,8 +961,11 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "file_name", report.fileName, {it.key() + "_SONATA.h5"});
             parseOptional(valueIt, "enabled", report.enabled, {true});
 
-            // Validate comma separated strings
-            const std::regex expr(R"(\w+(?:\s*,\s*\w+)*)");
+            // variable names can look like:
+            // `v`, or `i_clamp`, or `Foo.bar` but not `..asdf`, or `asdf..` or `asdf.asdf.asdf`
+            const char* const varName = R"(\w+(?:\.?\w+)?)";
+            // variable names are separated by `,` with any amount of whitespace separating them
+            const std::regex expr(fmt::format(R"({}(?:\s*,\s*{})*)", varName, varName));
             if (!std::regex_match(report.variableName, expr)) {
                 throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
                                               report.variableName));
@@ -1101,6 +1111,32 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "modoverride", connect.modoverride);
             parseOptional(valueIt, "synapse_delay_override", connect.synapseDelayOverride);
             parseOptional(valueIt, "delay", connect.delay);
+            parseOptional(valueIt, "neuromodulation_dtc", connect.neuromodulationDtc);
+            parseOptional(valueIt, "neuromodulation_strength", connect.neuromodulationStrength);
+        }
+        return result;
+    }
+
+    std::unordered_map<std::string, std::string> parseMetaData() const {
+        std::unordered_map<std::string, std::string> result;
+        const auto metaIt = _json.find("metadata");
+        if (metaIt == _json.end())
+            return result;
+        for (auto& it : metaIt->items()) {
+            result.insert({it.key(), it.value()});
+        }
+        return result;
+    }
+
+    std::unordered_map<std::string, variantValueType> parseBetaFeatures() const {
+        std::unordered_map<std::string, variantValueType> result;
+        const auto fIt = _json.find("beta_features");
+        if (fIt == _json.end())
+            return result;
+        for (auto& it : fIt->items()) {
+            variantValueType res_val;
+            parseVariantType(it.value(), res_val);
+            result.insert({it.key(), res_val});
         }
         return result;
     }
@@ -1128,6 +1164,8 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _targetSimulator = parser.parseTargetSimulator();
     _nodeSetsFile = parser.parseNodeSetsFile();
     _nodeSet = parser.parseNodeSet();
+    _metaData = parser.parseMetaData();
+    _betaFeatures = parser.parseBetaFeatures();
 }
 
 SimulationConfig SimulationConfig::fromFile(const std::string& path) {
@@ -1206,6 +1244,15 @@ const std::string& SimulationConfig::getNodeSetsFile() const noexcept {
 
 const nonstd::optional<std::string>& SimulationConfig::getNodeSet() const noexcept {
     return _nodeSet;
+}
+
+const std::unordered_map<std::string, std::string>& SimulationConfig::getMetaData() const noexcept {
+    return _metaData;
+}
+
+const std::unordered_map<std::string, variantValueType>& SimulationConfig::getBetaFeatures() const
+    noexcept {
+    return _betaFeatures;
 }
 
 const std::string& SimulationConfig::getExpandedJSON() const {

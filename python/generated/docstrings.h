@@ -586,6 +586,14 @@ static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_modoverr
 R"doc(Synapse helper files to instantiate the synapses in this
 connection_override, default = None)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodulationDtc =
+R"doc(To override the neuromod_dtc values between the selected source and
+target neurons for the neuromodulatory projection. Given in ms.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodulationStrength =
+R"doc(To override the neuromod_strength values between the selected source
+and target neurons for the neuromodulatory projection. Given in muM.)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_source = R"doc(node_set specifying presynaptic nodes)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_spontMinis =
@@ -766,6 +774,8 @@ R"doc(signal std dev as percentage of a cell’s threshold current
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_seriesResistance = R"doc(The series resistance (Mohm), default is 0.01 Mohm)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp_voltage = R"doc(The membrane voltage the targeted cells should be held at (mV))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise = R"doc()doc";
@@ -914,7 +924,10 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_type = R"doc(Report 
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_unit = R"doc(Descriptive text of the unit recorded. Not validated for correctness)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_variableName = R"doc(The simulation variable to access)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_variableName =
+R"doc(The simulation variable to access. The variables available are model
+dependent. For summation type, it supports multiple variables by comma
+separated strings. E.g. “ina”, "AdEx.V_M, v", "i_membrane, IClamp".)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defining global simulation settings for spike reports)doc";
 
@@ -938,13 +951,17 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_soma = R"
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run_forwardSkip =
-R"doc(Run without Stimulus or Reports for given duration prior to t=0 using
-a timestep computed as dt=0.1*forward_skip. Default = None)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod =
 R"doc(Selects the NEURON/CoreNEURON integration method. This parameter sets
 the NEURON global variable h.secondorder. Default 0 ('euler'))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_ionchannelSeed =
+R"doc(A non-negative integer used for seeding stochastic ion channels,
+default is 0.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_minisSeed =
+R"doc(A non-negative integer used for seeding the Poisson processes that
+drives the minis, default is 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_randomSeed = R"doc(Random seed)doc";
 
@@ -953,6 +970,14 @@ R"doc(The spike detection location. Can be either ‘soma’ or 'AIS'. Default
 is 'soma')doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeThreshold = R"doc(The spike detection threshold. Default is -30mV)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_stimulusSeed =
+R"doc(A non-negative integer used for seeding noise stimuli and any other
+future stochastic stimuli, default is 0.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_synapseSeed =
+R"doc(A non-negative integer used for seeding stochastic synapses, default
+is 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
 
@@ -973,6 +998,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_SimulatorType_invalid = R"d
 
 static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_betaFeatures = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_conditions = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_connections = R"doc()doc";
@@ -981,7 +1008,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_expandedJSON = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_fromFile =
 R"doc(Loads a SONATA JSON simulation config file from disk and returns a
-CircuitConfig object which parses it.
+SimulationConfig object which parses it.
 
 Throws:
     SonataError on: - Non accesible file (does not exists / does not
@@ -989,6 +1016,8 @@ Throws:
     (in any depth))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getBetaFeatures = R"doc(Returns the beta_features section)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getConditions = R"doc(Returns the Conditions section of the simulation configuration.)doc";
 
@@ -1010,6 +1039,8 @@ Throws:
     SonataError if the given input name does not exist)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getJSON = R"doc(Returns the JSON content of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getMetaData = R"doc(Returns the metadata section)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getNetwork = R"doc(Returns circuit config file associated with this simulation config)doc";
 
@@ -1042,9 +1073,11 @@ static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listConnectionOverrideNames = R"doc(Returns the names of the connection_overrides)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_listInputNames = R"doc(Returns the names of the reports)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_listInputNames = R"doc(Returns the names of the inputs)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listReportNames = R"doc(Returns the names of the reports)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_metaData = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_network = R"doc()doc";
 

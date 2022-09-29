@@ -541,9 +541,18 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("integration_method",
                       &SimulationConfig::Run::integrationMethod,
                       DOC_SIMULATIONCONFIG(Run, integrationMethod))
-        .def_readonly("forward_skip",
-                      &SimulationConfig::Run::forwardSkip,
-                      DOC_SIMULATIONCONFIG(Run, forwardSkip));
+        .def_readonly("stimulus_seed",
+                      &SimulationConfig::Run::stimulusSeed,
+                      DOC_SIMULATIONCONFIG(Run, stimulusSeed))
+        .def_readonly("ionchannel_seed",
+                      &SimulationConfig::Run::ionchannelSeed,
+                      DOC_SIMULATIONCONFIG(Run, ionchannelSeed))
+        .def_readonly("minis_seed",
+                      &SimulationConfig::Run::minisSeed,
+                      DOC_SIMULATIONCONFIG(Run, minisSeed))
+        .def_readonly("synapse_seed",
+                      &SimulationConfig::Run::synapseSeed,
+                      DOC_SIMULATIONCONFIG(Run, synapseSeed));
 
     py::enum_<SimulationConfig::Run::SpikeLocation>(run, "SpikeLocation")
         .value("soma", SimulationConfig::Run::SpikeLocation::soma)
@@ -592,9 +601,6 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("extracellular_calcium",
                       &SimulationConfig::Conditions::extracellularCalcium,
                       DOC_SIMULATIONCONFIG(Conditions, extracellularCalcium))
-        .def_readonly("minis_single_vesicle",
-                      &SimulationConfig::Conditions::minisSingleVesicle,
-                      DOC_SIMULATIONCONFIG(Conditions, minisSingleVesicle))
         .def_readonly("randomize_gaba_rise_time",
                       &SimulationConfig::Conditions::randomizeGabaRiseTime,
                       DOC_SIMULATIONCONFIG(Conditions, randomizeGabaRiseTime))
@@ -768,7 +774,10 @@ PYBIND11_MODULE(_libsonata, m) {
     py::class_<SimulationConfig::InputSeclamp, SimulationConfig::InputBase>(m, "Seclamp")
         .def_readonly("voltage",
                       &SimulationConfig::InputSeclamp::voltage,
-                      DOC_SIMULATIONCONFIG(InputSeclamp, voltage));
+                      DOC_SIMULATIONCONFIG(InputSeclamp, voltage))
+        .def_readonly("series_resistance",
+                      &SimulationConfig::InputSeclamp::seriesResistance,
+                      DOC_SIMULATIONCONFIG(InputSeclamp, seriesResistance));
 
     py::class_<SimulationConfig::InputNoise, SimulationConfig::InputBase>(m, "Noise")
         .def_readonly("mean",
@@ -944,32 +953,70 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(ConnectionOverride, synapseDelayOverride))
         .def_readonly("delay",
                       &SimulationConfig::ConnectionOverride::delay,
-                      DOC_SIMULATIONCONFIG(ConnectionOverride, delay));
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, delay))
+        .def_readonly("neuromodulation_dtc",
+                      &SimulationConfig::ConnectionOverride::neuromodulationDtc,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodulationDtc))
+        .def_readonly("neuromodulation_strength",
+                      &SimulationConfig::ConnectionOverride::neuromodulationStrength,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodulationStrength));
 
-    py::enum_<SimulationConfig::SimulatorType>(inputBase, "SimulatorType")
+    py::class_<SimulationConfig> simConf(m, "SimulationConfig", "");
+    simConf.def(py::init<const std::string&, const std::string&>())
+        .def_static(
+            "from_file",
+            [](py::object path) { return SimulationConfig::fromFile(py::str(path)); },
+            DOC_SIMULATIONCONFIG(fromFile))
+        .def_property_readonly("base_path",
+                               &SimulationConfig::getBasePath,
+                               DOC_SIMULATIONCONFIG(getBasePath))
+        .def_property_readonly("expanded_json",
+                               &SimulationConfig::getExpandedJSON,
+                               DOC_SIMULATIONCONFIG(getExpandedJSON))
+        .def_property_readonly("run", &SimulationConfig::getRun, DOC_SIMULATIONCONFIG(getRun))
+        .def_property_readonly("output",
+                               &SimulationConfig::getOutput,
+                               DOC_SIMULATIONCONFIG(getOutput))
+        .def_property_readonly("conditions",
+                               &SimulationConfig::getConditions,
+                               DOC_SIMULATIONCONFIG(getConditions))
+        .def_property_readonly("network",
+                               &SimulationConfig::getNetwork,
+                               DOC_SIMULATIONCONFIG(getNetwork))
+        .def_property_readonly("target_simulator",
+                               &SimulationConfig::getTargetSimulator,
+                               DOC_SIMULATIONCONFIG(getTargetSimulator))
+        .def_property_readonly("node_sets_file",
+                               &SimulationConfig::getNodeSetsFile,
+                               DOC_SIMULATIONCONFIG(getNodeSetsFile))
+        .def_property_readonly("node_set",
+                               &SimulationConfig::getNodeSet,
+                               DOC_SIMULATIONCONFIG(getNodeSet))
+        .def_property_readonly("list_report_names",
+                               &SimulationConfig::listReportNames,
+                               DOC_SIMULATIONCONFIG(listReportNames))
+        .def_property_readonly("list_input_names",
+                               &SimulationConfig::listInputNames,
+                               DOC_SIMULATIONCONFIG(listInputNames))
+        .def_property_readonly("list_connection_override_names",
+                               &SimulationConfig::listConnectionOverrideNames,
+                               DOC_SIMULATIONCONFIG(listConnectionOverrideNames))
+        .def("report", &SimulationConfig::getReport, "name"_a, DOC_SIMULATIONCONFIG(getReport))
+        .def("input", &SimulationConfig::getInput, "name"_a, DOC_SIMULATIONCONFIG(getInput))
+        .def("connection_override",
+             &SimulationConfig::getConnectionOverride,
+             "name"_a,
+             DOC_SIMULATIONCONFIG(getConnectionOverride))
+        .def_property_readonly("metadata",
+                               &SimulationConfig::getMetaData,
+                               DOC_SIMULATIONCONFIG(getMetaData))
+        .def_property_readonly("beta_features",
+                               &SimulationConfig::getBetaFeatures,
+                               DOC_SIMULATIONCONFIG(getBetaFeatures));
+
+    py::enum_<SimulationConfig::SimulatorType>(simConf, "SimulatorType")
         .value("NEURON", SimulationConfig::SimulatorType::NEURON)
         .value("CORENEURON", SimulationConfig::SimulatorType::CORENEURON);
-
-    py::class_<SimulationConfig>(m, "SimulationConfig", "")
-        .def(py::init<const std::string&, const std::string&>())
-        .def_static("from_file",
-                    [](py::object path) { return SimulationConfig::fromFile(py::str(path)); })
-        .def_property_readonly("base_path", &SimulationConfig::getBasePath)
-        .def_property_readonly("expanded_json", &SimulationConfig::getExpandedJSON)
-        .def_property_readonly("run", &SimulationConfig::getRun)
-        .def_property_readonly("output", &SimulationConfig::getOutput)
-        .def_property_readonly("conditions", &SimulationConfig::getConditions)
-        .def_property_readonly("network", &SimulationConfig::getNetwork)
-        .def_property_readonly("target_simulator", &SimulationConfig::getTargetSimulator)
-        .def_property_readonly("node_sets_file", &SimulationConfig::getNodeSetsFile)
-        .def_property_readonly("node_set", &SimulationConfig::getNodeSet)
-        .def_property_readonly("list_report_names", &SimulationConfig::listReportNames)
-        .def_property_readonly("list_input_names", &SimulationConfig::listInputNames)
-        .def_property_readonly("list_connection_override_names",
-                               &SimulationConfig::listConnectionOverrideNames)
-        .def("report", &SimulationConfig::getReport, "name"_a)
-        .def("input", &SimulationConfig::getInput, "name"_a)
-        .def("connection_override", &SimulationConfig::getConnectionOverride, "name"_a);
 
     bindPopulationClass<EdgePopulation>(
         m, "EdgePopulation", "Collection of edges with attributes and connectivity index")
