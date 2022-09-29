@@ -266,6 +266,26 @@ void parseOptional(const nlohmann::json& it,
     }
 }
 
+void parseVariantType(const nlohmann::json& it, variantValueType& var) {
+    switch (it.type()) {
+    case nlohmann::json::value_t::boolean:
+        var = it.get<bool>();
+        break;
+    case nlohmann::json::value_t::string:
+        var = it.get<std::string>();
+        break;
+    case nlohmann::json::value_t::number_float:
+        var = it.get<double>();
+        break;
+    case nlohmann::json::value_t::number_integer:
+    case nlohmann::json::value_t::number_unsigned:
+        var = it.get<int>();
+        break;
+    default:
+        throw SonataError("Value type not supported");
+    }
+}
+
 SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
                                          const SimulationConfig::InputBase::Module module,
                                          const std::string& basePath,
@@ -433,23 +453,7 @@ void parseConditionsMechanisms(
         std::unordered_map<std::string, variantValueType> map_vars;
         for (auto& varIt : scopeIt.value().items()) {
             variantValueType res_val;
-            switch (varIt.value().type()) {
-            case nlohmann::json::value_t::boolean:
-                res_val = varIt.value().get<bool>();
-                break;
-            case nlohmann::json::value_t::string:
-                res_val = varIt.value().get<std::string>();
-                break;
-            case nlohmann::json::value_t::number_float:
-                res_val = varIt.value().get<double>();
-                break;
-            case nlohmann::json::value_t::number_integer:
-            case nlohmann::json::value_t::number_unsigned:
-                res_val = varIt.value().get<int>();
-                break;
-            default:
-                throw SonataError("Value type not supported");
-            }
+            parseVariantType(varIt.value(), res_val);
             map_vars.insert({varIt.key(), res_val});
         }
         buf.insert({scopeIt.key(), map_vars});
@@ -1072,6 +1076,30 @@ class SimulationConfig::Parser
         return result;
     }
 
+    std::unordered_map<std::string, std::string> parseMetaData() const {
+        std::unordered_map<std::string, std::string> result;
+        const auto metaIt = _json.find("metadata");
+        if (metaIt == _json.end())
+            return result;
+        for (auto& it : metaIt->items()) {
+            result.insert({it.key(), it.value()});
+        }
+        return result;
+    }
+
+    std::unordered_map<std::string, variantValueType> parseBetaFeatures() const {
+        std::unordered_map<std::string, variantValueType> result;
+        const auto fIt = _json.find("beta_features");
+        if (fIt == _json.end())
+            return result;
+        for (auto& it : fIt->items()) {
+            variantValueType res_val;
+            parseVariantType(it.value(), res_val);
+            result.insert({it.key(), res_val});
+        }
+        return result;
+    }
+
     std::string getExpandedJSON() const {
         return _json.dump();
     }
@@ -1095,6 +1123,8 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _targetSimulator = parser.parseTargetSimulator();
     _nodeSetsFile = parser.parseNodeSetsFile();
     _nodeSet = parser.parseNodeSet();
+    _metaData = parser.parseMetaData();
+    _betaFeatures = parser.parseBetaFeatures();
 }
 
 SimulationConfig SimulationConfig::fromFile(const std::string& path) {
@@ -1173,6 +1203,15 @@ const std::string& SimulationConfig::getNodeSetsFile() const noexcept {
 
 const nonstd::optional<std::string>& SimulationConfig::getNodeSet() const noexcept {
     return _nodeSet;
+}
+
+const std::unordered_map<std::string, std::string>& SimulationConfig::getMetaData() const noexcept {
+    return _metaData;
+}
+
+const std::unordered_map<std::string, variantValueType>& SimulationConfig::getBetaFeatures() const
+    noexcept {
+    return _betaFeatures;
 }
 
 const std::string& SimulationConfig::getExpandedJSON() const {

@@ -560,6 +560,9 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getConnectionOverride("GABAB_erev").modoverride == nonstd::nullopt);
         CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationDtc == 100);
         CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationStrength == 0.75);
+
+        CHECK(config.getMetaData().size() == 2);
+        CHECK(config.getBetaFeatures().size() == 4);
     }
 
     SECTION("manifest_network_run") {

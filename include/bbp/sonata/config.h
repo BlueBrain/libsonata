@@ -538,7 +538,7 @@ class SONATA_API SimulationConfig
     SimulationConfig(const std::string& content, const std::string& basePath);
 
     /**
-     * Loads a SONATA JSON simulation config file from disk and returns a CircuitConfig object
+     * Loads a SONATA JSON simulation config file from disk and returns a SimulationConfig object
      * which parses it.
      *
      * \throws SonataError on:
@@ -592,7 +592,7 @@ class SONATA_API SimulationConfig
     const Report& getReport(const std::string& name) const;
 
     /**
-     * Returns the names of the reports
+     * Returns the names of the inputs
      */
     std::set<std::string> listInputNames() const;
 
@@ -634,6 +634,17 @@ class SONATA_API SimulationConfig
     const nonstd::optional<std::string>& getNodeSet() const noexcept;
 
     /**
+     * Returns the metadata section
+     */
+    const std::unordered_map<std::string, std::string>& getMetaData() const noexcept;
+
+
+    /**
+     * Returns the beta_features section
+     */
+    const std::unordered_map<std::string, variantValueType>& getBetaFeatures() const noexcept;
+
+    /**
      * Returns the configuration file JSON whose variables have been expanded by the
      * manifest entries.
      */
@@ -665,6 +676,10 @@ class SONATA_API SimulationConfig
     std::string _nodeSetsFile;
     // Name of node set
     nonstd::optional<std::string> _nodeSet{nonstd::nullopt};
+    // Remarks on the simulation
+    std::unordered_map<std::string, std::string> _metaData;
+    // Variables for a new feature in development, to be moved to other sections once in production
+    std::unordered_map<std::string, variantValueType> _betaFeatures;
 
     class Parser;
     friend class Parser;

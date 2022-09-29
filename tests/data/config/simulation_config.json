@@ -1,4 +1,14 @@
 {
+     "metadata": {
+        "note": "first attempt of simulation",
+        "sim_version": "1"
+     },
+     "beta_features": {
+        "v_str": "abcd",
+        "v_float": 0.5,
+        "v_int": 10,
+        "v_bool": false
+     },
      "manifest": {
          "$OUTPUT_DIR": "./some/path"
      },

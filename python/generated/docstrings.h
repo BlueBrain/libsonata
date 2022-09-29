@@ -956,6 +956,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_SimulatorType_invalid = R"d
 
 static const char *__doc_bbp_sonata_SimulationConfig_basePath = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_betaFeatures = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_conditions = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_connections = R"doc()doc";
@@ -964,7 +966,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_expandedJSON = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_fromFile =
 R"doc(Loads a SONATA JSON simulation config file from disk and returns a
-CircuitConfig object which parses it.
+SimulationConfig object which parses it.
 
 Throws:
     SonataError on: - Non accesible file (does not exists / does not
@@ -972,6 +974,8 @@ Throws:
     (in any depth))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getBasePath = R"doc(Returns the base path of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getBetaFeatures = R"doc(Returns the beta_features section)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getConditions = R"doc(Returns the Conditions section of the simulation configuration.)doc";
 
@@ -993,6 +997,8 @@ Throws:
     SonataError if the given input name does not exist)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getJSON = R"doc(Returns the JSON content of the simulation config file)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_getMetaData = R"doc(Returns the metadata section)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getNetwork = R"doc(Returns circuit config file associated with this simulation config)doc";
 
@@ -1025,9 +1031,11 @@ static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listConnectionOverrideNames = R"doc(Returns the names of the connection_overrides)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_listInputNames = R"doc(Returns the names of the reports)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_listInputNames = R"doc(Returns the names of the inputs)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listReportNames = R"doc(Returns the names of the reports)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_metaData = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_network = R"doc()doc";
 
