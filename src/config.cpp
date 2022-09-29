@@ -916,8 +916,11 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "file_name", report.fileName, {it.key() + "_SONATA.h5"});
             parseOptional(valueIt, "enabled", report.enabled, {true});
 
-            // Validate comma separated strings
-            const std::regex expr(R"(\w+(\.+\w+)?(?:\s*,\s*\w+(\.+\w+)?)*)");
+            // variable names can look like:
+            // `v`, or `i_clamp`, or `Foo.bar` but not `..asdf`, or `asdf..` or `asdf.asdf.asdf`
+            const char* const varName = R"(\w+(?:\.?\w+)?)";
+            // variable names are separated by `,` with any amount of whitespace separating them
+            const std::regex expr(fmt::format(R"({}(?:\s*,\s*{})*)", varName, varName));
             if (!std::regex_match(report.variableName, expr)) {
                 throw SonataError(fmt::format("Invalid comma separated variable names '{}'",
                                               report.variableName));

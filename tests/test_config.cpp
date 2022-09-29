@@ -759,6 +759,26 @@ TEST_CASE("SimulationConfig") {
               "reports": {
                 "test": {
                    "cells": "nodesetstring",
+                   "variable_name": "AdEx..foo, V",
+                   "type": "compartment",
+                   "dt": 0.05,
+                   "start_time": 0,
+                   "end_time": 500
+                }
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {  // Wrong variable_name in a report object: more than one '.' in a name
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "reports": {
+                "test": {
+                   "cells": "nodesetstring",
                    "variable_name": "AdEx.V_M.foo, V",
                    "type": "compartment",
                    "dt": 0.05,
