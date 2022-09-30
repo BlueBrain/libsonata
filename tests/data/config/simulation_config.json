@@ -43,6 +43,17 @@
           "property3": 0.025,
           "property4": "test"
         }
+      },
+      "modifications": {
+        "applyTTX": {
+            "node_set": "single",
+            "type": "TTX"
+        },
+        "no_SK_E2": {
+            "node_set": "single",
+            "type": "ConfigureAllSections",
+            "section_configure": "%s.gSK_E2bar_SK_E2 = 0"
+        }
       }
     },
     "inputs": {

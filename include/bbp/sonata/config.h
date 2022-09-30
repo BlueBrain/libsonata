@@ -232,6 +232,29 @@ class SONATA_API SimulationConfig
         /// The sorting order of the spike report. Default is "by_time"
         SpikesSortOrder sortOrder;
     };
+
+    struct ModificationBase {
+        enum class ModificationType { invalid = -1, TTX, ConfigureAllSections };
+
+        /// Node set which receives the manipulation
+        std::string nodeSet;
+        /// Name of the manipulation. Supported values are “TTX” and “ConfigureAllSections”.
+        ModificationType type;
+    };
+
+    struct ModificationTTX: public ModificationBase {};
+
+    struct ModificationConfigureAllSections: public ModificationBase {
+        /// For “ConfigureAllSections” manipulation, a snippet of python code to perform one or more
+        /// assignments involving section attributes, for all sections that have all the referenced
+        /// attributes. The format is "%s.xxxx; %s.xxxx; ...".
+        std::string sectionConfigure;
+    };
+
+    using Modification = nonstd::variant<ModificationTTX, ModificationConfigureAllSections>;
+
+    using ModificationMap = std::unordered_map<std::string, Modification>;
+
     /**
      * Parameters defining global experimental conditions.
      */
@@ -253,6 +276,14 @@ class SONATA_API SimulationConfig
         /// dictionaries of variables' names and values.
         std::unordered_map<std::string, std::unordered_map<std::string, variantValueType>>
             mechanisms;
+        /// Collection of dictionaries with each member decribing a modification that mimics
+        /// experimental manipulations to the circuit.
+        ModificationMap modifications;
+        /// Returns the names of the modifications
+        std::set<std::string> listModificationNames() const;
+        /// Returns the given modification parameters
+        /// \throws SonataError if the given modification name does not exist
+        const Modification& getModification(const std::string& name) const;
     };
     /**
      * List of report parameters collected during the simulation

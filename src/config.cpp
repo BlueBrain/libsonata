@@ -123,6 +123,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::SimulatorType,
                               {SimulationConfig::SimulatorType::NEURON, "NEURON"},
                               {SimulationConfig::SimulatorType::CORENEURON, "CORENEURON"}})
 
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    SimulationConfig::ModificationBase::ModificationType,
+    {{SimulationConfig::ModificationBase::ModificationType::invalid, nullptr},
+     {SimulationConfig::ModificationBase::ModificationType::TTX, "TTX"},
+     {SimulationConfig::ModificationBase::ModificationType::ConfigureAllSections,
+      "ConfigureAllSections"}})
+
 namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
@@ -457,6 +464,41 @@ void parseConditionsMechanisms(
             map_vars.insert({varIt.key(), res_val});
         }
         buf.insert({scopeIt.key(), map_vars});
+    }
+}
+
+void parseConditionsModifications(const nlohmann::json& it,
+                                  SimulationConfig::ModificationMap& buf) {
+    const auto sectionIt = it.find("modifications");
+    if (sectionIt == it.end()) {
+        return;
+    }
+    for (auto& mIt : sectionIt->items()) {
+        const auto valueIt = mIt.value();
+        const auto debugStr = fmt::format("modification {}", mIt.key());
+
+        SimulationConfig::ModificationBase::ModificationType type;
+        parseMandatory(valueIt, "type", debugStr, type);
+
+        switch (type) {
+        case SimulationConfig::ModificationBase::ModificationType::TTX: {
+            SimulationConfig::ModificationTTX result;
+            result.type = type;
+            parseMandatory(valueIt, "node_set", debugStr, result.nodeSet);
+            buf[mIt.key()] = result;
+            break;
+        }
+        case SimulationConfig::ModificationBase::ModificationType::ConfigureAllSections: {
+            SimulationConfig::ModificationConfigureAllSections result;
+            result.type = type;
+            parseMandatory(valueIt, "node_set", debugStr, result.nodeSet);
+            parseMandatory(valueIt, "section_configure", debugStr, result.sectionConfigure);
+            buf[mIt.key()] = result;
+            break;
+        }
+        default:
+            throw SonataError("Unknown modificationn type in " + debugStr);
+        }
     }
 }
 
@@ -887,6 +929,7 @@ class SimulationConfig::Parser
                       result.randomizeGabaRiseTime,
                       {false});
         parseConditionsMechanisms(*conditionsIt, result.mechanisms);
+        parseConditionsModifications(*conditionsIt, result.modifications);
         return result;
     }
 
@@ -1216,6 +1259,21 @@ const std::unordered_map<std::string, variantValueType>& SimulationConfig::getBe
 
 const std::string& SimulationConfig::getExpandedJSON() const {
     return _expandedJSON;
+}
+
+std::set<std::string> SimulationConfig::Conditions::listModificationNames() const {
+    return getMapKeys(modifications);
+}
+
+const SimulationConfig::Modification& SimulationConfig::Conditions::getModification(
+    const std::string& name) const {
+    const auto it = modifications.find(name);
+    if (it == modifications.end()) {
+        throw SonataError(
+            fmt::format("The modification '{}' is not present in the simulation config file",
+                        name));
+    }
+    return it->second;
 }
 
 }  // namespace sonata

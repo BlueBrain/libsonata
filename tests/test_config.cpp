@@ -337,6 +337,18 @@ TEST_CASE("SimulationConfig") {
         itr = config.getConditions().mechanisms.find("GluSynapse");
         CHECK(nonstd::get<double>(itr->second.find("property3")->second) == 0.025);
         CHECK(nonstd::get<std::string>(itr->second.find("property4")->second) == "test");
+        CHECK(config.getConditions().listModificationNames() ==
+              std::set<std::string>{"applyTTX", "no_SK_E2"});
+        const auto TTX = nonstd::get<SimulationConfig::ModificationTTX>(
+            config.getConditions().getModification("applyTTX"));
+        const auto configAllSects = nonstd::get<SimulationConfig::ModificationConfigureAllSections>(
+            config.getConditions().getModification("no_SK_E2"));
+        CHECK_THROWS_AS(config.getConditions().getModification("DoesNotExist"), SonataError);
+        CHECK(TTX.type == SimulationConfig::ModificationBase::ModificationType::TTX);
+        CHECK(TTX.nodeSet == "single");
+        CHECK(configAllSects.type ==
+              SimulationConfig::ModificationBase::ModificationType::ConfigureAllSections);
+        CHECK(configAllSects.sectionConfigure == "%s.gSK_E2bar_SK_E2 = 0");
 
         CHECK_THROWS_AS(config.getReport("DoesNotExist"), SonataError);
 
