@@ -474,10 +474,12 @@ void parseConditionsModifications(const nlohmann::json& it,
         return;
     }
     for (auto& mIt : sectionIt->items()) {
-        auto& valueIt = mIt.value();
-        const auto debugStr = fmt::format("modifcation {}", mIt.key());
+        const auto valueIt = mIt.value();
+        const auto debugStr = fmt::format("modification {}", mIt.key());
+
         SimulationConfig::ModificationBase::ModificationType type;
         parseMandatory(valueIt, "type", debugStr, type);
+
         switch (type) {
         case SimulationConfig::ModificationBase::ModificationType::TTX: {
             SimulationConfig::ModificationTTX result;
