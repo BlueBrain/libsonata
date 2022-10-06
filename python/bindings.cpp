@@ -509,7 +509,13 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_POPULATION_PROPERTIES(morphologiesDir))
         .def_readonly("alternate_morphology_formats",
                       &PopulationProperties::alternateMorphologyFormats,
-                      DOC_POPULATION_PROPERTIES(alternateMorphologyFormats));
+                      DOC_POPULATION_PROPERTIES(alternateMorphologyFormats))
+        .def_readonly("elements_path",
+                      &PopulationProperties::elementsPath,
+                      DOC_POPULATION_PROPERTIES(elementsPath))
+        .def_readonly("types_path",
+                      &PopulationProperties::typesPath,
+                      DOC_POPULATION_PROPERTIES(typesPath));
 
     py::class_<CircuitConfig>(m, "CircuitConfig", "")
         .def(py::init<const std::string&, const std::string&>())

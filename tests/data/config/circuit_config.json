@@ -14,13 +14,21 @@
     "nodes": [
       {
         "nodes_file": "$NETWORK_DIR/nodes1.h5",
-        "node_types_file": null
+        "node_types_file": null,
+        "populations": {
+            "nodes-A": {},
+            "nodes-B": {}
+        }
       }
     ],
     "edges": [
       {
         "edges_file": "$NETWORK_DIR/edges1.h5",
-        "edge_types_file": null
+        "edge_types_file": null,
+        "populations": {
+            "edges-AB": {},
+            "edges-AC": {}
+        }
       }
     ]
   }

@@ -571,11 +571,17 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertTrue(node_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
         self.assertEqual(node_prop.alternate_morphology_formats, {})
 
+        self.assertEqual(node_prop.types_path, '')
+        self.assertTrue(node_prop.elements_path.endswith('tests/data/nodes1.h5'))
+
         edge_prop = self.config.edge_population_properties('edges-AC')
         self.assertEqual(edge_prop.type, 'chemical_synapse')
         self.assertTrue(edge_prop.morphologies_dir.endswith('morphologies'))
         self.assertTrue(edge_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
         self.assertEqual(edge_prop.alternate_morphology_formats, {})
+
+        self.assertEqual(edge_prop.types_path, '')
+        self.assertTrue(edge_prop.elements_path.endswith('tests/data/edges1.h5'))
 
 
     def test_biophysical_properties_raises(self):

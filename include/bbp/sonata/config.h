@@ -54,6 +54,16 @@ struct SONATA_API PopulationProperties {
      * Dictionary for alternate directory paths.
      */
     std::unordered_map<std::string, std::string> alternateMorphologyFormats;
+
+    /**
+     * Path to underlying elements H5 file.  It is discouraged to directly access this.
+     */
+    std::string elementsPath;
+
+    /**
+     * Path to underlying types csv file.  It is discouraged to directly access this.
+     */
+    std::string typesPath;
 };
 
 /**
