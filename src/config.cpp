@@ -52,50 +52,6 @@ struct adl_serializer<nonstd::optional<T>> {
 
 namespace bbp {
 namespace sonata {
-namespace {
-
-void checkBiophysicalPopulations(
-    const std::unordered_map<std::string, PopulationProperties>& populations) {
-    for (const auto& it : populations) {
-        const auto population = it.first;
-        const auto properties = it.second;
-        if (properties.type == "biophysical") {
-            if (properties.morphologiesDir.empty() &&
-                properties.alternateMorphologyFormats.empty()) {
-                throw SonataError(
-                    fmt::format("Node population '{}' is defined as 'biophysical' "
-                                "but does not define 'morphologies_dir' or "
-                                "'alternateMorphologyFormats'",
-                                population));
-            } else if (properties.biophysicalNeuronModelsDir.empty()) {
-                throw SonataError(
-                    fmt::format("Node population '{}' is defined as 'biophysical' "
-                                "but does not define 'biophysical_neuron_models_dir'",
-                                population));
-            }
-        }
-    }
-}
-
-PopulationProperties getPopulationProperties(
-    const std::string& populationName,
-    const std::unordered_map<std::string, PopulationProperties>& populations) {
-    auto it = populations.find(populationName);
-    if (it == populations.end()) {
-        throw SonataError(fmt::format("Could not find population '{}'", populationName));
-    }
-
-    return it->second;
-}
-
-template <typename PopulationType>
-PopulationType getPopulation(const std::string& populationName,
-                             const std::unordered_map<std::string, PopulationProperties>& src) {
-    const auto properties = getPopulationProperties(populationName, src);
-    return PopulationType(properties.elementsPath, properties.typesPath, populationName);
-}
-}  // namespace
-
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::SpikeLocation,
                              {{SimulationConfig::Run::SpikeLocation::invalid, nullptr},
@@ -177,6 +133,47 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
 namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
+
+void checkBiophysicalPopulations(
+    const std::unordered_map<std::string, PopulationProperties>& populations) {
+    for (const auto& it : populations) {
+        const auto population = it.first;
+        const auto properties = it.second;
+        if (properties.type == "biophysical") {
+            if (properties.morphologiesDir.empty() &&
+                properties.alternateMorphologyFormats.empty()) {
+                throw SonataError(
+                    fmt::format("Node population '{}' is defined as 'biophysical' "
+                                "but does not define 'morphologies_dir' or "
+                                "'alternateMorphologyFormats'",
+                                population));
+            } else if (properties.biophysicalNeuronModelsDir.empty()) {
+                throw SonataError(
+                    fmt::format("Node population '{}' is defined as 'biophysical' "
+                                "but does not define 'biophysical_neuron_models_dir'",
+                                population));
+            }
+        }
+    }
+}
+
+PopulationProperties getPopulationProperties(
+    const std::string& populationName,
+    const std::unordered_map<std::string, PopulationProperties>& populations) {
+    auto it = populations.find(populationName);
+    if (it == populations.end()) {
+        throw SonataError(fmt::format("Could not find population '{}'", populationName));
+    }
+
+    return it->second;
+}
+
+template <typename PopulationType>
+PopulationType getPopulation(const std::string& populationName,
+                             const std::unordered_map<std::string, PopulationProperties>& src) {
+    const auto properties = getPopulationProperties(populationName, src);
+    return PopulationType(properties.elementsPath, properties.typesPath, populationName);
+}
 
 std::map<std::string, std::string> replaceVariables(std::map<std::string, std::string> variables) {
     constexpr size_t maxIterations = 10;
@@ -744,23 +741,6 @@ class CircuitConfig::Parser
   private:
     const fs::path _basePath;
     nlohmann::json _json;
-};
-
-class CircuitConfig::PopulationResolver
-{
-  public:
-    static void checkDuplicatePopulations(const std::vector<SubnetworkFiles>& src) {
-        std::set<std::string> check;
-        for (const auto& subNetwork : src) {
-            for (const auto& population : subNetwork.populations) {
-                if (check.find(population) != check.end()) {
-                    throw SonataError(fmt::format("Duplicate population name '{}'", population));
-                }
-                check.insert(population);
-            }
-        }
-    }
-
 };
 
 CircuitConfig::CircuitConfig(const std::string& contents, const std::string& basePath) {
