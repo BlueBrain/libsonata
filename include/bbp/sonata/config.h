@@ -52,13 +52,13 @@ struct SONATA_API PopulationProperties {
 
     /**
      * Dictionary for alternate directory paths.
-     * It is discouraged to directly access the contents of the file.
-     * Instead use 'libsonata' to read this file.
      */
     std::unordered_map<std::string, std::string> alternateMorphologyFormats;
 
     /**
      * Path to underlying elements H5 file.
+     * It is discouraged to directly access the contents of the file.
+     * Instead use 'libsonata' to read this file.
      */
     std::string elementsPath;
 
