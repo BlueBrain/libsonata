@@ -1,10 +1,22 @@
 # Changelog
 
+## v0.1.15:
+
+### Added:
+ - Parse `metadata` and `beta_features` sections in SimulationConfig (#224)
+ - SimulationConfig parser: add modifications properties in conditions section (#228)
+ - make nodes/edges paths files available through PopulationProperties (#230)
+
+### Fixed:
+ - Updates on the SimulationConfig parser (#227)
+ - don't make many small reads via HighFive/hdf5 (#226)
+ - Bump pybind11 from v2.5.0 to v2.10.0; supports python 3.11 (#223)
+ - fix report files not respecting the `output` path (#222)
+
 ## v0.1.14:
 
 ### Fixed:
- - Fix report files not respecting the simulation_config.json output path (#222)
- - Bump pybind11 from v2.5.0 to v2.10.0; supports python 3.11 (#223)
+ - Parse synapse mod variables in conditions/mechanisms section (#217)
 
 ## v0.1.13:
 
