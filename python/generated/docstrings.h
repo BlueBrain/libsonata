@@ -226,13 +226,14 @@ static const char *__doc_bbp_sonata_Population = R"doc()doc";
 
 static const char *__doc_bbp_sonata_PopulationProperties = R"doc(Stores population-specific network information.)doc";
 
-static const char *__doc_bbp_sonata_PopulationProperties_alternateMorphologyFormats = R"doc(Dictionary for alternate directory paths.)doc";
+static const char *__doc_bbp_sonata_PopulationProperties_alternateMorphologyFormats =
+R"doc(Dictionary for alternate directory paths. It is discouraged to
+directly access the contents of the file. Instead use 'libsonata' to
+read this file.)doc";
 
 static const char *__doc_bbp_sonata_PopulationProperties_biophysicalNeuronModelsDir = R"doc(Path to the template HOC files defining the E-Mode)doc";
 
-static const char *__doc_bbp_sonata_PopulationProperties_elementsPath =
-R"doc(Path to underlying elements H5 file. It is discouraged to directly
-access this.)doc";
+static const char *__doc_bbp_sonata_PopulationProperties_elementsPath = R"doc(Path to underlying elements H5 file.)doc";
 
 static const char *__doc_bbp_sonata_PopulationProperties_morphologiesDir = R"doc(Path to the directory containing the morphologies)doc";
 
@@ -240,7 +241,8 @@ static const char *__doc_bbp_sonata_PopulationProperties_type = R"doc(Population
 
 static const char *__doc_bbp_sonata_PopulationProperties_typesPath =
 R"doc(Path to underlying types csv file. It is discouraged to directly
-access this.)doc";
+access the contents of the file. Instead use 'libsonata' to read this
+file.)doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage = R"doc(Collection of {PopulationClass}s stored in a H5 file and optional CSV.)doc";
 

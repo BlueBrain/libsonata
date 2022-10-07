@@ -137,8 +137,8 @@ namespace fs = ghc::filesystem;
 void checkBiophysicalPopulations(
     const std::unordered_map<std::string, PopulationProperties>& populations) {
     for (const auto& it : populations) {
-        const auto population = it.first;
-        const auto properties = it.second;
+        const auto& population = it.first;
+        const auto& properties = it.second;
         if (properties.type == "biophysical") {
             if (properties.morphologiesDir.empty() &&
                 properties.alternateMorphologyFormats.empty()) {
