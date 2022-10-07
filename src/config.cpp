@@ -134,6 +134,47 @@ namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
 
+void checkBiophysicalPopulations(
+    const std::unordered_map<std::string, PopulationProperties>& populations) {
+    for (const auto& it : populations) {
+        const auto& population = it.first;
+        const auto& properties = it.second;
+        if (properties.type == "biophysical") {
+            if (properties.morphologiesDir.empty() &&
+                properties.alternateMorphologyFormats.empty()) {
+                throw SonataError(
+                    fmt::format("Node population '{}' is defined as 'biophysical' "
+                                "but does not define 'morphologies_dir' or "
+                                "'alternateMorphologyFormats'",
+                                population));
+            } else if (properties.biophysicalNeuronModelsDir.empty()) {
+                throw SonataError(
+                    fmt::format("Node population '{}' is defined as 'biophysical' "
+                                "but does not define 'biophysical_neuron_models_dir'",
+                                population));
+            }
+        }
+    }
+}
+
+PopulationProperties getPopulationProperties(
+    const std::string& populationName,
+    const std::unordered_map<std::string, PopulationProperties>& populations) {
+    auto it = populations.find(populationName);
+    if (it == populations.end()) {
+        throw SonataError(fmt::format("Could not find population '{}'", populationName));
+    }
+
+    return it->second;
+}
+
+template <typename PopulationType>
+PopulationType getPopulation(const std::string& populationName,
+                             const std::unordered_map<std::string, PopulationProperties>& src) {
+    const auto properties = getPopulationProperties(populationName, src);
+    return PopulationType(properties.elementsPath, properties.typesPath, populationName);
+}
+
 std::map<std::string, std::string> replaceVariables(std::map<std::string, std::string> variables) {
     constexpr size_t maxIterations = 10;
 
@@ -589,6 +630,23 @@ class CircuitConfig::Parser
         return result;
     }
 
+    template <typename JSON>
+    std::tuple<std::string, std::string> parseSubNetworksMG(const std::string& prefix,
+                                                            const JSON& value) const {
+        const std::string elementsFile = prefix + "s_file";
+        auto h5File = getJSONPath(value, elementsFile);
+
+        if (h5File.empty()) {
+            throw SonataError(
+                fmt::format("'{}' network do not define '{}' entry", prefix, elementsFile));
+        }
+
+        const std::string typesFile = prefix + "_types_file";
+        auto csvFile = getJSONPath(value, typesFile);
+
+        return {h5File, csvFile};
+    }
+
     template <typename PopulationType>
     Subnetworks parseSubNetworks(const std::string& prefix) const {
         using PopulationStorage = bbp::sonata::PopulationStorage<PopulationType>;
@@ -631,6 +689,10 @@ class CircuitConfig::Parser
 
         // Iterate over all defined subnetworks
         for (const auto& node : network) {
+            std::string elementsPath;
+            std::string typesPath;
+            std::tie(elementsPath, typesPath) = parseSubNetworksMG(prefix, node);
+
             const auto populationsIt = node.find("populations");
             if (populationsIt == node.end()) {
                 continue;
@@ -641,6 +703,9 @@ class CircuitConfig::Parser
                 const auto& popData = it.value();
 
                 PopulationProperties& popProperties = output[it.key()];
+
+                popProperties.elementsPath = elementsPath;
+                popProperties.typesPath = typesPath;
 
                 popProperties.type = getJSONValue<std::string>(popData, "type");
                 popProperties.morphologiesDir = getJSONPath(popData, "morphologies_dir");
@@ -678,73 +743,6 @@ class CircuitConfig::Parser
     nlohmann::json _json;
 };
 
-class CircuitConfig::PopulationResolver
-{
-  public:
-    static std::set<std::string> listPopulations(const std::vector<SubnetworkFiles>& src) {
-        std::set<std::string> result;
-        for (const auto& subNetwork : src) {
-            result.insert(subNetwork.populations.begin(), subNetwork.populations.end());
-        }
-        return result;
-    }
-
-    template <typename PopulationType>
-    static PopulationType getPopulation(const std::string& populationName,
-                                        const std::vector<SubnetworkFiles>& src) {
-        for (const auto& subNetwork : src) {
-            for (const auto& population : subNetwork.populations) {
-                if (population == populationName) {
-                    return PopulationType(subNetwork.elements, subNetwork.types, populationName);
-                }
-            }
-        }
-
-        throw SonataError(fmt::format("Could not find population '{}'", populationName));
-    }
-
-    static void checkDuplicatePopulations(const std::vector<SubnetworkFiles>& src) {
-        std::set<std::string> check;
-        for (const auto& subNetwork : src) {
-            for (const auto& population : subNetwork.populations) {
-                if (check.find(population) != check.end()) {
-                    throw SonataError(fmt::format("Duplicate population name '{}'", population));
-                }
-                check.insert(population);
-            }
-        }
-    }
-
-    static void checkBiophysicalPopulations(
-        const std::vector<SubnetworkFiles>& src,
-        const std::unordered_map<std::string, PopulationProperties>& populations) {
-        for (const auto& subNetwork : src) {
-            for (const auto& population : subNetwork.populations) {
-                const auto it = populations.find(population);
-                if (it == populations.end()) {
-                    continue;
-                }
-
-                if (it->second.type == "biophysical") {
-                    if (it->second.morphologiesDir.empty() &&
-                        it->second.alternateMorphologyFormats.empty()) {
-                        throw SonataError(
-                            fmt::format("Node population '{}' is defined as 'biophysical' "
-                                        "but does not define 'morphologies_dir' or "
-                                        "'alternateMorphologyFormats'",
-                                        population));
-                    } else if (it->second.biophysicalNeuronModelsDir.empty()) {
-                        throw SonataError(
-                            fmt::format("Node population '{}' is defined as 'biophysical' "
-                                        "but does not define 'biophysical_neuron_models_dir'",
-                                        population));
-                    }
-                }
-            }
-        }
-    }
-};
-
 CircuitConfig::CircuitConfig(const std::string& contents, const std::string& basePath) {
     Parser parser(contents, basePath);
 
@@ -754,16 +752,8 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
 
     _nodeSetsFile = parser.getNodeSetsPath();
 
-    // Load node subnetwork and check for duplicate populations
-    _networkNodes = parser.parseNodeNetwork();
-    PopulationResolver::checkDuplicatePopulations(_networkNodes);
-
     // Load node population overrides and check biophysical types
     _nodePopulationProperties = parser.parseNodePopulations();
-
-    // Load edge subnetowrk and check for duplicate populations
-    _networkEdges = parser.parseEdgeNetwork();
-    PopulationResolver::checkDuplicatePopulations(_networkEdges);
 
     // Load edge population overrides
     _edgePopulationProperties = parser.parseEdgePopulations();
@@ -790,7 +780,7 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
     updateDefaultProperties(_edgePopulationProperties, "chemical_synapse");
 
-    PopulationResolver::checkBiophysicalPopulations(_networkNodes, _nodePopulationProperties);
+    checkBiophysicalPopulations(_nodePopulationProperties);
 }
 
 CircuitConfig CircuitConfig::fromFile(const std::string& path) {
@@ -802,53 +792,27 @@ const std::string& CircuitConfig::getNodeSetsPath() const {
 }
 
 std::set<std::string> CircuitConfig::listNodePopulations() const {
-    return PopulationResolver::listPopulations(_networkNodes);
+    return getMapKeys(_nodePopulationProperties);
 }
 
 NodePopulation CircuitConfig::getNodePopulation(const std::string& name) const {
-    return PopulationResolver::getPopulation<NodePopulation>(name, _networkNodes);
+    return getPopulation<NodePopulation>(name, _nodePopulationProperties);
 }
 
 std::set<std::string> CircuitConfig::listEdgePopulations() const {
-    return PopulationResolver::listPopulations(_networkEdges);
+    return getMapKeys(_edgePopulationProperties);
 }
 
 EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name) const {
-    return PopulationResolver::getPopulation<EdgePopulation>(name, _networkEdges);
+    return getPopulation<EdgePopulation>(name, _edgePopulationProperties);
 }
 
 PopulationProperties CircuitConfig::getNodePopulationProperties(const std::string& name) const {
-    auto populations = listNodePopulations();
-    if (populations.find(name) == populations.end()) {
-        throw SonataError(fmt::format("Could not find node population '{}'", name));
-    }
-
-    auto popPropertiesIt = _nodePopulationProperties.find(name);
-    if (popPropertiesIt != _nodePopulationProperties.end()) {
-        return popPropertiesIt->second;
-    }
-
-    return {"biophysical",
-            _components.biophysicalNeuronModelsDir,
-            _components.morphologiesDir,
-            _components.alternateMorphologiesDir};
+    return getPopulationProperties(name, _nodePopulationProperties);
 }
 
 PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string& name) const {
-    auto populations = listEdgePopulations();
-    if (populations.find(name) == populations.end()) {
-        throw SonataError(fmt::format("Could not find edge population '{}'", name));
-    }
-
-    auto popPropertiesIt = _edgePopulationProperties.find(name);
-    if (popPropertiesIt != _edgePopulationProperties.end()) {
-        return popPropertiesIt->second;
-    }
-
-    return {"chemical_synapse",
-            _components.biophysicalNeuronModelsDir,
-            _components.morphologiesDir,
-            _components.alternateMorphologiesDir};
+    return getPopulationProperties(name, _edgePopulationProperties);
 }
 
 const std::string& CircuitConfig::getExpandedJSON() const {

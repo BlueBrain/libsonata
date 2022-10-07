@@ -41,7 +41,12 @@ TEST_CASE("CircuitConfig") {
         CHECK_THROWS_AS(config.getEdgePopulationProperties("DoesNotExist"), SonataError);
 
         CHECK(config.getNodePopulationProperties("nodes-A").type == "biophysical");
+        CHECK(endswith(config.getNodePopulationProperties("nodes-A").typesPath, ""));
+        CHECK(endswith(config.getNodePopulationProperties("nodes-A").elementsPath, "tests/data/nodes1.h5"));
+
         CHECK(config.getEdgePopulationProperties("edges-AB").type == "chemical_synapse");
+        CHECK(endswith(config.getEdgePopulationProperties("edges-AB").typesPath, ""));
+        CHECK(endswith(config.getEdgePopulationProperties("edges-AB").elementsPath, "tests/data/edges1.h5"));
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getExpandedJSON()));
         CHECK(nlohmann::json::parse(config.getExpandedJSON())

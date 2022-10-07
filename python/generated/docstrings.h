@@ -230,9 +230,19 @@ static const char *__doc_bbp_sonata_PopulationProperties_alternateMorphologyForm
 
 static const char *__doc_bbp_sonata_PopulationProperties_biophysicalNeuronModelsDir = R"doc(Path to the template HOC files defining the E-Mode)doc";
 
+static const char *__doc_bbp_sonata_PopulationProperties_elementsPath =
+R"doc(Path to underlying elements H5 file. It is discouraged to directly
+access the contents of the file. Instead use 'libsonata' to read this
+file.)doc";
+
 static const char *__doc_bbp_sonata_PopulationProperties_morphologiesDir = R"doc(Path to the directory containing the morphologies)doc";
 
 static const char *__doc_bbp_sonata_PopulationProperties_type = R"doc(Population type)doc";
+
+static const char *__doc_bbp_sonata_PopulationProperties_typesPath =
+R"doc(Path to underlying types csv file. It is discouraged to directly
+access the contents of the file. Instead use 'libsonata' to read this
+file.)doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage = R"doc(Collection of {PopulationClass}s stored in a H5 file and optional CSV.)doc";
 
@@ -557,10 +567,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_Conditions_mechanisms =
 R"doc(Properties to assign values to variables in synapse MOD files. The
 format is a dictionary with keys being the SUFFIX names and values
 being dictionaries of variables' names and values.)doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Conditions_minisSingleVesicle =
-R"doc(Limit spontaneous release to single vesicle when true. Default is
-false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_modifications =
 R"doc(Collection of dictionaries with each member decribing a modification
