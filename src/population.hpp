@@ -89,6 +89,10 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
 
 template <typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
+    if (selection.ranges().size() == 0) {
+        return std::vector<T>();
+    }
+
     if (selection.ranges().size() == 1) {
         return _readChunk<T>(dset, selection.ranges().front());
     }
