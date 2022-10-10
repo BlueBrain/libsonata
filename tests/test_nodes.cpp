@@ -38,6 +38,8 @@ TEST_CASE("NodePopulation", "[base]") {
     REQUIRE(population.enumerationNames() ==
             std::set<std::string>{"E-mapping-good", "E-mapping-bad"});
 
+    CHECK(population.getAttribute<double>("attr-X", Selection({})) ==
+          std::vector<double>{});
     CHECK(population.getAttribute<double>("attr-X", Selection({{0, 1}, {5, 6}})) ==
           std::vector<double>{11.0, 16.0});
     CHECK(population.getAttribute<float>("attr-X", Selection({{0, 1}})) ==
