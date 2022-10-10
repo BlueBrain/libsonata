@@ -166,6 +166,14 @@ class TestNodePopulation(unittest.TestCase):
         self.assertEqual(
             self.test_obj.get_attribute(
                 "E-mapping-good",
+                Selection([])
+            ).tolist(),
+            []
+        )
+
+        self.assertEqual(
+            self.test_obj.get_attribute(
+                "E-mapping-good",
                 Selection([(0, 1), (2, 3)])
             ).tolist(),
             ["C", "C"]
