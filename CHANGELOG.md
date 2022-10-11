@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.16:
+
+### Fixed:
+ - Fix #226 for empty selections (#232)
+
 ## v0.1.15:
 
 ### Added:
