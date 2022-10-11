@@ -166,6 +166,14 @@ class TestNodePopulation(unittest.TestCase):
         self.assertEqual(
             self.test_obj.get_attribute(
                 "E-mapping-good",
+                Selection([])
+            ).tolist(),
+            []
+        )
+
+        self.assertEqual(
+            self.test_obj.get_attribute(
+                "E-mapping-good",
                 Selection([(0, 1), (2, 3)])
             ).tolist(),
             ["C", "C"]
@@ -240,10 +248,12 @@ class TestEdgePopulation(unittest.TestCase):
     def test_source_nodes(self):
         self.assertEqual(self.test_obj.source_node(1), 1)
         self.assertEqual(self.test_obj.source_nodes(Selection([0, 1, 2, 4])).tolist(), [1, 1, 2, 3])
+        self.assertEqual(self.test_obj.source_nodes(Selection([])).tolist(), [])
 
     def test_target_nodes(self):
         self.assertEqual(self.test_obj.target_node(1), 2)
         self.assertEqual(self.test_obj.target_nodes(Selection([0, 1, 2, 4])).tolist(), [1, 2, 1, 0])
+        self.assertEqual(self.test_obj.target_nodes(Selection([])).tolist(), [])
 
     def test_afferent_edges(self):
         self.assertEqual(self.test_obj.afferent_edges([1, 2]).ranges, [(0, 4), (5, 6)])
