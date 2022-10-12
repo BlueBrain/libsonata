@@ -183,7 +183,7 @@ SpikeReader
    >>> spikes = libsonata.SpikeReader('path/to/H5/file')
 
    # list populations
-   >>> spikes.get_populations_names()
+   >>> spikes.get_population_names()
 
    # open population
    >>> population = spikes['<name>']
@@ -232,7 +232,7 @@ SomaReportReader
    >>> somas = libsonata.SomaReportReader('path/to/H5/file')
 
    # list populations
-   >>> somas.get_populations_names()
+   >>> somas.get_population_names()
 
    # open population
    >>> population_somas = somas['<name>']
@@ -298,7 +298,7 @@ ElementReportReader
    >>> elements = libsonata.ElementReportReader('path/to/H5/file')
 
    # list populations
-   >>> elements.get_populations_names()
+   >>> elements.get_population_names()
 
    # open population
    >>> population_elements = elements['<name>']
