@@ -1,0 +1,389 @@
+import json
+import os
+import unittest
+
+from libsonata import (CircuitConfig, SimulationConfig, SonataError,
+                       )
+
+
+from libsonata._libsonata import Report, Output, Run
+
+
+PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                    '../../tests/data')
+
+
+class TestCircuitConfig(unittest.TestCase):
+    def setUp(self):
+        self.config = CircuitConfig.from_file(os.path.join(PATH, 'config/circuit_config.json'))
+
+    def test_basic(self):
+        self.assertEqual(self.config.node_sets_path,
+                         os.path.abspath(os.path.join(PATH, 'config/node_sets.json')))
+
+        self.assertEqual(self.config.node_populations,
+                         {'nodes-A', 'nodes-B'})
+        self.assertEqual(self.config.node_population('nodes-A').name, 'nodes-A')
+
+        self.assertEqual(self.config.edge_populations,
+                         {'edges-AB', 'edges-AC'})
+        self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
+
+    def test_expanded_json(self):
+        config = json.loads(self.config.expanded_json)
+        self.assertEqual(config['components']['biophysical_neuron_models_dir'],
+                         'biophysical_neuron_models')
+        self.assertEqual(config['networks']['nodes'][0]['node_types_file'],
+                         None)
+        self.assertEqual(config['networks']['nodes'][0]['nodes_file'],
+                         '../nodes1.h5')
+
+    def test_get_population_properties(self):
+        node_prop = self.config.node_population_properties('nodes-A')
+        self.assertEqual(node_prop.type, 'biophysical')
+        self.assertTrue(node_prop.morphologies_dir.endswith('morphologies'))
+        self.assertTrue(node_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
+        self.assertEqual(node_prop.alternate_morphology_formats, {})
+
+        self.assertEqual(node_prop.types_path, '')
+        self.assertTrue(node_prop.elements_path.endswith('tests/data/nodes1.h5'))
+
+        edge_prop = self.config.edge_population_properties('edges-AC')
+        self.assertEqual(edge_prop.type, 'chemical_synapse')
+        self.assertTrue(edge_prop.morphologies_dir.endswith('morphologies'))
+        self.assertTrue(edge_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
+        self.assertEqual(edge_prop.alternate_morphology_formats, {})
+
+        self.assertEqual(edge_prop.types_path, '')
+        self.assertTrue(edge_prop.elements_path.endswith('tests/data/edges1.h5'))
+
+
+    def test_biophysical_properties_raises(self):
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "morphologies_dir": "some/morph/dir",
+            },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": { }  # nothing overridden;
+                                            # missing biophysical_neuron_models_dir
+                        }
+                    }],
+                "edges": []
+                }
+            }
+        self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
+
+
+    def test_shadowing_morphs(self):
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "biophysical_neuron_models_dir": "/biophysical_neuron_models",
+                "alternate_morphologies": {
+                    "h5v1": "/morphologies/h5"
+                    }
+                },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "morphologies_dir": "/my/custom/morphologies/dir"
+                                }
+                            }
+                        }
+                    ],
+                "edges": []
+                }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        pp = cc.node_population_properties('nodes-A')
+        assert pp.alternate_morphology_formats == {'h5v1': '/morphologies/h5'}
+        assert pp.biophysical_neuron_models_dir == "/biophysical_neuron_models"
+        assert pp.morphologies_dir == "/my/custom/morphologies/dir"
+        assert pp.alternate_morphology_formats == {'h5v1': '/morphologies/h5'}
+
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "biophysical_neuron_models_dir": "/some/dir",
+                                "morphologies_dir": "/my/custom/morphologies/dir"
+                                }
+                            }
+                        }
+                    ],
+                "edges": []
+                }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        pp = cc.node_population_properties('nodes-A')
+        assert pp.morphologies_dir == "/my/custom/morphologies/dir"
+
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "type": "biophysical",
+                                "biophysical_neuron_models_dir": "/some/dir",
+                                "alternate_morphologies": {
+                                    "h5v1": "/my/custom/morphologies/dir",
+                                    "neurolucida-asc": "/my/custom/morphologies/dir"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                "edges": []
+                }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        pp = cc.node_population_properties('nodes-A')
+        assert pp.morphologies_dir == ""
+        assert pp.alternate_morphology_formats == {
+            'neurolucida-asc': '/my/custom/morphologies/dir',
+            'h5v1': '/my/custom/morphologies/dir',
+            }
+
+
+class TestSimulationConfig(unittest.TestCase):
+    def setUp(self):
+        self.config = SimulationConfig.from_file(
+                        os.path.join(PATH, 'config', 'simulation_config.json'))
+
+    def test_basic(self):
+        self.assertEqual(self.config.base_path, os.path.abspath(os.path.join(PATH, 'config')))
+
+        self.assertEqual(self.config.run.tstop, 1000)
+        self.assertEqual(self.config.run.dt, 0.025)
+        self.assertEqual(self.config.run.random_seed, 201506)
+        self.assertEqual(self.config.run.spike_threshold, -30)
+        self.assertEqual(self.config.run.spike_location, Run.SpikeLocation.AIS)
+        self.assertEqual(self.config.run.integration_method, Run.IntegrationMethod.nicholson_ion)
+        self.assertEqual(self.config.run.stimulus_seed, 111)
+        self.assertEqual(self.config.run.ionchannel_seed, 222)
+        self.assertEqual(self.config.run.minis_seed, 333)
+        self.assertEqual(self.config.run.synapse_seed, 444)
+
+        self.assertEqual(self.config.output.output_dir,
+                         os.path.abspath(os.path.join(PATH, 'config/some/path/output')))
+        self.assertEqual(self.config.output.spikes_file, 'out.h5')
+        self.assertEqual(self.config.output.log_file, '')
+        self.assertEqual(self.config.output.spikes_sort_order, Output.SpikesSortOrder.by_id)
+
+        self.assertEqual(self.config.conditions.celsius, 35.0)
+        self.assertEqual(self.config.conditions.v_init, -80)
+        self.assertEqual(self.config.conditions.synapses_init_depleted, False)
+        self.assertEqual(self.config.conditions.extracellular_calcium, None)
+        self.assertEqual(self.config.conditions.randomize_gaba_rise_time, False)
+        self.assertEqual(self.config.conditions.mechanisms, {'ProbAMPANMDA_EMS': {'property2': -1,
+                                                                                  'property1': False},
+                                                             'GluSynapse': {'property4': 'test',
+                                                                            'property3': 0.025}})
+        self.assertEqual(self.config.conditions.list_modification_names, {"applyTTX", "no_SK_E2"})
+        self.assertEqual(self.config.conditions.modification("applyTTX").type.name, "TTX")
+        self.assertEqual(self.config.conditions.modification("applyTTX").node_set, "single")
+        self.assertEqual(self.config.conditions.modification("no_SK_E2").type.name,
+                         "ConfigureAllSections")
+        self.assertEqual(self.config.conditions.modification("no_SK_E2").node_set, "single")
+        self.assertEqual(self.config.conditions.modification("no_SK_E2").section_configure,
+                         "%s.gSK_E2bar_SK_E2 = 0")
+
+        self.assertEqual(self.config.list_report_names,
+                         { "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
+
+        self.assertEqual(self.config.report('soma').cells, 'Column')
+        self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
+        self.assertEqual(self.config.report('soma').compartments, Report.Compartments.center)
+        self.assertEqual(self.config.report('soma').enabled, True)
+        self.assertEqual(self.config.report('compartment').dt, 0.1)
+        self.assertEqual(self.config.report('compartment').sections, Report.Sections.all)
+        self.assertEqual(self.config.report('compartment').compartments, Report.Compartments.all)
+        self.assertEqual(self.config.report('compartment').enabled, False)
+        self.assertEqual(self.config.report('axonal_comp_centers').start_time, 0)
+        self.assertEqual(self.config.report('axonal_comp_centers').compartments, Report.Compartments.center)
+        self.assertEqual(self.config.report('axonal_comp_centers').scaling, Report.Scaling.none)
+        self.assertEqual(self.config.report('axonal_comp_centers').file_name,
+                         os.path.abspath(os.path.join(self.config.output.output_dir, 'axon_centers.h5')))
+        self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
+        self.assertEqual(self.config.report('cell_imembrane').type.name, 'summation')
+        self.assertEqual(self.config.report('cell_imembrane').variable_name, 'i_membrane, IClamp')
+
+        self.assertEqual(self.config.network,
+                         os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
+        self.assertEqual(self.config.target_simulator.name, 'CORENEURON');
+        circuit_conf = CircuitConfig.from_file(self.config.network);
+        self.assertEqual(self.config.node_sets_file, circuit_conf.node_sets_path);
+        self.assertEqual(self.config.node_set, 'Column');
+
+        self.assertEqual(self.config.list_input_names,
+                         {"ex_abs_shotnoise",
+                          "ex_extracellular_stimulation",
+                          "ex_hyperpolarizing",
+                          "ex_linear",
+                          "ex_noise_mean",
+                          "ex_noise_meanpercent",
+                          "ex_OU",
+                          "ex_pulse",
+                          "ex_rel_linear",
+                          "ex_rel_OU",
+                          "ex_rel_shotnoise",
+                          "ex_replay",
+                          "ex_seclamp",
+                          "ex_shotnoise",
+                          "ex_subthreshold"
+                          })
+
+        self.assertEqual(self.config.input('ex_linear').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_linear').module.name, 'linear')
+        self.assertEqual(self.config.input('ex_linear').delay, 0)
+        self.assertEqual(self.config.input('ex_linear').duration, 15)
+        self.assertEqual(self.config.input('ex_linear').node_set, "Column")
+        self.assertEqual(self.config.input('ex_linear').amp_start, 0.15)
+        self.assertEqual(self.config.input('ex_linear').amp_end, 0.15)
+
+        self.assertEqual(self.config.input('ex_rel_linear').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_rel_linear').module.name, 'relative_linear')
+        self.assertEqual(self.config.input('ex_rel_linear').delay, 0)
+        self.assertEqual(self.config.input('ex_rel_linear').duration, 1000)
+        self.assertEqual(self.config.input('ex_rel_linear').node_set, "Column")
+        self.assertEqual(self.config.input('ex_rel_linear').percent_start, 80)
+        self.assertEqual(self.config.input('ex_rel_linear').percent_end, 20)
+
+        self.assertEqual(self.config.input('ex_pulse').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_pulse').module.name, 'pulse')
+        self.assertEqual(self.config.input('ex_pulse').delay, 10)
+        self.assertEqual(self.config.input('ex_pulse').duration, 80)
+        self.assertEqual(self.config.input('ex_pulse').node_set, "Mosaic")
+        self.assertEqual(self.config.input('ex_pulse').width, 1)
+        self.assertEqual(self.config.input('ex_pulse').frequency, 80)
+
+        self.assertEqual(self.config.input('ex_noise_meanpercent').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_noise_meanpercent').module.name, 'noise')
+        self.assertEqual(self.config.input('ex_noise_meanpercent').delay, 0)
+        self.assertEqual(self.config.input('ex_noise_meanpercent').duration, 5000)
+        self.assertEqual(self.config.input('ex_noise_meanpercent').node_set, "Rt_RC")
+
+        self.assertEqual(self.config.input('ex_subthreshold').percent_less, 80)
+        self.assertEqual(self.config.input('ex_shotnoise').rise_time, 0.4)
+        self.assertEqual(self.config.input('ex_shotnoise').amp_mean, 70)
+
+        self.assertEqual(self.config.input('ex_hyperpolarizing').duration, 1000)
+
+        self.assertEqual(self.config.input('ex_noise_meanpercent').mean_percent, 0.01)
+        self.assertEqual(self.config.input('ex_noise_meanpercent').mean, None)
+
+        self.assertEqual(self.config.input('ex_noise_mean').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_noise_mean').module.name, 'noise')
+        self.assertEqual(self.config.input('ex_noise_mean').delay, 0)
+        self.assertEqual(self.config.input('ex_noise_mean').duration, 5000)
+        self.assertEqual(self.config.input('ex_noise_mean').node_set, "Rt_RC")
+        self.assertEqual(self.config.input('ex_noise_mean').mean, 0)
+        self.assertEqual(self.config.input('ex_noise_mean').mean_percent, None)
+
+        self.assertEqual(self.config.input('ex_rel_shotnoise').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_rel_shotnoise').module.name, 'relative_shot_noise')
+        self.assertEqual(self.config.input('ex_rel_shotnoise').delay, 0)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').duration, 1000)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').node_set, "L5E")
+        self.assertEqual(self.config.input('ex_rel_shotnoise').random_seed, self.config.run.random_seed)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').dt, 0.25)
+
+        self.assertEqual(self.config.input('ex_replay').input_type.name, 'spikes')
+        self.assertEqual(self.config.input('ex_replay').module.name, 'synapse_replay')
+        self.assertEqual(self.config.input('ex_replay').delay, 0)
+        self.assertEqual(self.config.input('ex_replay').duration, 40000)
+        self.assertEqual(self.config.input('ex_replay').node_set, "Column")
+        self.assertEqual(self.config.input('ex_replay').spike_file,
+                         os.path.abspath(os.path.join(PATH, 'config/replay.dat')))
+        self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
+        self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
+
+        self.assertEqual(self.config.input('ex_abs_shotnoise').input_type.name, "conductance")
+        self.assertEqual(self.config.input('ex_abs_shotnoise').amp_cv, 0.63)
+        self.assertEqual(self.config.input('ex_abs_shotnoise').mean, 50)
+        self.assertEqual(self.config.input('ex_abs_shotnoise').sigma, 5)
+
+        self.assertEqual(self.config.input('ex_OU').module.name, "ornstein_uhlenbeck")
+        self.assertEqual(self.config.input('ex_OU').input_type.name, "conductance")
+        self.assertEqual(self.config.input('ex_OU').tau, 2.8)
+        self.assertEqual(self.config.input('ex_OU').reversal, 10)
+        self.assertEqual(self.config.input('ex_OU').mean, 50)
+        self.assertEqual(self.config.input('ex_OU').sigma, 5)
+
+        self.assertEqual(self.config.input('ex_rel_OU').input_type.name, "current_clamp")
+        self.assertEqual(self.config.input('ex_rel_OU').tau, 2.8)
+        self.assertEqual(self.config.input('ex_rel_OU').reversal, 0)
+        self.assertEqual(self.config.input('ex_rel_OU').mean_percent, 70)
+        self.assertEqual(self.config.input('ex_rel_OU').sd_percent, 10)
+
+        self.assertEqual(self.config.input('ex_seclamp').voltage, 1.1)
+        self.assertEqual(self.config.input('ex_seclamp').series_resistance, 0.5)
+
+        self.assertEqual(self.config.list_connection_override_names, {"ConL3Exc-Uni", "GABAB_erev"})
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').source, 'Excitatory')
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').target, 'Mosaic')
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').weight, 1)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').spont_minis, 0.01)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').modoverride, 'GluSynapse')
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').delay, 0.5)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_delay_override, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').synapse_configure, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').neuromodulation_dtc, None)
+        self.assertEqual(self.config.connection_override('ConL3Exc-Uni').neuromodulation_strength, None)
+        self.assertEqual(self.config.connection_override('GABAB_erev').spont_minis, None)
+        self.assertEqual(self.config.connection_override('GABAB_erev').synapse_delay_override, 0.5)
+        self.assertEqual(self.config.connection_override('GABAB_erev').delay, 0)
+        self.assertEqual(self.config.connection_override('GABAB_erev').modoverride, None)
+        self.assertEqual(self.config.connection_override('GABAB_erev').synapse_configure, '%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77')
+        self.assertEqual(self.config.connection_override('GABAB_erev').neuromodulation_dtc, 100)
+        self.assertEqual(self.config.connection_override('GABAB_erev').neuromodulation_strength, 0.75)
+
+        self.assertEqual(self.config.metadata, {'sim_version': '1', 'note': 'first attempt of simulation'})
+        self.assertEqual(self.config.beta_features, {'v_str': 'abcd', 'v_int': 10, 'v_float': 0.5, 'v_bool': False})
+
+    def test_expanded_json(self):
+        config = json.loads(self.config.expanded_json)
+        self.assertEqual(config['output']['output_dir'], 'some/path/output')
+
+    def test_run(self):
+        contents = """
+        {
+          "manifest": {
+            "$CIRCUIT_DIR": "./circuit"
+          },
+          "network": "$CIRCUIT_DIR/circuit_config.json",
+          "run": {
+            "random_seed": 12345,
+            "dt": 0.05,
+            "tstop": 1000
+          }
+        }
+        """
+        conf = SimulationConfig(contents, "./")
+        self.assertEqual(conf.run.stimulus_seed, 0)
+        self.assertEqual(conf.run.ionchannel_seed, 0)
+        self.assertEqual(conf.run.minis_seed, 0)
+        self.assertEqual(conf.run.synapse_seed, 0)
