@@ -702,6 +702,9 @@ class CircuitConfig::Parser
             for (auto it = populationsIt->begin(); it != populationsIt->end(); ++it) {
                 const auto& popData = it.value();
 
+                if (output.find(it.key()) != output.end()) {
+                    throw SonataError(fmt::format("Population {} is declared twice", it.key()));
+                }
                 PopulationProperties& popProperties = output[it.key()];
 
                 popProperties.elementsPath = elementsPath;
