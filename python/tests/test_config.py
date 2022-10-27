@@ -57,7 +57,6 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertEqual(edge_prop.types_path, '')
         self.assertTrue(edge_prop.elements_path.endswith('tests/data/edges1.h5'))
 
-
     def test_biophysical_properties_raises(self):
         contents = {
             "manifest": {
@@ -80,6 +79,64 @@ class TestCircuitConfig(unittest.TestCase):
             }
         self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
 
+    def test_duplicate_population(self):
+        # in nodes
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "biophysical_neuron_models_dir": "/biophysical_neuron_models",
+                "morphologies_dir": "some/morph/dir",
+            },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": { "nodes-A": { } }
+                    },
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": { "nodes-A": { } }
+                    }
+                    ],
+                "edges": [
+                    ]
+                }
+            }
+        self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
+
+        # in edges
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "biophysical_neuron_models_dir": "/biophysical_neuron_models",
+                "morphologies_dir": "some/morph/dir",
+            },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": { "nodes-A": { } }
+                    }
+                    ],
+                "edges": [
+                    {
+                        "edges_file": "$NETWORK_DIR/edges1.h5",
+                        "edge_types_file": None,
+                        "populations": { "edges-AB": {}, }
+                    },
+                    {
+                        "edges_file": "$NETWORK_DIR/edges1.h5",
+                        "edge_types_file": None,
+                        "populations": { "edges-AB": {}, }
+                    }
+                    ]
+                }
+            }
+        self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
 
     def test_shadowing_morphs(self):
         contents = {
