@@ -52,7 +52,15 @@ static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_populations = 
 
 static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_types = R"doc()doc";
 
-static const char *__doc_bbp_sonata_CircuitConfig_components = R"doc()doc";
+static const char *__doc_bbp_sonata_CircuitConfig_Type = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Type_Complete = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Type_Partial = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Type_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_circuitType = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_edgePopulationProperties = R"doc()doc";
 
@@ -68,6 +76,8 @@ Throws:
     (in any depth) - Missing entries which become mandatory when
     another entry is present - Multiple populations with the same name
     in different edge/node networks)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getCircuitConfigType = R"doc(Returns the path to the node sets file.)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_getEdgePopulation =
 R"doc(Creates and returns an EdgePopulation object, initialized from the
@@ -116,6 +126,8 @@ networks.)doc";
 static const char *__doc_bbp_sonata_CircuitConfig_listNodePopulations =
 R"doc(Returns a set with all available population names across all the node
 networks.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_networkNodes = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_nodePopulationProperties = R"doc()doc";
 

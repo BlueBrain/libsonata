@@ -76,6 +76,8 @@ struct SONATA_API PopulationProperties {
 class SONATA_API CircuitConfig
 {
   public:
+    enum class Type { invalid, Complete, Partial };
+
     /**
      * Parses a SONATA JSON config file.
      *
@@ -99,6 +101,11 @@ class SONATA_API CircuitConfig
      *          - Multiple populations with the same name in different edge/node networks
      */
     static CircuitConfig fromFile(const std::string& path);
+
+    /**
+     * Returns the path to the node sets file.
+     */
+    Type getCircuitConfigType() const;
 
     /**
      * Returns the path to the node sets file.
@@ -174,11 +181,14 @@ class SONATA_API CircuitConfig
     // manifest variables
     std::string _expandedJSON;
 
+    // Config Type
+    Type _circuitType = Type::Complete;
+
     // Path to the nodesets file
     std::string _nodeSetsFile;
 
-    // Default components value for all networks
-    Components _components;
+    // Nodes network paths
+    std::vector<SubnetworkFiles> _networkNodes;
 
     // Node populations that override default components variables
     std::unordered_map<std::string, PopulationProperties> _nodePopulationProperties;

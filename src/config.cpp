@@ -53,6 +53,11 @@ struct adl_serializer<nonstd::optional<T>> {
 namespace bbp {
 namespace sonata {
 
+NLOHMANN_JSON_SERIALIZE_ENUM(CircuitConfig::Type,
+                             {{CircuitConfig::Type::invalid, nullptr},
+                              {CircuitConfig::Type::Partial, "partial"},
+                              {CircuitConfig::Type::Complete, "complete"}})
+
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::SpikeLocation,
                              {{SimulationConfig::Run::SpikeLocation::invalid, nullptr},
                               {SimulationConfig::Run::SpikeLocation::soma, "soma"},
@@ -562,7 +567,7 @@ class CircuitConfig::Parser
     template <typename T>
     T getJSONValue(const nlohmann::json& json,
                    const std::string& key,
-                   const std::string& defaultValue = std::string()) const {
+                   const T& defaultValue = T()) const {
         auto it = json.find(key);
         if (it != json.end() && !it->is_null()) {
             return it.value().get<T>();
@@ -582,10 +587,28 @@ class CircuitConfig::Parser
         return defaultValue;
     }
 
-    const nlohmann::json& getSubNetworkJson(const std::string& prefix) const {
+    Type getCircuitType() const {
+        if (_json.find("metadata") == _json.end()) {
+            return Type::Complete;
+        }
+        const auto& metadata = _json.at("metadata");
+        const auto res = getJSONValue<Type>(metadata, "type", {Type::Complete});
+
+        if (res == Type::invalid) {
+            throw SonataError("Invalid value for `metadata::type` in config");
+        }
+
+        return res;
+    }
+
+    nlohmann::json getSubNetworkJson(const std::string& prefix, CircuitConfig::Type type) const {
         // Fail if no network entry is defined
         if (_json.find("networks") == _json.end()) {
-            throw SonataError("Error parsing config: `networks` not specified");
+            if (type == CircuitConfig::Type::Complete) {
+                throw SonataError("Error parsing config: `networks` not specified");
+            } else {
+                return {};
+            }
         }
 
         const auto& networks = _json.at("networks");
@@ -605,14 +628,16 @@ class CircuitConfig::Parser
             return toAbsolute(_basePath, _json["node_sets_file"]);
         }
 
-        return std::string();
+        return {};
     }
 
     CircuitConfig::Components parseDefaultComponents() const {
         CircuitConfig::Components result;
+
         if (_json.find("components") == _json.end()) {
             return result;
         }
+
         const auto& components = _json.at("components");
 
         result.morphologiesDir = getJSONPath(components, "morphologies_dir");
@@ -648,34 +673,33 @@ class CircuitConfig::Parser
     }
 
     template <typename Population>
-    PopulationOverrides parsePopulationProperties(const std::string& prefix) const {
-        const auto& network = getSubNetworkJson(prefix);
+    PopulationOverrides parsePopulationProperties(const std::string& prefix,
+                                                  CircuitConfig::Type type) const {
+        const auto& network = getSubNetworkJson(prefix, type);
 
         std::unordered_map<std::string, PopulationProperties> output;
 
-        // Iterate over all defined subnetworks
-        for (const auto& node : network) {
+        for (const auto& subnetwork : network) {
             std::string elementsPath;
             std::string typesPath;
-            std::tie(elementsPath, typesPath) = parseSubNetworks(prefix, node);
+            std::tie(elementsPath, typesPath) = parseSubNetworks(prefix, subnetwork);
 
-            const auto populationsIt = node.find("populations");
-            if (populationsIt == node.end()) {
+            const auto populationsIt = subnetwork.find("populations");
+            if (populationsIt == subnetwork.end()) {
                 continue;
             }
 
-            // Iterate over all defined populations
             for (auto it = populationsIt->begin(); it != populationsIt->end(); ++it) {
                 const auto& popData = it.value();
 
                 if (output.find(it.key()) != output.end()) {
                     throw SonataError(fmt::format("Population {} is declared twice", it.key()));
                 }
+
                 PopulationProperties& popProperties = output[it.key()];
 
                 popProperties.elementsPath = elementsPath;
                 popProperties.typesPath = typesPath;
-
                 popProperties.type = getJSONValue<std::string>(popData, "type");
                 popProperties.morphologiesDir = getJSONPath(popData, "morphologies_dir");
                 popProperties.biophysicalNeuronModelsDir =
@@ -695,12 +719,12 @@ class CircuitConfig::Parser
         return output;
     }
 
-    PopulationOverrides parseNodePopulations() const {
-        return parsePopulationProperties<NodePopulation>("node");
+    PopulationOverrides parseNodePopulations(CircuitConfig::Type type) const {
+        return parsePopulationProperties<NodePopulation>("node", type);
     }
 
-    PopulationOverrides parseEdgePopulations() const {
-        return parsePopulationProperties<EdgePopulation>("edge");
+    PopulationOverrides parseEdgePopulations(CircuitConfig::Type type) const {
+        return parsePopulationProperties<EdgePopulation>("edge", type);
     }
 
     std::string getExpandedJSON() const {
@@ -716,44 +740,55 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     Parser parser(contents, basePath);
 
     _expandedJSON = parser.getExpandedJSON();
-
-    _components = parser.parseDefaultComponents();
+    _circuitType = parser.getCircuitType();
 
     _nodeSetsFile = parser.getNodeSetsPath();
 
     // Load node population overrides and check biophysical types
-    _nodePopulationProperties = parser.parseNodePopulations();
+    _nodePopulationProperties = parser.parseNodePopulations(_circuitType);
 
     // Load edge population overrides
-    _edgePopulationProperties = parser.parseEdgePopulations();
+    _edgePopulationProperties = parser.parseEdgePopulations(_circuitType);
+
+    Components components = parser.parseDefaultComponents();
 
     const auto updateDefaultProperties =
         [&](std::unordered_map<std::string, PopulationProperties>& map,
             const std::string& defaultType) {
             for (auto& entry : map) {
-                if (entry.second.type.empty()) {
-                    entry.second.type = defaultType;
+                auto& component = entry.second;
+                if (component.type.empty()) {
+                    component.type = defaultType;
                 }
-                if (entry.second.alternateMorphologyFormats.empty()) {
-                    entry.second.alternateMorphologyFormats = _components.alternateMorphologiesDir;
+
+                if (component.alternateMorphologyFormats.empty()) {
+                    component.alternateMorphologyFormats = components.alternateMorphologiesDir;
                 }
-                if (entry.second.biophysicalNeuronModelsDir.empty()) {
-                    entry.second.biophysicalNeuronModelsDir =
-                        _components.biophysicalNeuronModelsDir;
+
+                if (component.biophysicalNeuronModelsDir.empty()) {
+                    component.biophysicalNeuronModelsDir = components.biophysicalNeuronModelsDir;
                 }
-                if (entry.second.morphologiesDir.empty()) {
-                    entry.second.morphologiesDir = _components.morphologiesDir;
+
+                if (component.morphologiesDir.empty()) {
+                    component.morphologiesDir = components.morphologiesDir;
                 }
             }
         };
+
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
     updateDefaultProperties(_edgePopulationProperties, "chemical_synapse");
 
-    checkBiophysicalPopulations(_nodePopulationProperties);
+    if (_circuitType == Type::Complete) {
+        checkBiophysicalPopulations(_nodePopulationProperties);
+    }
 }
 
 CircuitConfig CircuitConfig::fromFile(const std::string& path) {
     return CircuitConfig(readFile(path), fs::path(path).parent_path());
+}
+
+CircuitConfig::Type CircuitConfig::getCircuitConfigType() const {
+    return _circuitType;
 }
 
 const std::string& CircuitConfig::getNodeSetsPath() const {
@@ -787,7 +822,6 @@ PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::strin
 const std::string& CircuitConfig::getExpandedJSON() const {
     return _expandedJSON;
 }
-
 
 class SimulationConfig::Parser
 {
