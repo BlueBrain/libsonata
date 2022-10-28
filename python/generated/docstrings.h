@@ -44,8 +44,6 @@ static const char *__doc_bbp_sonata_CircuitConfig_Components_morphologiesDir = R
 
 static const char *__doc_bbp_sonata_CircuitConfig_Parser = R"doc()doc";
 
-static const char *__doc_bbp_sonata_CircuitConfig_PopulationResolver = R"doc()doc";
-
 static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_elements = R"doc()doc";
@@ -118,10 +116,6 @@ networks.)doc";
 static const char *__doc_bbp_sonata_CircuitConfig_listNodePopulations =
 R"doc(Returns a set with all available population names across all the node
 networks.)doc";
-
-static const char *__doc_bbp_sonata_CircuitConfig_networkEdges = R"doc()doc";
-
-static const char *__doc_bbp_sonata_CircuitConfig_networkNodes = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_nodePopulationProperties = R"doc()doc";
 

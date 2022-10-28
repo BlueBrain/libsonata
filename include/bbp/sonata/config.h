@@ -169,9 +169,6 @@ class SONATA_API CircuitConfig
     };
 
     class Parser;
-    friend class Parser;
-    class PopulationResolver;
-    friend class PopulationResolver;
 
     // Circuit config json string whose paths and variables have been expanded to include
     // manifest variables
@@ -183,13 +180,9 @@ class SONATA_API CircuitConfig
     // Default components value for all networks
     Components _components;
 
-    // Nodes network paths
-    std::vector<SubnetworkFiles> _networkNodes;
     // Node populations that override default components variables
     std::unordered_map<std::string, PopulationProperties> _nodePopulationProperties;
 
-    // Edges network paths
-    std::vector<SubnetworkFiles> _networkEdges;
     // Edge populations that override default components variables
     std::unordered_map<std::string, PopulationProperties> _edgePopulationProperties;
 };
@@ -727,7 +720,6 @@ class SONATA_API SimulationConfig
     std::unordered_map<std::string, variantValueType> _betaFeatures;
 
     class Parser;
-    friend class Parser;
 };
 
 }  // namespace sonata
