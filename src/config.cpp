@@ -631,8 +631,8 @@ class CircuitConfig::Parser
     }
 
     template <typename JSON>
-    std::tuple<std::string, std::string> parseSubNetworksMG(const std::string& prefix,
-                                                            const JSON& value) const {
+    std::tuple<std::string, std::string> parseSubNetworks(const std::string& prefix,
+                                                          const JSON& value) const {
         const std::string elementsFile = prefix + "s_file";
         auto h5File = getJSONPath(value, elementsFile);
 
@@ -647,40 +647,6 @@ class CircuitConfig::Parser
         return {h5File, csvFile};
     }
 
-    template <typename PopulationType>
-    Subnetworks parseSubNetworks(const std::string& prefix) const {
-        using PopulationStorage = bbp::sonata::PopulationStorage<PopulationType>;
-
-        const auto& network = getSubNetworkJson(prefix);
-
-        const std::string elementsFile = prefix + "s_file";
-        const std::string typesFile = prefix + "_types_file";
-
-        std::vector<SubnetworkFiles> output;
-        for (const auto& node : network) {
-            auto h5File = getJSONPath(node, elementsFile);
-            if (h5File.empty()) {
-                throw SonataError(
-                    fmt::format("'{}' network do not define '{}' entry", prefix, elementsFile));
-            }
-
-            auto csvFile = getJSONPath(node, typesFile);
-
-            output.emplace_back(SubnetworkFiles{
-                h5File, csvFile, PopulationStorage(h5File, csvFile).populationNames()});
-        }
-
-        return output;
-    }
-
-    Subnetworks parseNodeNetwork() const {
-        return parseSubNetworks<NodePopulation>("node");
-    }
-
-    Subnetworks parseEdgeNetwork() const {
-        return parseSubNetworks<EdgePopulation>("edge");
-    }
-
     template <typename Population>
     PopulationOverrides parsePopulationProperties(const std::string& prefix) const {
         const auto& network = getSubNetworkJson(prefix);
@@ -691,7 +657,7 @@ class CircuitConfig::Parser
         for (const auto& node : network) {
             std::string elementsPath;
             std::string typesPath;
-            std::tie(elementsPath, typesPath) = parseSubNetworksMG(prefix, node);
+            std::tie(elementsPath, typesPath) = parseSubNetworks(prefix, node);
 
             const auto populationsIt = node.find("populations");
             if (populationsIt == node.end()) {
