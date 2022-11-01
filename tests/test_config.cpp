@@ -44,7 +44,7 @@ TEST_CASE("CircuitConfig") {
         CHECK(endswith(config.getNodePopulationProperties("nodes-A").typesPath, ""));
         CHECK(endswith(config.getNodePopulationProperties("nodes-A").elementsPath, "tests/data/nodes1.h5"));
 
-        CHECK(config.getEdgePopulationProperties("edges-AB").type == "chemical_synapse");
+        CHECK(config.getEdgePopulationProperties("edges-AB").type == "chemical");
         CHECK(endswith(config.getEdgePopulationProperties("edges-AB").typesPath, ""));
         CHECK(endswith(config.getEdgePopulationProperties("edges-AB").elementsPath, "tests/data/edges1.h5"));
 
