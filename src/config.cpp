@@ -53,10 +53,10 @@ struct adl_serializer<nonstd::optional<T>> {
 namespace bbp {
 namespace sonata {
 
-NLOHMANN_JSON_SERIALIZE_ENUM(CircuitConfig::Type,
-                             {{CircuitConfig::Type::invalid, nullptr},
-                              {CircuitConfig::Type::Partial, "partial"},
-                              {CircuitConfig::Type::Complete, "complete"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(CircuitConfig::ConfigStatus,
+                             {{CircuitConfig::ConfigStatus::invalid, nullptr},
+                              {CircuitConfig::ConfigStatus::Partial, "partial"},
+                              {CircuitConfig::ConfigStatus::Complete, "complete"}})
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::SpikeLocation,
                              {{SimulationConfig::Run::SpikeLocation::invalid, nullptr},
@@ -139,7 +139,7 @@ namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
 
-void checkBiophysicalPopulations(
+void raiseOnBiophysicalPopulationsErrors(
     const std::unordered_map<std::string, PopulationProperties>& populations) {
     for (const auto& it : populations) {
         const auto& population = it.first;
@@ -587,24 +587,25 @@ class CircuitConfig::Parser
         return defaultValue;
     }
 
-    Type getCircuitType() const {
+    ConfigStatus getCircuitConfigStatus() const {
         if (_json.find("metadata") == _json.end()) {
-            return Type::Complete;
+            return ConfigStatus::Complete;
         }
         const auto& metadata = _json.at("metadata");
-        const auto res = getJSONValue<Type>(metadata, "type", {Type::Complete});
+        const auto res = getJSONValue<ConfigStatus>(metadata, "status", {ConfigStatus::Complete});
 
-        if (res == Type::invalid) {
-            throw SonataError("Invalid value for `metadata::type` in config");
+        if (res == ConfigStatus::invalid) {
+            throw SonataError("Invalid value for `metadata::ConfigStatus` in config");
         }
 
         return res;
     }
 
-    nlohmann::json getSubNetworkJson(const std::string& prefix, CircuitConfig::Type type) const {
+    nlohmann::json getSubNetworkJson(const std::string& prefix,
+                                     CircuitConfig::ConfigStatus ConfigStatus) const {
         // Fail if no network entry is defined
         if (_json.find("networks") == _json.end()) {
-            if (type == CircuitConfig::Type::Complete) {
+            if (ConfigStatus == CircuitConfig::ConfigStatus::Complete) {
                 throw SonataError("Error parsing config: `networks` not specified");
             } else {
                 return {};
@@ -674,8 +675,8 @@ class CircuitConfig::Parser
 
     template <typename Population>
     PopulationOverrides parsePopulationProperties(const std::string& prefix,
-                                                  CircuitConfig::Type type) const {
-        const auto& network = getSubNetworkJson(prefix, type);
+                                                  CircuitConfig::ConfigStatus status) const {
+        const auto& network = getSubNetworkJson(prefix, status);
 
         std::unordered_map<std::string, PopulationProperties> output;
 
@@ -700,6 +701,7 @@ class CircuitConfig::Parser
 
                 popProperties.elementsPath = elementsPath;
                 popProperties.typesPath = typesPath;
+
                 popProperties.type = getJSONValue<std::string>(popData, "type");
                 popProperties.morphologiesDir = getJSONPath(popData, "morphologies_dir");
                 popProperties.biophysicalNeuronModelsDir =
@@ -719,12 +721,12 @@ class CircuitConfig::Parser
         return output;
     }
 
-    PopulationOverrides parseNodePopulations(CircuitConfig::Type type) const {
-        return parsePopulationProperties<NodePopulation>("node", type);
+    PopulationOverrides parseNodePopulations(CircuitConfig::ConfigStatus status) const {
+        return parsePopulationProperties<NodePopulation>("node", status);
     }
 
-    PopulationOverrides parseEdgePopulations(CircuitConfig::Type type) const {
-        return parsePopulationProperties<EdgePopulation>("edge", type);
+    PopulationOverrides parseEdgePopulations(CircuitConfig::ConfigStatus status) const {
+        return parsePopulationProperties<EdgePopulation>("edge", status);
     }
 
     std::string getExpandedJSON() const {
@@ -740,17 +742,17 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     Parser parser(contents, basePath);
 
     _expandedJSON = parser.getExpandedJSON();
-    _circuitType = parser.getCircuitType();
+    _status = parser.getCircuitConfigStatus();
 
     _nodeSetsFile = parser.getNodeSetsPath();
 
     // Load node population overrides and check biophysical types
-    _nodePopulationProperties = parser.parseNodePopulations(_circuitType);
+    _nodePopulationProperties = parser.parseNodePopulations(_status);
 
     // Load edge population overrides
-    _edgePopulationProperties = parser.parseEdgePopulations(_circuitType);
+    _edgePopulationProperties = parser.parseEdgePopulations(_status);
 
-    Components components = parser.parseDefaultComponents();
+    Components defaultComponents = parser.parseDefaultComponents();
 
     const auto updateDefaultProperties =
         [&](std::unordered_map<std::string, PopulationProperties>& map,
@@ -762,15 +764,17 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
                 }
 
                 if (component.alternateMorphologyFormats.empty()) {
-                    component.alternateMorphologyFormats = components.alternateMorphologiesDir;
+                    component.alternateMorphologyFormats =
+                        defaultComponents.alternateMorphologiesDir;
                 }
 
                 if (component.biophysicalNeuronModelsDir.empty()) {
-                    component.biophysicalNeuronModelsDir = components.biophysicalNeuronModelsDir;
+                    component.biophysicalNeuronModelsDir =
+                        defaultComponents.biophysicalNeuronModelsDir;
                 }
 
                 if (component.morphologiesDir.empty()) {
-                    component.morphologiesDir = components.morphologiesDir;
+                    component.morphologiesDir = defaultComponents.morphologiesDir;
                 }
             }
         };
@@ -778,8 +782,8 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
     updateDefaultProperties(_edgePopulationProperties, "chemical_synapse");
 
-    if (_circuitType == Type::Complete) {
-        checkBiophysicalPopulations(_nodePopulationProperties);
+    if (getCircuitConfigStatus() == ConfigStatus::Complete) {
+        raiseOnBiophysicalPopulationsErrors(_nodePopulationProperties);
     }
 }
 
@@ -787,8 +791,8 @@ CircuitConfig CircuitConfig::fromFile(const std::string& path) {
     return CircuitConfig(readFile(path), fs::path(path).parent_path());
 }
 
-CircuitConfig::Type CircuitConfig::getCircuitConfigType() const {
-    return _circuitType;
+CircuitConfig::ConfigStatus CircuitConfig::getCircuitConfigStatus() const {
+    return _status;
 }
 
 const std::string& CircuitConfig::getNodeSetsPath() const {

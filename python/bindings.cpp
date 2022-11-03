@@ -517,16 +517,16 @@ PYBIND11_MODULE(_libsonata, m) {
                       &PopulationProperties::typesPath,
                       DOC_POPULATION_PROPERTIES(typesPath));
 
-    py::enum_<CircuitConfig::Type>(m, "CircuitConfigType")
-        .value("invalid", CircuitConfig::Type::invalid)
-        .value("Complete", CircuitConfig::Type::Complete)
-        .value("Partial", CircuitConfig::Type::Partial);
+    py::enum_<CircuitConfig::ConfigStatus>(m, "CircuitConfigStatus")
+        .value("invalid", CircuitConfig::ConfigStatus::invalid)
+        .value("Complete", CircuitConfig::ConfigStatus::Complete)
+        .value("Partial", CircuitConfig::ConfigStatus::Partial);
 
     py::class_<CircuitConfig>(m, "CircuitConfig", "")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
                     [](py::object path) { return CircuitConfig::fromFile(py::str(path)); })
-        .def_property_readonly("type", &CircuitConfig::getCircuitConfigType)
+        .def_property_readonly("config_status", &CircuitConfig::getCircuitConfigStatus)
         .def_property_readonly("node_sets_path", &CircuitConfig::getNodeSetsPath)
         .def_property_readonly("node_populations", &CircuitConfig::listNodePopulations)
         .def("node_population", &CircuitConfig::getNodePopulation)

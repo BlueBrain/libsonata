@@ -6,7 +6,7 @@ from libsonata import (CircuitConfig, SimulationConfig, SonataError,
                        )
 
 
-from libsonata._libsonata import Report, Output, Run, CircuitConfigType
+from libsonata._libsonata import Report, Output, Run, CircuitConfigStatus
 
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -31,7 +31,7 @@ class TestCircuitConfig(unittest.TestCase):
 
         self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
 
-        self.assertEqual(self.config.type, CircuitConfigType.Complete)
+        self.assertEqual(self.config.config_status, CircuitConfigStatus.Complete)
 
     def test_expanded_json(self):
         config = json.loads(self.config.expanded_json)
@@ -62,26 +62,26 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertTrue(edge_prop.elements_path.endswith('tests/data/edges1.h5'))
 
     def test_partial(self):
-        contents = { "metadata": { "type": "NOT A TYPE" }, }
+        contents = { "metadata": { "status": "NOT A TYPE" }, }
         self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
 
-        contents = { "metadata": { "type": "partial" }, }
+        contents = { "metadata": { "status": "partial" }, }
         cc = CircuitConfig(json.dumps(contents), PATH)
-        self.assertEqual(cc.type, CircuitConfigType.Partial)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.Partial)
         self.assertEqual(cc.node_populations, set())
         self.assertEqual(cc.edge_populations, set())
 
         contents = {
-            "metadata": { "type": "partial" },
+            "metadata": { "status": "partial" },
             "networks-mispelled": { },
             }
         cc = CircuitConfig(json.dumps(contents), PATH)
-        self.assertEqual(cc.type, CircuitConfigType.Partial)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.Partial)
         self.assertEqual(cc.node_populations, set())
         self.assertEqual(cc.edge_populations, set())
 
         contents = {
-            "metadata": { "type": "partial" },
+            "metadata": { "status": "partial" },
             "components": {
                 "morphologies_dir": "some/morph/dir",
                 },
