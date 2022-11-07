@@ -53,7 +53,7 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertTrue(node_prop.elements_path.endswith('tests/data/nodes1.h5'))
 
         edge_prop = self.config.edge_population_properties('edges-AC')
-        self.assertEqual(edge_prop.type, 'chemical_synapse')
+        self.assertEqual(edge_prop.type, 'chemical')
         self.assertTrue(edge_prop.morphologies_dir.endswith('morphologies'))
         self.assertTrue(edge_prop.biophysical_neuron_models_dir.endswith('biophysical_neuron_models'))
         self.assertEqual(edge_prop.alternate_morphology_formats, {})

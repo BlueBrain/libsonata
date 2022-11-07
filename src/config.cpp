@@ -780,7 +780,7 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
         };
 
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
-    updateDefaultProperties(_edgePopulationProperties, "chemical_synapse");
+    updateDefaultProperties(_edgePopulationProperties, "chemical");
 
     if (getCircuitConfigStatus() == ConfigStatus::Complete) {
         raiseOnBiophysicalPopulationsErrors(_nodePopulationProperties);
