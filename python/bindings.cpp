@@ -519,8 +519,8 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::enum_<CircuitConfig::ConfigStatus>(m, "CircuitConfigStatus")
         .value("invalid", CircuitConfig::ConfigStatus::invalid)
-        .value("Complete", CircuitConfig::ConfigStatus::Complete)
-        .value("Partial", CircuitConfig::ConfigStatus::Partial);
+        .value("complete", CircuitConfig::ConfigStatus::complete)
+        .value("partial", CircuitConfig::ConfigStatus::partial);
 
     py::class_<CircuitConfig>(m, "CircuitConfig", "")
         .def(py::init<const std::string&, const std::string&>())

@@ -44,17 +44,17 @@ static const char *__doc_bbp_sonata_CircuitConfig_Components_morphologiesDir = R
 
 static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus = R"doc()doc";
 
-static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_Complete =
+static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_complete =
 R"doc(all mandatory properties exist, and the the config should return
 correct values in all possible cases)doc";
 
-static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_Partial =
+static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_invalid = R"doc(needed for parsing json contents that are null / not an enum value)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_partial =
 R"doc(Partial configs relax the requirements: - can be missing the top level
 networks key - can be missing the nodes and edges properties under
 network - mandatory properties aren't enforced (for example for
 biophysical circuits))doc";
-
-static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_invalid = R"doc(needed for parsing json contents that are null / not an enum value)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_Parser = R"doc()doc";
 

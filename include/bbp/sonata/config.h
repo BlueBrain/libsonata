@@ -81,14 +81,14 @@ class SONATA_API CircuitConfig
         invalid,
         /// all mandatory properties exist, and the the config should return
         /// correct values in all possible cases
-        Complete,
+        complete,
         /**
          * Partial configs relax the requirements:
              - can be missing the top level networks key
              - can be missing the nodes and edges properties under network
              - mandatory properties aren't enforced (for example for biophysical circuits)
          */
-        Partial
+        partial
     };
 
     /**
@@ -196,7 +196,7 @@ class SONATA_API CircuitConfig
     std::string _expandedJSON;
 
     /// How strict we are checking the circuit config
-    ConfigStatus _status = ConfigStatus::Complete;
+    ConfigStatus _status = ConfigStatus::complete;
 
     // Path to the nodesets file
     std::string _nodeSetsFile;

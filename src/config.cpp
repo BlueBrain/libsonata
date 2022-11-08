@@ -55,8 +55,8 @@ namespace sonata {
 
 NLOHMANN_JSON_SERIALIZE_ENUM(CircuitConfig::ConfigStatus,
                              {{CircuitConfig::ConfigStatus::invalid, nullptr},
-                              {CircuitConfig::ConfigStatus::Partial, "partial"},
-                              {CircuitConfig::ConfigStatus::Complete, "complete"}})
+                              {CircuitConfig::ConfigStatus::partial, "partial"},
+                              {CircuitConfig::ConfigStatus::complete, "complete"}})
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::SpikeLocation,
                              {{SimulationConfig::Run::SpikeLocation::invalid, nullptr},
@@ -589,10 +589,10 @@ class CircuitConfig::Parser
 
     ConfigStatus getCircuitConfigStatus() const {
         if (_json.find("metadata") == _json.end()) {
-            return ConfigStatus::Complete;
+            return ConfigStatus::complete;
         }
         const auto& metadata = _json.at("metadata");
-        const auto res = getJSONValue<ConfigStatus>(metadata, "status", {ConfigStatus::Complete});
+        const auto res = getJSONValue<ConfigStatus>(metadata, "status", {ConfigStatus::complete});
 
         if (res == ConfigStatus::invalid) {
             throw SonataError("Invalid value for `metadata::ConfigStatus` in config");
@@ -605,7 +605,7 @@ class CircuitConfig::Parser
                                      CircuitConfig::ConfigStatus ConfigStatus) const {
         // Fail if no network entry is defined
         if (_json.find("networks") == _json.end()) {
-            if (ConfigStatus == CircuitConfig::ConfigStatus::Complete) {
+            if (ConfigStatus == CircuitConfig::ConfigStatus::complete) {
                 throw SonataError("Error parsing config: `networks` not specified");
             } else {
                 return {};
@@ -782,7 +782,7 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     updateDefaultProperties(_nodePopulationProperties, "biophysical");
     updateDefaultProperties(_edgePopulationProperties, "chemical");
 
-    if (getCircuitConfigStatus() == ConfigStatus::Complete) {
+    if (getCircuitConfigStatus() == ConfigStatus::complete) {
         raiseOnBiophysicalPopulationsErrors(_nodePopulationProperties);
     }
 }

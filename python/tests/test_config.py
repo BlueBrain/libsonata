@@ -31,7 +31,7 @@ class TestCircuitConfig(unittest.TestCase):
 
         self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
 
-        self.assertEqual(self.config.config_status, CircuitConfigStatus.Complete)
+        self.assertEqual(self.config.config_status, CircuitConfigStatus.complete)
 
     def test_expanded_json(self):
         config = json.loads(self.config.expanded_json)
@@ -67,7 +67,7 @@ class TestCircuitConfig(unittest.TestCase):
 
         contents = { "metadata": { "status": "partial" }, }
         cc = CircuitConfig(json.dumps(contents), PATH)
-        self.assertEqual(cc.config_status, CircuitConfigStatus.Partial)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.partial)
         self.assertEqual(cc.node_populations, set())
         self.assertEqual(cc.edge_populations, set())
 
@@ -76,7 +76,7 @@ class TestCircuitConfig(unittest.TestCase):
             "networks-mispelled": { },
             }
         cc = CircuitConfig(json.dumps(contents), PATH)
-        self.assertEqual(cc.config_status, CircuitConfigStatus.Partial)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.partial)
         self.assertEqual(cc.node_populations, set())
         self.assertEqual(cc.edge_populations, set())
 
