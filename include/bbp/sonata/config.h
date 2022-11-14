@@ -76,6 +76,21 @@ struct SONATA_API PopulationProperties {
 class SONATA_API CircuitConfig
 {
   public:
+    enum class ConfigStatus {
+        /// needed for parsing json contents that are null / not an enum value
+        invalid,
+        /// all mandatory properties exist, and the the config should return
+        /// correct values in all possible cases
+        complete,
+        /**
+         * Partial configs relax the requirements:
+             - can be missing the top level networks key
+             - can be missing the nodes and edges properties under network
+             - mandatory properties aren't enforced (for example for biophysical circuits)
+         */
+        partial
+    };
+
     /**
      * Parses a SONATA JSON config file.
      *
@@ -99,6 +114,12 @@ class SONATA_API CircuitConfig
      *          - Multiple populations with the same name in different edge/node networks
      */
     static CircuitConfig fromFile(const std::string& path);
+
+    /**
+     * Returns the `completeness` of the checks that are performed for the
+     * circuit; see `ConfigStatus` for more information
+     */
+    ConfigStatus getCircuitConfigStatus() const;
 
     /**
      * Returns the path to the node sets file.
@@ -174,11 +195,14 @@ class SONATA_API CircuitConfig
     // manifest variables
     std::string _expandedJSON;
 
+    /// How strict we are checking the circuit config
+    ConfigStatus _status = ConfigStatus::complete;
+
     // Path to the nodesets file
     std::string _nodeSetsFile;
 
-    // Default components value for all networks
-    Components _components;
+    // Nodes network paths
+    std::vector<SubnetworkFiles> _networkNodes;
 
     // Node populations that override default components variables
     std::unordered_map<std::string, PopulationProperties> _nodePopulationProperties;

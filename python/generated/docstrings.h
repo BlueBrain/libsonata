@@ -42,6 +42,20 @@ static const char *__doc_bbp_sonata_CircuitConfig_Components_biophysicalNeuronMo
 
 static const char *__doc_bbp_sonata_CircuitConfig_Components_morphologiesDir = R"doc()doc";
 
+static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_complete =
+R"doc(all mandatory properties exist, and the the config should return
+correct values in all possible cases)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_invalid = R"doc(needed for parsing json contents that are null / not an enum value)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_partial =
+R"doc(Partial configs relax the requirements: - can be missing the top level
+networks key - can be missing the nodes and edges properties under
+network - mandatory properties aren't enforced (for example for
+biophysical circuits))doc";
+
 static const char *__doc_bbp_sonata_CircuitConfig_Parser = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles = R"doc()doc";
@@ -51,8 +65,6 @@ static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_elements = R"d
 static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_populations = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_types = R"doc()doc";
-
-static const char *__doc_bbp_sonata_CircuitConfig_components = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_edgePopulationProperties = R"doc()doc";
 
@@ -68,6 +80,10 @@ Throws:
     (in any depth) - Missing entries which become mandatory when
     another entry is present - Multiple populations with the same name
     in different edge/node networks)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getCircuitConfigStatus =
+R"doc(Returns the `completeness` of the checks that are performed for the
+circuit; see `ConfigStatus` for more information)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_getEdgePopulation =
 R"doc(Creates and returns an EdgePopulation object, initialized from the
@@ -117,9 +133,13 @@ static const char *__doc_bbp_sonata_CircuitConfig_listNodePopulations =
 R"doc(Returns a set with all available population names across all the node
 networks.)doc";
 
+static const char *__doc_bbp_sonata_CircuitConfig_networkNodes = R"doc()doc";
+
 static const char *__doc_bbp_sonata_CircuitConfig_nodePopulationProperties = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_nodeSetsFile = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_status = R"doc(How strict we are checking the circuit config)doc";
 
 static const char *__doc_bbp_sonata_DataFrame = R"doc()doc";
 

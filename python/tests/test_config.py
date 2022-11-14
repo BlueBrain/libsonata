@@ -6,7 +6,7 @@ from libsonata import (CircuitConfig, SimulationConfig, SonataError,
                        )
 
 
-from libsonata._libsonata import Report, Output, Run
+from libsonata._libsonata import Report, Output, Run, CircuitConfigStatus
 
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -28,6 +28,10 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertEqual(self.config.edge_populations,
                          {'edges-AB', 'edges-AC'})
         self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
+
+        self.assertEqual(self.config.edge_population('edges-AB').name, 'edges-AB')
+
+        self.assertEqual(self.config.config_status, CircuitConfigStatus.complete)
 
     def test_expanded_json(self):
         config = json.loads(self.config.expanded_json)
@@ -56,6 +60,47 @@ class TestCircuitConfig(unittest.TestCase):
 
         self.assertEqual(edge_prop.types_path, '')
         self.assertTrue(edge_prop.elements_path.endswith('tests/data/edges1.h5'))
+
+    def test_partial(self):
+        contents = { "metadata": { "status": "NOT A TYPE" }, }
+        self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
+
+        contents = { "metadata": { "status": "partial" }, }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.partial)
+        self.assertEqual(cc.node_populations, set())
+        self.assertEqual(cc.edge_populations, set())
+
+        contents = {
+            "metadata": { "status": "partial" },
+            "networks-mispelled": { },
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.partial)
+        self.assertEqual(cc.node_populations, set())
+        self.assertEqual(cc.edge_populations, set())
+
+        contents = {
+            "metadata": { "status": "partial" },
+            "components": {
+                "morphologies_dir": "some/morph/dir",
+                },
+            "networks": {
+                "nodes": [
+                    {"nodes_file": "./nodes1.h5",
+                     "populations": {
+                         # nothing overridden; missing biophysical_neuron_models_dir
+                         "nodes-A": { },
+                         },
+                     }],
+                    "edges": []
+                    }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        prop = cc.node_population_properties('nodes-A')
+        self.assertEqual(prop.alternate_morphology_formats, {})
+        self.assertTrue(prop.morphologies_dir.endswith('some/morph/dir'))
+        self.assertEqual(prop.biophysical_neuron_models_dir, '')
 
     def test_biophysical_properties_raises(self):
         contents = {

@@ -517,10 +517,16 @@ PYBIND11_MODULE(_libsonata, m) {
                       &PopulationProperties::typesPath,
                       DOC_POPULATION_PROPERTIES(typesPath));
 
+    py::enum_<CircuitConfig::ConfigStatus>(m, "CircuitConfigStatus")
+        .value("invalid", CircuitConfig::ConfigStatus::invalid)
+        .value("complete", CircuitConfig::ConfigStatus::complete)
+        .value("partial", CircuitConfig::ConfigStatus::partial);
+
     py::class_<CircuitConfig>(m, "CircuitConfig", "")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
                     [](py::object path) { return CircuitConfig::fromFile(py::str(path)); })
+        .def_property_readonly("config_status", &CircuitConfig::getCircuitConfigStatus)
         .def_property_readonly("node_sets_path", &CircuitConfig::getNodeSetsPath)
         .def_property_readonly("node_populations", &CircuitConfig::listNodePopulations)
         .def("node_population", &CircuitConfig::getNodePopulation)
