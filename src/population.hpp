@@ -86,9 +86,61 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
     return result;
 }
 
-
 template <typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
+    if (selection.ranges().empty()) {
+        return {};
+    } else if (selection.ranges().size() == 1) {
+        return _readChunk<T>(dset, selection.ranges().front());
+    }
+
+    const auto ids = selection.flatten();
+
+    std::vector<std::size_t> ids_index(ids.size());
+    std::iota(ids_index.begin(), ids_index.end(), std::size_t(0));
+    std::stable_sort(ids_index.begin(), ids_index.end(), [&ids](size_t i0, size_t i1) {
+        return ids[i0] < ids[i1];
+    });
+
+    std::vector<std::size_t> ids_sorted;
+    ids_sorted.reserve(ids.size());
+    std::transform(ids_index.begin(),
+                   ids_index.end(),
+                   std::back_inserter(ids_sorted),
+                   [&ids](size_t i) { return static_cast<size_t>(ids[i]); });
+
+    std::vector<T> result(ids_sorted.size());
+
+    char* gaps = getenv("GAP");
+    const std::size_t block_gap_limit = gaps ? atoi(gaps) : 16777216;
+    std::size_t start_idx = 0;
+    std::size_t end_idx = 0;
+    std::vector<size_t> linear_ids;
+    std::vector<T> linear_result;
+    while (end_idx < ids_sorted.size()) {
+        linear_ids.clear();
+
+        while (end_idx < ids_sorted.size() &&
+               (ids_sorted[end_idx] - ids_sorted[start_idx]) * sizeof(T) < block_gap_limit) {
+            linear_ids.push_back(ids_sorted[end_idx]);
+            end_idx++;
+        }
+
+        linear_result.resize(linear_ids.size());
+        dset.select(HighFive::ElementSet{linear_ids}).read(linear_result.data());
+
+        for (size_t i = 0; i < linear_ids.size(); ++i) {
+            result[ids_index[start_idx + i]] = linear_result[i];
+        }
+
+        start_idx = end_idx;
+    }
+
+    return result;
+}
+
+template <typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
+std::vector<T> _readSelection1(const HighFive::DataSet& dset, const Selection& selection) {
     if (selection.ranges().empty()) {
         return {};
     } else if (selection.ranges().size() == 1) {
@@ -117,6 +169,16 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
     for (size_t i = 0; i < ids_sorted.size(); ++i) {
         result[ids_index[i]] = linear_result[i];
     }
+
+    /*
+    const auto o = _readSelection1<T>(dset, selection);
+    for(size_t i = 0; i < o.size(); ++i){
+        if(o[i] != result[i]){
+            std::cout << o.size() << " diff: " << i << " " << o[i] << " " << result[i] << '\n';
+            exit(-1);
+        }
+    }
+    */
 
     return result;
 }
