@@ -86,6 +86,21 @@ class TestCircuitConfig(unittest.TestCase):
                 "morphologies_dir": "some/morph/dir",
                 },
             "networks": {
+                "nodes": [],
+                # Note: Missing "edges": []
+                },
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.partial)
+        self.assertEqual(cc.node_populations, set())
+        self.assertEqual(cc.edge_populations, set())
+
+        contents = {
+            "metadata": { "status": "partial" },
+            "components": {
+                "morphologies_dir": "some/morph/dir",
+                },
+            "networks": {
                 "nodes": [
                     {"nodes_file": "./nodes1.h5",
                      "populations": {
@@ -93,14 +108,15 @@ class TestCircuitConfig(unittest.TestCase):
                          "nodes-A": { },
                          },
                      }],
-                    "edges": []
-                    }
+                    # Note: Missing "edges": []
+                }
             }
         cc = CircuitConfig(json.dumps(contents), PATH)
         prop = cc.node_population_properties('nodes-A')
         self.assertEqual(prop.alternate_morphology_formats, {})
         self.assertTrue(prop.morphologies_dir.endswith('some/morph/dir'))
         self.assertEqual(prop.biophysical_neuron_models_dir, '')
+        self.assertEqual(cc.edge_populations, set())
 
     def test_biophysical_properties_raises(self):
         contents = {

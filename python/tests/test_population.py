@@ -36,7 +36,7 @@ class TestSelection(unittest.TestCase):
                              [1, 0, 1, 2])
 
         # these work due to forcecast
-        for dtype in (np.int, np.int16, np.int32, np.int64, ):
+        for dtype in (int, np.int16, np.int32, np.int64, ):
             self.assertEqual(Selection(np.array([1, 0, 1, 2], dtype=dtype)).flatten().tolist(),
                              [1, 0, 1, 2])
 

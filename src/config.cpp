@@ -616,8 +616,12 @@ class CircuitConfig::Parser
 
         const std::string component = prefix + "s";
         if (networks.find(component) == networks.end()) {
-            throw SonataError(
-                fmt::format("Error parsing networks config: '{}' not specified", component));
+            if (ConfigStatus == CircuitConfig::ConfigStatus::complete) {
+                throw SonataError(
+                    fmt::format("Error parsing networks config: '{}' not specified", component));
+            } else {
+                return {};
+            }
         }
 
         return networks.at(component);
