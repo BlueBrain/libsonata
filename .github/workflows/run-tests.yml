@@ -3,8 +3,8 @@ on: [pull_request, push]
 
 jobs:
   build-linux-cpp:
-    name: Run tests on ubuntu-18.04
-    runs-on: ubuntu-18.04
+    name: Run tests on ubuntu-20.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         compiler:
@@ -14,7 +14,7 @@ jobs:
             CXX: g++
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: 'true'
 
@@ -29,8 +29,8 @@ jobs:
           ./ci/cpp_test.sh
 
   build-linux-python:
-    name: Run python tests on ubuntu-18.04
-    runs-on: ubuntu-18.04
+    name: Run python tests on ubuntu-20.04
+    runs-on: ubuntu-20.04
 
     strategy:
       matrix:
@@ -38,11 +38,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: 'true'
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         name: Install Python
         with:
           python-version: ${{ matrix.python-version }}
@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: 'true'
 
