@@ -562,6 +562,14 @@ static const char *__doc_bbp_sonata_SimulationConfig = R"doc(Read access to a SO
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions = R"doc(Parameters defining global experimental conditions.)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_SpikeLocation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_SpikeLocation_AIS = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_SpikeLocation_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_SpikeLocation_soma = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_celsius = R"doc(Temperature of experiment. Default is 34.0)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_extracellularCalcium =
@@ -590,7 +598,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_Conditions_randomizeGabaRis
 R"doc(Enable legacy behavior to randomize the GABA_A rise time in the helper
 functions. Default is false)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Conditions_synapsesInitDepleted = R"doc(Synapse at start of simulation are in depleted state. Default is false)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_spikeLocation =
+R"doc(The spike detection location. Can be either ‘soma’ or 'AIS'. Default
+is 'soma')doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_vInit = R"doc(Initial membrane voltage in mV. Default is -80)doc";
 
@@ -961,14 +971,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_nicho
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_nicholson_ion = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_AIS = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_invalid = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_SpikeLocation_soma = R"doc()doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod =
@@ -984,10 +986,6 @@ R"doc(A non-negative integer used for seeding the Poisson processes that
 drives the minis, default is 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_randomSeed = R"doc(Random seed)doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeLocation =
-R"doc(The spike detection location. Can be either ‘soma’ or 'AIS'. Default
-is 'soma')doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_spikeThreshold = R"doc(The spike detection threshold. Default is -30mV)doc";
 

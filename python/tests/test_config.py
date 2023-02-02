@@ -86,6 +86,21 @@ class TestCircuitConfig(unittest.TestCase):
                 "morphologies_dir": "some/morph/dir",
                 },
             "networks": {
+                "nodes": [],
+                # Note: Missing "edges": []
+                },
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        self.assertEqual(cc.config_status, CircuitConfigStatus.partial)
+        self.assertEqual(cc.node_populations, set())
+        self.assertEqual(cc.edge_populations, set())
+
+        contents = {
+            "metadata": { "status": "partial" },
+            "components": {
+                "morphologies_dir": "some/morph/dir",
+                },
+            "networks": {
                 "nodes": [
                     {"nodes_file": "./nodes1.h5",
                      "populations": {
@@ -93,14 +108,15 @@ class TestCircuitConfig(unittest.TestCase):
                          "nodes-A": { },
                          },
                      }],
-                    "edges": []
-                    }
+                    # Note: Missing "edges": []
+                }
             }
         cc = CircuitConfig(json.dumps(contents), PATH)
         prop = cc.node_population_properties('nodes-A')
         self.assertEqual(prop.alternate_morphology_formats, {})
         self.assertTrue(prop.morphologies_dir.endswith('some/morph/dir'))
         self.assertEqual(prop.biophysical_neuron_models_dir, '')
+        self.assertEqual(cc.edge_populations, set())
 
     def test_biophysical_properties_raises(self):
         contents = {
@@ -282,7 +298,6 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.dt, 0.025)
         self.assertEqual(self.config.run.random_seed, 201506)
         self.assertEqual(self.config.run.spike_threshold, -30)
-        self.assertEqual(self.config.run.spike_location, Run.SpikeLocation.AIS)
         self.assertEqual(self.config.run.integration_method, Run.IntegrationMethod.nicholson_ion)
         self.assertEqual(self.config.run.stimulus_seed, 111)
         self.assertEqual(self.config.run.ionchannel_seed, 222)
@@ -297,7 +312,7 @@ class TestSimulationConfig(unittest.TestCase):
 
         self.assertEqual(self.config.conditions.celsius, 35.0)
         self.assertEqual(self.config.conditions.v_init, -80)
-        self.assertEqual(self.config.conditions.synapses_init_depleted, False)
+        self.assertEqual(self.config.conditions.spike_location, Conditions.SpikeLocation.AIS)
         self.assertEqual(self.config.conditions.extracellular_calcium, None)
         self.assertEqual(self.config.conditions.randomize_gaba_rise_time, False)
         self.assertEqual(self.config.conditions.mechanisms, {'ProbAMPANMDA_EMS': {'property2': -1,
