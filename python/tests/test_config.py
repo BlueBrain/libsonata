@@ -6,7 +6,7 @@ from libsonata import (CircuitConfig, SimulationConfig, SonataError,
                        )
 
 
-from libsonata._libsonata import Report, Output, Run, CircuitConfigStatus
+from libsonata._libsonata import Report, Output, Run, CircuitConfigStatus, Conditions
 
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
