@@ -229,7 +229,6 @@ class SONATA_API SimulationConfig
      * Parameters defining global simulation settings for spike reports
      */
     struct Run {
-        enum class SpikeLocation { invalid = -1, soma, AIS };
         enum class IntegrationMethod { invalid = -1, euler, nicholson, nicholson_ion };
 
         /// Biological simulation end time in milliseconds
@@ -240,8 +239,6 @@ class SONATA_API SimulationConfig
         int randomSeed{};
         /// The spike detection threshold. Default is -30mV
         int spikeThreshold;
-        /// The spike detection location. Can be either ‘soma’ or 'AIS'. Default is 'soma'
-        SpikeLocation spikeLocation;
         /// Selects the NEURON/CoreNEURON integration method. This parameter sets the NEURON
         /// global variable h.secondorder. Default 0 ('euler')
         IntegrationMethod integrationMethod;
@@ -298,12 +295,14 @@ class SONATA_API SimulationConfig
      * Parameters defining global experimental conditions.
      */
     struct Conditions {
+        enum class SpikeLocation { invalid = -1, soma, AIS };
+
         /// Temperature of experiment. Default is 34.0
         double celsius;
         /// Initial membrane voltage in mV. Default is -80
         double vInit;
-        /// Synapse at start of simulation are in depleted state. Default is false
-        bool synapsesInitDepleted;
+        /// The spike detection location. Can be either ‘soma’ or 'AIS'. Default is 'soma'
+        SpikeLocation spikeLocation;
         /// Extracellular calcium concentration, being applied to the synapse uHill parameter in
         /// order to scale the U parameter of synapses. Default is None.
         nonstd::optional<double> extracellularCalcium{nonstd::nullopt};

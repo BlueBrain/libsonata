@@ -293,10 +293,6 @@ TEST_CASE("CircuitConfig") {
                 "nodes":[]
               }
             })";
-            std::cerr << "qqqqqqqqqqqqqqqqqqqqqqqqqq" << CircuitConfig(contents, "./")
-                           .getEdgePopulationProperties("edges-AB")
-                           .morphologiesDir;
-
             CHECK(contains(CircuitConfig(contents, "./")
                            .getEdgePopulationProperties("edges-AB")
                            .morphologiesDir,
@@ -314,7 +310,6 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().dt == 0.025);
         CHECK(config.getRun().randomSeed == 201506);
         CHECK(config.getRun().spikeThreshold == -30);
-        CHECK(config.getRun().spikeLocation == SimulationConfig::Run::SpikeLocation::AIS);
         CHECK(config.getRun().integrationMethod == SimulationConfig::Run::IntegrationMethod::nicholson_ion);
         CHECK(config.getRun().stimulusSeed == 111);
         CHECK(config.getRun().ionchannelSeed == 222);
@@ -335,7 +330,8 @@ TEST_CASE("SimulationConfig") {
         CHECK_NOTHROW(config.getConditions());
         CHECK(config.getConditions().celsius == 35.);
         CHECK(config.getConditions().vInit == -80);
-        CHECK(config.getConditions().synapsesInitDepleted == false);
+        CHECK(config.getConditions().spikeLocation ==
+              SimulationConfig::Conditions::SpikeLocation::AIS);
         CHECK(config.getConditions().extracellularCalcium == nonstd::nullopt);
         CHECK(config.getConditions().randomizeGabaRiseTime == false);
         CHECK(config.getConditions().mechanisms.size() == 2);
@@ -644,12 +640,14 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
-        {  // Wrong spike_location in a run object
+        {  // Wrong spike_location in a condition object
             auto contents = R"({
               "run": {
                 "tstop": 1000,
                 "dt": 0.05,
-                "random_seed": 12345,
+                "random_seed": 12345
+              },
+              "conditions": {
                 "spike_location": "axon"
               }
             })";

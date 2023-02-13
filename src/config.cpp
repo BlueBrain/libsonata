@@ -58,10 +58,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(CircuitConfig::ConfigStatus,
                               {CircuitConfig::ConfigStatus::partial, "partial"},
                               {CircuitConfig::ConfigStatus::complete, "complete"}})
 
-NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::SpikeLocation,
-                             {{SimulationConfig::Run::SpikeLocation::invalid, nullptr},
-                              {SimulationConfig::Run::SpikeLocation::soma, "soma"},
-                              {SimulationConfig::Run::SpikeLocation::AIS, "AIS"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Conditions::SpikeLocation,
+                             {{SimulationConfig::Conditions::SpikeLocation::invalid, nullptr},
+                              {SimulationConfig::Conditions::SpikeLocation::soma, "soma"},
+                              {SimulationConfig::Conditions::SpikeLocation::AIS, "AIS"}})
+
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::IntegrationMethod,
                              {{SimulationConfig::Run::IntegrationMethod::invalid, nullptr},
                               {SimulationConfig::Run::IntegrationMethod::euler, 0},
@@ -860,7 +861,6 @@ class SimulationConfig::Parser
         parseMandatory(*runIt, "dt", "run", result.dt);
         parseMandatory(*runIt, "random_seed", "run", result.randomSeed);
         parseOptional(*runIt, "spike_threshold", result.spikeThreshold, {-30});
-        parseOptional(*runIt, "spike_location", result.spikeLocation, {Run::SpikeLocation::soma});
         parseOptional(*runIt,
                       "integration_method",
                       result.integrationMethod,
@@ -902,9 +902,9 @@ class SimulationConfig::Parser
         parseOptional(*conditionsIt, "celsius", result.celsius, {34.0});
         parseOptional(*conditionsIt, "v_init", result.vInit, {-80});
         parseOptional(*conditionsIt,
-                      "synapses_init_depleted",
-                      result.synapsesInitDepleted,
-                      {false});
+                      "spike_location",
+                      result.spikeLocation,
+                      {Conditions::SpikeLocation::soma});
         parseOptional(*conditionsIt, "extracellular_calcium", result.extracellularCalcium);
         parseOptional(*conditionsIt,
                       "randomize_gaba_rise_time",

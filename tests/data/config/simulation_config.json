@@ -22,7 +22,6 @@
          "ionchannel_seed": 222,
          "minis_seed": 333,
          "synapse_seed": 444,
-         "spike_location": "AIS",
          "integration_method" : 2,
          "forward_skip": 500
     },
@@ -33,7 +32,7 @@
     },
     "conditions": {
       "celsius": 35.0,
-      "synapses_init_depleted": false,
+      "spike_location": "AIS",
       "mechanisms": {
         "ProbAMPANMDA_EMS": {
           "property1": false,
