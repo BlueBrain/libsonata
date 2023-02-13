@@ -547,9 +547,6 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("spike_threshold",
                       &SimulationConfig::Run::spikeThreshold,
                       DOC_SIMULATIONCONFIG(Run, spikeThreshold))
-        .def_readonly("spike_location",
-                      &SimulationConfig::Run::spikeLocation,
-                      DOC_SIMULATIONCONFIG(Run, spikeLocation))
         .def_readonly("integration_method",
                       &SimulationConfig::Run::integrationMethod,
                       DOC_SIMULATIONCONFIG(Run, integrationMethod))
@@ -565,10 +562,6 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("synapse_seed",
                       &SimulationConfig::Run::synapseSeed,
                       DOC_SIMULATIONCONFIG(Run, synapseSeed));
-
-    py::enum_<SimulationConfig::Run::SpikeLocation>(run, "SpikeLocation")
-        .value("soma", SimulationConfig::Run::SpikeLocation::soma)
-        .value("AIS", SimulationConfig::Run::SpikeLocation::AIS);
 
     py::enum_<SimulationConfig::Run::IntegrationMethod>(run, "IntegrationMethod")
         .value("euler", SimulationConfig::Run::IntegrationMethod::euler)
@@ -598,18 +591,18 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("by_id", SimulationConfig::Output::SpikesSortOrder::by_id)
         .value("by_time", SimulationConfig::Output::SpikesSortOrder::by_time);
 
-    py::class_<SimulationConfig::Conditions>(m,
-                                             "Conditions",
-                                             "Parameters defining global experimental conditions")
+    py::class_<SimulationConfig::Conditions> conditions(
+        m, "Conditions", "Parameters defining global experimental conditions");
+    conditions
         .def_readonly("celsius",
                       &SimulationConfig::Conditions::celsius,
                       DOC_SIMULATIONCONFIG(Conditions, celsius))
         .def_readonly("v_init",
                       &SimulationConfig::Conditions::vInit,
                       DOC_SIMULATIONCONFIG(Conditions, vInit))
-        .def_readonly("synapses_init_depleted",
-                      &SimulationConfig::Conditions::synapsesInitDepleted,
-                      DOC_SIMULATIONCONFIG(Conditions, synapsesInitDepleted))
+        .def_readonly("spike_location",
+                      &SimulationConfig::Conditions::spikeLocation,
+                      DOC_SIMULATIONCONFIG(Conditions, spikeLocation))
         .def_readonly("extracellular_calcium",
                       &SimulationConfig::Conditions::extracellularCalcium,
                       DOC_SIMULATIONCONFIG(Conditions, extracellularCalcium))
@@ -626,6 +619,11 @@ PYBIND11_MODULE(_libsonata, m) {
              &SimulationConfig::Conditions::getModification,
              "name"_a,
              DOC_SIMULATIONCONFIG(Conditions, getModification));
+
+
+    py::enum_<SimulationConfig::Conditions::SpikeLocation>(conditions, "SpikeLocation")
+        .value("soma", SimulationConfig::Conditions::SpikeLocation::soma)
+        .value("AIS", SimulationConfig::Conditions::SpikeLocation::AIS);
 
     py::class_<SimulationConfig::ModificationBase> modificationBase(m, "ModificationBase");
     modificationBase
