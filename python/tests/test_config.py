@@ -42,6 +42,17 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertEqual(config['networks']['nodes'][0]['nodes_file'],
                          '../nodes1.h5')
 
+    def test_spatial_directories(self):
+        self.assertEqual(self.config.node_population_properties('nodes-A')
+                        .spatial_segment_index_dir, '')
+        self.assertTrue(self.config.node_population_properties('nodes-B')
+                        .spatial_segment_index_dir.endswith('spatial_segment_index_dir'))
+
+        self.assertEqual(self.config.edge_population_properties('edges-AB')
+                        .spatial_synapse_index_dir, '')
+        self.assertTrue(self.config.edge_population_properties('edges-AC')
+                        .spatial_synapse_index_dir.endswith('spatial_synapse_index_dir'))
+
     def test_get_population_properties(self):
         node_prop = self.config.node_population_properties('nodes-A')
         self.assertEqual(node_prop.type, 'biophysical')
@@ -284,6 +295,36 @@ class TestCircuitConfig(unittest.TestCase):
             'neurolucida-asc': '/my/custom/morphologies/dir',
             'h5v1': '/my/custom/morphologies/dir',
             }
+
+        contents = {
+              "manifest": {
+                "$NETWORK_DIR": "./data",
+                "$COMPONENT_DIR": "./"
+              },
+              "components": {
+                "morphologies_dir": "$COMPONENT_DIR/morphologies",
+                "biophysical_neuron_models_dir": "$COMPONENT_DIR/biophysical_neuron_models",
+                "alternate_morphologies": {
+                  "h5v1": "$COMPONENT_DIR/morphologies/h5"
+                }
+              },
+              "networks": {
+                "edges": [
+                  {
+                    "edges_file": "$NETWORK_DIR/edges1.h5",
+                    "populations": {
+                      "edges-AB": {
+                        "morphologies_dir": "/my/custom/morphologies/dir"
+                      }
+                    }
+                  }
+                ],
+                "nodes":[]
+              }
+            }
+        cc = CircuitConfig(json.dumps(contents), PATH)
+        ep = cc.edge_population_properties('edges-AB')
+        assert ep.morphologies_dir == "/my/custom/morphologies/dir"
 
 
 class TestSimulationConfig(unittest.TestCase):

@@ -134,7 +134,9 @@ py::object getDynamicsAttributeVectorWithDefault(const Population& obj,
 #define DOC_SPIKEREADER_POP(x) DOC(bbp, sonata, SpikeReader, Population, x)
 #define DOC_SPIKEREADER(x) DOC(bbp, sonata, SpikeReader, x)
 #define DOC_REPORTREADER_POP(x) DOC(bbp, sonata, ReportReader, Population, x)
-#define DOC_POPULATION_PROPERTIES(x) DOC(bbp, sonata, PopulationProperties, x)
+#define DOC_COMMON_POPULATION_PROPERTIES(x) DOC(bbp, sonata, CommonPopulationProperties, x)
+#define DOC_NODE_POPULATION_PROPERTIES(x) DOC(bbp, sonata, NodePopulationProperties, x)
+#define DOC_EDGE_POPULATION_PROPERTIES(x) DOC(bbp, sonata, EdgePopulationProperties, x)
 #define DOC_SIMULATIONCONFIG(...) DOC(bbp, sonata, SimulationConfig, __VA_ARGS__)
 
 // Emulating generic lambdas in pre-C++14
@@ -497,25 +499,39 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("materialize", &NodeSets::materialize, DOC_NODESETS(materialize))
         .def("toJSON", &NodeSets::toJSON, DOC_NODESETS(toJSON));
 
-    py::class_<PopulationProperties>(m,
-                                     "PopulationProperties",
-                                     "Stores population-specific network information")
-        .def_readonly("type", &PopulationProperties::type, DOC_POPULATION_PROPERTIES(type))
+    py::class_<CommonPopulationProperties>(m,
+                                           "CommonPopulationProperties",
+                                           "Stores population-specific network information")
+        .def_readonly("type",
+                      &CommonPopulationProperties::type,
+                      DOC_COMMON_POPULATION_PROPERTIES(type))
         .def_readonly("biophysical_neuron_models_dir",
-                      &PopulationProperties::biophysicalNeuronModelsDir,
-                      DOC_POPULATION_PROPERTIES(biophysicalNeuronModelsDir))
+                      &CommonPopulationProperties::biophysicalNeuronModelsDir,
+                      DOC_COMMON_POPULATION_PROPERTIES(biophysicalNeuronModelsDir))
         .def_readonly("morphologies_dir",
-                      &PopulationProperties::morphologiesDir,
-                      DOC_POPULATION_PROPERTIES(morphologiesDir))
+                      &CommonPopulationProperties::morphologiesDir,
+                      DOC_COMMON_POPULATION_PROPERTIES(morphologiesDir))
         .def_readonly("alternate_morphology_formats",
-                      &PopulationProperties::alternateMorphologyFormats,
-                      DOC_POPULATION_PROPERTIES(alternateMorphologyFormats))
+                      &CommonPopulationProperties::alternateMorphologyFormats,
+                      DOC_COMMON_POPULATION_PROPERTIES(alternateMorphologyFormats))
         .def_readonly("elements_path",
-                      &PopulationProperties::elementsPath,
-                      DOC_POPULATION_PROPERTIES(elementsPath))
+                      &CommonPopulationProperties::elementsPath,
+                      DOC_COMMON_POPULATION_PROPERTIES(elementsPath))
         .def_readonly("types_path",
-                      &PopulationProperties::typesPath,
-                      DOC_POPULATION_PROPERTIES(typesPath));
+                      &CommonPopulationProperties::typesPath,
+                      DOC_COMMON_POPULATION_PROPERTIES(typesPath));
+
+    py::class_<NodePopulationProperties, CommonPopulationProperties>(
+        m, "NodePopulationProperties", "Stores node population-specific network information")
+        .def_readonly("spatial_segment_index_dir",
+                      &NodePopulationProperties::spatialSegmentIndexDir,
+                      DOC_NODE_POPULATION_PROPERTIES(spatialSegmentIndexDir));
+
+    py::class_<EdgePopulationProperties, CommonPopulationProperties>(
+        m, "EdgePopulationProperties", "Stores edge population-specific network information")
+        .def_readonly("spatial_synapse_index_dir",
+                      &EdgePopulationProperties::spatialSynapseIndexDir,
+                      DOC_EDGE_POPULATION_PROPERTIES(spatialSynapseIndexDir));
 
     py::enum_<CircuitConfig::ConfigStatus>(m, "CircuitConfigStatus")
         .value("invalid", CircuitConfig::ConfigStatus::invalid)

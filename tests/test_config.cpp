@@ -244,7 +244,7 @@ TEST_CASE("CircuitConfig") {
                     "nodes_file": "$NETWORK_DIR/nodes1.h5",
                     "populations": {
                       "nodes-A": {
-                        "morphologies_dir": "my/custom/morpholgoies/dir",
+                        "morphologies_dir": "my/custom/morphologies/dir",
                         "alternate_morphologies": {
                           "h5v1" : "another/custom/morphologies/dir"
                         }
@@ -263,7 +263,7 @@ TEST_CASE("CircuitConfig") {
             CHECK(contains(CircuitConfig(contents, "./")
                            .getNodePopulationProperties("nodes-A")
                            .morphologiesDir,
-                           "/my/custom/morpholgoies/dir"));
+                           "/my/custom/morphologies/dir"));
         }
 
         {  // Edge population with overriden properties return correct information
@@ -285,7 +285,7 @@ TEST_CASE("CircuitConfig") {
                     "edges_file": "$NETWORK_DIR/edges1.h5",
                     "populations": {
                       "edges-AB": {
-                        "morphologies_dir": "my/custom/morpholgoies/dir"
+                        "morphologies_dir": "my/custom/morphologies/dir"
                       }
                     }
                   }
@@ -293,10 +293,14 @@ TEST_CASE("CircuitConfig") {
                 "nodes":[]
               }
             })";
+            std::cerr << "qqqqqqqqqqqqqqqqqqqqqqqqqq" << CircuitConfig(contents, "./")
+                           .getEdgePopulationProperties("edges-AB")
+                           .morphologiesDir;
+
             CHECK(contains(CircuitConfig(contents, "./")
                            .getEdgePopulationProperties("edges-AB")
                            .morphologiesDir,
-                           "/my/custom/morpholgoies/dir"));
+                           "my/custom/morphologies/dir"));
         }
     }
 }

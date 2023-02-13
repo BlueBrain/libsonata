@@ -140,7 +140,7 @@ namespace {
 namespace fs = ghc::filesystem;
 
 void raiseOnBiophysicalPopulationsErrors(
-    const std::unordered_map<std::string, PopulationProperties>& populations) {
+    const std::unordered_map<std::string, NodePopulationProperties>& populations) {
     for (const auto& it : populations) {
         const auto& population = it.first;
         const auto& properties = it.second;
@@ -162,9 +162,10 @@ void raiseOnBiophysicalPopulationsErrors(
     }
 }
 
-PopulationProperties getPopulationProperties(
+template <typename PopulationType>
+PopulationType getPopulationProperties(
     const std::string& populationName,
-    const std::unordered_map<std::string, PopulationProperties>& populations) {
+    const std::unordered_map<std::string, PopulationType>& populations) {
     auto it = populations.find(populationName);
     if (it == populations.end()) {
         throw SonataError(fmt::format("Could not find population '{}'", populationName));
@@ -173,9 +174,9 @@ PopulationProperties getPopulationProperties(
     return it->second;
 }
 
-template <typename PopulationType>
+template <typename PopulationType, typename PopulationPropertiesT>
 PopulationType getPopulation(const std::string& populationName,
-                             const std::unordered_map<std::string, PopulationProperties>& src) {
+                             const std::unordered_map<std::string, PopulationPropertiesT>& src) {
     const auto properties = getPopulationProperties(populationName, src);
     return PopulationType(properties.elementsPath, properties.typesPath, populationName);
 }
@@ -553,9 +554,6 @@ void parseConditionsModifications(const nlohmann::json& it,
 class CircuitConfig::Parser
 {
   public:
-    using Subnetworks = std::vector<CircuitConfig::SubnetworkFiles>;
-    using PopulationOverrides = std::unordered_map<std::string, PopulationProperties>;
-
     Parser(const std::string& contents, const std::string& basePath)
         : _basePath(fs::absolute(fs::path(basePath))) {
         // Parse and expand JSON string
@@ -660,6 +658,30 @@ class CircuitConfig::Parser
         return result;
     }
 
+    template <typename PopulationPropertiesT>
+    void updateDefaultProperties(std::unordered_map<std::string, PopulationPropertiesT>& map,
+                                 const std::string& defaultType,
+                                 const CircuitConfig::Components& defaultComponents) {
+        for (auto& entry : map) {
+            auto& component = entry.second;
+            if (component.type.empty()) {
+                component.type = defaultType;
+            }
+
+            if (component.alternateMorphologyFormats.empty()) {
+                component.alternateMorphologyFormats = defaultComponents.alternateMorphologiesDir;
+            }
+
+            if (component.biophysicalNeuronModelsDir.empty()) {
+                component.biophysicalNeuronModelsDir = defaultComponents.biophysicalNeuronModelsDir;
+            }
+
+            if (component.morphologiesDir.empty()) {
+                component.morphologiesDir = defaultComponents.morphologiesDir;
+            }
+        }
+    }
+
     template <typename JSON>
     std::tuple<std::string, std::string> parseSubNetworks(const std::string& prefix,
                                                           const JSON& value) const {
@@ -677,9 +699,9 @@ class CircuitConfig::Parser
         return {h5File, csvFile};
     }
 
-    template <typename Population>
-    PopulationOverrides parsePopulationProperties(const std::string& prefix,
-                                                  CircuitConfig::ConfigStatus status) const {
+    template <typename PopulationProperties, typename Func>
+    std::unordered_map<std::string, PopulationProperties> parsePopulationProperties(
+        const std::string& prefix, CircuitConfig::ConfigStatus status, const Func& parser) const {
         const auto& network = getSubNetworkJson(prefix, status);
 
         std::unordered_map<std::string, PopulationProperties> output;
@@ -719,18 +741,32 @@ class CircuitConfig::Parser
                                                                                         it.value());
                     }
                 }
+
+                parser(popProperties, popData);
             }
         }
 
         return output;
     }
 
-    PopulationOverrides parseNodePopulations(CircuitConfig::ConfigStatus status) const {
-        return parsePopulationProperties<NodePopulation>("node", status);
+    std::unordered_map<std::string, NodePopulationProperties> parseNodePopulations(
+        CircuitConfig::ConfigStatus status) const {
+        return parsePopulationProperties<NodePopulationProperties>(
+            "node",
+            status,
+            [&](NodePopulationProperties& popProperties, const nlohmann::json& popData) {
+            popProperties.spatialSegmentIndexDir = getJSONPath(popData, "spatial_segment_index_dir");
+            });
     }
 
-    PopulationOverrides parseEdgePopulations(CircuitConfig::ConfigStatus status) const {
-        return parsePopulationProperties<EdgePopulation>("edge", status);
+    std::unordered_map<std::string, EdgePopulationProperties> parseEdgePopulations(
+        CircuitConfig::ConfigStatus status) const {
+        return parsePopulationProperties<EdgePopulationProperties>(
+            "edge",
+            status,
+            [&](EdgePopulationProperties& popProperties, const nlohmann::json& popData) {
+            popProperties.spatialSynapseIndexDir = getJSONPath(popData, "spatial_synapse_index_dir");
+            });
     }
 
     std::string getExpandedJSON() const {
@@ -750,41 +786,12 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
 
     _nodeSetsFile = parser.getNodeSetsPath();
 
-    // Load node population overrides and check biophysical types
     _nodePopulationProperties = parser.parseNodePopulations(_status);
-
-    // Load edge population overrides
     _edgePopulationProperties = parser.parseEdgePopulations(_status);
 
     Components defaultComponents = parser.parseDefaultComponents();
-
-    const auto updateDefaultProperties =
-        [&](std::unordered_map<std::string, PopulationProperties>& map,
-            const std::string& defaultType) {
-            for (auto& entry : map) {
-                auto& component = entry.second;
-                if (component.type.empty()) {
-                    component.type = defaultType;
-                }
-
-                if (component.alternateMorphologyFormats.empty()) {
-                    component.alternateMorphologyFormats =
-                        defaultComponents.alternateMorphologiesDir;
-                }
-
-                if (component.biophysicalNeuronModelsDir.empty()) {
-                    component.biophysicalNeuronModelsDir =
-                        defaultComponents.biophysicalNeuronModelsDir;
-                }
-
-                if (component.morphologiesDir.empty()) {
-                    component.morphologiesDir = defaultComponents.morphologiesDir;
-                }
-            }
-        };
-
-    updateDefaultProperties(_nodePopulationProperties, "biophysical");
-    updateDefaultProperties(_edgePopulationProperties, "chemical");
+    parser.updateDefaultProperties(_nodePopulationProperties, "biophysical", defaultComponents);
+    parser.updateDefaultProperties(_edgePopulationProperties, "chemical", defaultComponents);
 
     if (getCircuitConfigStatus() == ConfigStatus::complete) {
         raiseOnBiophysicalPopulationsErrors(_nodePopulationProperties);
@@ -819,11 +826,11 @@ EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name) const {
     return getPopulation<EdgePopulation>(name, _edgePopulationProperties);
 }
 
-PopulationProperties CircuitConfig::getNodePopulationProperties(const std::string& name) const {
+NodePopulationProperties CircuitConfig::getNodePopulationProperties(const std::string& name) const {
     return getPopulationProperties(name, _nodePopulationProperties);
 }
 
-PopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string& name) const {
+EdgePopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string& name) const {
     return getPopulationProperties(name, _edgePopulationProperties);
 }
 

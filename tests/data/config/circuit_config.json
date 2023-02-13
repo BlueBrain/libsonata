@@ -17,7 +17,9 @@
         "node_types_file": null,
         "populations": {
             "nodes-A": {},
-            "nodes-B": {}
+            "nodes-B": {
+                "spatial_segment_index_dir": "$COMPONENT_DIR/spatial_segment_index_dir"
+            }
         }
       }
     ],
@@ -27,7 +29,9 @@
         "edge_types_file": null,
         "populations": {
             "edges-AB": {},
-            "edges-AC": {}
+            "edges-AC": {
+                "spatial_synapse_index_dir": "$COMPONENT_DIR/spatial_synapse_index_dir"
+            }
         }
       }
     ]
