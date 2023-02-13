@@ -8,6 +8,12 @@ set(TESTS_SRC
   test_selection.cpp
 )
 
+if(NOT EXTLIB_FROM_SUBMODULES)
+  # When using submodules `include(.../Catch)` is performed
+  # in `extlib/CMakeLists.txt`.
+  include(Catch)
+endif()
+
 add_executable(unittests ${TESTS_SRC})
 target_link_libraries(unittests
     PRIVATE
