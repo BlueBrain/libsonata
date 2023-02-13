@@ -36,6 +36,11 @@ Building the C++ library
    cmake  -DCMAKE_BUILD_TYPE=Release  -DEXTLIB_FROM_SUBMODULES=ON ..
    make -j
 
+Since `libsonata` uses backports for `std::optional` and `std::variant` which
+turn into their actual STL implementation once available, it's recommended to compile
+`libsonata` with the same C++ standard as the project linking to `libsonata`. This
+is done by passing `-DCMAKE_CXX_STANDARD={14,17}` to the `cmake` command above.
+
 Usage (Python)
 --------------
 
