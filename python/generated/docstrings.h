@@ -58,14 +58,6 @@ biophysical circuits))doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_Parser = R"doc()doc";
 
-static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles = R"doc()doc";
-
-static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_elements = R"doc()doc";
-
-static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_populations = R"doc()doc";
-
-static const char *__doc_bbp_sonata_CircuitConfig_SubnetworkFiles_types = R"doc()doc";
-
 static const char *__doc_bbp_sonata_CircuitConfig_edgePopulationProperties = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_expandedJSON = R"doc()doc";
@@ -133,13 +125,31 @@ static const char *__doc_bbp_sonata_CircuitConfig_listNodePopulations =
 R"doc(Returns a set with all available population names across all the node
 networks.)doc";
 
-static const char *__doc_bbp_sonata_CircuitConfig_networkNodes = R"doc()doc";
-
 static const char *__doc_bbp_sonata_CircuitConfig_nodePopulationProperties = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_nodeSetsFile = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_status = R"doc(How strict we are checking the circuit config)doc";
+
+static const char *__doc_bbp_sonata_CommonPopulationProperties = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CommonPopulationProperties_alternateMorphologyFormats = R"doc(Dictionary for alternate directory paths.)doc";
+
+static const char *__doc_bbp_sonata_CommonPopulationProperties_biophysicalNeuronModelsDir = R"doc(Path to the template HOC files defining the E-Mode)doc";
+
+static const char *__doc_bbp_sonata_CommonPopulationProperties_elementsPath =
+R"doc(Path to underlying elements H5 file. It is discouraged to directly
+access the contents of the file. Instead use 'libsonata' to read this
+file.)doc";
+
+static const char *__doc_bbp_sonata_CommonPopulationProperties_morphologiesDir = R"doc(Path to the directory containing the morphologies)doc";
+
+static const char *__doc_bbp_sonata_CommonPopulationProperties_type = R"doc(Population type)doc";
+
+static const char *__doc_bbp_sonata_CommonPopulationProperties_typesPath =
+R"doc(Path to underlying types csv file. It is discouraged to directly
+access the contents of the file. Instead use 'libsonata' to read this
+file.)doc";
 
 static const char *__doc_bbp_sonata_DataFrame = R"doc()doc";
 
@@ -150,6 +160,10 @@ static const char *__doc_bbp_sonata_DataFrame_ids = R"doc()doc";
 static const char *__doc_bbp_sonata_DataFrame_times = R"doc()doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_EdgePopulationProperties = R"doc(Edge population-specific network information.)doc";
+
+static const char *__doc_bbp_sonata_EdgePopulationProperties_spatialSynapseIndexDir = R"doc(Path to spatial_synapse_index)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation = R"doc()doc";
 
@@ -170,6 +184,10 @@ static const char *__doc_bbp_sonata_EdgePopulation_targetNodeIDs = R"doc(Return 
 static const char *__doc_bbp_sonata_EdgePopulation_writeIndices = R"doc(Write bidirectional node->edge indices to EdgePopulation HDF5.)doc";
 
 static const char *__doc_bbp_sonata_NodePopulation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_NodePopulationProperties = R"doc(Node population-specific network information.)doc";
+
+static const char *__doc_bbp_sonata_NodePopulationProperties_spatialSegmentIndexDir = R"doc(Path to spatial_segment_index)doc";
 
 static const char *__doc_bbp_sonata_NodePopulation_NodePopulation = R"doc()doc";
 
@@ -237,26 +255,6 @@ static const char *__doc_bbp_sonata_NodeSets_operator_assign = R"doc()doc";
 static const char *__doc_bbp_sonata_NodeSets_toJSON = R"doc(Return string version of node sets)doc";
 
 static const char *__doc_bbp_sonata_Population = R"doc()doc";
-
-static const char *__doc_bbp_sonata_PopulationProperties = R"doc(Stores population-specific network information.)doc";
-
-static const char *__doc_bbp_sonata_PopulationProperties_alternateMorphologyFormats = R"doc(Dictionary for alternate directory paths.)doc";
-
-static const char *__doc_bbp_sonata_PopulationProperties_biophysicalNeuronModelsDir = R"doc(Path to the template HOC files defining the E-Mode)doc";
-
-static const char *__doc_bbp_sonata_PopulationProperties_elementsPath =
-R"doc(Path to underlying elements H5 file. It is discouraged to directly
-access the contents of the file. Instead use 'libsonata' to read this
-file.)doc";
-
-static const char *__doc_bbp_sonata_PopulationProperties_morphologiesDir = R"doc(Path to the directory containing the morphologies)doc";
-
-static const char *__doc_bbp_sonata_PopulationProperties_type = R"doc(Population type)doc";
-
-static const char *__doc_bbp_sonata_PopulationProperties_typesPath =
-R"doc(Path to underlying types csv file. It is discouraged to directly
-access the contents of the file. Instead use 'libsonata' to read this
-file.)doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage = R"doc(Collection of {PopulationClass}s stored in a H5 file and optional CSV.)doc";
 

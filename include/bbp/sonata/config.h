@@ -31,14 +31,25 @@ namespace sonata {
 
 using variantValueType = nonstd::variant<bool, std::string, int, double>;
 
-/**
- * Stores population-specific network information.
- */
-struct SONATA_API PopulationProperties {
+struct CommonPopulationProperties {
     /**
      * Population type
      */
     std::string type;
+
+    /**
+     * Path to underlying elements H5 file.
+     * It is discouraged to directly access the contents of the file.
+     * Instead use 'libsonata' to read this file.
+     */
+    std::string elementsPath;
+
+    /**
+     * Path to underlying types csv file.
+     * It is discouraged to directly access the contents of the file.
+     * Instead use 'libsonata' to read this file.
+     */
+    std::string typesPath;
 
     /**
      * Path to the template HOC files defining the E-Mode
@@ -54,20 +65,26 @@ struct SONATA_API PopulationProperties {
      * Dictionary for alternate directory paths.
      */
     std::unordered_map<std::string, std::string> alternateMorphologyFormats;
+};
 
+/**
+ * Node population-specific network information.
+ */
+struct SONATA_API NodePopulationProperties: public CommonPopulationProperties {
     /**
-     * Path to underlying elements H5 file.
-     * It is discouraged to directly access the contents of the file.
-     * Instead use 'libsonata' to read this file.
+     * Path to spatial_segment_index
      */
-    std::string elementsPath;
+    std::string spatialSegmentIndexDir;
+};
 
+/**
+ * Edge population-specific network information.
+ */
+struct SONATA_API EdgePopulationProperties: public CommonPopulationProperties {
     /**
-     * Path to underlying types csv file.
-     * It is discouraged to directly access the contents of the file.
-     * Instead use 'libsonata' to read this file.
+     * Path to spatial_synapse_index
      */
-    std::string typesPath;
+    std::string spatialSynapseIndexDir;
 };
 
 /**
@@ -159,7 +176,7 @@ class SONATA_API CircuitConfig
      * \throws SonataError if the given population name does not correspond to any existing
      *         node population.
      */
-    PopulationProperties getNodePopulationProperties(const std::string& name) const;
+    NodePopulationProperties getNodePopulationProperties(const std::string& name) const;
 
     /**
      * Return a structure containing edge population specific properties, falling
@@ -168,7 +185,7 @@ class SONATA_API CircuitConfig
      * \throws SonataError if the given population name does not correspond to any existing
      *         edge population.
      */
-    PopulationProperties getEdgePopulationProperties(const std::string& name) const;
+    EdgePopulationProperties getEdgePopulationProperties(const std::string& name) const;
 
     /**
      * Returns the configuration file JSON whose variables have been expanded by the
@@ -183,12 +200,6 @@ class SONATA_API CircuitConfig
         std::string biophysicalNeuronModelsDir;
     };
 
-    struct SubnetworkFiles {
-        std::string elements;
-        std::string types;
-        std::set<std::string> populations;
-    };
-
     class Parser;
 
     // Circuit config json string whose paths and variables have been expanded to include
@@ -201,14 +212,11 @@ class SONATA_API CircuitConfig
     // Path to the nodesets file
     std::string _nodeSetsFile;
 
-    // Nodes network paths
-    std::vector<SubnetworkFiles> _networkNodes;
-
     // Node populations that override default components variables
-    std::unordered_map<std::string, PopulationProperties> _nodePopulationProperties;
+    std::unordered_map<std::string, NodePopulationProperties> _nodePopulationProperties;
 
     // Edge populations that override default components variables
-    std::unordered_map<std::string, PopulationProperties> _edgePopulationProperties;
+    std::unordered_map<std::string, EdgePopulationProperties> _edgePopulationProperties;
 };
 
 /**
