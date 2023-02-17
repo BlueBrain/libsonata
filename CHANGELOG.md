@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.1.17:
+
+### Added:
+ - Allow for partial circuit configs (#241)
+ - Added spatial index accessors for segment and synapse indices (#250)
+
+### Fixed:
+ - Add include(Catch) to CMakeLists.txt. (#248)
+ - Enable setting the C++ standard. (#247)
+ - SONATA sim config updates (#245)
+ - make `chemical` the default connection type (#242)
+ - add check for duplicate populations (#239)
+ - refactor python tests so they are not in a monolithic file (#238)
+ - Fix `get_population_names` in README.rst (#235)
+ - update github actions
+
 ## v0.1.16:
 
 ### Fixed:
