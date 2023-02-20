@@ -1,0 +1,14 @@
+test:
+  image: python:3.9
+  stage: test
+  tags:
+    - docker-runner
+  interruptible: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_SUBMODULE_DEPTH: 1
+
+  before_script:
+    - apt-get update && apt-get install -y libhdf5-dev
+  script:
+    - ./ci/python_test.sh
