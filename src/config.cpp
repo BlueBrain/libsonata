@@ -762,7 +762,8 @@ class CircuitConfig::Parser
             "node",
             status,
             [&](NodePopulationProperties& popProperties, const nlohmann::json& popData) {
-            popProperties.spatialSegmentIndexDir = getJSONPath(popData, "spatial_segment_index_dir");
+                popProperties.spatialSegmentIndexDir = getJSONPath(popData,
+                                                                   "spatial_segment_index_dir");
             });
     }
 
@@ -772,7 +773,8 @@ class CircuitConfig::Parser
             "edge",
             status,
             [&](EdgePopulationProperties& popProperties, const nlohmann::json& popData) {
-            popProperties.spatialSynapseIndexDir = getJSONPath(popData, "spatial_synapse_index_dir");
+                popProperties.spatialSynapseIndexDir = getJSONPath(popData,
+                                                                   "spatial_synapse_index_dir");
             });
     }
 
@@ -844,7 +846,8 @@ EdgePopulationProperties CircuitConfig::getEdgePopulationProperties(const std::s
     return getPopulationProperties(name, _edgePopulationProperties);
 }
 
-nonstd::optional<std::unordered_map<std::string, std::string>> CircuitConfig::getProvenance() const {
+nonstd::optional<std::unordered_map<std::string, std::string>> CircuitConfig::getProvenance()
+    const {
     return _provenance;
 }
 
