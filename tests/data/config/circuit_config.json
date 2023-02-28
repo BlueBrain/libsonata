@@ -8,6 +8,9 @@
   "components": {
     "morphologies_dir": "$COMPONENT_DIR/morphologies",
     "biophysical_neuron_models_dir": "$COMPONENT_DIR/biophysical_neuron_models"
+    "provenance": {
+      "bioname_dir": "$COMPONENT_DIR/bioname"
+    }
   },
   "node_sets_file": "$BASE_DIR/node_sets.json",
   "networks": {

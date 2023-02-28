@@ -33,6 +33,8 @@ class TestCircuitConfig(unittest.TestCase):
 
         self.assertEqual(self.config.config_status, CircuitConfigStatus.complete)
 
+        self.assertEqual(self.config.provenance, {"bioname_dir": "./bioname"})
+
     def test_expanded_json(self):
         config = json.loads(self.config.expanded_json)
         self.assertEqual(config['components']['biophysical_neuron_models_dir'],
@@ -81,6 +83,7 @@ class TestCircuitConfig(unittest.TestCase):
         self.assertEqual(cc.config_status, CircuitConfigStatus.partial)
         self.assertEqual(cc.node_populations, set())
         self.assertEqual(cc.edge_populations, set())
+        self.assertEqual(cc.provenance, None)
 
         contents = {
             "metadata": { "status": "partial" },

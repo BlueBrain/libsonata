@@ -550,6 +550,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("edge_population", &CircuitConfig::getEdgePopulation)
         .def("node_population_properties", &CircuitConfig::getNodePopulationProperties, "name"_a)
         .def("edge_population_properties", &CircuitConfig::getEdgePopulationProperties, "name"_a)
+        .def_property_readonly("provenance", &CircuitConfig::getProvenance)
         .def_property_readonly("expanded_json", &CircuitConfig::getExpandedJSON);
 
     py::class_<SimulationConfig::Run> run(m,

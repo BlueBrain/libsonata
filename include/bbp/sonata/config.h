@@ -188,6 +188,11 @@ class SONATA_API CircuitConfig
     EdgePopulationProperties getEdgePopulationProperties(const std::string& name) const;
 
     /**
+     * Return a dictionary with provenance information.
+     */
+    nonstd::optional<std::unordered_map<std::string, std::string>> getProvenance() const;
+
+    /**
      * Returns the configuration file JSON whose variables have been expanded by the
      * manifest entries.
      */
@@ -198,6 +203,7 @@ class SONATA_API CircuitConfig
         std::string morphologiesDir;
         std::unordered_map<std::string, std::string> alternateMorphologiesDir;
         std::string biophysicalNeuronModelsDir;
+        nonstd::optional<std::unordered_map<std::string, std::string>> provenance{nonstd::nullopt};
     };
 
     class Parser;
@@ -211,6 +217,9 @@ class SONATA_API CircuitConfig
 
     // Path to the nodesets file
     std::string _nodeSetsFile;
+
+    // Provenance
+    nonstd::optional<std::unordered_map<std::string, std::string>> _provenance;
 
     // Node populations that override default components variables
     std::unordered_map<std::string, NodePopulationProperties> _nodePopulationProperties;

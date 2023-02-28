@@ -656,6 +656,12 @@ class CircuitConfig::Parser
         result.biophysicalNeuronModelsDir = getJSONPath(components,
                                                         "biophysical_neuron_models_dir");
 
+        const auto provenance = components.find("provenance");
+        if (provenance != components.end()) {
+            const auto bioname = getJSONPath(*provenance, "bioname_dir");
+            result.provenance = {{"bioname_dir", bioname}};
+        }
+
         return result;
     }
 
@@ -791,6 +797,9 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     _edgePopulationProperties = parser.parseEdgePopulations(_status);
 
     Components defaultComponents = parser.parseDefaultComponents();
+
+    _provenance = defaultComponents.provenance;
+
     parser.updateDefaultProperties(_nodePopulationProperties, "biophysical", defaultComponents);
     parser.updateDefaultProperties(_edgePopulationProperties, "chemical", defaultComponents);
 
@@ -833,6 +842,10 @@ NodePopulationProperties CircuitConfig::getNodePopulationProperties(const std::s
 
 EdgePopulationProperties CircuitConfig::getEdgePopulationProperties(const std::string& name) const {
     return getPopulationProperties(name, _edgePopulationProperties);
+}
+
+nonstd::optional<std::unordered_map<std::string, std::string>> CircuitConfig::getProvenance() const {
+    return _provenance;
 }
 
 const std::string& CircuitConfig::getExpandedJSON() const {
