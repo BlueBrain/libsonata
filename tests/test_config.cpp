@@ -55,7 +55,7 @@ TEST_CASE("CircuitConfig") {
                   .get<std::string>() == "morphologies");
 
         CHECK(config.getProvenance().has_value());
-        CHECK(config.getProvenance()->value()["bioname_dir"] == "./bioname");
+        CHECK(config.getProvenance().value()["bioname_dir"] == "./bioname");
     }
 
     SECTION("Exception") {
