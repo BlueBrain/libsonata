@@ -938,7 +938,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_enabled = R"doc(Allo
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_endTime = R"doc(Time to stop reporting in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_fileName = R"doc(Report filename. Default is "<report name>_SONATA.h5")doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_fileName = R"doc(Report filename. Default is "<report name>.h5")doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_scaling =
 R"doc(For summation type, specify the handling of density values. Default

@@ -228,8 +228,7 @@
               "unit": "mV",
               "dt": 0.1,
               "start_time" : 0,
-              "end_time" : 500,
-              "file_name": "soma"
+              "end_time" : 500
          },
          "compartment": {
               "cells": "Mosaic",

@@ -376,6 +376,8 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
         self.assertEqual(self.config.report('soma').compartments, Report.Compartments.center)
         self.assertEqual(self.config.report('soma').enabled, True)
+        self.assertEqual(self.config.report('soma').file_name,
+                         os.path.abspath(os.path.join(self.config.output.output_dir, 'soma.h5')))
         self.assertEqual(self.config.report('compartment').dt, 0.1)
         self.assertEqual(self.config.report('compartment').sections, Report.Sections.all)
         self.assertEqual(self.config.report('compartment').compartments, Report.Compartments.all)

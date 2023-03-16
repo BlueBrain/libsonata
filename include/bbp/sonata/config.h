@@ -356,7 +356,7 @@ class SONATA_API SimulationConfig
         double startTime{};
         /// Time to stop reporting in milliseconds
         double endTime{};
-        /// Report filename. Default is "<report name>_SONATA.h5"
+        /// Report filename. Default is "<report name>.h5"
         std::string fileName;
         /// Allows for supressing a report so that is not created. Default is true
         bool enabled = true;

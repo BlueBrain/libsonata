@@ -368,6 +368,8 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getReport("soma").type == SimulationConfig::Report::Type::compartment);
         CHECK(config.getReport("soma").compartments == SimulationConfig::Report::Compartments::center);
         CHECK(config.getReport("soma").enabled == true);
+        const auto somaFilePath = fs::absolute(config.getOutput().outputDir / fs::path("soma.h5"));
+        CHECK(config.getReport("soma").fileName == somaFilePath.lexically_normal());
         CHECK(config.getReport("compartment").dt == 0.1);
         CHECK(config.getReport("compartment").sections == SimulationConfig::Report::Sections::all);
         CHECK(config.getReport("compartment").compartments == SimulationConfig::Report::Compartments::all);

@@ -942,7 +942,7 @@ class SimulationConfig::Parser
             parseMandatory(valueIt, "dt", debugStr, report.dt);
             parseMandatory(valueIt, "start_time", debugStr, report.startTime);
             parseMandatory(valueIt, "end_time", debugStr, report.endTime);
-            parseOptional(valueIt, "file_name", report.fileName, {it.key() + "_SONATA.h5"});
+            parseOptional(valueIt, "file_name", report.fileName, {it.key() + ".h5"});
             parseOptional(valueIt, "enabled", report.enabled, {true});
 
             // variable names can look like:
