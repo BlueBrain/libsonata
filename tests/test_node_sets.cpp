@@ -59,13 +59,13 @@ TEST_CASE("NodeSetParse") {
 
     SECTION("OperatorMultipleClauses")
     {
-        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to ops": 3, "2nd": 3}} })"";
+        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to be ops": 3, "2nd": 3}} })"";
         CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
     }
 
     SECTION("OperatorObject")
     {
-        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to ops": {}}} })"";
+        auto node_sets = R""({ "NodeSet0": {"attr-Y": {"has to be ops": {}}} })"";
         CHECK_THROWS_AS(NodeSets(node_sets), SonataError);
     }
 }

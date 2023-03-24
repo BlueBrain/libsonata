@@ -499,7 +499,9 @@ PYBIND11_MODULE(_libsonata, m) {
             DOC_POP_NODE(matchAttributeValues))
         .def(
             "match_values",
-            [](NodePopulation& obj, const std::string& name, const std::vector<std::string>& values) {
+            [](NodePopulation& obj,
+               const std::string& name,
+               const std::vector<std::string>& values) {
                 return obj.matchAttributeValues(name, values);
             },
             "name"_a,
