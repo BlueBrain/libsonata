@@ -67,6 +67,9 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         sel = NodeSets('{ "NodeSet0": { "node_id": [1, 3, 5] } }').materialize("NodeSet0", self.population)
         self.assertEqual(sel, Selection(((1, 2), (3, 4), (5, 6))))
 
+        sel = NodeSets('{ "NodeSet0": { "node_id": [1, 3, 500] } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((1, 2), (3, 4), )))
+
     def test_BasicScalarPopulation(self):
         sel = NodeSets('{ "NodeSet0": { "population": "nodes-A" } }').materialize("NodeSet0", self.population)
         self.assertEqual(sel, self.population.select_all())

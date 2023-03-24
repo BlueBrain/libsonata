@@ -107,6 +107,7 @@ class NodeSets
     }
 };
 
+// 'region': ['region1', 'region2', ...]
 template <typename T>
 class NodeSetBasicRule: public NodeSetRule
 {
@@ -129,6 +130,7 @@ class NodeSetBasicRule: public NodeSetRule
     std::vector<T> values_;
 };
 
+// 'population': ['popA', 'popB', ]
 class NodeSetBasicPopulation: public NodeSetRule
 {
   public:
@@ -152,6 +154,7 @@ class NodeSetBasicPopulation: public NodeSetRule
     std::vector<std::string> values_;
 };
 
+// 'node_id': [1, 2, 3, 4]
 class NodeSetBasicNodeIds: public NodeSetRule
 {
   public:
@@ -171,6 +174,7 @@ class NodeSetBasicNodeIds: public NodeSetRule
     Selection::Values values_;
 };
 
+// "string_attr": { "$regex": "^[s][o]me value$" }
 class NodeSetBasicOperatorString: public NodeSetRule
 {
   public:
@@ -221,6 +225,7 @@ class NodeSetBasicOperatorString: public NodeSetRule
     std::string value_;
 };
 
+// "numeric_attribute_gt": { "$gt": 3 },
 class NodeSetBasicOperatorNumeric: public NodeSetRule
 {
   public:
