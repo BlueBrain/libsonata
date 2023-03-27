@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <fmt/format.h>
+#include <iostream>  //XXX
 #include <sstream>
 #include <type_traits>
 
@@ -47,6 +48,9 @@ class NodeSetRule
 
     virtual Selection materialize(const NodeSets&, const NodePopulation&) const = 0;
     virtual std::string toJSON() const = 0;
+    virtual bool is_compound() const {
+        return false;
+    }
 };
 
 using NodeSetRulePtr = std::unique_ptr<NodeSetRule>;
@@ -70,15 +74,7 @@ class NodeSets
         parse_compound(j, node_sets_);
     }
 
-    Selection materialize(const std::string& name, const NodePopulation& population) const {
-        const auto& node_set = node_sets_.find(name);
-        if (node_set == node_sets_.end()) {
-            throw SonataError(fmt::format("Unknown node_set {}", name));
-        }
-
-        Selection ret = population.selectAll() & node_set->second->materialize(*this, population);
-        return ret;
-    }
+    Selection materialize(const std::string& name, const NodePopulation& population) const;
 
 
     std::set<std::string> names() const {
@@ -111,6 +107,13 @@ class NodeSetBasicRule: public NodeSetRule
     Selection materialize(const detail::NodeSets& /* unused */,
                           const NodePopulation& np) const final {
         return np.matchAttributeValues(attribute_, values_);
+    }
+
+    void add_attribute2rule(std::map<std::string, std::set<T>>& attribute2rule) const {
+        auto& s = attribute2rule[attribute_];
+        for (const auto& v : values_) {
+            s.insert(v);
+        }
     }
 
     std::string toJSON() const final {
@@ -340,6 +343,13 @@ class NodeSetCompoundRule: public NodeSetRule
         return toString("node_ids", targets_);
     }
 
+    bool is_compound() const override {
+        return true;
+    }
+    const CompoundTargets& getTargets() const {
+        return targets_;
+    }
+
   private:
     std::string name_;
     CompoundTargets targets_;
@@ -538,6 +548,70 @@ void parse_compound(const json& j, std::map<std::string, NodeSetRulePtr>& node_s
     }
 }
 
+Selection NodeSets::materialize(const std::string& name, const NodePopulation& population) const {
+    const auto& node_set = node_sets_.find(name);
+    if (node_set == node_sets_.end()) {
+        throw SonataError(fmt::format("Unknown node_set {}", name));
+    }
+    const auto& ns = node_set->second;
+    if (!ns->is_compound()) {
+        return population.selectAll() & ns->materialize(*this, population);
+    }
+
+    // it's common to have a deep structure of compound statements
+    // (ie: a whole hierarchy of regions), all checking the same attribute
+    // rather than `materializing` them separately, we group them, and materializ
+    // them all at once
+    Selection ret{{}};
+
+    std::vector<NodeSetRule*> queue{ns.get()};
+    std::map<std::string, std::set<std::string>> attribute2rule_strings;
+    std::map<std::string, std::set<int64_t>> attribute2rule_int64;
+    while (!queue.empty()) {
+        const auto* ns = queue.back();
+        queue.pop_back();
+
+        if (ns->is_compound()) {
+            const auto* targets = dynamic_cast<const NodeSetCompoundRule*>(ns);
+            for (const auto& target : targets->getTargets()) {
+                const auto& node_set = node_sets_.find(target)->second;
+                if (node_set->is_compound()) {
+                    queue.push_back(node_set.get());
+                    continue;
+                }
+
+                {
+                    const auto* basic_int = dynamic_cast<const NodeSetBasicRule<int64_t>*>(
+                        node_set.get());
+                    if (basic_int != nullptr) {
+                        basic_int->add_attribute2rule(attribute2rule_int64);
+                        continue;
+                    }
+                }
+
+                {
+                    const auto* basic_string = dynamic_cast<const NodeSetBasicRule<std::string>*>(
+                        node_set.get());
+                    if (basic_string != nullptr) {
+                        basic_string->add_attribute2rule(attribute2rule_strings);
+                        continue;
+                    }
+                }
+
+                ret = ret | ns->materialize(*this, population);
+            }
+        } else {
+            ret = ret | ns->materialize(*this, population);
+        }
+    }
+
+    for (const auto& it : attribute2rule_strings) {
+        std::vector<std::string> values(it.second.begin(), it.second.end());
+        ret = ret | population.matchAttributeValues(it.first, values);
+    }
+
+    return ret;
+}
 }  // namespace detail
 
 NodeSets::NodeSets(const std::string& content)

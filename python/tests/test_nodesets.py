@@ -96,6 +96,42 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         sel = NodeSets(j).materialize("NodeSetCompound1", self.population)
         self.assertEqual(sel, Selection(((1, 4), )))
 
+        j = json.dumps({
+                "NodeSet0": { "E-mapping-good": ["A", "B"] },
+                "NodeSet1": { "attr-Y": 21 },
+                "NodeSetCompound0": ["NodeSet0", "NodeSet1"],
+                "NodeSetCompound1": ["NodeSetCompound0"],
+                "NodeSetCompound2": ["NodeSetCompound1"],
+                "NodeSetCompound3": ["NodeSetCompound2"],
+                "NodeSetCompound4": ["NodeSetCompound3"],
+                "NodeSetCompound5": ["NodeSetCompound4"]
+            })
+        expected = Selection(((1, 2), (3, 4)))
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound1", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound2", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound3", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound4", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound5", self.population), expected)
+
+        j = json.dumps({
+                "NodeSetString0": { "E-mapping-good": ["A", ] },
+                "NodeSetString1": { "E-mapping-good": ["A", "B"] },
+                "NodeSetInt0": { "attr-Y": 21 },
+                "NodeSetInt1": { "attr-Y": 21 },
+                "NodeSetCompound0": ["NodeSetString0", "NodeSetString1", "NodeSetInt0", "NodeSetInt1"],
+                "NodeSetCompound1": ["NodeSetCompound0", ],
+                "NodeSetCompound2": ["NodeSetCompound1", "NodeSetString1"],
+                "NodeSetCompound3": ["NodeSetCompound2", "NodeSetString0"],
+                "NodeSetCompound4": ["NodeSetCompound3",],
+                "NodeSetCompound5": ["NodeSetCompound4",],
+            })
+        expected = Selection(((1, 2), (3, 4)))
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound1", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound2", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound3", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound4", self.population), expected)
+        self.assertEqual(NodeSets(j).materialize("NodeSetCompound5", self.population), expected)
+
     def test_NodeSet_toJSON(self):
         j = json.dumps(
         {"bio_layer45": {
