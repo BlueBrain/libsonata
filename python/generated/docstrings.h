@@ -920,6 +920,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_Type = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_compartment = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_lfp = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_invalid = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_summation = R"doc()doc";

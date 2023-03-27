@@ -720,6 +720,7 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::enum_<SimulationConfig::Report::Type>(report, "Type")
         .value("compartment", SimulationConfig::Report::Type::compartment)
+        .value("lfp", SimulationConfig::Report::Type::lfp)
         .value("summation", SimulationConfig::Report::Type::summation)
         .value("synapse", SimulationConfig::Report::Type::synapse);
 

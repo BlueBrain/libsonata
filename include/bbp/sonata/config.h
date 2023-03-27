@@ -328,7 +328,7 @@ class SONATA_API SimulationConfig
      */
     struct Report {
         enum class Sections { invalid = -1, soma, axon, dend, apic, all };
-        enum class Type { invalid = -1, compartment, summation, synapse };
+        enum class Type { invalid = -1, compartment, lfp, summation, synapse };
         enum class Scaling { invalid = -1, none, area };
         enum class Compartments { invalid = -1, center, all };
 

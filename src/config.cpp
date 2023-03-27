@@ -85,6 +85,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Sections,
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Type,
                              {{SimulationConfig::Report::Type::invalid, nullptr},
                               {SimulationConfig::Report::Type::compartment, "compartment"},
+                              {SimulationConfig::Report::Type::lfp, "lfp"},
                               {SimulationConfig::Report::Type::summation, "summation"},
                               {SimulationConfig::Report::Type::synapse, "synapse"}})
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Scaling,
