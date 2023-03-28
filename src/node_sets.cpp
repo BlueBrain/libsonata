@@ -345,12 +345,24 @@ class NodeSetCompoundRule: public NodeSetRule
     CompoundTargets targets_;
 };
 
-int64_t get_integer_or_throw(const json& el) {
+int64_t get_int64_or_throw(const json& el) {
     auto v = el.get<double>();
     if (std::floor(v) != v) {
-        throw SonataError("Only allowed integers in node set rules");
+        throw SonataError(fmt::format("expected integer, got float {}", v));
     }
     return static_cast<int64_t>(v);
+}
+
+uint64_t get_uint64_or_throw(const json& el) {
+    auto v = el.get<double>();
+    if (v < 0) {
+        throw SonataError(fmt::format("expected unsigned integer, got {}", v));
+    }
+
+    if (std::floor(v) != v) {
+        throw SonataError(fmt::format("expected integer, got float {}", v));
+    }
+    return static_cast<uint64_t>(v);
 }
 
 NodeSetRulePtr _dispatch_node(const std::string& attribute, const json& value) {
@@ -359,16 +371,11 @@ NodeSetRulePtr _dispatch_node(const std::string& attribute, const json& value) {
             throw SonataError("'population' must be a string");
         }
 
-        int64_t v = get_integer_or_throw(value);
         if (attribute == "node_id") {
-            if (v < 0) {
-                throw SonataError("'node_id' must be positive");
-            }
-
-            Selection::Values node_ids{static_cast<uint64_t>(v)};
+            Selection::Values node_ids{get_uint64_or_throw(value)};
             return std::make_unique<NodeSetBasicNodeIds>(std::move(node_ids));
         } else {
-            std::vector<int64_t> f = {v};
+            std::vector<int64_t> f = {get_int64_or_throw(value)};
             return std::make_unique<NodeSetBasicRule<int64_t>>(attribute, f);
         }
     } else if (value.is_string()) {
@@ -397,7 +404,7 @@ NodeSetRulePtr _dispatch_node(const std::string& attribute, const json& value) {
 
             std::vector<int64_t> values;
             for (auto& inner_el : array.items()) {
-                values.emplace_back(get_integer_or_throw(inner_el.value()));
+                values.emplace_back(get_int64_or_throw(inner_el.value()));
             }
 
             if (attribute == "node_id") {
