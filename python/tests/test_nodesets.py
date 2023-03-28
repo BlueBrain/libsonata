@@ -106,7 +106,7 @@ class TestNodePopulationNodeSet(unittest.TestCase):
                 "NodeSetCompound4": ["NodeSetCompound3"],
                 "NodeSetCompound5": ["NodeSetCompound4"]
             })
-        expected = Selection(((1, 2), (3, 4)))
+        expected = Selection(((0, 2), (3, 4)))
         self.assertEqual(NodeSets(j).materialize("NodeSetCompound1", self.population), expected)
         self.assertEqual(NodeSets(j).materialize("NodeSetCompound2", self.population), expected)
         self.assertEqual(NodeSets(j).materialize("NodeSetCompound3", self.population), expected)
@@ -117,7 +117,7 @@ class TestNodePopulationNodeSet(unittest.TestCase):
                 "NodeSetString0": { "E-mapping-good": ["A", ] },
                 "NodeSetString1": { "E-mapping-good": ["A", "B"] },
                 "NodeSetInt0": { "attr-Y": 21 },
-                "NodeSetInt1": { "attr-Y": 21 },
+                "NodeSetInt1": { "attr-Y": 22 },
                 "NodeSetCompound0": ["NodeSetString0", "NodeSetString1", "NodeSetInt0", "NodeSetInt1"],
                 "NodeSetCompound1": ["NodeSetCompound0", ],
                 "NodeSetCompound2": ["NodeSetCompound1", "NodeSetString1"],
@@ -125,7 +125,7 @@ class TestNodePopulationNodeSet(unittest.TestCase):
                 "NodeSetCompound4": ["NodeSetCompound3",],
                 "NodeSetCompound5": ["NodeSetCompound4",],
             })
-        expected = Selection(((1, 2), (3, 4)))
+        expected = Selection(((0, 2), (3, 4)))
         self.assertEqual(NodeSets(j).materialize("NodeSetCompound1", self.population), expected)
         self.assertEqual(NodeSets(j).materialize("NodeSetCompound2", self.population), expected)
         self.assertEqual(NodeSets(j).materialize("NodeSetCompound3", self.population), expected)

@@ -2,7 +2,6 @@
 #include <cassert>
 #include <cmath>
 #include <fmt/format.h>
-#include <iostream>  //XXX
 #include <sstream>
 #include <type_traits>
 
@@ -606,6 +605,11 @@ Selection NodeSets::materialize(const std::string& name, const NodePopulation& p
 
     for (const auto& it : attribute2rule_strings) {
         std::vector<std::string> values(it.second.begin(), it.second.end());
+        ret = ret | population.matchAttributeValues(it.first, values);
+    }
+
+    for (const auto& it : attribute2rule_int64) {
+        std::vector<int64_t> values(it.second.begin(), it.second.end());
         ret = ret | population.matchAttributeValues(it.first, values);
     }
 
