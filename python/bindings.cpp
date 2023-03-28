@@ -488,6 +488,24 @@ PYBIND11_MODULE(_libsonata, m) {
             },
             "name"_a,
             "value"_a,
+            DOC_POP_NODE(matchAttributeValues))
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const std::vector<size_t>& values) {
+                return obj.matchAttributeValues(name, values);
+            },
+            "name"_a,
+            "value"_a,
+            DOC_POP_NODE(matchAttributeValues))
+        .def(
+            "match_values",
+            [](NodePopulation& obj,
+               const std::string& name,
+               const std::vector<std::string>& values) {
+                return obj.matchAttributeValues(name, values);
+            },
+            "name"_a,
+            "value"_a,
             DOC_POP_NODE(matchAttributeValues));
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");

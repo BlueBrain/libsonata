@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 
@@ -17,6 +18,10 @@ class TestNodeSetFailure(unittest.TestCase):
     def test_CorrectStructure(self):
         self.assertRaises(SonataError, NodeSets, "1")
         self.assertRaises(SonataError, NodeSets, "[1]")
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": 1 }')
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": "string" }')
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": null }')
+        self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": true }')
 
     def test_BasicScalarFailFloat(self):
         self.assertRaises(SonataError, NodeSets, '{ "NodeSet0": { "node_id": 1.5 } }')
@@ -52,7 +57,8 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         self.assertEqual(sel, Selection(((0, 1), (2, 3))))
 
     def test_BasicScalarEnum(self):
-        sel = NodeSets('{ "NodeSet0": { "E-mapping-good": "C" } }').materialize("NodeSet0", self.population)
+        j = json.dumps({"NodeSet0": {"E-mapping-good": "C"}})
+        sel = NodeSets(j).materialize("NodeSet0", self.population)
         self.assertEqual(sel, Selection(((0, 1), (2, 3), (4, 6),)))
 
     def test_BasicScalarAnded(self):
@@ -66,6 +72,9 @@ class TestNodePopulationNodeSet(unittest.TestCase):
     def test_BasicScalarNodeId(self):
         sel = NodeSets('{ "NodeSet0": { "node_id": [1, 3, 5] } }').materialize("NodeSet0", self.population)
         self.assertEqual(sel, Selection(((1, 2), (3, 4), (5, 6))))
+
+        sel = NodeSets('{ "NodeSet0": { "node_id": [1, 3, 500] } }').materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((1, 2), (3, 4), )))
 
     def test_BasicScalarPopulation(self):
         sel = NodeSets('{ "NodeSet0": { "population": "nodes-A" } }').materialize("NodeSet0", self.population)
@@ -88,7 +97,7 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         self.assertEqual(sel, Selection(((1, 4), )))
 
     def test_NodeSet_toJSON(self):
-        j = '''
+        j = json.dumps(
         {"bio_layer45": {
               "model_type": "biophysical",
               "location": ["layer4", "layer5"]
@@ -108,7 +117,7 @@ class TestNodePopulationNodeSet(unittest.TestCase):
               "string_attr": { "$regex": "^[s][o]me value$" }
           },
           "combined": ["bio_layer45", "V1_point_prime"]
-        }'''
+        })
         new = NodeSets(j).toJSON()
         ns1 = NodeSets(new)
         self.assertEqual(new, ns1.toJSON())

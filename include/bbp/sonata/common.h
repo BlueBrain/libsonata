@@ -50,7 +50,10 @@ class SONATA_API SonataError: public std::runtime_error
     explicit SonataError(const std::string& what);
 };
 
-#define THROW_IF_REACHED throw SonataError("Should never be reached");
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define AT __FILE__ ":" TOSTRING(__LINE__)
+#define THROW_IF_REACHED throw SonataError("Should never be reached: " AT);
 
 }  // namespace sonata
 }  // namespace bbp
