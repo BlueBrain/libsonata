@@ -76,7 +76,6 @@ class NodeSets
 
     Selection materialize(const std::string& name, const NodePopulation& population) const;
 
-
     std::set<std::string> names() const {
         return getMapKeys(node_sets_);
     }
