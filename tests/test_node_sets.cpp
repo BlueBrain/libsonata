@@ -206,24 +206,46 @@ TEST_CASE("NodeSetBasic") {
 TEST_CASE("NodeSetCompound") {
     const NodePopulation population("./data/nodes1.h5", "", "nodes-A");
     SECTION("Compound") {
-        auto node_sets = R"({
-            "NodeSet0": { "node_id": [1] },
-            "NodeSet1": { "node_id": [2] },
-            "NodeSetCompound0": ["NodeSet0", "NodeSet1"],
-            "NodeSetCompound1": ["NodeSetCompound0", "NodeSet2"],
-            "NodeSetCompound2": ["NodeSetCompound1"],
-            "NodeSetCompound3": ["NodeSetCompound2"],
-            "NodeSetCompound4": ["NodeSetCompound3"],
-            "NodeSetCompound5": ["NodeSetCompound4"],
-            "NodeSet2": { "node_id": [3] }
-        })";
-        NodeSets ns(node_sets);
-        Selection expected{{{1, 4}}};
-        CHECK(expected == ns.materialize("NodeSetCompound1", population));
-        CHECK(expected == ns.materialize("NodeSetCompound2", population));
-        CHECK(expected == ns.materialize("NodeSetCompound3", population));
-        CHECK(expected == ns.materialize("NodeSetCompound4", population));
-        CHECK(expected == ns.materialize("NodeSetCompound5", population));
+        {
+            const auto *const node_sets = R"({
+                "NodeSet0": { "node_id": [1] },
+                "NodeSet1": { "node_id": [2] },
+                "NodeSetCompound0": ["NodeSet0", "NodeSet1"],
+                "NodeSetCompound1": ["NodeSetCompound0", "NodeSet2"],
+                "NodeSetCompound2": ["NodeSetCompound1"],
+                "NodeSetCompound3": ["NodeSetCompound2"],
+                "NodeSetCompound4": ["NodeSetCompound3"],
+                "NodeSetCompound5": ["NodeSetCompound4"],
+                "NodeSet2": { "node_id": [3] }
+            })";
+            NodeSets ns(node_sets);
+            Selection expected{{{1, 4}}};
+            CHECK(expected == ns.materialize("NodeSetCompound1", population));
+            CHECK(expected == ns.materialize("NodeSetCompound2", population));
+            CHECK(expected == ns.materialize("NodeSetCompound3", population));
+            CHECK(expected == ns.materialize("NodeSetCompound4", population));
+            CHECK(expected == ns.materialize("NodeSetCompound5", population));
+        }
+
+        {
+            const auto *const node_sets = R"({
+                "NodeSet0": { "E-mapping-good": ["A", "B"] },
+                "NodeSet1": { "attr-Y": 21 },
+                "NodeSetCompound0": ["NodeSet0", "NodeSet1"],
+                "NodeSetCompound1": ["NodeSetCompound0"],
+                "NodeSetCompound2": ["NodeSetCompound1"],
+                "NodeSetCompound3": ["NodeSetCompound2"],
+                "NodeSetCompound4": ["NodeSetCompound3"],
+                "NodeSetCompound5": ["NodeSetCompound4"]
+            })";
+            NodeSets ns(node_sets);
+            Selection expected{{{0, 2}, {3, 4}}};
+            CHECK(expected == ns.materialize("NodeSetCompound1", population));
+            CHECK(expected == ns.materialize("NodeSetCompound2", population));
+            CHECK(expected == ns.materialize("NodeSetCompound3", population));
+            CHECK(expected == ns.materialize("NodeSetCompound4", population));
+            CHECK(expected == ns.materialize("NodeSetCompound5", population));
+        }
     }
 }
 
