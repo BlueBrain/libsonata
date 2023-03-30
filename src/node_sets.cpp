@@ -558,7 +558,7 @@ Selection NodeSets::materialize(const std::string& name, const NodePopulation& p
 
     // it's common to have a deep structure of compound statements
     // (ie: a whole hierarchy of regions), all checking the same attribute
-    // rather than `materializing` them separately, we group them, and materializ
+    // rather than `materializing` them separately, we group them, and materialize
     // them all at once
     Selection ret{{}};
 
