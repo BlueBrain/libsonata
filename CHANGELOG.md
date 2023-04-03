@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.18:
+ - speed up nested compound nodesets
+
 ## v0.1.17:
 
 ### Added:
