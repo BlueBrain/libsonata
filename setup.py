@@ -11,6 +11,7 @@ from distutils.version import LooseVersion
 
 
 MIN_CPU_CORES = 2
+VERSION = '0.1.19'
 
 
 def get_cpu_count():
@@ -64,7 +65,7 @@ class CMakeBuild(build_ext):
             "-DSONATA_TESTS={}".format(os.environ.get("SONATA_TESTS", "OFF")),
             "-DEXTLIB_FROM_SUBMODULES=ON",
             "-DSONATA_PYTHON=ON",
-            "-DSONATA_VERSION=" + self.distribution.get_version(),
+            "-DSONATA_VERSION=" + VERSION,
             "-DCMAKE_BUILD_TYPE={}".format(build_type),
             "-DSONATA_CXX_WARNINGS=OFF",
             '-DPYTHON_EXECUTABLE=' + sys.executable
@@ -81,7 +82,7 @@ class CMakeBuild(build_ext):
 
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
-            env.get("CXXFLAGS", ""), self.distribution.get_version()
+            env.get("CXXFLAGS", ""), VERSION
         )
 
         subprocess.check_call(
@@ -131,8 +132,7 @@ setup(
         'docs': ['sphinx-bluebrain-theme'],
     },
     python_requires=">=3.7",
-    use_scm_version={"local_scheme": "no-local-version",
-                     },
+    version=VERSION,
     package_dir={"": "python"},
     packages=['libsonata',
               ],
