@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 cmake_policy(VERSION 3.3)
 
+set(SONATA_VERSION "0.1.19")
 if(NOT SONATA_VERSION)
     execute_process(COMMAND git describe --tags
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
