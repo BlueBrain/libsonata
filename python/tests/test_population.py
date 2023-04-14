@@ -271,6 +271,17 @@ class TestEdgePopulation(unittest.TestCase):
     def test_select_all(self):
         self.assertEqual(self.test_obj.select_all().flat_size, 6)
 
+    def test_library_enumeration(self):
+        self.assertEqual(
+            self.test_obj.get_attribute("E-mapping-good", Selection([(0, 1), (2, 3)])).tolist(),
+            ["C", "C"]
+        )
+
+        self.assertEqual(
+            self.test_obj.get_enumeration( "E-mapping-good", Selection([(0, 1), (2, 3)])).tolist(),
+            [2, 2]
+        )
+
 
 class TestMisc(unittest.TestCase):
     def test_path_ctor(self):

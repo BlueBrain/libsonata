@@ -59,6 +59,12 @@ TEST_CASE("EdgePopulation", "[edges]") {
     CHECK(population.connectingEdges({999}, {999}).empty());
     // duplicate node IDs are ignored; order of node IDs is not relevant
     CHECK(population.connectingEdges({2, 1, 2}, {2, 1, 2}) == Selection({{0, 4}}));
+
+    CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) ==
+          std::vector<size_t>{2, 2});
+
+    CHECK(population.getAttribute<std::string>("E-mapping-good", Selection({{0, 1}})) ==
+          std::vector<std::string>{"C"});
 }
 
 
