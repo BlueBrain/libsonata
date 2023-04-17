@@ -25,7 +25,8 @@ class SONATA_API NodeSets
      * \param content is the JSON node_sets value
      * \throw if content cannot be parsed
      */
-    NodeSets(const std::string& content);
+    explicit NodeSets(const std::string& content);
+    explicit NodeSets(std::unique_ptr<detail::NodeSets>&& impl);
     NodeSets(NodeSets&&) noexcept;
     NodeSets(const NodeSets& other) = delete;
     NodeSets& operator=(NodeSets&&) noexcept;
