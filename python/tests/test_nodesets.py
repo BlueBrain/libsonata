@@ -43,6 +43,9 @@ class TestNodeSetFailure(unittest.TestCase):
     def test_MissingBasic(self):
         self.assertRaises(SonataError, NodeSets, '{"compound": ["missing"] }')
 
+    def test_MissingFile(self):
+        self.assertRaises(SonataError, NodeSets.from_file, 'this/file/does/not/exist')
+
 
 class TestNodePopulationNodeSet(unittest.TestCase):
     def setUp(self):

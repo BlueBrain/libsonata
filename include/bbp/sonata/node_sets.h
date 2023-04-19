@@ -9,7 +9,7 @@ namespace bbp {
 namespace sonata {
 namespace detail {
 class NodeSets;
-}
+}  // namespace detail
 
 class SONATA_API NodeSets
 {
