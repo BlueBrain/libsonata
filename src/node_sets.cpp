@@ -2,8 +2,11 @@
 #include <cassert>
 #include <cmath>
 #include <fmt/format.h>
+#include <fstream>
 #include <sstream>
 #include <type_traits>
+
+#include "../extlib/filesystem.hpp"
 
 #include <nlohmann/json.hpp>
 #include <utility>
@@ -14,6 +17,8 @@
 
 namespace bbp {
 namespace sonata {
+
+namespace fs = ghc::filesystem;
 
 namespace detail {
 
@@ -61,8 +66,7 @@ class NodeSets
     std::map<std::string, NodeSetRulePtr> node_sets_;
 
   public:
-    explicit NodeSets(const std::string& content) {
-        json j = json::parse(content);
+    explicit NodeSets(const json& j) {
         if (!j.is_object()) {
             throw SonataError("Top level node_set must be an object");
         }
@@ -72,6 +76,24 @@ class NodeSets
         parse_basic(j, node_sets_);
         parse_compound(j, node_sets_);
     }
+
+    static const fs::path& validate_path(const fs::path& path) {
+        if (!fs::exists(path)) {
+            throw SonataError(fmt::format("Path does not exist: {}", std::string(path)));
+        }
+        return path;
+    }
+
+    explicit NodeSets(const fs::path& path)
+        : NodeSets(json::parse(std::ifstream(validate_path(path)))) {}
+
+    static std::unique_ptr<NodeSets> fromFile(const std::string& path_) {
+        fs::path path(path_);
+        return std::make_unique<detail::NodeSets>(path);
+    }
+
+    explicit NodeSets(const std::string& content)
+        : NodeSets(json::parse(content)) {}
 
     Selection materialize(const std::string& name, const NodePopulation& population) const;
 
@@ -620,13 +642,15 @@ Selection NodeSets::materialize(const std::string& name, const NodePopulation& p
 NodeSets::NodeSets(const std::string& content)
     : impl_(new detail::NodeSets(content)) {}
 
+NodeSets::NodeSets(std::unique_ptr<detail::NodeSets>&& impl)
+    : impl_(std::move(impl)) {}
+
 NodeSets::NodeSets(NodeSets&&) noexcept = default;
 NodeSets& NodeSets::operator=(NodeSets&&) noexcept = default;
 NodeSets::~NodeSets() = default;
 
 NodeSets NodeSets::fromFile(const std::string& path) {
-    const auto contents = readFile(path);
-    return NodeSets(contents);
+    return NodeSets(detail::NodeSets::fromFile(path));
 }
 
 Selection NodeSets::materialize(const std::string& name, const NodePopulation& population) const {
