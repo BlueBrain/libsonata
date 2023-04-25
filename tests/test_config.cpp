@@ -558,27 +558,27 @@ TEST_CASE("SimulationConfig") {
                                                                "ex_shotnoise",
                                                                "ex_subthreshold"});
 
-        CHECK(config.listConnectionOverrideNames() ==
-              std::set<std::string>{"ConL3Exc-Uni", "GABAB_erev"});
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").source == "Excitatory");
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").target == "Mosaic");
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").weight == 1);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").spontMinis == 0.01);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").modoverride == "GluSynapse");
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").delay == 0.5);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseDelayOverride == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").synapseConfigure == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodulationDtc == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("ConL3Exc-Uni").neuromodulationStrength ==
-              nonstd::nullopt);
-        CHECK(config.getConnectionOverride("GABAB_erev").spontMinis == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("GABAB_erev").synapseDelayOverride == 0.5);
-        CHECK(config.getConnectionOverride("GABAB_erev").delay == 0);
-        CHECK(config.getConnectionOverride("GABAB_erev").synapseConfigure ==
-              "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77");
-        CHECK(config.getConnectionOverride("GABAB_erev").modoverride == nonstd::nullopt);
-        CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationDtc == 100);
-        CHECK(config.getConnectionOverride("GABAB_erev").neuromodulationStrength == 0.75);
+        auto overrides = config.getConnectionOverrides();
+        CHECK(overrides[0].name == "ConL3Exc-Uni");
+        CHECK(overrides[0].source == "Excitatory");
+        CHECK(overrides[0].target == "Mosaic");
+        CHECK(overrides[0].weight == 1);
+        CHECK(overrides[0].spontMinis == 0.01);
+        CHECK(overrides[0].modoverride == "GluSynapse");
+        CHECK(overrides[0].delay == 0.5);
+        CHECK(overrides[0].synapseDelayOverride == nonstd::nullopt);
+        CHECK(overrides[0].synapseConfigure == nonstd::nullopt);
+        CHECK(overrides[0].neuromodulationDtc == nonstd::nullopt);
+        CHECK(overrides[0].neuromodulationStrength == nonstd::nullopt);
+
+        CHECK(overrides[1].name == "GABAB_erev");
+        CHECK(overrides[1].spontMinis == nonstd::nullopt);
+        CHECK(overrides[1].synapseDelayOverride == 0.5);
+        CHECK(overrides[1].delay == 0);
+        CHECK(overrides[1].synapseConfigure == "%s.e_GABAA = -82.0 tau_d_GABAB_ProbGABAAB_EMS = 77");
+        CHECK(overrides[1].modoverride == nonstd::nullopt);
+        CHECK(overrides[1].neuromodulationDtc == 100);
+        CHECK(overrides[1].neuromodulationStrength == 0.75);
 
         CHECK(config.getMetaData().size() == 2);
         CHECK(config.getBetaFeatures().size() == 4);

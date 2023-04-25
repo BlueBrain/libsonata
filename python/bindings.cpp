@@ -974,6 +974,9 @@ PYBIND11_MODULE(_libsonata, m) {
     py::class_<SimulationConfig::ConnectionOverride>(m,
                                                      "ConnectionOverride",
                                                      "List of parameters of a connection")
+        .def_readonly("name",
+                      &SimulationConfig::ConnectionOverride::name,
+                      DOC_SIMULATIONCONFIG(ConnectionOverride, name))
         .def_readonly("source",
                       &SimulationConfig::ConnectionOverride::source,
                       DOC_SIMULATIONCONFIG(ConnectionOverride, source))
@@ -1042,15 +1045,11 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("list_input_names",
                                &SimulationConfig::listInputNames,
                                DOC_SIMULATIONCONFIG(listInputNames))
-        .def_property_readonly("list_connection_override_names",
-                               &SimulationConfig::listConnectionOverrideNames,
-                               DOC_SIMULATIONCONFIG(listConnectionOverrideNames))
         .def("report", &SimulationConfig::getReport, "name"_a, DOC_SIMULATIONCONFIG(getReport))
         .def("input", &SimulationConfig::getInput, "name"_a, DOC_SIMULATIONCONFIG(getInput))
-        .def("connection_override",
-             &SimulationConfig::getConnectionOverride,
-             "name"_a,
-             DOC_SIMULATIONCONFIG(getConnectionOverride))
+        .def("connection_overrides",
+             &SimulationConfig::getConnectionOverrides,
+             DOC_SIMULATIONCONFIG(getConnectionOverrides))
         .def_property_readonly("metadata",
                                &SimulationConfig::getMetaData,
                                DOC_SIMULATIONCONFIG(getMetaData))

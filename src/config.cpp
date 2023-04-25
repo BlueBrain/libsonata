@@ -1076,17 +1076,19 @@ class SimulationConfig::Parser
         return result;
     }
 
-    ConnectionMap parseConnectionOverrides() const {
-        ConnectionMap result;
+    std::vector<ConnectionOverride> parseConnectionOverrides() const {
+        std::vector<ConnectionOverride> result;
 
         const auto connIt = _json.find("connection_overrides");
-        if (connIt == _json.end())
+        if (connIt == _json.end()) {
             return result;
+        }
 
         for (auto it = connIt->begin(); it != connIt->end(); ++it) {
-            auto& connect = result[it.key()];
-            auto& valueIt = it.value();
-            const auto debugStr = fmt::format("connection_override {}", it.key());
+            const auto& valueIt = it.value();
+            ConnectionOverride connect;
+            parseMandatory(valueIt, "name", "connection_override", connect.name);
+            const auto debugStr = fmt::format("connection_override {}", connect.name);
             parseMandatory(valueIt, "source", debugStr, connect.source);
             parseMandatory(valueIt, "target", debugStr, connect.target);
             parseOptional(valueIt, "weight", connect.weight);
@@ -1097,6 +1099,8 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "delay", connect.delay);
             parseOptional(valueIt, "neuromodulation_dtc", connect.neuromodulationDtc);
             parseOptional(valueIt, "neuromodulation_strength", connect.neuromodulationStrength);
+
+            result.push_back(connect);
         }
         return result;
     }
@@ -1104,8 +1108,9 @@ class SimulationConfig::Parser
     std::unordered_map<std::string, std::string> parseMetaData() const {
         std::unordered_map<std::string, std::string> result;
         const auto metaIt = _json.find("metadata");
-        if (metaIt == _json.end())
+        if (metaIt == _json.end()) {
             return result;
+        }
         for (auto& it : metaIt->items()) {
             result.insert({it.key(), it.value()});
         }
@@ -1115,8 +1120,9 @@ class SimulationConfig::Parser
     std::unordered_map<std::string, variantValueType> parseBetaFeatures() const {
         std::unordered_map<std::string, variantValueType> result;
         const auto fIt = _json.find("beta_features");
-        if (fIt == _json.end())
+        if (fIt == _json.end()) {
             return result;
+        }
         for (auto& it : fIt->items()) {
             variantValueType res_val;
             parseVariantType(it.value(), res_val);
@@ -1144,7 +1150,7 @@ SimulationConfig::SimulationConfig(const std::string& content, const std::string
     _reports = parser.parseReports(_output);
     _network = parser.parseNetwork();
     _inputs = parser.parseInputs();
-    _connections = parser.parseConnectionOverrides();
+    _connection_overrides = parser.parseConnectionOverrides();
     _targetSimulator = parser.parseTargetSimulator();
     _nodeSetsFile = parser.parseNodeSetsFile();
     _nodeSet = parser.parseNodeSet();
@@ -1203,19 +1209,9 @@ const SimulationConfig::Input& SimulationConfig::getInput(const std::string& nam
     return it->second;
 }
 
-std::set<std::string> SimulationConfig::listConnectionOverrideNames() const {
-    return getMapKeys(_connections);
-}
-
-const SimulationConfig::ConnectionOverride& SimulationConfig::getConnectionOverride(
-    const std::string& name) const {
-    const auto it = _connections.find(name);
-    if (it == _connections.end()) {
-        throw SonataError(
-            fmt::format("The connection_override '{}' is not present in the simulation config file",
-                        name));
-    }
-    return it->second;
+const std::vector<SimulationConfig::ConnectionOverride>& SimulationConfig::getConnectionOverrides()
+    const {
+    return _connection_overrides;
 }
 
 const SimulationConfig::SimulatorType& SimulationConfig::getTargetSimulator() const {

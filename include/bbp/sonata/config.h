@@ -566,6 +566,8 @@ class SONATA_API SimulationConfig
      *  between two sets of nodes
      */
     struct ConnectionOverride {
+        /// the name of the connection override
+        std::string name;
         /// node_set specifying presynaptic nodes
         std::string source;
         /// node_set specifying postsynaptic nodes
@@ -593,7 +595,6 @@ class SONATA_API SimulationConfig
         /// for the neuromodulatory projection. Given in muM.
         nonstd::optional<double> neuromodulationStrength{nonstd::nullopt};
     };
-    using ConnectionMap = std::unordered_map<std::string, ConnectionOverride>;
 
     enum class SimulatorType { invalid = -1, NEURON, CORENEURON };
 
@@ -673,17 +674,10 @@ class SONATA_API SimulationConfig
     const Input& getInput(const std::string& name) const;
 
     /**
-     * Returns the names of the connection_overrides
-     */
-    std::set<std::string> listConnectionOverrideNames() const;
-
-    /**
-     * Returns the given connection parameters
+     * Returns the full list of connection overrides
      *
-     * \throws SonataError if the given connection name does not correspond with any existing
-     *         connection.
      */
-    const ConnectionOverride& getConnectionOverride(const std::string& name) const;
+    const std::vector<ConnectionOverride>& getConnectionOverrides() const;
 
     /**
      * Returns the name of simulator, default = NEURON
@@ -738,7 +732,7 @@ class SONATA_API SimulationConfig
     // List of inputs
     InputMap _inputs;
     // List of connections
-    ConnectionMap _connections;
+    std::vector<ConnectionOverride> _connection_overrides;
     // Name of simulator
     SimulatorType _targetSimulator;
     // Path of node sets file
