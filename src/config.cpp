@@ -1084,6 +1084,12 @@ class SimulationConfig::Parser
             return result;
         }
 
+        if (!connIt->is_array()) {
+            throw SonataError("`connection_overrides` must be an array");
+        }
+
+        result.reserve(connIt->size());
+
         for (auto it = connIt->begin(); it != connIt->end(); ++it) {
             const auto& valueIt = it.value();
             ConnectionOverride connect;
@@ -1100,7 +1106,7 @@ class SimulationConfig::Parser
             parseOptional(valueIt, "neuromodulation_dtc", connect.neuromodulationDtc);
             parseOptional(valueIt, "neuromodulation_strength", connect.neuromodulationStrength);
 
-            result.push_back(connect);
+            result.push_back(std::move(connect));
         }
         return result;
     }
