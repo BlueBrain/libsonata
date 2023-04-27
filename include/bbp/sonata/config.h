@@ -677,7 +677,7 @@ class SONATA_API SimulationConfig
      * Returns the full list of connection overrides
      *
      */
-    const std::vector<ConnectionOverride>& getConnectionOverrides() const;
+    const std::vector<ConnectionOverride>& getConnectionOverrides() const noexcept;
 
     /**
      * Returns the name of simulator, default = NEURON

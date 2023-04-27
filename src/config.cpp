@@ -1216,7 +1216,7 @@ const SimulationConfig::Input& SimulationConfig::getInput(const std::string& nam
 }
 
 const std::vector<SimulationConfig::ConnectionOverride>& SimulationConfig::getConnectionOverrides()
-    const {
+    const noexcept {
     return _connection_overrides;
 }
 
