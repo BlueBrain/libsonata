@@ -2,11 +2,11 @@ import json
 import os
 import unittest
 
-from libsonata import (CircuitConfig, SimulationConfig, SonataError,
+from libsonata import (CircuitConfig, CircuitConfigStatus, SimulationConfig, SonataError,
                        )
 
 
-from libsonata._libsonata import Report, Output, Run, CircuitConfigStatus, Conditions
+from libsonata._libsonata import Report, Output, Run, Conditions
 
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
