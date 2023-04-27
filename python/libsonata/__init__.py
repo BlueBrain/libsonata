@@ -5,6 +5,7 @@
 
 from libsonata._libsonata import (
     CircuitConfig,
+    CircuitConfigStatus,
     SimulationConfig,
     EdgePopulation,
     EdgeStorage,
@@ -26,6 +27,7 @@ from libsonata._libsonata import (
 
 __all__ = [
     "CircuitConfig",
+    "CircuitConfigStatus",
     "EdgePopulation",
     "EdgeStorage",
     "ElementDataFrame",
