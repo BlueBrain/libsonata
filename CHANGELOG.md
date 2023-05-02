@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19:
+ - switch to having `connection_overrides` being a list (#263)
+ - expose circuit config status (#264)
+ - Don't read the full node sets file before parsing (#261)
+
 ## v0.1.18:
  - speed up nested compound nodesets
 
