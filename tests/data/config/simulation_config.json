@@ -201,8 +201,9 @@
             "node_set": "Column"
         }
     },
-    "connection_overrides": {
-        "ConL3Exc-Uni": {
+    "connection_overrides": [
+        {
+            "name": "ConL3Exc-Uni",
             "source": "Excitatory",
             "target": "Mosaic",
             "weight": 1.0,
@@ -210,7 +211,8 @@
             "modoverride": "GluSynapse",
             "delay" : 0.5
         },
-        "GABAB_erev": {
+        {
+            "name": "GABAB_erev",
             "source": "Inhibitory",
             "target": "Mosaic",
             "weight": 1.0,
@@ -219,7 +221,7 @@
             "neuromodulation_dtc": 100,
             "neuromodulation_strength": 0.75
         }
-    },
+    ],
     "reports": {
          "soma": {
               "sections": "soma",

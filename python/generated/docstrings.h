@@ -614,6 +614,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_modoverr
 R"doc(Synapse helper files to instantiate the synapses in this
 connection_override, default = None)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_name = R"doc(the name of the connection override)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_neuromodulationDtc =
 R"doc(To override the neuromod_dtc values between the selected source and
 target neurons for the neuromodulatory projection. Given in ms.)doc";
@@ -1018,7 +1020,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_betaFeatures = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_conditions = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_connections = R"doc()doc";
+static const char *__doc_bbp_sonata_SimulationConfig_connection_overrides = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_expandedJSON = R"doc()doc";
 
@@ -1037,12 +1039,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_getBetaFeatures = R"doc(Ret
 
 static const char *__doc_bbp_sonata_SimulationConfig_getConditions = R"doc(Returns the Conditions section of the simulation configuration.)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_getConnectionOverride =
-R"doc(Returns the given connection parameters
-
-Throws:
-    SonataError if the given connection name does not correspond with
-    any existing connection.)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_getConnectionOverrides = R"doc(Returns the full list of connection overrides)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getExpandedJSON =
 R"doc(Returns the configuration file JSON whose variables have been expanded
@@ -1086,8 +1083,6 @@ Throws:
     SonataError if the given value is neither NEURON nor CORENEURON)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_inputs = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_listConnectionOverrideNames = R"doc(Returns the names of the connection_overrides)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_listInputNames = R"doc(Returns the names of the inputs)doc";
 
