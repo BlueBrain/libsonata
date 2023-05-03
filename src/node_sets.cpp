@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fmt/format.h>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <type_traits>
 
@@ -11,19 +12,18 @@
 #include <nlohmann/json.hpp>
 #include <utility>
 
-#include "utils.h"  // readFile
+#include "utils.h"  // getMapKeys
 
 #include <bbp/sonata/node_sets.h>
 
 namespace bbp {
 namespace sonata {
 
-namespace fs = ghc::filesystem;
-
 namespace detail {
 
 const size_t MAX_COMPOUND_RECURSION = 10;
 
+namespace fs = ghc::filesystem;
 using json = nlohmann::json;
 
 void replace_trailing_coma(std::string& s, char c) {
@@ -433,7 +433,7 @@ NodeSetRulePtr _dispatch_node(const std::string& attribute, const json& value) {
             }
 
             std::vector<int64_t> values;
-            for (auto& inner_el : array.items()) {
+            for (const auto& inner_el : array.items()) {
                 values.emplace_back(get_int64_or_throw(inner_el.value()));
             }
 
@@ -458,7 +458,7 @@ NodeSetRulePtr _dispatch_node(const std::string& attribute, const json& value) {
             }
 
             std::vector<std::string> values;
-            for (auto& inner_el : array.items()) {
+            for (const auto& inner_el : array.items()) {
                 values.emplace_back(inner_el.value().get<std::string>());
             }
 
@@ -545,7 +545,7 @@ void check_compound(const std::map<std::string, NodeSetRulePtr>& node_sets,
 
 void parse_compound(const json& j, std::map<std::string, NodeSetRulePtr>& node_sets) {
     std::map<std::string, CompoundTargets> compound_rules;
-    for (auto& el : j.items()) {
+    for (const auto& el : j.items()) {
         if (el.value().is_array()) {
             CompoundTargets targets;
             for (const auto& name : el.value()) {

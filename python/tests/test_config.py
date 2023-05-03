@@ -557,8 +557,8 @@ class TestSimulationConfig(unittest.TestCase):
               },
               "network": "$CIRCUIT_DIR/circuit_config.json",
               "run": { "random_seed": 12345, "dt": 0.05, "tstop": 1000 },
-              "connection_overrides": { }
+              "connection_overrides": [{}]
             }
             """
-            SimulationConfig(contents, "./")
+            libsonata.SimulationConfig(contents, "./")
         self.assertEqual(e.exception.args, ('`connection_overrides` must be an array', ))

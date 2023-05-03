@@ -12,7 +12,6 @@
 #include <bbp/sonata/config.h>
 #include <bbp/sonata/optional.hpp>
 
-#include <bbp/sonata/optional.hpp>
 #include <cassert>
 #include <fstream>
 #include <memory>
@@ -238,7 +237,7 @@ nlohmann::json expandVariables(const nlohmann::json& json,
 
             if (startPos != std::string::npos) {
                 valueStr.replace(startPos, varName.length(), varValue);
-                value = fs::path(valueStr).lexically_normal();
+                value = std::string(fs::path(valueStr).lexically_normal());
             }
         }
     }
@@ -1084,7 +1083,9 @@ class SimulationConfig::Parser
             return result;
         }
 
+            std::cout << connIt->type_name() << '\n';
         if (!connIt->is_array()) {
+            std::cout << connIt->type_name() << '\n';
             throw SonataError("`connection_overrides` must be an array");
         }
 

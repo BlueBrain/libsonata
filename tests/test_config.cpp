@@ -1169,5 +1169,15 @@ TEST_CASE("SimulationConfig") {
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
         }
+        {
+    auto j = nlohmann::json::parse("{\"foo\": []}");
+    const auto it = j.find("foo");
+
+    if (it == j.end()) {
+        std::cerr << "*******************" << "not found\n";
+    }else{
+        std::cerr << "*******************" << it->type_name() << std::endl;
+    }
+        }
     }
 }
