@@ -1080,7 +1080,12 @@ class SimulationConfig::Parser
         std::vector<ConnectionOverride> result;
 
         const auto connIt = _json.find("connection_overrides");
-        if (connIt == _json.end()) {
+        // nlohmann::json::flatten().unflatten() converts empty containers to `null`:
+        // https://json.nlohmann.me/api/basic_json/unflatten/#notes
+        // so we can't tell the difference between {} and []; however, since these are
+        // empty, we will assume the intent was to have no connection_overrides and forgo
+        // better error reporting
+        if (connIt == _json.end() || connIt->is_null()) {
             return result;
         }
 
