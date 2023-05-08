@@ -33,7 +33,7 @@ Building the C++ library
    git clone git@github.com:BlueBrain/libsonata.git --recursive
    cd libsonata
    mkdir build && cd build
-   cmake  -DCMAKE_BUILD_TYPE=Release  -DEXTLIB_FROM_SUBMODULES=ON ..
+   cmake -DCMAKE_BUILD_TYPE=Release -DEXTLIB_FROM_SUBMODULES=ON ..
    make -j
 
 Since `libsonata` uses backports for `std::optional` and `std::variant` which
@@ -112,6 +112,31 @@ For instance, `{1, 2, 3, 5}` sequence becomes `{[1, 4), [5, 6)}`.
    4
    >>> bool(selection)
    True
+
+
+Node Sets
++++++++++
+
+libsonata can work with the Node Set concept, as described here: `SONATA guide: Node Sets File <https://github.com/AllenInstitute/sonata/blob/master/docs/SONATA_DEVELOPER_GUIDE.md#node-sets-file>`__
+This allows the definition of names for groups of cells, and a way to query them.
+libsonata also allows for extended expressions, such as Regular expressions,and floating point tests, as described here: `SONATA extension: Node Sets <https://sonata-extension.readthedocs.io/en/latest/sonata_nodeset.html>`__
+
+.. code-block:: pycon
+
+   # load a node set JSON file
+   >>> node_sets = libsonata.NodeSets.from_file('node_sets.json')
+
+   # list node sets
+   >>> node_sets.names
+   {'L6_UPC', 'Layer1', 'Layer2', 'Layer3', ....}
+
+   # get the selection of nodes that match in population
+   >>> selection = node_sets.materialize('Layer1', population)
+
+   # node sets can also be loaded from a JSON string
+   >>> node_sets_manual = libsonata.NodeSets(json.dumps({"SLM_PPA_and_SP_PC": {"mtype": ["SLM_PPA", "SP_PC"]}}))
+   >>> node_sets_manual.names
+   {'SLM_PPA_and_SP_PC'}
 
 
 Edges
