@@ -466,7 +466,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.ampMean == 70);
             CHECK(input.ampVar == 40);
             CHECK(input.rate == 4);
-            CHECK(input.randomSeed == 201506);
+            CHECK(input.randomSeed == nonstd::nullopt);
             CHECK(input.riseTime == 0.4);
             CHECK(input.decayTime == 4);
         }
@@ -480,7 +480,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.ampCv == 0.63);
             CHECK(input.meanPercent == 70);
             CHECK(input.sdPercent == 40);
-            CHECK(input.randomSeed == 201506);
+            CHECK(input.randomSeed == 230522);
             CHECK(input.riseTime == 0.4);
             CHECK(input.decayTime == 4);
         }
@@ -520,6 +520,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.ampCv == 0.63);
             CHECK(input.mean == 50);
             CHECK(input.sigma == 5);
+            CHECK(input.randomSeed == nonstd::nullopt);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputOrnsteinUhlenbeck>(
@@ -530,6 +531,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.reversal == 10);
             CHECK(input.mean == 50);
             CHECK(input.sigma == 5);
+            CHECK(input.randomSeed == nonstd::nullopt);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputRelativeOrnsteinUhlenbeck>(
@@ -540,6 +542,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.reversal == 0);
             CHECK(input.meanPercent == 70);
             CHECK(input.sdPercent == 10);
+            CHECK(input.randomSeed == 230522);
         }
 
         CHECK(config.listInputNames() == std::set<std::string>{"ex_abs_shotnoise",

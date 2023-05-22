@@ -344,7 +344,6 @@ void parseVariantType(const nlohmann::json& it, variantValueType& var) {
 SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
                                          const SimulationConfig::InputBase::Module module,
                                          const std::string& basePath,
-                                         int randomSeed,
                                          const std::string& debugStr) {
     using Module = SimulationConfig::InputBase::Module;
 
@@ -415,7 +414,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseCommon(ret);
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
-        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "rate", debugStr, ret.rate);
         parseMandatory(valueIt, "amp_mean", debugStr, ret.ampMean);
@@ -428,7 +427,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
 
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
-        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
@@ -441,7 +440,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
 
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
-        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean", debugStr, ret.mean);
@@ -473,7 +472,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseCommon(ret);
         parseMandatory(valueIt, "tau", debugStr, ret.tau);
         parseOptional(valueIt, "reversal", ret.reversal);
-        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
 
         parseMandatory(valueIt, "mean", debugStr, ret.mean);
@@ -485,7 +484,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseCommon(ret);
         parseMandatory(valueIt, "tau", debugStr, ret.tau);
         parseOptional(valueIt, "reversal", ret.reversal);
-        parseOptional(valueIt, "random_seed", ret.randomSeed, {randomSeed});
+        parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
 
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
@@ -1016,8 +1015,7 @@ class SimulationConfig::Parser
             InputBase::Module module;
             parseMandatory(valueIt, "module", debugStr, module);
 
-            const auto input =
-                parseInputModule(valueIt, module, _basePath, parseRun().randomSeed, debugStr);
+            const auto input = parseInputModule(valueIt, module, _basePath, debugStr);
             result[it.key()] = input;
 
             auto mismatchingModuleInputType = [&it]() {
