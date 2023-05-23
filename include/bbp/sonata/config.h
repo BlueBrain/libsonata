@@ -464,8 +464,8 @@ class SONATA_API SimulationConfig
         double riseTime{};
         /// The decay time of the bi-exponential shots (ms)
         double decayTime{};
-        /// Override the random seed to introduce correlations between cells
-        int randomSeed{};
+        /// Override the random seed to introduce correlations between cells, default = None
+        nonstd::optional<int> randomSeed{nonstd::nullopt};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// Rate of Poisson events (Hz)
@@ -482,8 +482,8 @@ class SONATA_API SimulationConfig
         double riseTime{};
         /// The decay time of the bi-exponential shots (ms)
         double decayTime{};
-        /// Override the random seed to introduce correlations between cells
-        int randomSeed{};
+        /// Override the random seed to introduce correlations between cells, default = None
+        nonstd::optional<int> randomSeed{nonstd::nullopt};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
@@ -501,8 +501,8 @@ class SONATA_API SimulationConfig
         double riseTime{};
         /// The decay time of the bi-exponential shots (ms)
         double decayTime{};
-        /// Override the random seed to introduce correlations between cells
-        int randomSeed{};
+        /// Override the random seed to introduce correlations between cells, default = None
+        nonstd::optional<int> randomSeed{nonstd::nullopt};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
@@ -520,8 +520,8 @@ class SONATA_API SimulationConfig
         double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
-        /// Override the random seed to introduce correlations between cells
-        int randomSeed{};
+        /// Override the random seed to introduce correlations between cells, default = None
+        nonstd::optional<int> randomSeed{nonstd::nullopt};
         /// Signal mean in nA (current_clamp) or uS (conductance)
         double mean{};
         /// Signal std dev in nA (current_clamp) or uS (conductance)
@@ -535,8 +535,8 @@ class SONATA_API SimulationConfig
         double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
-        /// Override the random seed to introduce correlations between cells
-        int randomSeed{};
+        /// Override the random seed to introduce correlations between cells, default = None
+        nonstd::optional<int> randomSeed{nonstd::nullopt};
         /// Signal mean as percentage of a cell’s threshold current (current_clamp) or inverse input
         /// resistance (conductance)
         double meanPercent{};

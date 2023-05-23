@@ -235,6 +235,8 @@ static const char *__doc_bbp_sonata_NodeSets_NodeSets_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodeSets_NodeSets_3 = R"doc()doc";
 
+static const char *__doc_bbp_sonata_NodeSets_NodeSets_4 = R"doc()doc";
+
 static const char *__doc_bbp_sonata_NodeSets_fromFile = R"doc(Open a SONATA `node sets` file from a path */)doc";
 
 static const char *__doc_bbp_sonata_NodeSets_impl = R"doc()doc";
@@ -652,7 +654,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_dt =
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_mean = R"doc(Signal mean in nA (current_clamp) or uS (conductance).)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_randomSeed =
+R"doc(Override the random seed to introduce correlations between cells,
+default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
 
@@ -740,7 +744,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_dt =
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_mean = R"doc(Signal mean in nA (current_clamp) or uS (conductance))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_randomSeed =
+R"doc(Override the random seed to introduce correlations between cells,
+default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
 
@@ -772,7 +778,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenb
 R"doc(Signal mean as percentage of a cell’s threshold current
 (current_clamp) or inverse input resistance (conductance))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_randomSeed =
+R"doc(Override the random seed to introduce correlations between cells,
+default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
 
@@ -794,7 +802,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_mean
 R"doc(Signal mean as percentage of a cell’s threshold current
 (current_clamp) or inverse input resistance (conductance))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_randomSeed =
+R"doc(Override the random seed to introduce correlations between cells,
+default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
 
@@ -822,7 +832,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_decayTime = 
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_randomSeed = R"doc(Override the random seed to introduce correlations between cells)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_randomSeed =
+R"doc(Override the random seed to introduce correlations between cells,
+default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_rate = R"doc(Rate of Poisson events (Hz))doc";
 
