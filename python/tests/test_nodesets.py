@@ -167,4 +167,8 @@ class TestNodePopulationNodeSet(unittest.TestCase):
     def test_NodeSetEmptyArray(self):
         j = '''{"NodeSet0": { "node_id": [] } }'''
         sel = NodeSets(j).materialize("NodeSet0", self.population)
-        self.assertEqual(sel, Selection(((), )))
+        self.assertEqual(sel, Selection([]))
+
+        j = '''{ "NodeSetCompound0": [] } '''
+        sel = NodeSets(j).materialize("NodeSetCompound0", self.population)
+        self.assertEqual(sel, Selection([]))

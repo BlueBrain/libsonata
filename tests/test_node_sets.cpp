@@ -207,9 +207,7 @@ TEST_CASE("NodeSetBasic") {
         auto node_sets = R""({ "NodeSet0": {"node_id": [] } })"";
         NodeSets ns(node_sets);
         Selection sel = ns.materialize("NodeSet0", population);
-        CHECK(sel == Selection({
-                         {0, 1},
-                     }));
+        CHECK(sel == Selection({}));
     }
 }
 
@@ -256,6 +254,17 @@ TEST_CASE("NodeSetCompound") {
             CHECK(expected == ns.materialize("NodeSetCompound4", population));
             CHECK(expected == ns.materialize("NodeSetCompound5", population));
         }
+    }
+
+    SECTION("EmptyCompoundArray")
+    {
+        auto node_sets = R""({ "NodeSet0": {"node_id": [] },
+                               "NodeSetCompound0": []
+                }
+        )"";
+        NodeSets ns(node_sets);
+        Selection sel = ns.materialize("NodeSetCompound0", population);
+        CHECK(sel == Selection({}));
     }
 }
 
