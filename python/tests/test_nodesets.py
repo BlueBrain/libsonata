@@ -163,3 +163,8 @@ class TestNodePopulationNodeSet(unittest.TestCase):
 
         ns = NodeSets.from_file(os.path.join(PATH, 'node_sets.json'))
         self.assertEqual(new, ns.toJSON())
+
+    def test_NodeSetEmptyArray(self):
+        j = '''{"NodeSet0": { "node_id": [] } }'''
+        sel = NodeSets(j).materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((), )))

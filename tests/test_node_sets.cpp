@@ -201,6 +201,16 @@ TEST_CASE("NodeSetBasic") {
             CHECK(sel == Selection{{}});
         }
     }
+
+    SECTION("EmptyArray")
+    {
+        auto node_sets = R""({ "NodeSet0": {"node_id": [] } })"";
+        NodeSets ns(node_sets);
+        Selection sel = ns.materialize("NodeSet0", population);
+        CHECK(sel == Selection({
+                         {0, 1},
+                     }));
+    }
 }
 
 TEST_CASE("NodeSetCompound") {
