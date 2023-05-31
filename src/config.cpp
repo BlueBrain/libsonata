@@ -85,6 +85,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Sections,
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Type,
                              {{SimulationConfig::Report::Type::invalid, nullptr},
                               {SimulationConfig::Report::Type::compartment, "compartment"},
+                              {SimulationConfig::Report::Type::lfp, "lfp"},
                               {SimulationConfig::Report::Type::summation, "summation"},
                               {SimulationConfig::Report::Type::synapse, "synapse"}})
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Scaling,
@@ -975,6 +976,7 @@ class SimulationConfig::Parser
         parseOptional(*runIt, "ionchannel_seed", result.ionchannelSeed, {0});
         parseOptional(*runIt, "minis_seed", result.minisSeed, {0});
         parseOptional(*runIt, "synapse_seed", result.synapseSeed, {0});
+        parseOptional(*runIt, "electrodes_file", result.electrodesFile, {""});
         return result;
     }
 

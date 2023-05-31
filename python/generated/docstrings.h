@@ -966,6 +966,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_Type = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_compartment = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_lfp = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_invalid = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_summation = R"doc()doc";
@@ -1042,6 +1044,8 @@ R"doc(A non-negative integer used for seeding stochastic synapses, default
 is 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_electrodesFile = R"doc(Electrode weights file)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
 R"doc(Parses a SONATA JSON simulation configuration file.

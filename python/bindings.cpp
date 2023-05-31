@@ -610,7 +610,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(Run, minisSeed))
         .def_readonly("synapse_seed",
                       &SimulationConfig::Run::synapseSeed,
-                      DOC_SIMULATIONCONFIG(Run, synapseSeed));
+                      DOC_SIMULATIONCONFIG(Run, synapseSeed))
+        .def_readonly("electrodes_file",
+                      &SimulationConfig::Run::electrodesFile,
+                      DOC_SIMULATIONCONFIG(Run, electrodesFile));
 
     py::enum_<SimulationConfig::Run::IntegrationMethod>(run, "IntegrationMethod")
         .value("euler", SimulationConfig::Run::IntegrationMethod::euler)
@@ -753,6 +756,7 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::enum_<SimulationConfig::Report::Type>(report, "Type")
         .value("compartment", SimulationConfig::Report::Type::compartment)
+        .value("lfp", SimulationConfig::Report::Type::lfp)
         .value("summation", SimulationConfig::Report::Type::summation)
         .value("synapse", SimulationConfig::Report::Type::synapse);
 

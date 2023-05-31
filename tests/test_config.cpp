@@ -315,6 +315,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().ionchannelSeed == 222);
         CHECK(config.getRun().minisSeed == 333);
         CHECK(config.getRun().synapseSeed == 444);
+        CHECK(config.getRun().electrodesFile == "electrodes/electrode_weights.h5");
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
@@ -361,7 +362,8 @@ TEST_CASE("SimulationConfig") {
               "axonal_comp_centers",
               "cell_imembrane",
               "compartment",
-              "soma"
+              "soma",
+              "lfp"
               });
 
         CHECK(config.getReport("soma").cells == "Column");
@@ -382,6 +384,7 @@ TEST_CASE("SimulationConfig") {
               axonalFilePath.lexically_normal());
         CHECK(config.getReport("cell_imembrane").endTime == 500.);
         CHECK(config.getReport("cell_imembrane").variableName == "i_membrane, IClamp");
+        CHECK(config.getReport("lfp").type == SimulationConfig::Report::Type::lfp);
 
         CHECK_NOTHROW(nlohmann::json::parse(config.getExpandedJSON()));
         CHECK(config.getBasePath() == basePath.lexically_normal());
@@ -632,6 +635,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().ionchannelSeed == 0);
         CHECK(config.getRun().minisSeed == 0);
         CHECK(config.getRun().synapseSeed == 0);
+        CHECK(config.getRun().electrodesFile == "");
     }
 
     SECTION("Exception") {
