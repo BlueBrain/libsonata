@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.21:
+ - SimulationConfig: set the default value of random_seed in inputs to None (#270)
+ - Allow empty arrays in nodesets (#272)
+
 ## v0.1.19:
  - switch to having `connection_overrides` being a list (#263)
  - expose circuit config status (#264)

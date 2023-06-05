@@ -115,6 +115,18 @@ class NodeSets
     }
 };
 
+class NodeSetNullRule: public NodeSetRule
+{
+    Selection materialize(const detail::NodeSets& /* unused */,
+                          const NodePopulation& /* unused */) const final {
+        return Selection({});
+    }
+
+    std::string toJSON() const final {
+        return {};
+    }
+};
+
 // { 'region': ['region1', 'region2', ...] }
 template <typename T>
 class NodeSetBasicRule: public NodeSetRule
@@ -424,7 +436,7 @@ NodeSetRulePtr _dispatch_node(const std::string& attribute, const json& value) {
         const auto& array = value;
 
         if (array.empty()) {
-            throw SonataError(fmt::format("NodeSet Array is empty for attribute: {}", attribute));
+            return std::make_unique<NodeSetNullRule>();
         }
 
         if (array[0].is_number()) {
