@@ -199,15 +199,21 @@ static const char *__doc_bbp_sonata_NodePopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodePopulationProperties = R"doc(Node population-specific network information.)doc";
 
-static const char *__doc_bbp_sonata_NodePopulationProperties_microdomainsFile = R"doc(Path to spatial_segment_index)doc";
+static const char *__doc_bbp_sonata_NodePopulationProperties_microdomainsFile =
+R"doc(Path to the .h5 storing microdomain data. Only for astrocyte node
+populations where it is mandatory.)doc";
 
 static const char *__doc_bbp_sonata_NodePopulationProperties_spatialSegmentIndexDir = R"doc(Path to spatial_segment_index)doc";
 
-static const char *__doc_bbp_sonata_NodePopulationProperties_spineMorphologiesDir = R"doc(Path to spatial_segment_index)doc";
+static const char *__doc_bbp_sonata_NodePopulationProperties_spineMorphologiesDir = R"doc(Path to the directory containing the dendritic spine morphologies.)doc";
 
-static const char *__doc_bbp_sonata_NodePopulationProperties_vasculatureFile = R"doc(Path to the .h5 file containing the vasculature morphology.)doc";
+static const char *__doc_bbp_sonata_NodePopulationProperties_vasculatureFile =
+R"doc(Path to the .h5 file containing the vasculature morphology. Only for
+vasculature node populations where it is mandatory.)doc";
 
-static const char *__doc_bbp_sonata_NodePopulationProperties_vasculatureMesh = R"doc(Path to spatial_segment_index)doc";
+static const char *__doc_bbp_sonata_NodePopulationProperties_vasculatureMesh =
+R"doc(Path to the .obj file containing the mesh of a vasculature morphology.
+Only for vasculature node populations where it is mandatory.)doc";
 
 static const char *__doc_bbp_sonata_NodePopulation_NodePopulation = R"doc()doc";
 
