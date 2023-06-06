@@ -151,6 +151,33 @@ class TestCircuitConfig(unittest.TestCase):
             }
         self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
 
+    def test_vasculature_properties(self):
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "vasculature_mesh": "$BASE_DIR/vasculature_mesh.h5",
+            },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "type": "vasculature",
+                                "vasculature_file": "$BASE_DIR/vasculature_file.h5",
+                            }
+                        }
+                    }],
+                "edges": []
+                }
+            }
+        res = CircuitConfig(json.dumps(contents), PATH)
+        properties = res.node_population_properties('nodes-A')
+        assert properties.vasculature_file.endswith('tests/data/vasculature_file.h5')
+        assert properties.vasculature_mesh.endswith('tests/data/vasculature_mesh.h5')
+
     def test_duplicate_population(self):
         # in nodes
         contents = {

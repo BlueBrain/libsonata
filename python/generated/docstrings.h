@@ -40,7 +40,17 @@ static const char *__doc_bbp_sonata_CircuitConfig_Components_alternateMorphologi
 
 static const char *__doc_bbp_sonata_CircuitConfig_Components_biophysicalNeuronModelsDir = R"doc()doc";
 
+static const char *__doc_bbp_sonata_CircuitConfig_Components_endfeetMeshesFile = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components_microdomainsFile = R"doc()doc";
+
 static const char *__doc_bbp_sonata_CircuitConfig_Components_morphologiesDir = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components_spineMorphologiesDir = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components_vasculatureFile = R"doc()doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_Components_vasculatureMesh = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus = R"doc()doc";
 
@@ -163,6 +173,8 @@ static const char *__doc_bbp_sonata_EdgePopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_EdgePopulationProperties = R"doc(Edge population-specific network information.)doc";
 
+static const char *__doc_bbp_sonata_EdgePopulationProperties_endfeetMeshesFile = R"doc(Path to spatial_segment_index)doc";
+
 static const char *__doc_bbp_sonata_EdgePopulationProperties_spatialSynapseIndexDir = R"doc(Path to spatial_synapse_index)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation = R"doc()doc";
@@ -187,7 +199,15 @@ static const char *__doc_bbp_sonata_NodePopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodePopulationProperties = R"doc(Node population-specific network information.)doc";
 
+static const char *__doc_bbp_sonata_NodePopulationProperties_microdomainsFile = R"doc(Path to spatial_segment_index)doc";
+
 static const char *__doc_bbp_sonata_NodePopulationProperties_spatialSegmentIndexDir = R"doc(Path to spatial_segment_index)doc";
+
+static const char *__doc_bbp_sonata_NodePopulationProperties_spineMorphologiesDir = R"doc(Path to spatial_segment_index)doc";
+
+static const char *__doc_bbp_sonata_NodePopulationProperties_vasculatureFile = R"doc(Path to the .h5 file containing the vasculature morphology.)doc";
+
+static const char *__doc_bbp_sonata_NodePopulationProperties_vasculatureMesh = R"doc(Path to spatial_segment_index)doc";
 
 static const char *__doc_bbp_sonata_NodePopulation_NodePopulation = R"doc()doc";
 

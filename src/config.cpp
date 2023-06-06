@@ -140,26 +140,55 @@ namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
 
-void raiseOnBiophysicalPopulationsErrors(
-    const std::unordered_map<std::string, NodePopulationProperties>& populations) {
-    for (const auto& it : populations) {
-        const auto& population = it.first;
-        const auto& properties = it.second;
-        if (properties.type == "biophysical") {
-            if (properties.morphologiesDir.empty() &&
-                properties.alternateMorphologyFormats.empty()) {
-                throw SonataError(
-                    fmt::format("Node population '{}' is defined as 'biophysical' "
-                                "but does not define 'morphologies_dir' or "
-                                "'alternateMorphologyFormats'",
-                                population));
-            } else if (properties.biophysicalNeuronModelsDir.empty()) {
-                throw SonataError(
-                    fmt::format("Node population '{}' is defined as 'biophysical' "
-                                "but does not define 'biophysical_neuron_models_dir'",
-                                population));
-            }
-        }
+void raiseOnBiophysicalPopulationErrors(const std::string& population,
+                                        const bbp::sonata::NodePopulationProperties& properties) {
+    if (properties.morphologiesDir.empty() && properties.alternateMorphologyFormats.empty()) {
+        throw SonataError(
+            fmt::format("Node population '{}' is defined as 'biophysical' "
+                        "but does not define 'morphologies_dir' or "
+                        "'alternateMorphologyFormats'",
+                        population));
+    } else if (properties.biophysicalNeuronModelsDir.empty()) {
+        throw SonataError(
+            fmt::format("Node population '{}' is defined as 'biophysical' "
+                        "but does not define 'biophysical_neuron_models_dir'",
+                        population));
+    }
+}
+
+void raiseOnVasculaturePopulationErrors(const std::string& population,
+                                        const bbp::sonata::NodePopulationProperties& properties) {
+    if (!properties.vasculatureFile.has_value() || properties.vasculatureFile.value().empty()) {
+        throw SonataError(
+            fmt::format("Node population '{}' is defined as 'vasculature' "
+                        "but does not define 'vasculature_file",
+                        population));
+    } else if (!properties.vasculatureMesh.has_value() ||
+               properties.vasculatureMesh.value().empty()) {
+        throw SonataError(
+            fmt::format("Node population '{}' is defined as 'vasculature' "
+                        "but does not define 'vasculature_mesh",
+                        population));
+    }
+}
+
+void raiseOnAstrocytePopulationErrors(const std::string& population,
+                                      const bbp::sonata::NodePopulationProperties& properties) {
+    if (!properties.microdomainsFile.has_value() || properties.microdomainsFile.value().empty()) {
+        throw SonataError(
+            fmt::format("Node population '{}' is defined as 'astrocyte' "
+                        "but does not define 'microdomains_file",
+                        population));
+    }
+}
+
+void raiseOnEndfootPopulationErrors(const std::string& population,
+                                    const bbp::sonata::EdgePopulationProperties& properties) {
+    if (!properties.endfeetMeshesFile.has_value() || properties.endfeetMeshesFile.value().empty()) {
+        throw SonataError(
+            fmt::format("Node population '{}' is defined as 'endfoot' "
+                        "but does not define 'endfeet_meshes_file",
+                        population));
     }
 }
 
@@ -574,6 +603,16 @@ class CircuitConfig::Parser
         return defaultValue;
     }
 
+    nonstd::optional<std::string> getOptionalJSONPath(const nlohmann::json& json,
+                                                      const std::string& key) const {
+        auto value = getJSONValue<std::string>(json, key);
+        if (!value.empty()) {
+            return toAbsolute(_basePath, value);
+        }
+
+        return nonstd::nullopt;
+    }
+
     std::string getJSONPath(const nlohmann::json& json,
                             const std::string& key,
                             const std::string& defaultValue = std::string()) const {
@@ -655,29 +694,69 @@ class CircuitConfig::Parser
         result.biophysicalNeuronModelsDir = getJSONPath(components,
                                                         "biophysical_neuron_models_dir");
 
+        result.vasculatureFile = getOptionalJSONPath(components, "vasculature_file");
+        result.vasculatureMesh = getOptionalJSONPath(components, "vasculature_mesh");
+        result.endfeetMeshesFile = getOptionalJSONPath(components, "endfeetMeshesFile");
+        result.microdomainsFile = getOptionalJSONPath(components, "microdomains_file");
+        result.spineMorphologiesDir = getOptionalJSONPath(components, "spine_morphologies_dir");
+
         return result;
     }
 
     template <typename PopulationPropertiesT>
-    void updateDefaultProperties(std::unordered_map<std::string, PopulationPropertiesT>& map,
+    void updateDefaultProperties(PopulationPropertiesT& component,
                                  const std::string& defaultType,
                                  const CircuitConfig::Components& defaultComponents) {
+        if (component.type.empty()) {
+            component.type = defaultType;
+        }
+
+        if (component.alternateMorphologyFormats.empty()) {
+            component.alternateMorphologyFormats = defaultComponents.alternateMorphologiesDir;
+        }
+
+        if (component.biophysicalNeuronModelsDir.empty()) {
+            component.biophysicalNeuronModelsDir = defaultComponents.biophysicalNeuronModelsDir;
+        }
+
+        if (component.morphologiesDir.empty()) {
+            component.morphologiesDir = defaultComponents.morphologiesDir;
+        }
+    }
+
+    void updateDefaultNodeProperties(std::unordered_map<std::string, NodePopulationProperties>& map,
+                                     const std::string& defaultType,
+                                     const CircuitConfig::Components& defaultComponents) {
         for (auto& entry : map) {
             auto& component = entry.second;
-            if (component.type.empty()) {
-                component.type = defaultType;
+            updateDefaultProperties(component, defaultType, defaultComponents);
+
+            if (!component.vasculatureFile) {
+                component.vasculatureFile = defaultComponents.vasculatureFile;
             }
 
-            if (component.alternateMorphologyFormats.empty()) {
-                component.alternateMorphologyFormats = defaultComponents.alternateMorphologiesDir;
+            if (!component.vasculatureMesh) {
+                component.vasculatureMesh = defaultComponents.vasculatureMesh;
             }
 
-            if (component.biophysicalNeuronModelsDir.empty()) {
-                component.biophysicalNeuronModelsDir = defaultComponents.biophysicalNeuronModelsDir;
+            if (!component.microdomainsFile) {
+                component.microdomainsFile = defaultComponents.microdomainsFile;
             }
+            if (!component.spineMorphologiesDir) {
+                component.spineMorphologiesDir = defaultComponents.spineMorphologiesDir;
+            }
+        }
+    }
 
-            if (component.morphologiesDir.empty()) {
-                component.morphologiesDir = defaultComponents.morphologiesDir;
+    void updateDefaultEdgeProperties(std::unordered_map<std::string, EdgePopulationProperties>& map,
+                                     const std::string& defaultType,
+                                     const CircuitConfig::Components& defaultComponents) {
+        for (auto& entry : map) {
+            auto& component = entry.second;
+            updateDefaultProperties(component, defaultType, defaultComponents);
+
+            if (!component.endfeetMeshesFile) {
+                component.endfeetMeshesFile = defaultComponents.endfeetMeshesFile;
             }
         }
     }
@@ -756,6 +835,11 @@ class CircuitConfig::Parser
             status,
             [&](NodePopulationProperties& popProperties, const nlohmann::json& popData) {
             popProperties.spatialSegmentIndexDir = getJSONPath(popData, "spatial_segment_index_dir");
+            popProperties.vasculatureFile = getOptionalJSONPath(popData, "vasculature_file");
+            popProperties.vasculatureMesh = getOptionalJSONPath(popData, "vasculature_mesh");
+            popProperties.microdomainsFile = getOptionalJSONPath(popData, "microdomains_file");
+            popProperties.spineMorphologiesDir = getOptionalJSONPath(popData,
+                                                                     "spine_morphologies_dir");
             });
     }
 
@@ -766,6 +850,7 @@ class CircuitConfig::Parser
             status,
             [&](EdgePopulationProperties& popProperties, const nlohmann::json& popData) {
             popProperties.spatialSynapseIndexDir = getJSONPath(popData, "spatial_synapse_index_dir");
+            popProperties.endfeetMeshesFile = getOptionalJSONPath(popData, "endfeetMeshesFile");
             });
     }
 
@@ -790,11 +875,30 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
     _edgePopulationProperties = parser.parseEdgePopulations(_status);
 
     Components defaultComponents = parser.parseDefaultComponents();
-    parser.updateDefaultProperties(_nodePopulationProperties, "biophysical", defaultComponents);
-    parser.updateDefaultProperties(_edgePopulationProperties, "chemical", defaultComponents);
+
+    parser.updateDefaultNodeProperties(_nodePopulationProperties, "biophysical", defaultComponents);
+    parser.updateDefaultEdgeProperties(_edgePopulationProperties, "chemical", defaultComponents);
 
     if (getCircuitConfigStatus() == ConfigStatus::complete) {
-        raiseOnBiophysicalPopulationsErrors(_nodePopulationProperties);
+        for (const auto& it : _nodePopulationProperties) {
+            const auto& population = it.first;
+            const auto& properties = it.second;
+            if (properties.type == "biophysical") {
+                raiseOnBiophysicalPopulationErrors(population, properties);
+            } else if (properties.type == "vasculature") {
+                raiseOnVasculaturePopulationErrors(population, properties);
+            } else if (properties.type == "astrocyte") {
+                raiseOnAstrocytePopulationErrors(population, properties);
+            }
+        }
+
+        for (const auto& it : _edgePopulationProperties) {
+            const auto& population = it.first;
+            const auto& properties = it.second;
+            if (properties.type == "endfoot") {
+                raiseOnEndfootPopulationErrors(population, properties);
+            }
+        }
     }
 }
 

@@ -543,13 +543,28 @@ PYBIND11_MODULE(_libsonata, m) {
         m, "NodePopulationProperties", "Stores node population-specific network information")
         .def_readonly("spatial_segment_index_dir",
                       &NodePopulationProperties::spatialSegmentIndexDir,
-                      DOC_NODE_POPULATION_PROPERTIES(spatialSegmentIndexDir));
+                      DOC_NODE_POPULATION_PROPERTIES(spatialSegmentIndexDir))
+        .def_readonly("vasculature_file",
+                      &NodePopulationProperties::vasculatureFile,
+                      DOC_NODE_POPULATION_PROPERTIES(vasculatureFile))
+        .def_readonly("vasculature_mesh",
+                      &NodePopulationProperties::vasculatureMesh,
+                      DOC_NODE_POPULATION_PROPERTIES(vasculatureMesh))
+        .def_readonly("microdomains_file",
+                      &NodePopulationProperties::microdomainsFile,
+                      DOC_NODE_POPULATION_PROPERTIES(microdomainsFile))
+        .def_readonly("spine_morphologies_dir",
+                      &NodePopulationProperties::spineMorphologiesDir,
+                      DOC_NODE_POPULATION_PROPERTIES(spineMorphologiesDir));
 
     py::class_<EdgePopulationProperties, CommonPopulationProperties>(
         m, "EdgePopulationProperties", "Stores edge population-specific network information")
         .def_readonly("spatial_synapse_index_dir",
                       &EdgePopulationProperties::spatialSynapseIndexDir,
-                      DOC_EDGE_POPULATION_PROPERTIES(spatialSynapseIndexDir));
+                      DOC_EDGE_POPULATION_PROPERTIES(spatialSynapseIndexDir))
+        .def_readonly("endfeet_meshes_file",
+                      &EdgePopulationProperties::endfeetMeshesFile,
+                      DOC_EDGE_POPULATION_PROPERTIES(endfeetMeshesFile));
 
     py::enum_<CircuitConfig::ConfigStatus>(m, "CircuitConfigStatus")
         .value("invalid", CircuitConfig::ConfigStatus::invalid)
