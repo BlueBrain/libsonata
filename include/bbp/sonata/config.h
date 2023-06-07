@@ -75,6 +75,29 @@ struct SONATA_API NodePopulationProperties: public CommonPopulationProperties {
      * Path to spatial_segment_index
      */
     std::string spatialSegmentIndexDir;
+
+    /**
+     * Path to the .h5 file containing the vasculature morphology. Only for vasculature node
+     * populations where it is mandatory.
+     */
+    nonstd::optional<std::string> vasculatureFile{nonstd::nullopt};
+
+    /**
+     *Path to the .obj file containing the mesh of a vasculature morphology. Only for vasculature
+     *node populations where it is mandatory.
+     */
+    nonstd::optional<std::string> vasculatureMesh{nonstd::nullopt};
+
+    /**
+     * Path to the .h5 storing microdomain data. Only for astrocyte node populations where it is
+     * mandatory.
+     */
+    nonstd::optional<std::string> microdomainsFile{nonstd::nullopt};
+
+    /**
+     * Path to the directory containing the dendritic spine morphologies.
+     */
+    nonstd::optional<std::string> spineMorphologiesDir{nonstd::nullopt};
 };
 
 /**
@@ -85,6 +108,11 @@ struct SONATA_API EdgePopulationProperties: public CommonPopulationProperties {
      * Path to spatial_synapse_index
      */
     std::string spatialSynapseIndexDir;
+
+    /**
+     * Path to spatial_segment_index
+     */
+    nonstd::optional<std::string> endfeetMeshesFile{nonstd::nullopt};
 };
 
 /**
@@ -198,6 +226,12 @@ class SONATA_API CircuitConfig
         std::string morphologiesDir;
         std::unordered_map<std::string, std::string> alternateMorphologiesDir;
         std::string biophysicalNeuronModelsDir;
+
+        nonstd::optional<std::string> vasculatureFile{nonstd::nullopt};
+        nonstd::optional<std::string> vasculatureMesh{nonstd::nullopt};
+        nonstd::optional<std::string> endfeetMeshesFile{nonstd::nullopt};
+        nonstd::optional<std::string> microdomainsFile{nonstd::nullopt};
+        nonstd::optional<std::string> spineMorphologiesDir{nonstd::nullopt};
     };
 
     class Parser;

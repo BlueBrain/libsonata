@@ -151,6 +151,78 @@ class TestCircuitConfig(unittest.TestCase):
             }
         self.assertRaises(SonataError, CircuitConfig, json.dumps(contents), PATH)
 
+    def test_vasculature_properties(self):
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "components": {
+                "vasculature_mesh": "$BASE_DIR/vasculature_mesh.h5",
+            },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "type": "vasculature",
+                                "vasculature_file": "$BASE_DIR/vasculature_file.h5",
+                            }
+                        }
+                    }],
+                "edges": []
+                }
+            }
+        res = CircuitConfig(json.dumps(contents), PATH)
+        properties = res.node_population_properties('nodes-A')
+        assert properties.vasculature_file.endswith('tests/data/vasculature_file.h5')
+        assert properties.vasculature_mesh.endswith('tests/data/vasculature_mesh.h5')
+
+    def test_astrocyte_properties(self):
+        contents = {
+            "manifest": {
+                "$BASE_DIR": "./",
+                },
+            "networks": {
+                "nodes": [
+                    {
+                        "nodes_file": "$BASE_DIR/nodes1.h5",
+                        "populations": {
+                            "nodes-A": {
+                                "type": "astrocyte",
+                                "microdomains_file": "$BASE_DIR/microdomains_file.h5",
+                            }
+                        }
+                    }],
+                "edges": []
+                }
+            }
+        res = CircuitConfig(json.dumps(contents), PATH)
+        properties = res.node_population_properties('nodes-A')
+        assert properties.microdomains_file.endswith('tests/data/microdomains_file.h5')
+
+    def test_endfeet_properties(self):
+        contents = {
+            "manifest": { "$BASE_DIR": "./", },
+            "networks": {
+                "nodes": [],
+                "edges": [
+                  {
+                    "edges_file": "$NETWORK_DIR/edges1.h5",
+                    "populations": {
+                      "edges-AB": {
+                        "type": "endfoot",
+                        "endfeet_meshes_file": "$BASE_DIR/meshes.h5"
+                      }
+                    }
+                  }
+                ]
+                }
+            }
+        res = CircuitConfig(json.dumps(contents), PATH)
+        properties = res.edge_population_properties('edges-AB')
+        assert properties.endfeet_meshes_file.endswith('tests/data/meshes.h5')
+
     def test_duplicate_population(self):
         # in nodes
         contents = {
