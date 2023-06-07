@@ -696,7 +696,7 @@ class CircuitConfig::Parser
 
         result.vasculatureFile = getOptionalJSONPath(components, "vasculature_file");
         result.vasculatureMesh = getOptionalJSONPath(components, "vasculature_mesh");
-        result.endfeetMeshesFile = getOptionalJSONPath(components, "endfeetMeshesFile");
+        result.endfeetMeshesFile = getOptionalJSONPath(components, "endfeet_meshes_file");
         result.microdomainsFile = getOptionalJSONPath(components, "microdomains_file");
         result.spineMorphologiesDir = getOptionalJSONPath(components, "spine_morphologies_dir");
 
@@ -850,7 +850,7 @@ class CircuitConfig::Parser
             status,
             [&](EdgePopulationProperties& popProperties, const nlohmann::json& popData) {
             popProperties.spatialSynapseIndexDir = getJSONPath(popData, "spatial_synapse_index_dir");
-            popProperties.endfeetMeshesFile = getOptionalJSONPath(popData, "endfeetMeshesFile");
+            popProperties.endfeetMeshesFile = getOptionalJSONPath(popData, "endfeet_meshes_file");
             });
     }
 
