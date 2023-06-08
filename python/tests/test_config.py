@@ -417,7 +417,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.minis_seed, 333)
         self.assertEqual(self.config.run.synapse_seed, 444)
         self.assertEqual(self.config.run.electrodes_file,
-                         os.path.abspath(os.path.join(PATH, 'electrodes/electrode_weights.h5')))
+                         os.path.abspath(os.path.join(PATH, 'config/electrodes/electrode_weights.h5')))
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/some/path/output')))
