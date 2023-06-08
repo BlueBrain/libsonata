@@ -315,11 +315,13 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().ionchannelSeed == 222);
         CHECK(config.getRun().minisSeed == 333);
         CHECK(config.getRun().synapseSeed == 444);
-        CHECK(config.getRun().electrodesFile == "electrodes/electrode_weights.h5");
 
         namespace fs = ghc::filesystem;
         const auto basePath = fs::absolute(
             fs::path("./data/config/simulation_config.json").parent_path());
+
+        const auto electrodesPath = fs::absolute(basePath / "electrodes/electrode_weights.h5");
+        CHECK(config.getRun().electrodesFile == (electrodesPath).lexically_normal());
 
         CHECK_NOTHROW(config.getOutput());
         const auto outputPath = fs::absolute(basePath / "some/path/output");

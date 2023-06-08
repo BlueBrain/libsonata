@@ -977,6 +977,11 @@ class SimulationConfig::Parser
         parseOptional(*runIt, "minis_seed", result.minisSeed, {0});
         parseOptional(*runIt, "synapse_seed", result.synapseSeed, {0});
         parseOptional(*runIt, "electrodes_file", result.electrodesFile, {""});
+
+        if (!result.electrodesFile.empty()) {
+            result.electrodesFile = toAbsolute(_basePath, result.electrodesFile);
+        }
+
         return result;
     }
 
