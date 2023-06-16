@@ -172,3 +172,12 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         j = '''{ "NodeSetCompound0": [] } '''
         sel = NodeSets(j).materialize("NodeSetCompound0", self.population)
         self.assertEqual(sel, Selection([]))
+
+    def test_library_datatype(self):
+        # E-mapping-good is an @library value, we don't want to allow
+        # materialization of @libraries by integers
+        j = json.dumps({"NodeSet0": { "E-mapping-good": 0 }})
+        self.assertRaises(SonataError, NodeSets(j).materialize, "NodeSet0", self.population)
+
+        j = json.dumps({"NodeSet0": { "E-mapping-good": [0, 1, ] }})
+        self.assertRaises(SonataError, NodeSets(j).materialize, "NodeSet0", self.population)
