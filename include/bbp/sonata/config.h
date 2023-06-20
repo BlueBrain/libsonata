@@ -1,7 +1,5 @@
 /*************************************************************************
  * Copyright (C) 2018-2021 Blue Brain Project
- *                         Jonas Karlsson <jonas.karlsson@epfl.ch>
- *                         Juan Hernando <juan.hernando@epfl.ch>
  *
  * This file is part of 'libsonata', distributed under the terms
  * of the GNU Lesser General Public License version 3.
