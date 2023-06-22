@@ -1341,8 +1341,8 @@ const nonstd::optional<std::string>& SimulationConfig::getNodeSet() const noexce
     return _nodeSet;
 }
 
-const std::unordered_map<std::string, variantValueType>& SimulationConfig::getMetaData()
-    const noexcept {
+const std::unordered_map<std::string, variantValueType>& SimulationConfig::getMetaData() const
+    noexcept {
     return _metaData;
 }
 
