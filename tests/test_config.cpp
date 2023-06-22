@@ -583,7 +583,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(overrides[1].neuromodulationDtc == 100);
         CHECK(overrides[1].neuromodulationStrength == 0.75);
 
-        CHECK(config.getMetaData().size() == 2);
+        CHECK(config.getMetaData().size() == 4);
         CHECK(config.getBetaFeatures().size() == 4);
     }
 

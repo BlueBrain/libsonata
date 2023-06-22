@@ -597,7 +597,8 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(overrides['GABAB_erev'].neuromodulation_dtc, 100)
         self.assertEqual(overrides['GABAB_erev'].neuromodulation_strength, 0.75)
 
-        self.assertEqual(self.config.metadata, {'sim_version': '1', 'note': 'first attempt of simulation'})
+        self.assertEqual(self.config.metadata,
+                         {'sim_version': 1, 'note': 'first attempt of simulation', 'v_float': 0.5, 'v_bool': False})
         self.assertEqual(self.config.beta_features, {'v_str': 'abcd', 'v_int': 10, 'v_float': 0.5, 'v_bool': False})
 
     def test_expanded_json(self):

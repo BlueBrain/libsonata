@@ -1218,14 +1218,16 @@ class SimulationConfig::Parser
         return result;
     }
 
-    std::unordered_map<std::string, std::string> parseMetaData() const {
-        std::unordered_map<std::string, std::string> result;
+    std::unordered_map<std::string, variantValueType> parseMetaData() const {
+        std::unordered_map<std::string, variantValueType> result;
         const auto metaIt = _json.find("metadata");
         if (metaIt == _json.end()) {
             return result;
         }
         for (auto& it : metaIt->items()) {
-            result.insert({it.key(), it.value()});
+            variantValueType res_val;
+            parseVariantType(it.value(), res_val);
+            result.insert({it.key(), res_val});
         }
         return result;
     }
@@ -1339,7 +1341,8 @@ const nonstd::optional<std::string>& SimulationConfig::getNodeSet() const noexce
     return _nodeSet;
 }
 
-const std::unordered_map<std::string, std::string>& SimulationConfig::getMetaData() const noexcept {
+const std::unordered_map<std::string, variantValueType>& SimulationConfig::getMetaData()
+    const noexcept {
     return _metaData;
 }
 
