@@ -584,7 +584,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(overrides[1].neuromodulationStrength == 0.75);
         REQUIRE_THAT(config.getMetaData(),
                      Catch::Matchers::Predicate<decltype(config.getMetaData())>(
-                         [](auto& metadata) -> bool {
+                         [](const auto& metadata) -> bool {
                              return metadata.size() == 4 &&
                                     nonstd::get<std::string>(metadata.at("note")) ==
                                         "first attempt of simulation" &&
@@ -595,7 +595,7 @@ TEST_CASE("SimulationConfig") {
                          "metadata matches"));
         REQUIRE_THAT(config.getBetaFeatures(),
                      Catch::Matchers::Predicate<decltype(config.getBetaFeatures())>(
-                         [](auto& features) -> bool {
+                         [](const auto& features) -> bool {
                              return features.size() == 4 &&
                                     nonstd::get<std::string>(features.at("v_str")) == "abcd" &&
                                     nonstd::get<int>(features.at("v_int")) == 10 &&
