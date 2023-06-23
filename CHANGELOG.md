@@ -1,6 +1,11 @@
 # Changelog
 
 ## v0.1.21:
+ - bump HighFive to v2.7.1 (#278)
+ - Extend metadata type to be int, float, bool and string (#277)
+ - Prevent node_set materialization for `@libary` with integers (#276)
+
+## v0.1.21:
  - SimulationConfig: set the default value of random_seed in inputs to None (#270)
  - Allow empty arrays in nodesets (#272)
  - implement spec for population properties for vasculature, astrocytes and endfeet (#275)
