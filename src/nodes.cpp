@@ -107,6 +107,10 @@ Selection NodePopulation::regexMatch(const std::string& name, const std::string&
 template <typename T>
 Selection NodePopulation::matchAttributeValues(const std::string& attribute,
                                                const std::vector<T>& values) const {
+    if (enumerationNames().count(attribute) > 0) {
+        throw SonataError("Matching a @library enum by non-string");
+    }
+
     auto dtype = impl_->getAttributeDataSet(attribute).getDataType();
     if (is_unsigned_int(dtype) || is_signed_int(dtype)) {
         return _matchAttributeValues<T>(*this, attribute, values);
