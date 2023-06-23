@@ -582,9 +582,27 @@ TEST_CASE("SimulationConfig") {
         CHECK(overrides[1].modoverride == nonstd::nullopt);
         CHECK(overrides[1].neuromodulationDtc == 100);
         CHECK(overrides[1].neuromodulationStrength == 0.75);
-
-        CHECK(config.getMetaData().size() == 2);
-        CHECK(config.getBetaFeatures().size() == 4);
+        REQUIRE_THAT(config.getMetaData(),
+                     Catch::Matchers::Predicate<decltype(config.getMetaData())>(
+                         [](const auto& metadata) -> bool {
+                             return metadata.size() == 4 &&
+                                    nonstd::get<std::string>(metadata.at("note")) ==
+                                        "first attempt of simulation" &&
+                                    nonstd::get<int>(metadata.at("sim_version")) == 1 &&
+                                    nonstd::get<double>(metadata.at("v_float")) == 0.5 &&
+                                    nonstd::get<bool>(metadata.at("v_bool")) == false;
+                         },
+                         "metadata matches"));
+        REQUIRE_THAT(config.getBetaFeatures(),
+                     Catch::Matchers::Predicate<decltype(config.getBetaFeatures())>(
+                         [](const auto& features) -> bool {
+                             return features.size() == 4 &&
+                                    nonstd::get<std::string>(features.at("v_str")) == "abcd" &&
+                                    nonstd::get<int>(features.at("v_int")) == 10 &&
+                                    nonstd::get<double>(features.at("v_float")) == 0.5 &&
+                                    nonstd::get<bool>(features.at("v_bool")) == false;
+                         },
+                         "beta features match"));
     }
 
     SECTION("manifest_network_run") {

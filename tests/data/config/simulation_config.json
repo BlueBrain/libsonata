@@ -1,7 +1,9 @@
 {
      "metadata": {
         "note": "first attempt of simulation",
-        "sim_version": "1"
+        "sim_version": 1,
+        "v_float": 0.5,
+        "v_bool": false
      },
      "beta_features": {
         "v_str": "abcd",

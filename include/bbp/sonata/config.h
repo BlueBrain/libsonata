@@ -733,7 +733,7 @@ class SONATA_API SimulationConfig
     /**
      * Returns the metadata section
      */
-    const std::unordered_map<std::string, std::string>& getMetaData() const noexcept;
+    const std::unordered_map<std::string, variantValueType>& getMetaData() const noexcept;
 
 
     /**
@@ -774,7 +774,7 @@ class SONATA_API SimulationConfig
     // Name of node set
     nonstd::optional<std::string> _nodeSet{nonstd::nullopt};
     // Remarks on the simulation
-    std::unordered_map<std::string, std::string> _metaData;
+    std::unordered_map<std::string, variantValueType> _metaData;
     // Variables for a new feature in development, to be moved to other sections once in production
     std::unordered_map<std::string, variantValueType> _betaFeatures;
 
