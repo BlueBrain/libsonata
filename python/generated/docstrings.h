@@ -1146,7 +1146,7 @@ static const char *__doc_bbp_sonata_SonataError = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SonataError_SonataError = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SpikeReader = R"doc()doc";
+static const char *__doc_bbp_sonata_SpikeReader = R"doc(Used to read spike files)doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population = R"doc()doc";
 
@@ -1164,7 +1164,7 @@ static const char *__doc_bbp_sonata_SpikeReader_Population_filterNode = R"doc()d
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_filterTimestamp = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SpikeReader_Population_get = R"doc(Return reports for this population.)doc";
+static const char *__doc_bbp_sonata_SpikeReader_Population_get = R"doc(Return spikes with all those node_ids between 'tstart' and 'tstop')doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc(Return the way data are sorted ('none', 'by_id', 'by_time'))doc";
 

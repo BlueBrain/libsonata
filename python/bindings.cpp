@@ -458,7 +458,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("__or__", &bbp::sonata::operator|, "Union of selections")
         .def("__and__", &bbp::sonata::operator&, "Intersection of selections")
         .def("__repr__", [](Selection& obj) {
-            const auto ranges = obj.ranges();
+            const auto& ranges = obj.ranges();
             const size_t max_count = 10;
 
             if (ranges.size() < max_count) {
@@ -475,22 +475,6 @@ PYBIND11_MODULE(_libsonata, m) {
     bindPopulationClass<NodePopulation>(m, "NodePopulation", "Collection of nodes with attributes")
         .def(
             "match_values",
-            [](NodePopulation& obj, const std::string& name, const size_t value) {
-                return obj.matchAttributeValues(name, value);
-            },
-            "name"_a,
-            "value"_a,
-            DOC_POP_NODE(matchAttributeValues))
-        .def(
-            "match_values",
-            [](NodePopulation& obj, const std::string& name, const std::string& value) {
-                return obj.matchAttributeValues(name, value);
-            },
-            "name"_a,
-            "value"_a,
-            DOC_POP_NODE(matchAttributeValues))
-        .def(
-            "match_values",
             [](NodePopulation& obj, const std::string& name, const std::vector<size_t>& values) {
                 return obj.matchAttributeValues(name, values);
             },
@@ -503,6 +487,22 @@ PYBIND11_MODULE(_libsonata, m) {
                const std::string& name,
                const std::vector<std::string>& values) {
                 return obj.matchAttributeValues(name, values);
+            },
+            "name"_a,
+            "value"_a,
+            DOC_POP_NODE(matchAttributeValues))
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const size_t value) {
+                return obj.matchAttributeValues(name, value);
+            },
+            "name"_a,
+            "value"_a,
+            DOC_POP_NODE(matchAttributeValues))
+        .def(
+            "match_values",
+            [](NodePopulation& obj, const std::string& name, const std::string& value) {
+                return obj.matchAttributeValues(name, value);
             },
             "name"_a,
             "value"_a,
@@ -1110,18 +1110,25 @@ PYBIND11_MODULE(_libsonata, m) {
             DOC_POP_EDGE(targetNodeIDs))
         .def(
             "afferent_edges",
+            [](EdgePopulation& obj, const std::vector<NodeID>& target) {
+                return obj.afferentEdges(target);
+            },
+            "target"_a,
+            DOC_POP_EDGE(afferentEdges))
+        .def(
+            "afferent_edges",
             [](EdgePopulation& obj, NodeID target) {
                 return obj.afferentEdges(std::vector<NodeID>{target});
             },
             "target"_a,
             DOC_POP_EDGE(afferentEdges))
         .def(
-            "afferent_edges",
-            [](EdgePopulation& obj, const std::vector<NodeID>& target) {
-                return obj.afferentEdges(target);
+            "efferent_edges",
+            [](EdgePopulation& obj, const std::vector<NodeID>& source) {
+                return obj.efferentEdges(source);
             },
-            "target"_a,
-            DOC_POP_EDGE(afferentEdges))
+            "source"_a,
+            DOC_POP_EDGE(efferentEdges))
         .def(
             "efferent_edges",
             [](EdgePopulation& obj, NodeID source) {
@@ -1130,12 +1137,13 @@ PYBIND11_MODULE(_libsonata, m) {
             "source"_a,
             DOC_POP_EDGE(efferentEdges))
         .def(
-            "efferent_edges",
-            [](EdgePopulation& obj, const std::vector<NodeID>& source) {
-                return obj.efferentEdges(source);
-            },
+            "connecting_edges",
+            [](EdgePopulation& obj,
+               const std::vector<NodeID>& source,
+               const std::vector<NodeID>& target) { return obj.connectingEdges(source, target); },
             "source"_a,
-            DOC_POP_EDGE(efferentEdges))
+            "target"_a,
+            DOC_POP_EDGE(connectingEdges))
         .def(
             "connecting_edges",
             [](EdgePopulation& obj, NodeID source, NodeID target) {
@@ -1145,14 +1153,6 @@ PYBIND11_MODULE(_libsonata, m) {
             "source"_a,
             "target"_a,
             DOC_POP_EDGE(connectingEdges))
-        .def(
-            "connecting_edges",
-            [](EdgePopulation& obj,
-               const std::vector<NodeID>& source,
-               const std::vector<NodeID>& target) { return obj.connectingEdges(source, target); },
-            "source"_a,
-            "target"_a,
-            "Find all edges connecting two given node sets")
         .def_static("write_indices",
                     &EdgePopulation::writeIndices,
                     "h5_filepath"_a,
@@ -1167,7 +1167,7 @@ PYBIND11_MODULE(_libsonata, m) {
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
         .def("get",
              &SpikeReader::Population::get,
-             "Return spikes with all those node_ids between 'tstart' and 'tstop'",
+             DOC_SPIKEREADER_POP(get),
              "node_ids"_a = nonstd::nullopt,
              "tstart"_a = nonstd::nullopt,
              "tstop"_a = nonstd::nullopt)
@@ -1185,7 +1185,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("times",
                                &SpikeReader::Population::getTimes,
                                DOC_SPIKEREADER_POP(getTimes));
-    py::class_<SpikeReader>(m, "SpikeReader", "Used to read spike files")
+    py::class_<SpikeReader>(m, "SpikeReader", DOC(bbp, sonata, SpikeReader))
         .def(py::init([](py::object h5_filepath) { return SpikeReader(py::str(h5_filepath)); }),
              "h5_filepath"_a)
         .def("get_population_names",
