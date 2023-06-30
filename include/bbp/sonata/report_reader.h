@@ -28,6 +28,7 @@ struct SONATA_API DataFrame {
 using Spike = std::pair<NodeID, double>;
 using Spikes = std::vector<Spike>;
 
+/// Used to read spike files
 class SONATA_API SpikeReader
 {
   public:
@@ -46,7 +47,7 @@ class SONATA_API SpikeReader
         std::tuple<double, double> getTimes() const;
 
         /**
-         * Return reports for this population.
+         * Return spikes with all those node_ids between 'tstart' and 'tstop'
          */
         Spikes get(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
                    const nonstd::optional<double>& tstart = nonstd::nullopt,
