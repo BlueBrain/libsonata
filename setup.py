@@ -130,7 +130,7 @@ setup(
     extras_require={
         'docs': ['sphinx-bluebrain-theme'],
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     use_scm_version={"local_scheme": "no-local-version",
                      },
     package_dir={"": "python"},
