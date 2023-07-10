@@ -1,13 +1,9 @@
-import inspect
 import os
-import platform
-import re
 import subprocess
 import sys
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
 
 
 MIN_CPU_CORES = 2
@@ -42,7 +38,7 @@ class CMakeBuild(build_ext):
 
     def run(self):
         try:
-            out = subprocess.check_output(["cmake", "--version"])
+            subprocess.check_output(["cmake", "--version"])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
@@ -96,11 +92,8 @@ class CMakeBuild(build_ext):
 # nearly verbatim from how h5py handles is
 install_requires = [
     # We only really aim to support NumPy & Python combinations for which
-    # there are wheels on PyPI (e.g. NumPy >=1.17.5 for Python 3.8).
-    # But we don't want to duplicate the information in oldest-supported-numpy
-    # here, and if you can build an older NumPy on a newer Python
-    # NumPy 1.14.5 is the first with wheels for Python 3.7, our minimum Python.
-    "numpy >=1.14.5",
+    # there are wheels on PyPI (e.g. NumPy >=1.17.3 for Python 3.8).
+    "numpy>=1.17.3",
 ]
 
 setup_requires = [
@@ -130,7 +123,7 @@ setup(
     extras_require={
         'docs': ['sphinx-bluebrain-theme'],
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     use_scm_version={"local_scheme": "no-local-version",
                      },
     package_dir={"": "python"},
