@@ -58,7 +58,11 @@ std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group,
 }
 
 bool _isEmtpyOrNullDataset(const HighFive::DataSet& dset) {
-    return dset.getElementCount() == 0;
+    //  Once HighFive releases a version with
+    // https://github.com/BlueBrain/HighFive/pull/787
+    // can switch to the more clear:
+    // return dset.getElementCount() == 0;
+    return dset.getStorageSize() == 0;
 }
 
 template <typename T>
