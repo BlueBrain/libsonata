@@ -263,6 +263,13 @@ static const char *__doc_bbp_sonata_NodeSets_NodeSets_3 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodeSets_NodeSets_4 = R"doc()doc";
 
+static const char *__doc_bbp_sonata_NodeSets_extend =
+R"doc(Extend this NodeSets to include the `other` nodeset
+
+Duplicate names are overriden with the values from `other`
+
+The duplicate names are returned.)doc";
+
 static const char *__doc_bbp_sonata_NodeSets_fromFile = R"doc(Open a SONATA `node sets` file from a path */)doc";
 
 static const char *__doc_bbp_sonata_NodeSets_impl = R"doc()doc";

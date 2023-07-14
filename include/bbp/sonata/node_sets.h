@@ -49,6 +49,15 @@ class SONATA_API NodeSets
     std::set<std::string> names() const;
 
     /**
+     * Extend this NodeSets to include the `other` nodeset
+     *
+     * Duplicate names are overriden with the values from `other`
+     *
+     * The duplicate names are returned.
+     */
+    std::set<std::string> extend(const NodeSets& other) const;
+
+    /**
      * Return string version of node sets
      */
     std::string toJSON() const;

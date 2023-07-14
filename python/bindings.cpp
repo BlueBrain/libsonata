@@ -515,6 +515,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_static("from_file", [](py::object path) { return NodeSets::fromFile(py::str(path)); })
         .def_property_readonly("names", &NodeSets::names, DOC_NODESETS(names))
         .def("materialize", &NodeSets::materialize, DOC_NODESETS(materialize))
+        .def("extend", &NodeSets::extend, "other"_a, DOC_NODESETS(extend))
         .def("toJSON", &NodeSets::toJSON, DOC_NODESETS(toJSON));
 
     py::class_<CommonPopulationProperties>(m,
