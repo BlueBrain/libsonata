@@ -676,6 +676,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_ampC
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_mean = R"doc(Signal mean in nA (current_clamp) or uS (conductance).)doc";
@@ -822,6 +824,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_ampC
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_meanPercent =
@@ -855,6 +859,8 @@ R"doc(The variance of gamma-distributed amplitudes in nA^2 (current_clamp)
 or uS^2 (conductance))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 

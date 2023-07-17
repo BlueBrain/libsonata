@@ -500,6 +500,8 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells, default = None
         nonstd::optional<int> randomSeed{nonstd::nullopt};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// Rate of Poisson events (Hz)
@@ -518,6 +520,8 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells, default = None
         nonstd::optional<int> randomSeed{nonstd::nullopt};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
@@ -537,6 +541,8 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells, default = None
         nonstd::optional<int> randomSeed{nonstd::nullopt};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
