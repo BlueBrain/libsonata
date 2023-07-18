@@ -444,7 +444,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
         parseOptional(valueIt, "random_seed", ret.randomSeed);
-        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "rate", debugStr, ret.rate);
         parseMandatory(valueIt, "amp_mean", debugStr, ret.ampMean);
@@ -458,7 +458,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
         parseOptional(valueIt, "random_seed", ret.randomSeed);
-        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
@@ -472,7 +472,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
         parseOptional(valueIt, "random_seed", ret.randomSeed);
-        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean", debugStr, ret.mean);
@@ -503,7 +503,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputOrnsteinUhlenbeck ret;
         parseCommon(ret);
         parseMandatory(valueIt, "tau", debugStr, ret.tau);
-        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
 
@@ -515,7 +515,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputRelativeOrnsteinUhlenbeck ret;
         parseCommon(ret);
         parseMandatory(valueIt, "tau", debugStr, ret.tau);
-        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
 
