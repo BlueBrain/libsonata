@@ -859,6 +859,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::InputShotNoise::randomSeed,
                       DOC_SIMULATIONCONFIG(InputShotNoise, randomSeed))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputShotNoise::reversal,
+                      DOC_SIMULATIONCONFIG(InputShotNoise, reversal))
         .def_readonly("dt",
                       &SimulationConfig::InputShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputShotNoise, dt))
@@ -883,6 +886,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::InputRelativeShotNoise::randomSeed,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, randomSeed))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputRelativeShotNoise::reversal,
+                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, reversal))
         .def_readonly("dt",
                       &SimulationConfig::InputRelativeShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, dt))
@@ -907,6 +913,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::InputAbsoluteShotNoise::randomSeed,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, randomSeed))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputAbsoluteShotNoise::reversal,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, reversal))
         .def_readonly("dt",
                       &SimulationConfig::InputAbsoluteShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, dt))
