@@ -28,9 +28,6 @@ struct SONATA_API DataFrame {
 struct SpikeStruct {
     NodeID node_id;
     double timestamp;
-    bool operator==(const SpikeStruct& other) const {
-        return node_id == other.node_id && timestamp == other.timestamp;
-    }
 };
 using SpikeStruct = struct SpikeStruct;
 using Spike = std::pair<NodeID, double>;
