@@ -32,19 +32,22 @@ class TestSpikeReader(unittest.TestCase):
         self.assertRaises(RuntimeError, self.test_obj.__getitem__, 'foobar')
 
     def test_get_spikes_from_population(self):
-        self.assertEqual(self.test_obj['All'].get(), [(5, 0.1), (2, 0.2), (3, 0.3), (2, 0.7), (3, 1.3)])
-        self.assertEqual(self.test_obj['All'].get(tstart=0.2, tstop=1.0), [(2, 0.2), (3, 0.3), (2, 0.7)])
-        self.assertEqual(self.test_obj['spikes2'].get(tstart=0.2, tstop=1.0), [(3, 0.3), (2, 0.2), (2, 0.7)])
-        self.assertEqual(self.test_obj['spikes1'].get((3,)), [(3, 0.3), (3, 1.3)])
-        self.assertEqual(self.test_obj['spikes2'].get((3,)), [(3, 0.3), (3, 1.3)])
-        self.assertEqual(self.test_obj['spikes2'].get((10,)), [])
-        self.assertEqual(self.test_obj['spikes2'].get((2,), 0., 0.5), [(2, 0.2)])
-        self.assertEqual(self.test_obj['spikes1'].get((2, 5)), [(2, 0.2), (2, 0.7), (5, 0.1)])
-        self.assertEqual(self.test_obj['spikes2'].get((2, 5)), [(5, 0.1), (2, 0.2), (2, 0.7)])
+        # Define the structured data type
+        dtype = np.dtype([('node_id', '<u8'), ('timestamp', '<f8')])
+
+        self.assertTrue(np.array_equal(self.test_obj['All'].get(), np.array([(5, 0.1), (2, 0.2), (3, 0.3), (2, 0.7), (3, 1.3)], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['All'].get(tstart=0.2, tstop=1.0), np.array([(2, 0.2), (3, 0.3), (2, 0.7)], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['spikes2'].get(tstart=0.2, tstop=1.0), np.array([(3, 0.3), (2, 0.2), (2, 0.7)], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['spikes1'].get((3,)), np.array([(3, 0.3), (3, 1.3)], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['spikes2'].get((3,)), np.array([(3, 0.3), (3, 1.3)], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['spikes2'].get((10,)), np.array([], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['spikes2'].get((2,), 0., 0.5), np.array([(2, 0.2)], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['spikes1'].get((2, 5)), np.array([(2, 0.2), (2, 0.7), (5, 0.1)], dtype=dtype)))
+        self.assertTrue(np.array_equal(self.test_obj['spikes2'].get((2, 5)), np.array([(5, 0.1), (2, 0.2), (2, 0.7)], dtype=dtype)))
         self.assertEqual(self.test_obj['All'].sorting, "by_time")
         self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting, "none")
-        self.assertEqual(self.test_obj['empty'].get(), [])
+        self.assertTrue(np.array_equal(self.test_obj['empty'].get(), np.array([], dtype=dtype)))
 
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[])), 0)
 
