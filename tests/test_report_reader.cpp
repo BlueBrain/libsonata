@@ -18,11 +18,11 @@ TEST_CASE("SpikeReader", "[base]") {
             std::vector<std::string>{"All", "empty", "spikes1", "spikes2"});
 
     REQUIRE(reader.openPopulation("All").get(Selection({{3, 4}})) ==
-            std::vector<Spike>{{3UL, 0.3}, {3UL, 1.3}});
+            std::vector<std::pair<uint64_t, double>>{{3UL, 0.3}, {3UL, 1.3}});
     REQUIRE(reader.openPopulation("spikes1").get(Selection({{3, 4}})) ==
-            std::vector<Spike>{{3UL, 0.3}, {3UL, 1.3}});
+            std::vector<std::pair<uint64_t, double>>{{3UL, 0.3}, {3UL, 1.3}});
     REQUIRE(reader.openPopulation("spikes2").get(Selection({{3, 4}})) ==
-            std::vector<Spike>{{3UL, 0.3}, {3UL, 1.3}});
+            std::vector<std::pair<uint64_t, double>>{{3UL, 0.3}, {3UL, 1.3}});
 
     REQUIRE(reader.openPopulation("All").getSorting() == SpikeReader::Population::Sorting::by_time);
     REQUIRE(reader.openPopulation("spikes1").getSorting() ==
@@ -31,8 +31,8 @@ TEST_CASE("SpikeReader", "[base]") {
             SpikeReader::Population::Sorting::none);
 
     REQUIRE(reader.openPopulation("All").get(Selection({{5, 6}}), 0.1, 0.1) ==
-            std::vector<Spike>{{5, 0.1}});
-    REQUIRE(reader.openPopulation("empty").get() == std::vector<Spike>{});
+            std::vector<std::pair<uint64_t, double>>{{5, 0.1}});
+    REQUIRE(reader.openPopulation("empty").get() == std::vector<std::pair<uint64_t, double>>{});
 
     REQUIRE(reader.openPopulation("All").getTimes() == std::make_tuple(0.1, 1.3));
 }

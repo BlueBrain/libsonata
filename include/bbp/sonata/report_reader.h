@@ -25,15 +25,15 @@ struct SONATA_API DataFrame {
     std::vector<float> data;
 };
 
-typedef struct {
+struct SpikeStruct {
     NodeID node_id;
     double timestamp;
-} Spike;
-
-bool operator==(const Spike& lhs, const Spike& rhs) {
-    return lhs.node_id == rhs.node_id && lhs.timestamp == rhs.timestamp;
-}
-
+    bool operator==(const SpikeStruct& other) const {
+        return node_id == other.node_id && timestamp == other.timestamp;
+    }
+};
+using SpikeStruct = struct SpikeStruct;
+using Spike = std::pair<NodeID, double>;
 using Spikes = std::vector<Spike>;
 
 /// Used to read spike files

@@ -29,7 +29,7 @@ void filterNodeIDUnsorted(Spikes& spikes, const Selection& node_ids) {
     const auto values = node_ids.flatten();
     const auto new_end =
         std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
-            return std::find(values.cbegin(), values.cend(), spike.node_id) == values.cend();
+            return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
         });
     spikes.erase(new_end, spikes.end());
 }
@@ -39,15 +39,15 @@ void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) {
     for (const auto& range : node_ids.ranges()) {
         const auto begin = std::lower_bound(spikes.begin(),
                                             spikes.end(),
-                                            Spike{range.first, 0.},
+                                            std::make_pair(range.first, 0.),
                                             [](const Spike& spike1, const Spike& spike2) {
-                                                return spike1.node_id < spike2.node_id;
+                                                return spike1.first < spike2.first;
                                             });
         const auto end = std::upper_bound(spikes.begin(),
                                           spikes.end(),
-                                          Spike{range.second - 1, 0.},
+                                          std::make_pair(range.second - 1, 0.),
                                           [](const Spike& spike1, const Spike& spike2) {
-                                              return spike1.node_id < spike2.node_id;
+                                              return spike1.first < spike2.first;
                                           });
 
         std::move(begin, end, std::back_inserter(_spikes));
@@ -59,7 +59,7 @@ void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) {
 void filterTimestampUnsorted(Spikes& spikes, double tstart, double tstop) {
     auto new_end =
         std::remove_if(spikes.begin(), spikes.end(), [&tstart, &tstop](const Spike& spike) {
-            return (spike.timestamp < tstart - EPSILON) || (spike.timestamp > tstop + EPSILON);
+            return (spike.second < tstart - EPSILON) || (spike.second > tstop + EPSILON);
         });
     spikes.erase(new_end, spikes.end());
 }
@@ -67,16 +67,16 @@ void filterTimestampUnsorted(Spikes& spikes, double tstart, double tstop) {
 void filterTimestampSorted(Spikes& spikes, double tstart, double tstop) {
     const auto end = std::upper_bound(spikes.begin(),
                                       spikes.end(),
-                                      Spike{0UL, tstop + EPSILON},
+                                      std::make_pair(0UL, tstop + EPSILON),
                                       [](const Spike& spike1, const Spike& spike2) {
-                                          return spike1.timestamp < spike2.timestamp;
+                                          return spike1.second < spike2.second;
                                       });
     spikes.erase(end, spikes.end());
     const auto begin = std::lower_bound(spikes.begin(),
                                         spikes.end(),
-                                        Spike{0UL, tstart - EPSILON},
+                                        std::make_pair(0UL, tstart - EPSILON),
                                         [](const Spike& spike1, const Spike& spike2) {
-                                            return spike1.timestamp < spike2.timestamp;
+                                            return spike1.second < spike2.second;
                                         });
     spikes.erase(spikes.begin(), begin);
 }
@@ -153,10 +153,10 @@ SpikeReader::Population::Population(const std::string& filename,
     const auto pop_path = std::string("/spikes/") + populationName;
     const auto pop = file.getGroup(pop_path);
 
-    std::vector<NodeID> node_ids;
+    std::vector<Spike::first_type> node_ids;
     pop.getDataSet("node_ids").read(node_ids);
 
-    std::vector<double> timestamps;
+    std::vector<Spike::second_type> timestamps;
     pop.getDataSet("timestamps").read(timestamps);
 
     if (node_ids.size() != timestamps.size()) {
@@ -168,8 +168,8 @@ SpikeReader::Population::Population(const std::string& filename,
                    std::make_move_iterator(node_ids.end()),
                    std::make_move_iterator(timestamps.begin()),
                    std::back_inserter(spikes_),
-                   [](NodeID&& node_id, double&& timestamp) {
-                       return Spike{std::move(node_id), std::move(timestamp)};
+                   [](Spike::first_type&& node_id, Spike::second_type&& timestamp) {
+                       return std::make_pair(std::move(node_id), std::move(timestamp));
                    });
 
     if (pop.hasAttribute("sorting")) {
