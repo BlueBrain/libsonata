@@ -54,6 +54,10 @@ class TestSpikeReader(unittest.TestCase):
         timestamps_ref = np.asarray([0.1, 0.2, 0.3, 0.7, 1.3])
         self.assertTrue((structured_data["timestamp"] == timestamps_ref).all())
 
+        dict_data = self.test_obj['All'].get_dict()
+        self.assertTrue((dict_data["node_ids"] == node_ids_ref).all())
+        self.assertTrue((dict_data["timestamps"] == timestamps_ref).all())
+
     def test_getTimes_from_population(self):
         self.assertEqual(self.test_obj['All'].times, (0.1, 1.3))
 
