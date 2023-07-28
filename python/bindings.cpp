@@ -1177,8 +1177,6 @@ PYBIND11_MODULE(_libsonata, m) {
 
     bindStorageClass<EdgeStorage>(m, "EdgeStorage", "EdgePopulation");
 
-    PYBIND11_NUMPY_DTYPE(SpikeStruct, node_id, timestamp);
-
     py::class_<SpikeReader::Population>(m, "SpikePopulation", "A population inside a SpikeReader")
         .def("get",
              &SpikeReader::Population::get,
@@ -1186,30 +1184,6 @@ PYBIND11_MODULE(_libsonata, m) {
              "node_ids"_a = nonstd::nullopt,
              "tstart"_a = nonstd::nullopt,
              "tstop"_a = nonstd::nullopt)
-        .def(
-            "get_array",
-            [](const SpikeReader::Population& self,
-               const py::object& node_ids = py::none(),
-               const py::object& tstart = py::none(),
-               const py::object& tstop = py::none()) {
-                auto spikes = self.get(
-                    node_ids.is_none() ? nonstd::nullopt
-                                       : node_ids.cast<nonstd::optional<Selection>>(),
-                    tstart.is_none() ? nonstd::nullopt : tstart.cast<nonstd::optional<double>>(),
-                    tstop.is_none() ? nonstd::nullopt : tstop.cast<nonstd::optional<double>>());
-                std::vector<SpikeStruct> result;
-                result.reserve(spikes.size());
-                std::transform(spikes.begin(),
-                               spikes.end(),
-                               std::back_inserter(result),
-                               [](const Spike& pair) {
-                                   return SpikeStruct{pair.first, pair.second};
-                               });
-                return py::array_t<SpikeStruct>(result.size(), result.data());
-            },
-            "node_ids"_a = nonstd::nullopt,
-            "tstart"_a = nonstd::nullopt,
-            "tstop"_a = nonstd::nullopt)
         .def(
             "get_dict",
             [](const SpikeReader::Population& self,

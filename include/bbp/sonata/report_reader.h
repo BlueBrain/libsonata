@@ -25,11 +25,6 @@ struct SONATA_API DataFrame {
     std::vector<float> data;
 };
 
-struct SpikeStruct {
-    NodeID node_id;
-    double timestamp;
-};
-using SpikeStruct = struct SpikeStruct;
 using Spike = std::pair<NodeID, double>;
 using Spikes = std::vector<Spike>;
 
