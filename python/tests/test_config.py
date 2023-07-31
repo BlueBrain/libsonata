@@ -416,6 +416,8 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.ionchannel_seed, 222)
         self.assertEqual(self.config.run.minis_seed, 333)
         self.assertEqual(self.config.run.synapse_seed, 444)
+        self.assertEqual(self.config.run.electrodes_file,
+                         os.path.abspath(os.path.join(PATH, 'config/electrodes/electrode_weights.h5')))
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/some/path/output')))
@@ -442,7 +444,7 @@ class TestSimulationConfig(unittest.TestCase):
                          "%s.gSK_E2bar_SK_E2 = 0")
 
         self.assertEqual(self.config.list_report_names,
-                         { "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
+                         { "axonal_comp_centers", "cell_imembrane", "compartment", "soma", "lfp" })
 
         self.assertEqual(self.config.report('soma').cells, 'Column')
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
@@ -462,6 +464,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
         self.assertEqual(self.config.report('cell_imembrane').type.name, 'summation')
         self.assertEqual(self.config.report('cell_imembrane').variable_name, 'i_membrane, IClamp')
+        self.assertEqual(self.config.report('lfp').type, Report.Type.lfp)
 
         self.assertEqual(self.config.network,
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
@@ -641,6 +644,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(conf.run.ionchannel_seed, 0)
         self.assertEqual(conf.run.minis_seed, 0)
         self.assertEqual(conf.run.synapse_seed, 0)
+        self.assertEqual(conf.run.electrodes_file, "")
 
     def test_simulation_config_failures(self):
         with self.assertRaises(SonataError) as e:
