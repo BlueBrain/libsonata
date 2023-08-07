@@ -143,6 +143,25 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
     return spikes;
 }
 
+SpikesArrays SpikeReader::Population::get_arrays(const nonstd::optional<Selection>& node_ids,
+                                                 const nonstd::optional<double>& tstart,
+                                                 const nonstd::optional<double>& tstop) const {
+    if (!node_ids && !tstart && !tstop) {
+        return std::make_pair(node_ids_, timestamps_);
+    }
+
+    auto spikes = get(node_ids, tstart, tstop);
+
+    std::vector<NodeID> nodeids;
+    std::vector<double> timestamps;
+    for (const auto& pair : spikes) {
+        nodeids.push_back(pair.first);
+        timestamps.push_back(pair.second);
+    }
+
+    return std::make_pair(nodeids, timestamps);
+}
+
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
     return sorting_;
 }
@@ -153,20 +172,17 @@ SpikeReader::Population::Population(const std::string& filename,
     const auto pop_path = std::string("/spikes/") + populationName;
     const auto pop = file.getGroup(pop_path);
 
-    std::vector<Spike::first_type> node_ids;
-    pop.getDataSet("node_ids").read(node_ids);
+    pop.getDataSet("node_ids").read(node_ids_);
+    pop.getDataSet("timestamps").read(timestamps_);
 
-    std::vector<Spike::second_type> timestamps;
-    pop.getDataSet("timestamps").read(timestamps);
-
-    if (node_ids.size() != timestamps.size()) {
+    if (node_ids_.size() != timestamps_.size()) {
         throw SonataError(
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
 
-    std::transform(std::make_move_iterator(node_ids.begin()),
-                   std::make_move_iterator(node_ids.end()),
-                   std::make_move_iterator(timestamps.begin()),
+    std::transform(std::make_move_iterator(node_ids_.begin()),
+                   std::make_move_iterator(node_ids_.end()),
+                   std::make_move_iterator(timestamps_.begin()),
                    std::back_inserter(spikes_),
                    [](Spike::first_type&& node_id, Spike::second_type&& timestamp) {
                        return std::make_pair(std::move(node_id), std::move(timestamp));
@@ -177,11 +193,11 @@ SpikeReader::Population::Population(const std::string& filename,
     }
 
     if (sorting_ == Sorting::by_time) {
-        tstart_ = timestamps.empty() ? 0 : timestamps.front();
-        tstop_ = timestamps.empty() ? 0 : timestamps.back();
+        tstart_ = timestamps_.empty() ? 0 : timestamps_.front();
+        tstop_ = timestamps_.empty() ? 0 : timestamps_.back();
     } else {
-        tstart_ = timestamps.empty() ? 0 : *min_element(timestamps.cbegin(), timestamps.cend());
-        tstop_ = timestamps.empty() ? 0 : *max_element(timestamps.cbegin(), timestamps.cend());
+        tstart_ = timestamps_.empty() ? 0 : *min_element(timestamps_.cbegin(), timestamps_.cend());
+        tstop_ = timestamps_.empty() ? 0 : *max_element(timestamps_.cbegin(), timestamps_.cend());
     }
 }
 

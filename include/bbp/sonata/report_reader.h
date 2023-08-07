@@ -27,6 +27,7 @@ struct SONATA_API DataFrame {
 
 using Spike = std::pair<NodeID, double>;
 using Spikes = std::vector<Spike>;
+using SpikesArrays = std::pair<std::vector<NodeID>, std::vector<double>>;
 
 /// Used to read spike files
 class SONATA_API SpikeReader
@@ -53,6 +54,10 @@ class SONATA_API SpikeReader
                    const nonstd::optional<double>& tstart = nonstd::nullopt,
                    const nonstd::optional<double>& tstop = nonstd::nullopt) const;
 
+        SpikesArrays get_arrays(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+                                const nonstd::optional<double>& tstart = nonstd::nullopt,
+                                const nonstd::optional<double>& tstop = nonstd::nullopt) const;
+
         /**
          * Return the way data are sorted ('none', 'by_id', 'by_time')
          */
@@ -62,6 +67,8 @@ class SONATA_API SpikeReader
         Population(const std::string& filename, const std::string& populationName);
 
         Spikes spikes_;
+        std::vector<NodeID> node_ids_;
+        std::vector<double> timestamps_;
         Sorting sorting_ = Sorting::none;
         // Use for clamping of user values
         double tstart_, tstop_;

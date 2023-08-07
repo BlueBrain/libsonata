@@ -1190,25 +1190,17 @@ PYBIND11_MODULE(_libsonata, m) {
                const py::object& node_ids = py::none(),
                const py::object& tstart = py::none(),
                const py::object& tstop = py::none()) {
-                auto spikes = self.get(
+                std::vector<NodeID> nodeids;
+                std::vector<double> timestamps;
+                std::tie(nodeids, timestamps) = self.get_arrays(
                     node_ids.is_none() ? nonstd::nullopt
                                        : node_ids.cast<nonstd::optional<Selection>>(),
                     tstart.is_none() ? nonstd::nullopt : tstart.cast<nonstd::optional<double>>(),
                     tstop.is_none() ? nonstd::nullopt : tstop.cast<nonstd::optional<double>>());
-                py::array_t<NodeID> nodeArray(spikes.size());
-                py::array_t<double> timestampArray(spikes.size());
-
-                auto intBuffer = nodeArray.mutable_unchecked<1>();
-                auto doubleBuffer = timestampArray.mutable_unchecked<1>();
-
-                for (size_t i = 0; i < spikes.size(); ++i) {
-                    intBuffer(i) = spikes[i].first;
-                    doubleBuffer(i) = spikes[i].second;
-                }
 
                 py::dict result;
-                result["node_ids"] = nodeArray;
-                result["timestamps"] = timestampArray;
+                result["node_ids"] = py::array_t<NodeID>(nodeids.size(), nodeids.data());
+                result["timestamps"] = py::array_t<double>(timestamps.size(), timestamps.data());
                 return result;
             },
             "node_ids"_a = nonstd::nullopt,
