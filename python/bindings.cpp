@@ -1192,7 +1192,7 @@ PYBIND11_MODULE(_libsonata, m) {
                const py::object& tstop = py::none()) {
                 std::vector<NodeID> nodeids;
                 std::vector<double> timestamps;
-                std::tie(nodeids, timestamps) = self.get_arrays(
+                std::tie(nodeids, timestamps) = self.getArrays(
                     node_ids.is_none() ? nonstd::nullopt
                                        : node_ids.cast<nonstd::optional<Selection>>(),
                     tstart.is_none() ? nonstd::nullopt : tstart.cast<nonstd::optional<double>>(),

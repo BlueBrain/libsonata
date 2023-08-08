@@ -115,6 +115,18 @@ std::tuple<double, double> SpikeReader::Population::getTimes() const {
     return std::tie(tstart_, tstop_);
 }
 
+Spikes SpikeReader::Population::createSpikes() const {
+    Spikes spikes;
+    std::transform(node_ids_.begin(),
+                   node_ids_.end(),
+                   timestamps_.begin(),
+                   std::back_inserter(spikes),
+                   [](Spike::first_type node_id, Spike::second_type timestamp) {
+                       return std::make_pair(node_id, timestamp);
+                   });
+    return spikes;
+}
+
 Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
                                     const nonstd::optional<double>& tstart,
                                     const nonstd::optional<double>& tstop) const {
@@ -133,7 +145,7 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
         return Spikes{};
     }
 
-    auto spikes = spikes_;
+    auto spikes = createSpikes();
     filterTimestamp(spikes, start, stop);
 
     if (node_ids) {
@@ -143,9 +155,9 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
     return spikes;
 }
 
-SpikesArrays SpikeReader::Population::get_arrays(const nonstd::optional<Selection>& node_ids,
-                                                 const nonstd::optional<double>& tstart,
-                                                 const nonstd::optional<double>& tstop) const {
+SpikesArrays SpikeReader::Population::getArrays(const nonstd::optional<Selection>& node_ids,
+                                                const nonstd::optional<double>& tstart,
+                                                const nonstd::optional<double>& tstop) const {
     if (!node_ids && !tstart && !tstop) {
         return std::make_pair(node_ids_, timestamps_);
     }
@@ -179,14 +191,6 @@ SpikeReader::Population::Population(const std::string& filename,
         throw SonataError(
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
-
-    std::transform(std::make_move_iterator(node_ids_.begin()),
-                   std::make_move_iterator(node_ids_.end()),
-                   std::make_move_iterator(timestamps_.begin()),
-                   std::back_inserter(spikes_),
-                   [](Spike::first_type&& node_id, Spike::second_type&& timestamp) {
-                       return std::make_pair(std::move(node_id), std::move(timestamp));
-                   });
 
     if (pop.hasAttribute("sorting")) {
         pop.getAttribute("sorting").read(sorting_);
