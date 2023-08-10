@@ -162,16 +162,29 @@ SpikesArrays SpikeReader::Population::getArrays(const nonstd::optional<Selection
         return std::make_pair(node_ids_, timestamps_);
     }
 
-    auto spikes = get(node_ids, tstart, tstop);
+    SpikesArrays arrays;
+    const auto& node_ids_selection = node_ids.value().flatten();
+    // Create arrays directly for required data based on conditions
+    for (size_t i = 0; i < node_ids_.size(); ++i) {
+        const auto& node_id = node_ids_[i];
+        const auto& timestamp = timestamps_[i];
 
-    std::vector<NodeID> nodeids;
-    std::vector<double> timestamps;
-    for (const auto& pair : spikes) {
-        nodeids.push_back(pair.first);
-        timestamps.push_back(pair.second);
+        // Check if node_id is found in node_ids_selection
+        bool node_ids_found = std::find(node_ids_selection.begin(),
+                                        node_ids_selection.end(),
+                                        node_id) != node_ids_selection.end();
+
+        // Check if timestamp is within valid range
+        bool valid_timestamp = (!tstart || timestamp >= tstart.value()) &&
+                               (!tstop || timestamp <= tstop.value());
+
+        // Include data if both conditions are satisfied
+        if (node_ids && node_ids_found && valid_timestamp) {
+            arrays.first.push_back(node_id);
+            arrays.second.push_back(timestamp);
+        }
     }
-
-    return std::make_pair(nodeids, timestamps);
+    return arrays;
 }
 
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {

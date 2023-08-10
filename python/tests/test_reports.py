@@ -51,9 +51,9 @@ class TestSpikeReader(unittest.TestCase):
         dict_data = self.test_obj['All'].get_dict()
         self.assertTrue((dict_data["node_ids"] == np.asarray([5, 2, 3, 2, 3])).all())
         self.assertTrue((dict_data["timestamps"] == np.asarray([0.1, 0.2, 0.3, 0.7, 1.3])).all())
-        dict_data_filtered = self.test_obj['All'].get_dict(node_ids=[5, 3])
-        self.assertTrue((dict_data_filtered["node_ids"] == np.asarray([5, 3, 3])).all())
-        self.assertTrue((dict_data_filtered["timestamps"] == np.asarray([0.1, 0.3, 1.3])).all())
+        dict_data_filtered = self.test_obj['All'].get_dict(node_ids=[5, 3], tstart=0.2)
+        self.assertTrue((dict_data_filtered["node_ids"] == np.asarray([3, 3])).all())
+        self.assertTrue((dict_data_filtered["timestamps"] == np.asarray([0.3, 1.3])).all())
 
     def test_getTimes_from_population(self):
         self.assertEqual(self.test_obj['All'].times, (0.1, 1.3))
