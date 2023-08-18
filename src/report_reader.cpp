@@ -163,23 +163,26 @@ SpikesArrays SpikeReader::Population::getArrays(const nonstd::optional<Selection
     }
 
     SpikesArrays arrays;
-    const auto& node_ids_selection = node_ids.value().flatten();
     // Create arrays directly for required data based on conditions
     for (size_t i = 0; i < node_ids_.size(); ++i) {
         const auto& node_id = node_ids_[i];
         const auto& timestamp = timestamps_[i];
 
         // Check if node_id is found in node_ids_selection
-        bool node_ids_found = std::find(node_ids_selection.begin(),
-                                        node_ids_selection.end(),
-                                        node_id) != node_ids_selection.end();
+        bool node_ids_found = true;
+        if (node_ids) {
+            const auto& node_ids_selection = node_ids.value().flatten();
+            node_ids_found = std::find(node_ids_selection.begin(),
+                                       node_ids_selection.end(),
+                                       node_id) != node_ids_selection.end();
+        }
 
         // Check if timestamp is within valid range
         bool valid_timestamp = (!tstart || timestamp >= tstart.value()) &&
                                (!tstop || timestamp <= tstop.value());
 
         // Include data if both conditions are satisfied
-        if (node_ids && node_ids_found && valid_timestamp) {
+        if (node_ids_found && valid_timestamp) {
             arrays.first.push_back(node_id);
             arrays.second.push_back(timestamp);
         }
