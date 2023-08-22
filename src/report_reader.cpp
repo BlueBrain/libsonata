@@ -163,6 +163,7 @@ SpikeTimes SpikeReader::Population::getArrays(const nonstd::optional<Selection>&
                                               const nonstd::optional<double>& tstart,
                                               const nonstd::optional<double>& tstop) const {
     SpikeTimes filtered_spikes;
+    const auto& node_ids_selection = node_ids ? node_ids.value().flatten() : std::vector<NodeID>{};
     // Create arrays directly for required data based on conditions
     for (size_t i = 0; i < spike_times_.node_ids.size(); ++i) {
         const auto& node_id = spike_times_.node_ids[i];
@@ -171,7 +172,6 @@ SpikeTimes SpikeReader::Population::getArrays(const nonstd::optional<Selection>&
         // Check if node_id is found in node_ids_selection
         bool node_ids_found = true;
         if (node_ids) {
-            const auto& node_ids_selection = node_ids.value().flatten();
             node_ids_found = std::find(node_ids_selection.begin(),
                                        node_ids_selection.end(),
                                        node_id) != node_ids_selection.end();
