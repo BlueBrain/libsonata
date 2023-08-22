@@ -117,9 +117,9 @@ std::tuple<double, double> SpikeReader::Population::getTimes() const {
 
 Spikes SpikeReader::Population::createSpikes() const {
     Spikes spikes;
-    std::transform(node_ids_.begin(),
-                   node_ids_.end(),
-                   timestamps_.begin(),
+    std::transform(spike_times_.node_ids.begin(),
+                   spike_times_.node_ids.end(),
+                   spike_times_.timestamps.begin(),
                    std::back_inserter(spikes),
                    [](Spike::first_type node_id, Spike::second_type timestamp) {
                        return std::make_pair(node_id, timestamp);
@@ -155,18 +155,18 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
     return spikes;
 }
 
-SpikesArrays SpikeReader::Population::getArrays(const nonstd::optional<Selection>& node_ids,
-                                                const nonstd::optional<double>& tstart,
-                                                const nonstd::optional<double>& tstop) const {
-    if (!node_ids && !tstart && !tstop) {
-        return std::make_pair(node_ids_, timestamps_);
-    }
+const SpikeTimes& SpikeReader::Population::getRawArrays() const {
+    return spike_times_;
+}
 
-    SpikesArrays arrays;
+SpikeTimes SpikeReader::Population::getArrays(const nonstd::optional<Selection>& node_ids,
+                                              const nonstd::optional<double>& tstart,
+                                              const nonstd::optional<double>& tstop) const {
+    SpikeTimes filtered_spikes;
     // Create arrays directly for required data based on conditions
-    for (size_t i = 0; i < node_ids_.size(); ++i) {
-        const auto& node_id = node_ids_[i];
-        const auto& timestamp = timestamps_[i];
+    for (size_t i = 0; i < spike_times_.node_ids.size(); ++i) {
+        const auto& node_id = spike_times_.node_ids[i];
+        const auto& timestamp = spike_times_.timestamps[i];
 
         // Check if node_id is found in node_ids_selection
         bool node_ids_found = true;
@@ -183,11 +183,11 @@ SpikesArrays SpikeReader::Population::getArrays(const nonstd::optional<Selection
 
         // Include data if both conditions are satisfied
         if (node_ids_found && valid_timestamp) {
-            arrays.first.push_back(node_id);
-            arrays.second.push_back(timestamp);
+            filtered_spikes.node_ids.emplace_back(node_id);
+            filtered_spikes.timestamps.emplace_back(timestamp);
         }
     }
-    return arrays;
+    return filtered_spikes;
 }
 
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
@@ -199,11 +199,13 @@ SpikeReader::Population::Population(const std::string& filename,
     H5::File file(filename, H5::File::ReadOnly);
     const auto pop_path = std::string("/spikes/") + populationName;
     const auto pop = file.getGroup(pop_path);
+    auto& node_ids = spike_times_.node_ids;
+    auto& timestamps = spike_times_.timestamps;
 
-    pop.getDataSet("node_ids").read(node_ids_);
-    pop.getDataSet("timestamps").read(timestamps_);
+    pop.getDataSet("node_ids").read(node_ids);
+    pop.getDataSet("timestamps").read(timestamps);
 
-    if (node_ids_.size() != timestamps_.size()) {
+    if (node_ids.size() != timestamps.size()) {
         throw SonataError(
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
@@ -213,11 +215,11 @@ SpikeReader::Population::Population(const std::string& filename,
     }
 
     if (sorting_ == Sorting::by_time) {
-        tstart_ = timestamps_.empty() ? 0 : timestamps_.front();
-        tstop_ = timestamps_.empty() ? 0 : timestamps_.back();
+        tstart_ = timestamps.empty() ? 0 : timestamps.front();
+        tstop_ = timestamps.empty() ? 0 : timestamps.back();
     } else {
-        tstart_ = timestamps_.empty() ? 0 : *min_element(timestamps_.cbegin(), timestamps_.cend());
-        tstop_ = timestamps_.empty() ? 0 : *max_element(timestamps_.cbegin(), timestamps_.cend());
+        tstart_ = timestamps.empty() ? 0 : *min_element(timestamps.cbegin(), timestamps.cend());
+        tstop_ = timestamps.empty() ? 0 : *max_element(timestamps.cbegin(), timestamps.cend());
     }
 }
 
