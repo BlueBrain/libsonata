@@ -1184,6 +1184,33 @@ PYBIND11_MODULE(_libsonata, m) {
              "node_ids"_a = nonstd::nullopt,
              "tstart"_a = nonstd::nullopt,
              "tstop"_a = nonstd::nullopt)
+        .def(
+            "get_dict",
+            [](const SpikeReader::Population& self,
+               const py::object& node_ids = py::none(),
+               const py::object& tstart = py::none(),
+               const py::object& tstop = py::none()) {
+                const SpikeTimes& spikes =
+                    (node_ids.is_none() && tstart.is_none() && tstop.is_none())
+                        ? self.getRawArrays()
+                        : self.getArrays(node_ids.is_none()
+                                             ? nonstd::nullopt
+                                             : node_ids.cast<nonstd::optional<Selection>>(),
+                                         tstart.is_none() ? nonstd::nullopt
+                                                          : tstart.cast<nonstd::optional<double>>(),
+                                         tstop.is_none() ? nonstd::nullopt
+                                                         : tstop.cast<nonstd::optional<double>>());
+
+                py::dict result;
+                result["node_ids"] = py::array_t<NodeID>(spikes.node_ids.size(),
+                                                         spikes.node_ids.data());
+                result["timestamps"] = py::array_t<double>(spikes.timestamps.size(),
+                                                           spikes.timestamps.data());
+                return result;
+            },
+            "node_ids"_a = nonstd::nullopt,
+            "tstart"_a = nonstd::nullopt,
+            "tstop"_a = nonstd::nullopt)
         .def_property_readonly(
             "sorting",
             [](const SpikeReader::Population& self) {
