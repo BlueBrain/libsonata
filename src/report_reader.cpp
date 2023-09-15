@@ -115,6 +115,18 @@ std::tuple<double, double> SpikeReader::Population::getTimes() const {
     return std::tie(tstart_, tstop_);
 }
 
+Spikes SpikeReader::Population::createSpikes() const {
+    Spikes spikes;
+    std::transform(spike_times_.node_ids.begin(),
+                   spike_times_.node_ids.end(),
+                   spike_times_.timestamps.begin(),
+                   std::back_inserter(spikes),
+                   [](Spike::first_type node_id, Spike::second_type timestamp) {
+                       return std::make_pair(node_id, timestamp);
+                   });
+    return spikes;
+}
+
 Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
                                     const nonstd::optional<double>& tstart,
                                     const nonstd::optional<double>& tstop) const {
@@ -133,7 +145,7 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
         return Spikes{};
     }
 
-    auto spikes = spikes_;
+    auto spikes = createSpikes();
     filterTimestamp(spikes, start, stop);
 
     if (node_ids) {
@@ -141,6 +153,41 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
     }
 
     return spikes;
+}
+
+const SpikeTimes& SpikeReader::Population::getRawArrays() const {
+    return spike_times_;
+}
+
+SpikeTimes SpikeReader::Population::getArrays(const nonstd::optional<Selection>& node_ids,
+                                              const nonstd::optional<double>& tstart,
+                                              const nonstd::optional<double>& tstop) const {
+    SpikeTimes filtered_spikes;
+    const auto& node_ids_selection = node_ids ? node_ids.value().flatten() : std::vector<NodeID>{};
+    // Create arrays directly for required data based on conditions
+    for (size_t i = 0; i < spike_times_.node_ids.size(); ++i) {
+        const auto& node_id = spike_times_.node_ids[i];
+        const auto& timestamp = spike_times_.timestamps[i];
+
+        // Check if node_id is found in node_ids_selection
+        bool node_ids_found = true;
+        if (node_ids) {
+            node_ids_found = std::find(node_ids_selection.begin(),
+                                       node_ids_selection.end(),
+                                       node_id) != node_ids_selection.end();
+        }
+
+        // Check if timestamp is within valid range
+        bool valid_timestamp = (!tstart || timestamp >= tstart.value()) &&
+                               (!tstop || timestamp <= tstop.value());
+
+        // Include data if both conditions are satisfied
+        if (node_ids_found && valid_timestamp) {
+            filtered_spikes.node_ids.emplace_back(node_id);
+            filtered_spikes.timestamps.emplace_back(timestamp);
+        }
+    }
+    return filtered_spikes;
 }
 
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
@@ -152,25 +199,16 @@ SpikeReader::Population::Population(const std::string& filename,
     H5::File file(filename, H5::File::ReadOnly);
     const auto pop_path = std::string("/spikes/") + populationName;
     const auto pop = file.getGroup(pop_path);
+    auto& node_ids = spike_times_.node_ids;
+    auto& timestamps = spike_times_.timestamps;
 
-    std::vector<Spike::first_type> node_ids;
     pop.getDataSet("node_ids").read(node_ids);
-
-    std::vector<Spike::second_type> timestamps;
     pop.getDataSet("timestamps").read(timestamps);
 
     if (node_ids.size() != timestamps.size()) {
         throw SonataError(
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
-
-    std::transform(std::make_move_iterator(node_ids.begin()),
-                   std::make_move_iterator(node_ids.end()),
-                   std::make_move_iterator(timestamps.begin()),
-                   std::back_inserter(spikes_),
-                   [](Spike::first_type&& node_id, Spike::second_type&& timestamp) {
-                       return std::make_pair(std::move(node_id), std::move(timestamp));
-                   });
 
     if (pop.hasAttribute("sorting")) {
         pop.getAttribute("sorting").read(sorting_);

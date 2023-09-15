@@ -12,7 +12,8 @@
         "v_bool": false
      },
      "manifest": {
-         "$OUTPUT_DIR": "./some/path"
+         "$OUTPUT_DIR": "./some/path",
+         "$ELECTRODES_DIR": "./electrodes/"
      },
      "target_simulator": "CORENEURON",
      "node_set" : "Column",
@@ -25,7 +26,8 @@
          "minis_seed": 333,
          "synapse_seed": 444,
          "integration_method" : 2,
-         "forward_skip": 500
+         "forward_skip": 500,
+         "electrodes_file": "$ELECTRODES_DIR/electrode_weights.h5"
     },
     "output": {
          "output_dir": "$OUTPUT_DIR/output",
@@ -99,6 +101,7 @@
             "delay": 0,
             "duration": 1000,
             "decay_time": 4,
+            "reversal": 10,
             "rise_time": 0.4,
             "amp_mean": 70,
             "amp_var": 40,
@@ -159,6 +162,7 @@
             "delay": 0,
             "duration": 1000,
             "decay_time": 4,
+            "reversal": 10,
             "rise_time": 0.4,
             "amp_cv": 0.63,
             "mean": 50,
@@ -248,6 +252,15 @@
               "file_name": "voltage",
               "enabled" : false
          },
+         "lfp": {
+            "cells": "All",
+            "type": "lfp",
+            "variable_name": "v",
+            "unit": "mV",
+            "dt": 0.1,
+            "start_time": 0.0,
+            "end_time": 110000.0
+        },
          "axonal_comp_centers": {
               "cells": "Mosaic",
               "sections": "axon",

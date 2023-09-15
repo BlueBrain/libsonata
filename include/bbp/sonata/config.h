@@ -286,6 +286,8 @@ class SONATA_API SimulationConfig
         int minisSeed;
         /// A non-negative integer used for seeding stochastic synapses, default is 0.
         int synapseSeed;
+        /// Filename that contains the weights for the LFP calculation.
+        std::string electrodesFile;
     };
     /**
      * Parameters to override simulator output for spike reports
@@ -362,7 +364,7 @@ class SONATA_API SimulationConfig
      */
     struct Report {
         enum class Sections { invalid = -1, soma, axon, dend, apic, all };
-        enum class Type { invalid = -1, compartment, summation, synapse };
+        enum class Type { invalid = -1, compartment, lfp, summation, synapse };
         enum class Scaling { invalid = -1, none, area };
         enum class Compartments { invalid = -1, center, all };
 
@@ -500,6 +502,8 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells, default = None
         nonstd::optional<int> randomSeed{nonstd::nullopt};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// Rate of Poisson events (Hz)
@@ -518,6 +522,8 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells, default = None
         nonstd::optional<int> randomSeed{nonstd::nullopt};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
@@ -537,6 +543,8 @@ class SONATA_API SimulationConfig
         double decayTime{};
         /// Override the random seed to introduce correlations between cells, default = None
         nonstd::optional<int> randomSeed{nonstd::nullopt};
+        /// Reversal potential for conductance injection in mV. Default is 0
+        double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
         /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
