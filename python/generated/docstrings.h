@@ -263,13 +263,6 @@ static const char *__doc_bbp_sonata_NodeSets_NodeSets_3 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodeSets_NodeSets_4 = R"doc()doc";
 
-static const char *__doc_bbp_sonata_NodeSets_extend =
-R"doc(Extend this NodeSets to include the `other` nodeset
-
-Duplicate names are overriden with the values from `other`
-
-The duplicate names are returned.)doc";
-
 static const char *__doc_bbp_sonata_NodeSets_fromFile = R"doc(Open a SONATA `node sets` file from a path */)doc";
 
 static const char *__doc_bbp_sonata_NodeSets_impl = R"doc()doc";
@@ -288,6 +281,13 @@ static const char *__doc_bbp_sonata_NodeSets_names = R"doc(Names of the node set
 static const char *__doc_bbp_sonata_NodeSets_operator_assign = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodeSets_toJSON = R"doc(Return string version of node sets)doc";
+
+static const char *__doc_bbp_sonata_NodeSets_update =
+R"doc(Update this NodeSets to include the `other` nodeset
+
+Duplicate names are overriden with the values from `other`
+
+The duplicate names are returned.)doc";
 
 static const char *__doc_bbp_sonata_Population = R"doc()doc";
 
@@ -683,8 +683,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_ampC
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_mean = R"doc(Signal mean in nA (current_clamp) or uS (conductance).)doc";
@@ -692,6 +690,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_mean
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_randomSeed =
 R"doc(Override the random seed to introduce correlations between cells,
 default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
 
@@ -831,8 +831,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_ampC
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_meanPercent =
@@ -842,6 +840,8 @@ R"doc(Signal mean as percentage of a cell’s threshold current
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_randomSeed =
 R"doc(Override the random seed to introduce correlations between cells,
 default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
 
@@ -867,8 +867,6 @@ or uS^2 (conductance))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_randomSeed =
@@ -876,6 +874,8 @@ R"doc(Override the random seed to introduce correlations between cells,
 default = None)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_rate = R"doc(Rate of Poisson events (Hz))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
 
@@ -973,9 +973,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_Report_Type = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_compartment = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_lfp = R"doc()doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_lfp = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_Type_summation = R"doc()doc";
 
@@ -1026,6 +1026,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_nicho
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Run_electrodesFile = R"doc(Filename that contains the weights for the LFP calculation.)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod =
 R"doc(Selects the NEURON/CoreNEURON integration method. This parameter sets
 the NEURON global variable h.secondorder. Default 0 ('euler'))doc";
@@ -1051,8 +1053,6 @@ R"doc(A non-negative integer used for seeding stochastic synapses, default
 is 0.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_tstop = R"doc(Biological simulation end time in milliseconds)doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_electrodesFile = R"doc(Electrode weights file)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_SimulationConfig =
 R"doc(Parses a SONATA JSON simulation configuration file.
@@ -1177,11 +1177,19 @@ static const char *__doc_bbp_sonata_SpikeReader_Population_Sorting_by_time = R"d
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_Sorting_none = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SpikeReader_Population_createSpikes = R"doc(Create the spikes from the vectors of node_ids and timestamps)doc";
+
 static const char *__doc_bbp_sonata_SpikeReader_Population_filterNode = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_filterTimestamp = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_get = R"doc(Return spikes with all those node_ids between 'tstart' and 'tstop')doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_getArrays =
+R"doc(Return the node_ids and timestamps vectors with all node_ids between
+'tstart' and 'tstop')doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_getRawArrays = R"doc(Return the raw node_ids and timestamps vectors)doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc(Return the way data are sorted ('none', 'by_id', 'by_time'))doc";
 
@@ -1189,7 +1197,7 @@ static const char *__doc_bbp_sonata_SpikeReader_Population_getTimes = R"doc(Retu
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_sorting = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SpikeReader_Population_spikes = R"doc()doc";
+static const char *__doc_bbp_sonata_SpikeReader_Population_spike_times = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_tstart = R"doc()doc";
 
@@ -1204,6 +1212,12 @@ static const char *__doc_bbp_sonata_SpikeReader_getPopulationNames = R"doc(Retur
 static const char *__doc_bbp_sonata_SpikeReader_openPopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_populations = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeTimes = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeTimes_node_ids = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeTimes_timestamps = R"doc()doc";
 
 static const char *__doc_bbp_sonata_detail_NodeSets = R"doc()doc";
 

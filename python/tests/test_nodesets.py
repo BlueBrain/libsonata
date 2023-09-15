@@ -184,17 +184,17 @@ class TestNodePopulationNodeSet(unittest.TestCase):
 
     def test_extend(self):
         ns0 = NodeSets(json.dumps({"NodeSet0": { "E-mapping-good": 0 }}))
-        dup = ns0.extend(ns0)
+        dup = ns0.update(ns0)
         self.assertEqual(dup, {"NodeSet0"})
         self.assertEqual(ns0.names, {"NodeSet0"})
 
         ns1 = NodeSets(json.dumps({"NodeSet1": { "E-mapping-good": 0 }}))
-        dup = ns0.extend(ns1)
+        dup = ns0.update(ns1)
         self.assertEqual(dup, set())
         self.assertEqual(ns0.names, {"NodeSet0", "NodeSet1"})
 
         ns0 = NodeSets(json.dumps({"NodeSet0": { "E-mapping-good": 0 }}))
         ns1 = NodeSets(json.dumps({"NodeSet0": { "E-mapping-good": 0 }}))
-        dup = ns0.extend(ns1)
+        dup = ns0.update(ns1)
         self.assertEqual(dup, {"NodeSet0"})
         self.assertEqual(ns0.names, {"NodeSet0"})

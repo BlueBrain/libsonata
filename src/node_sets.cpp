@@ -102,7 +102,7 @@ class NodeSets
         return getMapKeys(node_sets_);
     }
 
-    std::set<std::string> extend(const NodeSets& other) {
+    std::set<std::string> update(const NodeSets& other) {
         if (&other == this) {
             return names();
         }
@@ -727,8 +727,8 @@ std::set<std::string> NodeSets::names() const {
     return impl_->names();
 }
 
-std::set<std::string> NodeSets::extend(const NodeSets& other) const {
-    return impl_->extend(*other.impl_);
+std::set<std::string> NodeSets::update(const NodeSets& other) const {
+    return impl_->update(*other.impl_);
 }
 
 std::string NodeSets::toJSON() const {
