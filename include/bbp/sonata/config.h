@@ -728,8 +728,7 @@ class SONATA_API SimulationConfig
     const SimulationConfig::SimulatorType& getTargetSimulator() const;
 
     /**
-     * Returns the path of node sets file overriding node_sets_file provided in _network,
-     * default is empty in case of no setting in _network
+     * Returns the path of node sets file, default is empty
      */
     const std::string& getNodeSetsFile() const noexcept;
 

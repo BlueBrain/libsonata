@@ -470,7 +470,7 @@ class TestSimulationConfig(unittest.TestCase):
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
         self.assertEqual(self.config.target_simulator.name, 'CORENEURON');
         circuit_conf = CircuitConfig.from_file(self.config.network);
-        self.assertEqual(self.config.node_sets_file, circuit_conf.node_sets_path);
+        self.assertEqual(self.config.node_sets_file, '');
         self.assertEqual(self.config.node_set, 'Column');
 
         self.assertEqual(self.config.list_input_names,

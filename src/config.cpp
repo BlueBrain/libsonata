@@ -1090,20 +1090,11 @@ class SimulationConfig::Parser
     }
 
     std::string parseNodeSetsFile() const noexcept {
-        std::string val;
         if (_json.contains("node_sets_file")) {
-            val = _json["node_sets_file"];
-            return toAbsolute(_basePath, val);
-        } else {
-            try {
-                const auto circuitFile = parseNetwork();
-                const auto conf = CircuitConfig::fromFile(circuitFile);
-                return conf.getNodeSetsPath();
-            } catch (...) {
-                // Don't throw CircuitConfig exceptions in SimulationConfig and return empty string
-                return val;
-            }
+            return toAbsolute(_basePath, _json["node_sets_file"]);
         }
+
+        return {};
     }
 
     nonstd::optional<std::string> parseNodeSet() const {

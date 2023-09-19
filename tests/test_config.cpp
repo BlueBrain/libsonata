@@ -394,8 +394,7 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
         CHECK(config.getTargetSimulator() == SimulationConfig::SimulatorType::CORENEURON);
-        const auto circuit_conf = CircuitConfig::fromFile(config.getNetwork());
-        CHECK(config.getNodeSetsFile() == circuit_conf.getNodeSetsPath());
+        CHECK(config.getNodeSetsFile() == "");
         CHECK(config.getNodeSet() == "Column");
 
         using InputType = SimulationConfig::InputBase::InputType;
@@ -619,6 +618,7 @@ TEST_CASE("SimulationConfig") {
             "$CIRCUIT_DIR": "./circuit"
           },
           "network": "$CIRCUIT_DIR/circuit_config.json",
+          "node_sets_file": "user_nodesets_file.json",
           "run": {
             "random_seed": 12345,
             "dt": 0.05,
@@ -631,7 +631,8 @@ TEST_CASE("SimulationConfig") {
         const auto network = fs::absolute(basePath / "circuit" / fs::path("circuit_config.json"));
         CHECK(config.getNetwork() == network.lexically_normal());
         CHECK(config.getTargetSimulator() == SimulationConfig::SimulatorType::NEURON);  // default
-        CHECK(config.getNodeSetsFile() == "");  // network file is not readable so default empty
+        CHECK(config.getNodeSetsFile() ==
+              fs::absolute(basePath / fs::path("user_nodesets_file.json")).lexically_normal());
         CHECK(config.getNodeSet() == nonstd::nullopt);  // default
         CHECK(config.getRun().stimulusSeed == 0);
         CHECK(config.getRun().ionchannelSeed == 0);
