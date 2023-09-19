@@ -1116,9 +1116,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_getNodeSet =
 R"doc(Returns the name of node set to be instantiated for the simulation,
 default = None)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_getNodeSetsFile =
-R"doc(Returns the path of node sets file overriding node_sets_file provided
-in _network, default is empty in case of no setting in _network)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_getNodeSetsFile = R"doc(Returns the path of node sets file, default is empty)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_getOutput = R"doc(Returns the Output section of the simulation configuration.)doc";
 
