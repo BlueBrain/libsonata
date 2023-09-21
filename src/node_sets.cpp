@@ -28,7 +28,9 @@ using json = nlohmann::json;
 
 void replace_trailing_coma(std::string& s, char c) {
     s.pop_back();
-    s.pop_back();
+    if (s.back() == ',') {
+        s.pop_back();
+    }
     s.push_back(c);
 }
 
@@ -119,9 +121,17 @@ class NodeSets
     std::string toJSON() const {
         std::string ret{"{\n"};
         for (const auto& pair : node_sets_) {
-            ret += fmt::format(R"(  "{}": {{)", pair.first);
-            ret += pair.second->toJSON();
-            ret += "},\n";
+            if (pair.second->is_compound()) {
+                ret += fmt::format("  {},\n", pair.second->toJSON());
+            } else {
+                std::string contents = pair.second->toJSON();
+                if (contents.empty()) {
+                    continue;
+                }
+                ret += fmt::format(R"(  "{}": {{)", pair.first);
+                ret += contents;
+                ret += "},\n";
+            }
         }
         replace_trailing_coma(ret, '\n');
         ret += "}";
@@ -221,7 +231,7 @@ class NodeSetBasicNodeIds: public NodeSetRule
     }
 
     std::string toJSON() const final {
-        return toString("node_ids", values_);
+        return toString("node_id", values_);
     }
 
     std::unique_ptr<NodeSetRule> clone() const final {
@@ -254,7 +264,11 @@ class NodeSetBasicMultiClause: public NodeSetRule
     std::string toJSON() const final {
         std::string ret;
         for (const auto& clause : clauses_) {
-            ret += clause->toJSON();
+            std::string contents = clause->toJSON();
+            if (contents.empty()) {
+                continue;
+            }
+            ret += contents;
             ret += ", ";
         }
         replace_trailing_coma(ret, ' ');
@@ -422,7 +436,7 @@ class NodeSetCompoundRule: public NodeSetRule
     }
 
     std::string toJSON() const final {
-        return toString("node_ids", targets_);
+        return toString(name_, targets_);
     }
 
     bool is_compound() const override {
