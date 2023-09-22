@@ -293,13 +293,28 @@ TEST_CASE("NodeSet") {
     })";
 
     SECTION("toJSON") {
-        NodeSets ns0(node_sets);
-        std::string j = ns0.toJSON();
-        NodeSets ns1(j);
-        CHECK(ns0.toJSON() == ns1.toJSON());
+        {
+            NodeSets ns0(node_sets);
+            std::string j = ns0.toJSON();
+            NodeSets ns1(j);
+            CHECK(ns0.toJSON() == ns1.toJSON());
 
-        auto ns = NodeSets::fromFile("./data/node_sets.json");
-        CHECK(ns.toJSON() == ns1.toJSON());
+            auto ns = NodeSets::fromFile("./data/node_sets.json");
+            CHECK(ns.toJSON() == ns1.toJSON());
+        }
+
+        {
+            NodeSets ns0(R"({"AND": {"node_id": [], "mtype": "L6_Y"}})");
+            CHECK(ns0.toJSON() == "{\n  \"AND\": {\"mtype\": [\"L6_Y\"] }\n}");
+        }
+
+        {
+            NodeSets ns0(R"({"NAME": {"node_id": []}})");
+            CHECK(ns0.toJSON() == "{\n}");
+
+            NodeSets ns1(R"({})");
+            CHECK(ns1.toJSON() == "{\n}");
+        }
     }
 
     SECTION("names") {
