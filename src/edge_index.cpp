@@ -23,16 +23,16 @@ namespace edge_index {
 
 namespace {
 
-typedef std::vector<std::vector<uint64_t>> RawIndex;
+using RawIndex = std::vector<std::vector<uint64_t>>;
 
-const char* SOURCE_NODE_ID_DSET = "source_node_id";
-const char* TARGET_NODE_ID_DSET = "target_node_id";
+const char* const SOURCE_NODE_ID_DSET = "source_node_id";
+const char* const TARGET_NODE_ID_DSET = "target_node_id";
 
-const char* INDEX_GROUP = "indices";
-const char* SOURCE_INDEX_GROUP = "indices/source_to_target";
-const char* TARGET_INDEX_GROUP = "indices/target_to_source";
-const char* NODE_ID_TO_RANGES_DSET = "node_id_to_ranges";
-const char* RANGE_TO_EDGE_ID_DSET = "range_to_edge_id";
+const char* const INDEX_GROUP = "indices";
+const char* const SOURCE_INDEX_GROUP = "indices/source_to_target";
+const char* const TARGET_INDEX_GROUP = "indices/target_to_source";
+const char* const NODE_ID_TO_RANGES_DSET = "node_id_to_ranges";
+const char* const RANGE_TO_EDGE_ID_DSET = "range_to_edge_id";
 
 }  // unnamed namespace
 
@@ -153,7 +153,7 @@ void _writeIndexGroup(const std::vector<NodeID>& nodeIDs,
     const auto rangeCount =
         std::accumulate(nodeToRanges.begin(),
                         nodeToRanges.end(),
-                        uint64_t(0),
+                        uint64_t{0},
                         [](uint64_t total, decltype(nodeToRanges)::const_reference item) {
                             return total + item.second.size();
                         });

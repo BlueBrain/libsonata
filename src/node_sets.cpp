@@ -3,8 +3,6 @@
 #include <cmath>
 #include <fmt/format.h>
 #include <fstream>
-#include <sstream>
-#include <type_traits>
 
 #include "../extlib/filesystem.hpp"
 
@@ -50,6 +48,11 @@ class NodeSets;
 class NodeSetRule
 {
   public:
+    NodeSetRule() = default;
+    NodeSetRule(const NodeSetRule&) = delete;
+    NodeSetRule operator=(const NodeSetRule&) = delete;
+    NodeSetRule(const NodeSetRule&&) = delete;
+    NodeSetRule operator=(const NodeSetRule&&) = delete;
     virtual ~NodeSetRule() = default;
 
     virtual Selection materialize(const NodeSets&, const NodePopulation&) const = 0;
@@ -161,8 +164,8 @@ template <typename T>
 class NodeSetBasicRule: public NodeSetRule
 {
   public:
-    NodeSetBasicRule(const std::string attribute, const std::vector<T>& values)
-        : attribute_(attribute)
+    NodeSetBasicRule(std::string attribute, const std::vector<T>& values)
+        : attribute_(std::move(attribute))
         , values_(values) {}
 
     Selection materialize(const detail::NodeSets& /* unused */,
@@ -222,8 +225,8 @@ class NodeSetBasicPopulation: public NodeSetRule
 class NodeSetBasicNodeIds: public NodeSetRule
 {
   public:
-    explicit NodeSetBasicNodeIds(const Selection::Values& values)
-        : values_(values) {}
+    explicit NodeSetBasicNodeIds(Selection::Values values)
+        : values_(std::move(values)) {}
 
     Selection materialize(const detail::NodeSets& /* unused */,
                           const NodePopulation& np) const final {
@@ -292,12 +295,12 @@ class NodeSetBasicMultiClause: public NodeSetRule
 class NodeSetBasicOperatorString: public NodeSetRule
 {
   public:
-    explicit NodeSetBasicOperatorString(const std::string& attribute,
+    explicit NodeSetBasicOperatorString(std::string attribute,
                                         const std::string& op,
-                                        const std::string& value)
+                                        std::string value)
         : op_(string2op(op))
-        , attribute_(attribute)
-        , value_(value) {}
+        , attribute_(std::move(attribute))
+        , value_(std::move(value)) {}
 
     Selection materialize(const detail::NodeSets& /* unused */,
                           const NodePopulation& np) const final {
@@ -358,13 +361,15 @@ class NodeSetBasicOperatorNumeric: public NodeSetRule
                           const NodePopulation& np) const final {
         switch (op_) {
         case Op::gt:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v > value_; });
+            return np.filterAttribute<double>(name_, [this](const double v) { return v > value_; });
         case Op::lt:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v < value_; });
+            return np.filterAttribute<double>(name_, [this](const double v) { return v < value_; });
         case Op::gte:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v >= value_; });
+            return np.filterAttribute<double>(name_,
+                                              [this](const double v) { return v >= value_; });
         case Op::lte:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v <= value_; });
+            return np.filterAttribute<double>(name_,
+                                              [this](const double v) { return v <= value_; });
         default:              // LCOV_EXCL_LINE
             LIBSONATA_THROW_IF_REACHED  // LCOV_EXCL_LINE
         }

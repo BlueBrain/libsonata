@@ -11,16 +11,16 @@
 
 #include <algorithm>  // std::transform
 #include <iterator>   // std::inserter
-#include <map>
 #include <set>
 #include <string>
-#include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include <bbp/sonata/population.h>
 
 std::string readFile(const std::string& path);
+
+namespace bbp {
+namespace sonata {
 
 template <typename T, class UnaryPredicate>
 bbp::sonata::Selection _getMatchingSelection(const std::vector<T>& values, UnaryPredicate pred) {
@@ -44,3 +44,5 @@ std::set<std::string> getMapKeys(const T& map) {
     });
     return ret;
 }
+}  // namespace sonata
+}  // namespace bbp

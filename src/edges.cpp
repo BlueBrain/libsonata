@@ -22,9 +22,9 @@
 
 namespace {
 
-const char* SOURCE_NODE_ID_DSET = "source_node_id";
-const char* TARGET_NODE_ID_DSET = "target_node_id";
-const char* NODE_POPULATION_ATTR = "node_population";
+const char* const SOURCE_NODE_ID_DSET = "source_node_id";
+const char* const TARGET_NODE_ID_DSET = "target_node_id";
+const char* const NODE_POPULATION_ATTR = "node_population";
 
 }  // unnamed namespace
 
