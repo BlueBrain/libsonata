@@ -50,9 +50,10 @@ class NodeSetRule
   public:
     NodeSetRule() = default;
     NodeSetRule(const NodeSetRule&) = delete;
-    NodeSetRule operator=(const NodeSetRule&) = delete;
+    void operator=(const NodeSetRule&) = delete;
     NodeSetRule(const NodeSetRule&&) = delete;
-    NodeSetRule operator=(const NodeSetRule&&) = delete;
+    void operator=(const NodeSetRule&&) = delete;
+
     virtual ~NodeSetRule() = default;
 
     virtual Selection materialize(const NodeSets&, const NodePopulation&) const = 0;

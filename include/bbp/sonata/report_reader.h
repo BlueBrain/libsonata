@@ -92,7 +92,7 @@ class SONATA_API SpikeReader
         friend SpikeReader;
     };
 
-    explicit SpikeReader(const std::string& filename);
+    explicit SpikeReader(std::string filename);
 
     /**
      * Return a list of all population names.

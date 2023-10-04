@@ -16,13 +16,15 @@
 std::string readFile(const std::string& path) {
     namespace fs = ghc::filesystem;
 
-    if (!fs::is_regular_file(path))
+    if (!fs::is_regular_file(path)) {
         throw std::runtime_error("Path `" + path + "` is not a file");
+    }
 
     std::ifstream file(path);
 
-    if (file.fail())
+    if (file.fail()) {
         throw std::runtime_error("Could not open file `" + path + "`");
+    }
 
     std::string contents;
 

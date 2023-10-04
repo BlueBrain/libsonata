@@ -95,8 +95,8 @@ inline void emplace_ids(CompartmentID& key, NodeID node_id, ElementID element_id
 namespace bbp {
 namespace sonata {
 
-SpikeReader::SpikeReader(const std::string& filename)
-    : filename_(filename) {}
+SpikeReader::SpikeReader(std::string filename)
+    : filename_(std::move(filename)) {}
 
 std::vector<std::string> SpikeReader::getPopulationNames() const {
     H5::File file(filename_, H5::File::ReadOnly);
