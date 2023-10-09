@@ -70,7 +70,7 @@ Selection intersection_(const Ranges& lhs, const Ranges& rhs) {
         auto start = std::max(it0->first, it1->first);
         auto end = std::min(it0->second, it1->second);
         if (start < end) {
-            ret.push_back({start, end});
+            ret.emplace_back(start, end);
         }
 
         if (it0->second < it1->second) {
@@ -354,7 +354,7 @@ Selection Population::filterAttribute(const std::string& name,
     }
 
     const auto& values = getAttribute<std::string>(name, selectAll());
-    return _getMatchingSelection(values, pred);
+    return _getMatchingSelection(values, std::move(pred));
 }
 
 template <typename T>

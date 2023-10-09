@@ -94,14 +94,14 @@ NodePopulation::NodePopulation(const std::string& h5FilePath,
                                const std::string& name)
     : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
 
-Selection NodePopulation::regexMatch(const std::string& name, const std::string& regex) const {
+Selection NodePopulation::regexMatch(const std::string& attribute, const std::string& regex) const {
     std::regex re(regex);
     const auto pred = [re](const std::string& v) {
         std::smatch match;
         std::regex_search(v, match, re);
         return !match.empty();
     };
-    return _filterStringAttribute(*this, name, pred);
+    return _filterStringAttribute(*this, attribute, pred);
 }
 
 template <typename T>

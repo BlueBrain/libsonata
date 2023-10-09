@@ -10,12 +10,8 @@
  *************************************************************************/
 
 #include <bbp/sonata/config.h>
-#include <bbp/sonata/optional.hpp>
 
 #include <bbp/sonata/optional.hpp>
-#include <cassert>
-#include <fstream>
-#include <memory>
 #include <regex>
 #include <set>
 #include <string>
@@ -24,7 +20,6 @@
 #include <nlohmann/json.hpp>
 
 #include "../extlib/filesystem.hpp"
-#include "population.hpp"
 #include "utils.h"
 
 // Add a specialization of adl_serializer to the nlohmann namespace for conversion from/to
@@ -285,7 +280,7 @@ Variables readVariables(const nlohmann::json& json) {
         return variables;
     }
 
-    const auto manifest = json["manifest"];
+    const auto& manifest = json["manifest"];
 
     const std::regex regexVariable(R"(\$[a-zA-Z0-9_]*)");
 
@@ -307,7 +302,7 @@ std::string toAbsolute(const fs::path& base, const fs::path& path) {
     return absolute.lexically_normal().string();
 }
 
-template <typename Type, typename std::enable_if<std::is_enum<Type>::value>::type* = nullptr>
+template <typename Type, std::enable_if_t<std::is_enum<Type>::value>* = nullptr>
 void raiseIfInvalidEnum(const char* name,
                         const Type& buf,
                         const std::string& found_value,
@@ -907,7 +902,7 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
 }
 
 CircuitConfig CircuitConfig::fromFile(const std::string& path) {
-    return CircuitConfig(readFile(path), fs::path(path).parent_path());
+    return {readFile(path), fs::path(path).parent_path()};
 }
 
 CircuitConfig::ConfigStatus CircuitConfig::getCircuitConfigStatus() const {

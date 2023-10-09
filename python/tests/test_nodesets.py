@@ -198,3 +198,10 @@ class TestNodePopulationNodeSet(unittest.TestCase):
         dup = ns0.update(ns1)
         self.assertEqual(dup, {"NodeSet0"})
         self.assertEqual(ns0.names, {"NodeSet0"})
+
+        j0 = '''{"NodeSet0": { "attr-Y": [21, 22] } }'''
+        j1 = '''{"NodeSet0": { "attr-Y": [22] } }'''
+        ns = NodeSets(j0)
+        ns.update(NodeSets(j1))
+        sel = ns.materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((1, 2), )))
