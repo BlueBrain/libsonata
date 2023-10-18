@@ -36,8 +36,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           # note: config is stored in pyproject.toml now
-          CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014 python -m cibuildwheel --output-dir dist
-          CIBW_MANYLINUX_X86_64_IMAGE=manylinux_2_28 python -m cibuildwheel --output-dir dist
+          CMAKE_BUILD_PARALLEL_LEVEL=2 CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014 python -m cibuildwheel --output-dir dist
+          CMAKE_BUILD_PARALLEL_LEVEL=2 CIBW_MANYLINUX_X86_64_IMAGE=manylinux_2_28 python -m cibuildwheel --output-dir dist
 
       - name: Build wheels Mac OS
         if: runner.os == 'macOS'
