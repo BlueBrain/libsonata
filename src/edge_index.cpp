@@ -11,6 +11,7 @@
 
 #include <bbp/sonata/common.h>
 
+#include <array>
 #include <cstdint>
 #include <set>
 #include <unordered_map>
@@ -23,7 +24,7 @@ namespace edge_index {
 
 namespace {
 
-using RawIndex = std::vector<std::vector<uint64_t>>;
+using RawIndex = std::vector<std::array<uint64_t, 2>>;
 
 const char* const SOURCE_NODE_ID_DSET = "source_node_id";
 const char* const TARGET_NODE_ID_DSET = "target_node_id";
