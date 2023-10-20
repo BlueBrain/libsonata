@@ -23,5 +23,8 @@ changes=$(git-clang-format 'HEAD~1' $DIRS_TO_FORMAT)
 if [[ $(echo "$changes" | grep -n1 'changed files') ]]; then
     echo "The following files require changes to pass the current clang-format"
     echo "$changes"
+    echo ""
+    echo "This is the diff:"
+    git diff
     exit 1
 fi
