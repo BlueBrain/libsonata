@@ -93,14 +93,8 @@ Selection union_(const Ranges& lhs, const Ranges& rhs) {
 }  // namespace detail
 
 
-Selection::Selection(Selection::Ranges&& ranges)
+Selection::Selection(Selection::Ranges ranges)
     : ranges_(std::move(ranges)) {
-    detail::_checkRanges(ranges_);
-}
-
-
-Selection::Selection(const Selection::Ranges& ranges)
-    : ranges_(ranges) {
     detail::_checkRanges(ranges_);
 }
 
