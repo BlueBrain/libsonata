@@ -34,25 +34,7 @@ void _checkRanges(const Ranges& ranges) {
 }
 
 Ranges _sortAndMerge(const Ranges& ranges) {
-    if (ranges.empty()) {
-        return ranges;
-    }
-    Ranges ret;
-    Ranges sorted(ranges);
-    std::sort(sorted.begin(), sorted.end());
-
-    auto it = sorted.cbegin();
-    ret.push_back(*(it++));
-
-    for (; it != sorted.cend(); ++it) {
-        auto& last = ret[ret.size() - 1].second;
-        if (last < it->first) {
-            ret.push_back(*it);
-        } else {
-            last = std::max(last, it->second);
-        }
-    }
-    return ret;
+    return bulk_read::sortAndMerge(ranges);
 }
 
 Selection intersection_(const Ranges& lhs, const Ranges& rhs) {
@@ -122,11 +104,7 @@ Selection::Values Selection::flatten() const {
 
 
 size_t Selection::flatSize() const {
-    size_t result = 0;
-    for (const auto& range : ranges_) {
-        result += (range.second - range.first);
-    }
-    return result;
+    return bulk_read::detail::flatSize(ranges_);
 }
 
 

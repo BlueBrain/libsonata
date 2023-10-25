@@ -22,6 +22,8 @@
 
 #include <highfive/H5File.hpp>
 
+#include "read_bulk.hpp"
+
 namespace bbp {
 namespace sonata {
 
