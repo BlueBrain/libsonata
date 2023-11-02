@@ -124,7 +124,7 @@ class SONATA_API CircuitConfig
     enum class ConfigStatus {
         /// needed for parsing json contents that are null / not an enum value
         invalid,
-        /// all mandatory properties exist, and the the config should return
+        /// all mandatory properties exist, and the config should return
         /// correct values in all possible cases
         complete,
         /**
@@ -240,7 +240,7 @@ class SONATA_API CircuitConfig
     // manifest variables
     std::string _expandedJSON;
 
-    /// How strict we are checking the circuit config
+    // How strict we are checking the circuit config
     ConfigStatus _status = ConfigStatus::complete;
 
     // Path to the nodesets file
@@ -394,7 +394,7 @@ class SONATA_API SimulationConfig
         double endTime{};
         /// Report filename. Default is "<report name>.h5"
         std::string fileName;
-        /// Allows for supressing a report so that is not created. Default is true
+        /// Allows for suppressing a report so that is not created. Default is true
         bool enabled = true;
     };
 
