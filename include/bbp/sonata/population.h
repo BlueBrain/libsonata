@@ -33,8 +33,7 @@ class SONATA_API Selection
     using Range = std::pair<Value, Value>;
     using Ranges = std::vector<Range>;
 
-    explicit Selection(Ranges&& ranges);
-    explicit Selection(const Ranges& ranges);
+    Selection(Ranges ranges);
 
     template <typename Iterator>
     static Selection fromValues(Iterator first, Iterator last);
