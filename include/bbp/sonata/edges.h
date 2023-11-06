@@ -30,6 +30,11 @@ class SONATA_API EdgePopulation: public Population
                    const std::string& csvFilePath,
                    const std::string& name);
 
+    EdgePopulation(const std::string& h5FilePath,
+                   const std::string& csvFilePath,
+                   const std::string& name,
+                   const IoOpts& io_opts);
+
     /**
      * Name of source population extracted from 'source_node_id' dataset
      */

@@ -305,11 +305,12 @@ py::class_<Storage> bindStorageClass(py::module& m, const char* clsName, const c
     };
     return py::class_<Storage>(
                m, clsName, imbuePopulationClassName(DOC(bbp, sonata, PopulationStorage)).c_str())
-        .def(py::init([](py::object h5_filepath, py::object csv_filepath) {
-                 return Storage(py::str(h5_filepath), py::str(csv_filepath));
+        .def(py::init([](py::object h5_filepath, py::object csv_filepath, IoOpts io_opts) {
+                 return Storage(py::str(h5_filepath), py::str(csv_filepath), std::move(io_opts));
              }),
              "h5_filepath"_a,
-             "csv_filepath"_a = "")
+             "csv_filepath"_a = "",
+             "io_opts"_a = IoOpts())
         .def_property_readonly("population_names",
                                &Storage::populationNames,
                                imbuePopulationClassName(DOC_POP_STOR(populationNames)).c_str())
@@ -403,6 +404,8 @@ void bindReportReader(py::module& m, const std::string& prefix) {
 
 
 PYBIND11_MODULE(_libsonata, m) {
+    py::class_<IoOpts>(m, "IoOpts").def(py::init([]() { return IoOpts(); }));
+
     py::class_<Selection>(m,
                           "Selection",
                           "ID sequence in the form convenient for querying attributes")
@@ -579,9 +582,19 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_property_readonly("config_status", &CircuitConfig::getCircuitConfigStatus)
         .def_property_readonly("node_sets_path", &CircuitConfig::getNodeSetsPath)
         .def_property_readonly("node_populations", &CircuitConfig::listNodePopulations)
-        .def("node_population", &CircuitConfig::getNodePopulation)
+        .def("node_population",
+             [](const CircuitConfig& config, const std::string& name) {
+                 return config.getNodePopulation(name);
+             })
         .def_property_readonly("edge_populations", &CircuitConfig::listEdgePopulations)
-        .def("edge_population", &CircuitConfig::getEdgePopulation)
+        .def("edge_population",
+             [](const CircuitConfig& config, const std::string& name) {
+                 return config.getEdgePopulation(name);
+             })
+        .def("edge_population",
+             [](const CircuitConfig& config, const std::string& name, IoOpts io_opts) {
+                 return config.getEdgePopulation(name, io_opts);
+             })
         .def("node_population_properties", &CircuitConfig::getNodePopulationProperties, "name"_a)
         .def("edge_population_properties", &CircuitConfig::getEdgePopulationProperties, "name"_a)
         .def_property_readonly("expanded_json", &CircuitConfig::getExpandedJSON);

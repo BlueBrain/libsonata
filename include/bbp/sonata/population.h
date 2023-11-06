@@ -19,6 +19,8 @@
 #include <utility>  // std::move
 #include <vector>
 
+#include <bbp/sonata/io_options.h>
+
 
 namespace bbp {
 namespace sonata {
@@ -239,7 +241,8 @@ class SONATA_API Population
     Population(const std::string& h5FilePath,
                const std::string& csvFilePath,
                const std::string& name,
-               const std::string& prefix);
+               const std::string& prefix,
+               const IoOpts& io_opts);
 
     Population(const Population&) = delete;
 
@@ -264,7 +267,12 @@ template <typename Population>
 class SONATA_API PopulationStorage
 {
   public:
-    PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath = "");
+    PopulationStorage(const std::string& h5FilePath);
+    PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath);
+    PopulationStorage(const std::string& h5FilePath, const IoOpts& io_opts);
+    PopulationStorage(const std::string& h5FilePath,
+                      const std::string& csvFilePath,
+                      const IoOpts& io_opts);
 
     PopulationStorage(const PopulationStorage&) = delete;
 

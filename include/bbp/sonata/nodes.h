@@ -30,6 +30,11 @@ class SONATA_API NodePopulation: public Population
                    const std::string& csvFilePath,
                    const std::string& name);
 
+    NodePopulation(const std::string& h5FilePath,
+                   const std::string& csvFilePath,
+                   const std::string& name,
+                   const IoOpts& io_opts);
+
     /**
      * Return selection of where attribute values match value
      *

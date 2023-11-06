@@ -33,11 +33,17 @@ namespace bbp {
 namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
-
+//
 EdgePopulation::EdgePopulation(const std::string& h5FilePath,
                                const std::string& csvFilePath,
                                const std::string& name)
-    : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
+    : Population(h5FilePath, csvFilePath, name, ELEMENT, IoOpts()) {}
+
+EdgePopulation::EdgePopulation(const std::string& h5FilePath,
+                               const std::string& csvFilePath,
+                               const std::string& name,
+                               const IoOpts& io_opts)
+    : Population(h5FilePath, csvFilePath, name, ELEMENT, io_opts) {}
 
 
 std::string EdgePopulation::source() const {
@@ -59,14 +65,14 @@ std::string EdgePopulation::target() const {
 std::vector<NodeID> EdgePopulation::sourceNodeIDs(const Selection& selection) const {
     HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet(SOURCE_NODE_ID_DSET);
-    return _readSelection<NodeID>(dset, selection);
+    return _readSelection<NodeID>(dset, selection, impl_->io_opts);
 }
 
 
 std::vector<NodeID> EdgePopulation::targetNodeIDs(const Selection& selection) const {
     HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet(TARGET_NODE_ID_DSET);
-    return _readSelection<NodeID>(dset, selection);
+    return _readSelection<NodeID>(dset, selection, impl_->io_opts);
 }
 
 

@@ -194,10 +194,11 @@ std::string _getDataType(const HighFive::DataSet& dset, const std::string& name)
 Population::Population(const std::string& h5FilePath,
                        const std::string& csvFilePath,
                        const std::string& name,
-                       const std::string& prefix)
-    : impl_([h5FilePath, csvFilePath, name, prefix] {
+                       const std::string& prefix,
+                       const IoOpts& io_opts)
+    : impl_([h5FilePath, csvFilePath, name, prefix, io_opts] {
         HDF5_LOCK_GUARD
-        return new Population::Impl(h5FilePath, csvFilePath, name, prefix);
+        return new Population::Impl(h5FilePath, csvFilePath, name, prefix, io_opts);
     }()) {}
 
 
@@ -240,14 +241,14 @@ std::vector<std::string> Population::enumerationValues(const std::string& name) 
 
     // Note: can't use select all, because our locks aren't re-entrant
     const auto selection = Selection({{0, dset.getSpace().getDimensions()[0]}});
-    return _readSelection<std::string>(dset, selection);
+    return _readSelection<std::string>(dset, selection, impl_->io_opts);
 }
 
 
 template <typename T>
 std::vector<T> Population::getAttribute(const std::string& name, const Selection& selection) const {
     HDF5_LOCK_GUARD
-    return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
+    return _readSelection<T>(impl_->getAttributeDataSet(name), selection, impl_->io_opts);
 }
 
 
@@ -256,7 +257,9 @@ std::vector<std::string> Population::getAttribute<std::string>(const std::string
                                                                const Selection& selection) const {
     if (impl_->attributeEnumNames.count(name) == 0) {
         HDF5_LOCK_GUARD
-        return _readSelection<std::string>(impl_->getAttributeDataSet(name), selection);
+        return _readSelection<std::string>(impl_->getAttributeDataSet(name),
+                                           selection,
+                                           impl_->io_opts);
     }
 
     const auto indices = getAttribute<size_t>(name, selection);
@@ -297,7 +300,7 @@ std::vector<T> Population::getEnumeration(const std::string& name,
     }
 
     HDF5_LOCK_GUARD
-    return _readSelection<T>(impl_->getAttributeDataSet(name), selection);
+    return _readSelection<T>(impl_->getAttributeDataSet(name), selection, impl_->io_opts);
 }
 
 
@@ -321,7 +324,7 @@ template <typename T>
 std::vector<T> Population::getDynamicsAttribute(const std::string& name,
                                                 const Selection& selection) const {
     HDF5_LOCK_GUARD
-    return _readSelection<T>(impl_->getDynamicsAttributeDataSet(name), selection);
+    return _readSelection<T>(impl_->getDynamicsAttributeDataSet(name), selection, impl_->io_opts);
 }
 
 
