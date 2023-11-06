@@ -63,8 +63,14 @@ class CMakeBuild(build_ext):
             "-DSONATA_VERSION=" + self.distribution.get_version(),
             "-DCMAKE_BUILD_TYPE={}".format(build_type),
             "-DSONATA_CXX_WARNINGS=OFF",
-            '-DPYTHON_EXECUTABLE=' + sys.executable
+            '-DPYTHON_EXECUTABLE=' + sys.executable,
         ]
+
+        try:
+            import mpi4py
+            cmake_args.append("-DSONATA_MPI4PY_INCLUDE_DIR=" + mpi4py.get_include())
+        except ModuleNotFoundError:
+            pass
 
         build_args = ["--config", build_type,
                       "--target", self.target,

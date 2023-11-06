@@ -20,6 +20,12 @@
 #include <memory>
 #include <string>
 
+
+#if SONATA_HAS_MPI == 1
+#include <bbp/sonata/collective_io_options.h>
+#include <mpi4py/mpi4py.h>
+#endif
+
 namespace py = pybind11;
 
 using namespace pybind11::literals;
@@ -404,7 +410,31 @@ void bindReportReader(py::module& m, const std::string& prefix) {
 
 
 PYBIND11_MODULE(_libsonata, m) {
+#if SONATA_HAS_MPI == 1
+    if (import_mpi4py() < 0) {
+        throw std::runtime_error("Could not load mpi4py API.");
+    }
+#endif
+
     py::class_<IoOpts>(m, "IoOpts").def(py::init([]() { return IoOpts(); }));
+
+    m.def("make_collective_io_opts",
+          [](py::object comm, bool collective_metadata, bool collective_transfer) {
+#if SONATA_HAS_MPI == 1
+              PyObject* py_comm = comm.ptr();
+              // Check that we have been passed an mpi4py communicator
+              if (PyObject_TypeCheck(py_comm, &PyMPIComm_Type)) {
+                  return IoOpts(FileAccessOpts(
+                                    std::make_shared<MPIFileAccessOptsImpl>(*PyMPIComm_Get(py_comm),
+                                                                            collective_metadata)),
+                                DataTransferOpts(std::make_shared<MPIDataTransferOptsImpl>(
+                                    collective_transfer)));
+              }
+              throw std::runtime_error("Not an MPI Comm!");
+#else
+            return IoOpts();
+#endif
+          });
 
     py::class_<Selection>(m,
                           "Selection",

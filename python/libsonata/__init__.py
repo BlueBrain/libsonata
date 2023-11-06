@@ -23,7 +23,8 @@ from libsonata._libsonata import (
     SpikePopulation,
     SpikeReader,
     version,
-    IoOpts
+    IoOpts,
+    make_collective_io_opts
 )
 
 __all__ = [
