@@ -97,6 +97,7 @@ set(SONATA_SRC
     src/edges.cpp
     src/hdf5_mutex.cpp
     src/hdf5_reader.cpp
+    src/hdf5_collective_reader.cpp
     src/node_sets.cpp
     src/nodes.cpp
     src/population.cpp

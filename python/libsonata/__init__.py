@@ -24,6 +24,7 @@ from libsonata._libsonata import (
     SpikeReader,
     version,
     Hdf5Reader,
+    make_collective_reader,
 )
 
 __all__ = [
