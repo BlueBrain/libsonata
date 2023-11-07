@@ -1,7 +1,10 @@
 #pragma once
 
-#include <bbp/sonata/population.h>
+#include <algorithm>
 #include <cstdint>
+#include <fmt/format.h>
+
+#include <bbp/sonata/population.h>
 
 #define SONATA_PAGESIZE (4 * 1 << 20)
 
