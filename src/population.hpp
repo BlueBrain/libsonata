@@ -110,8 +110,8 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
                    std::back_inserter(ids_sorted),
                    [&ids](size_t i) { return static_cast<size_t>(ids[i]); });
 
-    std::vector<T> linear_result(ids_sorted.size());
-    dset.select(HighFive::ElementSet{ids_sorted}).read(linear_result.data());
+    std::vector<T> linear_result;
+    dset.select(HighFive::ElementSet{ids_sorted}).read(linear_result);
 
     std::vector<T> result(ids_sorted.size());
     for (size_t i = 0; i < ids_sorted.size(); ++i) {
@@ -143,11 +143,7 @@ struct Population::Impl {
               h5Root.getGroup("0").exist(H5_DYNAMICS_PARAMS)
                   ? _listChildren(h5Root.getGroup("0").getGroup(H5_DYNAMICS_PARAMS))
                   : std::set<std::string>{}) {
-        size_t groupID = 0;
-        while (h5Root.exist(std::to_string(groupID))) {
-            ++groupID;
-        }
-        if (groupID != 1) {
+        if (h5Root.exist("1")) {
             throw SonataError("Only single-group populations are supported at the moment");
         }
     }
