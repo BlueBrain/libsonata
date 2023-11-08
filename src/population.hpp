@@ -110,8 +110,8 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
                    std::back_inserter(ids_sorted),
                    [&ids](size_t i) { return static_cast<size_t>(ids[i]); });
 
-    std::vector<T> linear_result(ids_sorted.size());
-    dset.select(HighFive::ElementSet{ids_sorted}).read(linear_result.data());
+    std::vector<T> linear_result;
+    dset.select(HighFive::ElementSet{ids_sorted}).read(linear_result);
 
     std::vector<T> result(ids_sorted.size());
     for (size_t i = 0; i < ids_sorted.size(); ++i) {
