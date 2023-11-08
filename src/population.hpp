@@ -143,11 +143,7 @@ struct Population::Impl {
               h5Root.getGroup("0").exist(H5_DYNAMICS_PARAMS)
                   ? _listChildren(h5Root.getGroup("0").getGroup(H5_DYNAMICS_PARAMS))
                   : std::set<std::string>{}) {
-        size_t groupID = 0;
-        while (h5Root.exist(std::to_string(groupID))) {
-            ++groupID;
-        }
-        if (groupID != 1) {
+        if (h5Root.exist("1")) {
             throw SonataError("Only single-group populations are supported at the moment");
         }
     }
