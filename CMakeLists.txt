@@ -100,6 +100,7 @@ set(SONATA_SRC
     src/nodes.cpp
     src/population.cpp
     src/report_reader.cpp
+    src/selection.cpp
     src/utils.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp
     )
