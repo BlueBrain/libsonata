@@ -21,8 +21,10 @@ namespace edge_index {
 const HighFive::Group sourceIndex(const HighFive::Group& h5Root);
 const HighFive::Group targetIndex(const HighFive::Group& h5Root);
 
-Selection resolve(const HighFive::Group& indexGroup, NodeID nodeID);
-Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& nodeIDs);
+Selection resolve(const HighFive::Group& indexGroup, NodeID nodeID, const Hdf5Reader& reader);
+Selection resolve(const HighFive::Group& indexGroup,
+                  const std::vector<NodeID>& nodeIDs,
+                  const Hdf5Reader& reader);
 
 void write(HighFive::Group& h5Root,
            uint64_t sourceNodeCount,
