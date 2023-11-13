@@ -78,14 +78,7 @@ const Selection::Ranges& Selection::ranges() const {
 
 
 Selection::Values Selection::flatten() const {
-    Selection::Values result;
-    result.reserve(flatSize());
-    for (const auto& range : ranges_) {
-        for (auto v = range.first; v < range.second; ++v) {
-            result.emplace_back(v);
-        }
-    }
-    return result;
+    return bulk_read::detail::flattenRanges<Selection::Value>(ranges_);
 }
 
 

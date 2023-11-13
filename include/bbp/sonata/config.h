@@ -182,8 +182,8 @@ class SONATA_API CircuitConfig
      *
      * \throws SonataError if the given population does not exist in any node network.
      */
+    NodePopulation getNodePopulation(const std::string& name, const Hdf5Reader& hdf5_reader) const;
     NodePopulation getNodePopulation(const std::string& name) const;
-
     /**
      * Returns a set with all available population names across all the edge networks.
      */
@@ -195,6 +195,7 @@ class SONATA_API CircuitConfig
      *
      * \throws SonataError if the given population does not exist in any edge network.
      */
+    EdgePopulation getEdgePopulation(const std::string& name, const Hdf5Reader& hdf5_reader) const;
     EdgePopulation getEdgePopulation(const std::string& name) const;
 
     /**

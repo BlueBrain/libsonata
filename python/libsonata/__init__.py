@@ -23,6 +23,7 @@ from libsonata._libsonata import (
     SpikePopulation,
     SpikeReader,
     version,
+    Hdf5Reader,
 )
 
 __all__ = [

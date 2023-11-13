@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "read_bulk.hpp"
-#include "read_canonical_selection.hpp"
 
 namespace bbp {
 namespace sonata {
@@ -55,7 +54,9 @@ const HighFive::Group targetIndex(const HighFive::Group& h5Root) {
     return h5Root.getGroup(TARGET_INDEX_GROUP);
 }
 
-Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& nodeIDs) {
+Selection resolve(const HighFive::Group& indexGroup,
+                  const std::vector<NodeID>& nodeIDs,
+                  const Hdf5Reader& reader) {
     auto node2ranges_dset = indexGroup.getDataSet(NODE_ID_TO_RANGES_DSET);
     auto node_dim = node2ranges_dset.getSpace().getDimensions()[0];
     auto sortedNodeIds = nodeIDs;
@@ -65,12 +66,11 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
         return id >= node_dim;
     });
     std::sort(sortedNodeIds.begin(), sortedNodeIds.end());
-    sortedNodeIds.erase(std::unique(sortedNodeIds.begin(), sortedNodeIds.end()),
-                        sortedNodeIds.end());
 
     auto nodeSelection = Selection::fromValues(sortedNodeIds);
-    auto primaryRange = detail::readCanonicalSelection<std::array<uint64_t, 2>>(
-        node2ranges_dset, nodeSelection.ranges(), RawIndex{{0, 2}});
+    auto primaryRange = reader.readSelection<std::array<uint64_t, 2>>(node2ranges_dset,
+                                                                      nodeSelection,
+                                                                      RawIndex{{0, 2}});
 
     bulk_read::detail::erase_if(primaryRange, [](const auto& range) {
         // Filter out any invalid ranges `start >= end`.
@@ -80,7 +80,7 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
     // TODO check that the spec allows us to optimize this.
     primaryRange = bulk_read::sortAndMerge(primaryRange);
 
-    auto secondaryRange = detail::readCanonicalSelection<std::array<uint64_t, 2>>(
+    auto secondaryRange = reader.readSelection<std::array<uint64_t, 2>>(
         indexGroup.getDataSet(RANGE_TO_EDGE_ID_DSET), primaryRange, RawIndex{{0, 2}});
 
     // Sort and eliminate empty ranges.
@@ -94,6 +94,12 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
     }
 
     return Selection(std::move(edgeIds));
+}
+
+Selection resolve(const HighFive::Group& indexGroup,
+                  const NodeID nodeID,
+                  const Hdf5Reader& reader) {
+    return resolve(indexGroup, std::vector<NodeID>{nodeID}, reader);
 }
 
 
@@ -122,6 +128,8 @@ std::unordered_map<NodeID, RawIndex> _groupNodeRanges(const std::vector<NodeID>&
 }
 
 
+// Use only in the writing code below. General purpose reading should use the
+// Hdf5Reader interface.
 std::vector<NodeID> _readNodeIDs(const HighFive::Group& h5Root, const std::string& name) {
     std::vector<NodeID> result;
     h5Root.getDataSet(name).read(result);
