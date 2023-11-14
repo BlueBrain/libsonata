@@ -66,6 +66,7 @@ jobs:
 
       - name: Install packages on MacOS
         run: |
+            brew install --force --overwrite python@3.11
             brew update
             brew install cmake || true  # macos image has cmake installed, but a new version may exist; ignore it if so
             brew install doxygen
