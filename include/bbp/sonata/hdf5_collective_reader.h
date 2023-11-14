@@ -2,7 +2,7 @@
 
 #include <mpi.h>
 
-#include "hdf5_reader.h"
+#include <bbp/sonata/hdf5_reader.h>
 
 namespace bbp {
 namespace sonata {

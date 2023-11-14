@@ -23,6 +23,7 @@
 
 #if SONATA_HAS_MPI == 1
 #include <bbp/sonata/hdf5_collective_reader.h>
+#include "../src/hdf5_collective_reader.cpp"
 #include <mpi4py/mpi4py.h>
 #endif
 

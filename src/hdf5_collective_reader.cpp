@@ -1,11 +1,5 @@
 #include <bbp/sonata/hdf5_collective_reader.h>
 
-#include "population.hpp"
-#include <cstdint>
-#include <stdexcept>
-
-#include "read_bulk.hpp"
-
 namespace bbp {
 namespace sonata {
 
