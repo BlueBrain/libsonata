@@ -44,7 +44,7 @@ jobs:
         env:
           MACOSX_DEPLOYMENT_TARGET: '10.13'
           CIBW_BEFORE_BUILD: |
-             brew update
+             # brew update
              brew --version
              brew install cmake
              brew install hdf5
