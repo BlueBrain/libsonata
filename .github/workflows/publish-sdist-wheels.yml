@@ -44,6 +44,7 @@ jobs:
         env:
           MACOSX_DEPLOYMENT_TARGET: '10.13'
           CIBW_BEFORE_BUILD: |
+             brew install --force --overwrite python@3.11
              brew update
              brew --version
              brew install cmake
