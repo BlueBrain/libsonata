@@ -44,6 +44,10 @@ jobs:
         env:
           MACOSX_DEPLOYMENT_TARGET: '10.13'
           CIBW_BEFORE_BUILD: |
+             # Unlink and re-link to prevent errors when GitHub macOS runner images
+             # install Python outside of brew.
+             brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
+
              brew update
              brew --version
              brew install cmake
