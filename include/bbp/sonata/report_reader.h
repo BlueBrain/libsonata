@@ -10,8 +10,6 @@
 #include <bbp/sonata/optional.hpp>
 #include <bbp/sonata/population.h>
 
-namespace H5 = HighFive;
-
 namespace bbp {
 namespace sonata {
 
@@ -181,7 +179,7 @@ class SONATA_API ReportReader
             Selection::Ranges min_max_blocks;
         };
 
-        Population(const H5::File& file, const std::string& populationName);
+        Population(const HighFive::File& file, const std::string& populationName);
         std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
                                            const nonstd::optional<double>& tstop) const;
         /**
@@ -197,7 +195,7 @@ class SONATA_API ReportReader
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
             const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
-        H5::Group pop_group_;
+        HighFive::Group pop_group_;
         std::vector<NodeID> node_ids_;
         std::vector<Selection::Range> node_ranges_;
         std::vector<uint64_t> node_offsets_;
@@ -221,7 +219,7 @@ class SONATA_API ReportReader
     const Population& openPopulation(const std::string& populationName) const;
 
   private:
-    H5::File file_;
+    HighFive::File file_;
 
     // Lazy loaded population
     mutable std::map<std::string, Population> populations_;
