@@ -23,7 +23,7 @@ PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 class TestSelection(unittest.TestCase):
     def test_basic(self):
-        ranges = [(3, 5), (0, 3)]
+        ranges = [[3, 5], [0, 3]]
         selection = Selection(ranges)
         self.assertTrue(selection)
         self.assertEqual(selection.ranges, ranges)
@@ -53,7 +53,7 @@ class TestSelection(unittest.TestCase):
             [1, 3, 4, 1],
             [0, 0, 0, 0],
         ]
-        expected = [(1, 2), (3, 5), (1, 2)]
+        expected = [[1, 2], [3, 5], [1, 2]]
         self.assertEqual(Selection(values[0]).ranges, expected)
         self.assertEqual(Selection(np.array(values, dtype=np.uint64, order='C')[0]).ranges, expected)
         self.assertEqual(Selection(np.array(values, dtype=np.uint32, order='C')[0]).ranges, expected)
@@ -257,28 +257,29 @@ class TestEdgePopulation(unittest.TestCase):
         self.assertEqual(self.test_obj.target_nodes(Selection([])).tolist(), [])
 
     def test_afferent_edges(self):
-        self.assertEqual(self.test_obj.afferent_edges([1, 2]).ranges, [(0, 4), (5, 6)])
-        self.assertEqual(self.test_obj.afferent_edges(1).ranges, [(0, 1), (2, 4)])
+        self.assertEqual(self.test_obj.afferent_edges([1, 2]).ranges, [[0, 4], [5, 6]])
+        self.assertEqual(self.test_obj.afferent_edges(1).ranges, [[0, 1], [2, 4]])
 
     def test_efferent_edges(self):
-        self.assertEqual(self.test_obj.efferent_edges([1, 2]).ranges, [(0, 4)])
+        print(f"{type(self.test_obj.efferent_edges([1, 2]).ranges)=}", flush=True)
+        self.assertEqual(self.test_obj.efferent_edges([1, 2]).ranges, [[0, 4]])
         self.assertEqual(self.test_obj.efferent_edges(0).ranges, [])
 
     def test_connecting_edges(self):
-        self.assertEqual(self.test_obj.connecting_edges([1, 2], [1, 2]).ranges, [(0, 4)])
-        self.assertEqual(self.test_obj.connecting_edges(1, 1).ranges, [(0, 1)])
+        self.assertEqual(self.test_obj.connecting_edges([1, 2], [1, 2]).ranges, [[0, 4]])
+        self.assertEqual(self.test_obj.connecting_edges(1, 1).ranges, [[0, 1]])
 
     def test_select_all(self):
         self.assertEqual(self.test_obj.select_all().flat_size, 6)
 
     def test_library_enumeration(self):
         self.assertEqual(
-            self.test_obj.get_attribute("E-mapping-good", Selection([(0, 1), (2, 3)])).tolist(),
+            self.test_obj.get_attribute("E-mapping-good", Selection([[0, 1], [2, 3]])).tolist(),
             ["C", "C"]
         )
 
         self.assertEqual(
-            self.test_obj.get_enumeration( "E-mapping-good", Selection([(0, 1), (2, 3)])).tolist(),
+            self.test_obj.get_enumeration( "E-mapping-good", Selection([[0, 1], [2, 3]])).tolist(),
             [2, 2]
         )
 
