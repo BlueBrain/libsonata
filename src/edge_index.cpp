@@ -85,14 +85,7 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
     // Sort and eliminate empty ranges.
     secondaryRange = bulk_read::sortAndMerge(secondaryRange);
 
-    // Copy `secondaryRange`, because the types don't match.
-    Selection::Ranges edgeIds;
-    edgeIds.reserve(secondaryRange.size());
-    for (const auto& range : secondaryRange) {
-        edgeIds.emplace_back(range[0], range[1]);
-    }
-
-    return Selection(std::move(edgeIds));
+    return Selection(std::move(secondaryRange));
 }
 
 

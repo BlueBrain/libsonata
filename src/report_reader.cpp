@@ -39,13 +39,13 @@ void filterNodeIDSorted(Spikes& spikes, const Selection& node_ids) {
     for (const auto& range : node_ids.ranges()) {
         const auto begin = std::lower_bound(spikes.begin(),
                                             spikes.end(),
-                                            std::make_pair(range.first, 0.),
+                                            std::make_pair(std::get<0>(range), 0.),
                                             [](const Spike& spike1, const Spike& spike2) {
                                                 return spike1.first < spike2.first;
                                             });
         const auto end = std::upper_bound(spikes.begin(),
                                           spikes.end(),
-                                          std::make_pair(range.second - 1, 0.),
+                                          std::make_pair(std::get<1>(range) - 1, 0.),
                                           [](const Spike& spike1, const Spike& spike2) {
                                               return spike1.first < spike2.first;
                                           });
@@ -275,7 +275,7 @@ ReportReader<T>::Population::Population(const HighFive::File& file,
     // Expand the pointers into tuples that define the range of each GID
     size_t element_ids_count = 0;
     for (size_t i = 0; i < node_ids_.size(); ++i) {
-        node_ranges_.emplace_back(index_pointers[i], index_pointers[i + 1]);  // Range of GID
+        node_ranges_.push_back({index_pointers[i], index_pointers[i + 1]});   // Range of GID
         node_offsets_.emplace_back(element_ids_count);                        // Offset in output
         node_index_.emplace_back(i);                                          // Index of previous
 
@@ -382,7 +382,7 @@ ReportReader<T>::Population::getNodeIdElementLayout(
                 result.node_offsets.emplace_back(element_ids_count);
                 result.node_index.emplace_back(result.node_index.size());
 
-                element_ids_count += (range.second - range.first);
+                element_ids_count += (std::get<1>(range) - std::get<0>(range));
             }
         }
     } else {
@@ -395,7 +395,8 @@ ReportReader<T>::Population::getNodeIdElementLayout(
         std::sort(result.node_index.begin(),
                   result.node_index.end(),
                   [&](const size_t i, const size_t j) {
-                      return result.node_ranges[i].first < result.node_ranges[j].first;
+                      return std::get<0>(result.node_ranges[i]) <
+                             std::get<0>(result.node_ranges[j]);
                   });
 
         // Generate the {min,max} IO blocks for the requests
@@ -403,15 +404,15 @@ ReportReader<T>::Population::getNodeIdElementLayout(
         for (size_t i = 0; (i + 1) < result.node_index.size(); i++) {
             const auto index = result.node_index[i];
             const auto index_next = result.node_index[i + 1];
-            const auto max = result.node_ranges[index].second;
-            const auto min_next = result.node_ranges[index_next].first;
+            const auto max = std::get<1>(result.node_ranges[index]);
+            const auto min_next = std::get<0>(result.node_ranges[index_next]);
 
             if ((min_next - max) > block_gap_limit) {
-                result.min_max_blocks.emplace_back(std::make_pair(offset, (i + 1)));
+                result.min_max_blocks.push_back({offset, (i + 1)});
                 offset = (i + 1);
             }
         }
-        result.min_max_blocks.emplace_back(std::make_pair(offset, result.node_index.size()));
+        result.min_max_blocks.push_back({offset, result.node_index.size()});
 
         // Fill the GID-ElementID mapping in blocks to reduce the file system overhead
         std::vector<ElementID> element_ids;
@@ -420,22 +421,22 @@ ReportReader<T>::Population::getNodeIdElementLayout(
         result.ids.resize(element_ids_count);
 
         for (const auto& min_max_block : result.min_max_blocks) {
-            const auto first_index = result.node_index[min_max_block.first];
-            const auto last_index = result.node_index[min_max_block.second - 1];
-            const auto min = result.node_ranges[first_index].first;
-            const auto max = result.node_ranges[last_index].second;
+            const auto first_index = result.node_index[std::get<0>(min_max_block)];
+            const auto last_index = result.node_index[std::get<1>(min_max_block) - 1];
+            const auto min = std::get<0>(result.node_ranges[first_index]);
+            const auto max = std::get<1>(result.node_ranges[last_index]);
 
             dataset_elem_ids.select({min}, {max - min}).read(element_ids);
 
             // Copy the values for each of the GIDs assigned into this block
-            for (size_t i = min_max_block.first; i < min_max_block.second; ++i) {
+            for (size_t i = std::get<0>(min_max_block); i < std::get<1>(min_max_block); ++i) {
                 const auto index = result.node_index[i];
                 const auto node_id = concrete_node_ids[index];
-                const auto range = Selection::Range(result.node_ranges[index].first - min,
-                                                    result.node_ranges[index].second - min);
+                const auto range = Selection::Range{std::get<0>(result.node_ranges[index]) - min,
+                                                    std::get<1>(result.node_ranges[index]) - min};
 
                 auto offset = result.node_offsets[index];
-                for (auto i = range.first; i < range.second; i++, offset++) {
+                for (auto i = std::get<0>(range); i < std::get<1>(range); i++, offset++) {
                     emplace_ids(result.ids[offset], node_id, element_ids[i]);
                 }
             }
@@ -447,8 +448,8 @@ ReportReader<T>::Population::getNodeIdElementLayout(
         //            We observed that fooling HDF5 hides the issue, but we should
         //            verify this behaviour once new releases of HDF5 are available.
         const auto min_max_block = result.min_max_blocks.back();
-        const auto index = result.node_index[min_max_block.first];
-        dataset_elem_ids.select({result.node_ranges[index].first}, {1}).read(element_ids);
+        const auto index = result.node_index[std::get<0>(min_max_block)];
+        dataset_elem_ids.select({std::get<0>(result.node_ranges[index])}, {1}).read(element_ids);
     }
 
     return result;
@@ -552,28 +553,28 @@ DataFrame<T> ReportReader<T>::Population::get(
     for (size_t timer_index = index_start; timer_index <= index_stop; timer_index += stride) {
         // Access the data in blocks to reduce the file system overhead
         for (const auto& min_max_block : min_max_blocks) {
-            const auto first_index = node_index[min_max_block.first];
-            const auto last_index = node_index[min_max_block.second - 1];
-            const auto min = node_ranges[first_index].first;
-            const auto max = node_ranges[last_index].second;
+            const auto first_index = node_index[std::get<0>(min_max_block)];
+            const auto last_index = node_index[std::get<1>(min_max_block) - 1];
+            const auto min = std::get<0>(node_ranges[first_index]);
+            const auto max = std::get<1>(node_ranges[last_index]);
 
             dataset.select({timer_index, min}, {1, max - min}).read(buffer);
 
             // Copy the values for each of the GIDs assigned into this block
             const auto buffer_start = buffer.begin();
-            for (size_t i = min_max_block.first; i < min_max_block.second; ++i) {
+            for (size_t i = std::get<0>(min_max_block); i < std::get<1>(min_max_block); ++i) {
                 const auto index = node_index[i];
-                const auto range = Selection::Range(node_ranges[index].first - min,
-                                                    node_ranges[index].second - min);
-                const auto elements_per_gid = (range.second - range.first);
+                const auto range = Selection::Range{std::get<0>(node_ranges[index]) - min,
+                                                    std::get<1>(node_ranges[index]) - min};
+                const auto elements_per_gid = (std::get<1>(range) - std::get<0>(range));
                 const auto offset = node_offsets[index];
 
                 // Soma report
                 if (elements_per_gid == 1) {
-                    data_start[offset] = buffer_start[range.first];
+                    data_start[offset] = buffer_start[std::get<0>(range)];
                 } else {  // Elements report
-                    std::copy(std::next(buffer_start, range.first),
-                              std::next(buffer_start, range.second),
+                    std::copy(std::next(buffer_start, std::get<0>(range)),
+                              std::next(buffer_start, std::get<1>(range)),
                               std::next(data_start, offset));
                 }
             }

@@ -429,7 +429,7 @@ PYBIND11_MODULE(_libsonata, m) {
                          if (raw(i, 0) < 0 || raw(i, 1) < 0) {
                              throw SonataError("Negative value passed to Selection");
                          }
-                         ranges.emplace_back(raw(i, 0), raw(i, 1));
+                         ranges.push_back({uint64_t(raw(i, 0)), uint64_t(raw(i, 1))});
                      }
                      return Selection(ranges);
                  }

@@ -13,8 +13,9 @@ using Ranges = Selection::Ranges;
 
 void _checkRanges(const Ranges& ranges) {
     for (const auto& range : ranges) {
-        if (range.first >= range.second) {
-            throw SonataError(fmt::format("Invalid range: {}-{}", range.first, range.second));
+        if (std::get<0>(range) >= std::get<1>(range)) {
+            throw SonataError(
+                fmt::format("Invalid range: {}-{}", std::get<0>(range), std::get<1>(range)));
         }
     }
 }
@@ -35,13 +36,13 @@ Selection intersection_(const Ranges& lhs, const Ranges& rhs) {
 
     Ranges ret;
     while (it0 != r0.cend() && it1 != r1.cend()) {
-        auto start = std::max(it0->first, it1->first);
-        auto end = std::min(it0->second, it1->second);
+        auto start = std::max(std::get<0>(*it0), std::get<0>(*it1));
+        auto end = std::min(std::get<1>(*it0), std::get<1>(*it1));
         if (start < end) {
-            ret.emplace_back(start, end);
+            ret.push_back({start, end});
         }
 
-        if (it0->second < it1->second) {
+        if (std::get<1>(*it0) < std::get<1>(*it1)) {
             ++it0;
         } else {
             ++it1;
@@ -81,7 +82,7 @@ Selection::Values Selection::flatten() const {
     Selection::Values result;
     result.reserve(flatSize());
     for (const auto& range : ranges_) {
-        for (auto v = range.first; v < range.second; ++v) {
+        for (auto v = std::get<0>(range); v < std::get<1>(range); ++v) {
             result.emplace_back(v);
         }
     }
