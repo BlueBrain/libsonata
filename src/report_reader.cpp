@@ -6,9 +6,9 @@
 
 constexpr double EPSILON = 1e-6;
 
-H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
+HighFive::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
     using bbp::sonata::SpikeReader;
-    return H5::EnumType<SpikeReader::Population::Sorting>(
+    return HighFive::EnumType<SpikeReader::Population::Sorting>(
         {{"none", SpikeReader::Population::Sorting::none},
          {"by_id", SpikeReader::Population::Sorting::by_id},
          {"by_time", SpikeReader::Population::Sorting::by_time}});
@@ -99,7 +99,7 @@ SpikeReader::SpikeReader(std::string filename)
     : filename_(std::move(filename)) {}
 
 std::vector<std::string> SpikeReader::getPopulationNames() const {
-    H5::File file(filename_, H5::File::ReadOnly);
+    HighFive::File file(filename_, HighFive::File::ReadOnly);
     return file.getGroup("/spikes").listObjectNames();
 }
 
@@ -196,7 +196,7 @@ SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
 
 SpikeReader::Population::Population(const std::string& filename,
                                     const std::string& populationName) {
-    H5::File file(filename, H5::File::ReadOnly);
+    HighFive::File file(filename, HighFive::File::ReadOnly);
     const auto pop_path = std::string("/spikes/") + populationName;
     const auto pop = file.getGroup(pop_path);
     auto& node_ids = spike_times_.node_ids;
@@ -241,7 +241,7 @@ void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, dou
 
 template <typename T>
 ReportReader<T>::ReportReader(const std::string& filename)
-    : file_(filename, H5::File::ReadOnly) {}
+    : file_(filename, HighFive::File::ReadOnly) {}
 
 template <typename T>
 std::vector<std::string> ReportReader<T>::getPopulationNames() const {
@@ -258,7 +258,8 @@ auto ReportReader<T>::openPopulation(const std::string& populationName) const ->
 }
 
 template <typename T>
-ReportReader<T>::Population::Population(const H5::File& file, const std::string& populationName)
+ReportReader<T>::Population::Population(const HighFive::File& file,
+                                        const std::string& populationName)
     : pop_group_(file.getGroup(std::string("/report/") + populationName))
     , is_node_ids_sorted_(false) {
     const auto mapping_group = pop_group_.getGroup("mapping");
