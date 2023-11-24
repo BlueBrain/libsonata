@@ -57,14 +57,6 @@ std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group,
     return names;
 }
 
-bool _isEmtpyOrNullDataset(const HighFive::DataSet& dset) {
-    //  Once HighFive releases a version with
-    // https://github.com/BlueBrain/HighFive/pull/787
-    // can switch to the more clear:
-    // return dset.getElementCount() == 0;
-    return dset.getStorageSize() == 0;
-}
-
 template <typename T>
 std::vector<T> _readChunk(const HighFive::DataSet& dset, const Selection::Range& range) {
     std::vector<T> result;
@@ -77,7 +69,7 @@ std::vector<T> _readChunk(const HighFive::DataSet& dset, const Selection::Range&
 
 template <typename T, typename std::enable_if<!std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
-    if (selection.ranges().empty() || _isEmtpyOrNullDataset(dset)) {
+    if (selection.ranges().empty() || dset.getElementCount() == 0) {
         return {};
     }
 
@@ -100,7 +92,7 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
 
 template <typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
-    if (selection.ranges().empty() || _isEmtpyOrNullDataset(dset)) {
+    if (selection.ranges().empty() || dset.getElementCount() == 0) {
         return {};
     } else if (selection.ranges().size() == 1) {
         return _readChunk<T>(dset, selection.ranges().front());
