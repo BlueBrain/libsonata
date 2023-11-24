@@ -515,6 +515,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_static("from_file", [](py::object path) { return NodeSets::fromFile(py::str(path)); })
         .def_property_readonly("names", &NodeSets::names, DOC_NODESETS(names))
         .def("materialize", &NodeSets::materialize, DOC_NODESETS(materialize))
+        .def("update", &NodeSets::update, "other"_a, DOC_NODESETS(update))
         .def("toJSON", &NodeSets::toJSON, DOC_NODESETS(toJSON));
 
     py::class_<CommonPopulationProperties>(m,
@@ -610,7 +611,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(Run, minisSeed))
         .def_readonly("synapse_seed",
                       &SimulationConfig::Run::synapseSeed,
-                      DOC_SIMULATIONCONFIG(Run, synapseSeed));
+                      DOC_SIMULATIONCONFIG(Run, synapseSeed))
+        .def_readonly("electrodes_file",
+                      &SimulationConfig::Run::electrodesFile,
+                      DOC_SIMULATIONCONFIG(Run, electrodesFile));
 
     py::enum_<SimulationConfig::Run::IntegrationMethod>(run, "IntegrationMethod")
         .value("euler", SimulationConfig::Run::IntegrationMethod::euler)
@@ -753,6 +757,7 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::enum_<SimulationConfig::Report::Type>(report, "Type")
         .value("compartment", SimulationConfig::Report::Type::compartment)
+        .value("lfp", SimulationConfig::Report::Type::lfp)
         .value("summation", SimulationConfig::Report::Type::summation)
         .value("synapse", SimulationConfig::Report::Type::synapse);
 
@@ -859,6 +864,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::InputShotNoise::randomSeed,
                       DOC_SIMULATIONCONFIG(InputShotNoise, randomSeed))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputShotNoise::reversal,
+                      DOC_SIMULATIONCONFIG(InputShotNoise, reversal))
         .def_readonly("dt",
                       &SimulationConfig::InputShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputShotNoise, dt))
@@ -883,6 +891,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::InputRelativeShotNoise::randomSeed,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, randomSeed))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputRelativeShotNoise::reversal,
+                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, reversal))
         .def_readonly("dt",
                       &SimulationConfig::InputRelativeShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, dt))
@@ -907,6 +918,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("random_seed",
                       &SimulationConfig::InputAbsoluteShotNoise::randomSeed,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, randomSeed))
+        .def_readonly("reversal",
+                      &SimulationConfig::InputAbsoluteShotNoise::reversal,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, reversal))
         .def_readonly("dt",
                       &SimulationConfig::InputAbsoluteShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, dt))
@@ -1171,6 +1185,33 @@ PYBIND11_MODULE(_libsonata, m) {
              "node_ids"_a = nonstd::nullopt,
              "tstart"_a = nonstd::nullopt,
              "tstop"_a = nonstd::nullopt)
+        .def(
+            "get_dict",
+            [](const SpikeReader::Population& self,
+               const py::object& node_ids = py::none(),
+               const py::object& tstart = py::none(),
+               const py::object& tstop = py::none()) {
+                const SpikeTimes& spikes =
+                    (node_ids.is_none() && tstart.is_none() && tstop.is_none())
+                        ? self.getRawArrays()
+                        : self.getArrays(node_ids.is_none()
+                                             ? nonstd::nullopt
+                                             : node_ids.cast<nonstd::optional<Selection>>(),
+                                         tstart.is_none() ? nonstd::nullopt
+                                                          : tstart.cast<nonstd::optional<double>>(),
+                                         tstop.is_none() ? nonstd::nullopt
+                                                         : tstop.cast<nonstd::optional<double>>());
+
+                py::dict result;
+                result["node_ids"] = py::array_t<NodeID>(spikes.node_ids.size(),
+                                                         spikes.node_ids.data());
+                result["timestamps"] = py::array_t<double>(spikes.timestamps.size(),
+                                                           spikes.timestamps.data());
+                return result;
+            },
+            "node_ids"_a = nonstd::nullopt,
+            "tstart"_a = nonstd::nullopt,
+            "tstop"_a = nonstd::nullopt)
         .def_property_readonly(
             "sorting",
             [](const SpikeReader::Population& self) {

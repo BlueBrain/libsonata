@@ -39,7 +39,7 @@ class SONATA_API NodeSets
      * Return a selection corresponding to the node_set name
      *
      * \param name is the name of the node_set rule to be evaluated
-     * \param population is the population overwhich the returned selection will be valid
+     * \param population is the population for which the returned selection will be valid
      */
     Selection materialize(const std::string& name, const NodePopulation& population) const;
 
@@ -49,7 +49,16 @@ class SONATA_API NodeSets
     std::set<std::string> names() const;
 
     /**
-     * Return string version of node sets
+     * Update `this` to include all nodesets from `this` and `other`.
+     *
+     * Duplicate names are overridden with the values from `other`.
+     *
+     * The duplicate names are returned.
+     */
+    std::set<std::string> update(const NodeSets& other) const;
+
+    /**
+     * Return the nodesets as a JSON string.
      */
     std::string toJSON() const;
 

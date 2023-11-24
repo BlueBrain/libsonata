@@ -11,11 +11,13 @@
 
 #include <bbp/sonata/common.h>
 
+#include <array>
 #include <cstdint>
 #include <set>
 #include <unordered_map>
 #include <vector>
 
+#include "read_bulk.hpp"
 
 namespace bbp {
 namespace sonata {
@@ -23,16 +25,16 @@ namespace edge_index {
 
 namespace {
 
-typedef std::vector<std::vector<uint64_t>> RawIndex;
+using RawIndex = std::vector<std::array<uint64_t, 2>>;
 
-const char* SOURCE_NODE_ID_DSET = "source_node_id";
-const char* TARGET_NODE_ID_DSET = "target_node_id";
+const char* const SOURCE_NODE_ID_DSET = "source_node_id";
+const char* const TARGET_NODE_ID_DSET = "target_node_id";
 
-const char* INDEX_GROUP = "indices";
-const char* SOURCE_INDEX_GROUP = "indices/source_to_target";
-const char* TARGET_INDEX_GROUP = "indices/target_to_source";
-const char* NODE_ID_TO_RANGES_DSET = "node_id_to_ranges";
-const char* RANGE_TO_EDGE_ID_DSET = "range_to_edge_id";
+const char* const INDEX_GROUP = "indices";
+const char* const SOURCE_INDEX_GROUP = "indices/source_to_target";
+const char* const TARGET_INDEX_GROUP = "indices/target_to_source";
+const char* const NODE_ID_TO_RANGES_DSET = "node_id_to_ranges";
+const char* const RANGE_TO_EDGE_ID_DSET = "range_to_edge_id";
 
 }  // unnamed namespace
 
@@ -51,7 +53,6 @@ const HighFive::Group targetIndex(const HighFive::Group& h5Root) {
     }
     return h5Root.getGroup(TARGET_INDEX_GROUP);
 }
-
 
 Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID) {
     if (nodeID >= indexGroup.getDataSet(NODE_ID_TO_RANGES_DSET).getSpace().getDimensions()[0]) {
@@ -89,19 +90,54 @@ Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID) {
     return Selection(std::move(ranges));
 }
 
-
 Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& nodeIDs) {
+    constexpr size_t min_gap_size = SONATA_PAGESIZE / (2 * sizeof(uint64_t));
+    constexpr size_t max_aggregated_block_size = 128 * min_gap_size;
+
     if (nodeIDs.size() == 1) {
         return resolve(indexGroup, nodeIDs[0]);
     }
-    // TODO optimize: bulk read for primary index
-    // TODO optimize: range merging
-    std::set<EdgeID> merged;
-    for (NodeID nodeID : nodeIDs) {
-        const auto ids = resolve(indexGroup, nodeID).flatten();
-        merged.insert(ids.begin(), ids.end());
+
+    auto readBlock = [&indexGroup](auto& buffer, const auto& range, const std::string& dset_name) {
+        size_t i_begin = std::get<0>(range);
+        size_t i_end = std::get<1>(range);
+
+        indexGroup.getDataSet(dset_name).select({i_begin, 0}, {i_end - i_begin, 2}).read(buffer);
+    };
+
+    auto primaryRange = bulk_read::bulkRead<std::array<uint64_t, 2>>(
+        [&readBlock](auto& buffer, const auto& range) {
+            readBlock(buffer, range, NODE_ID_TO_RANGES_DSET);
+        },
+        Selection::fromValues(nodeIDs),
+        min_gap_size,
+        max_aggregated_block_size);
+
+    // Sort and eliminate empty ranges.
+    primaryRange = bulk_read::sortAndMerge(primaryRange);
+    if (primaryRange.empty()) {
+        return Selection({});
     }
-    return Selection::fromValues(merged.begin(), merged.end());
+
+    auto secondaryRange = bulk_read::bulkRead<std::array<uint64_t, 2>>(
+        [&readBlock](auto& buffer, const auto& range) {
+            readBlock(buffer, range, RANGE_TO_EDGE_ID_DSET);
+        },
+        primaryRange,
+        min_gap_size,
+        max_aggregated_block_size);
+
+    // Sort and eliminate empty ranges.
+    secondaryRange = bulk_read::sortAndMerge(secondaryRange);
+
+    // Copy `secondaryRange`, because the types don't match.
+    Selection::Ranges edgeIds;
+    edgeIds.reserve(secondaryRange.size());
+    for (const auto& range : secondaryRange) {
+        edgeIds.emplace_back(range[0], range[1]);
+    }
+
+    return Selection(std::move(edgeIds));
 }
 
 
@@ -153,7 +189,7 @@ void _writeIndexGroup(const std::vector<NodeID>& nodeIDs,
     const auto rangeCount =
         std::accumulate(nodeToRanges.begin(),
                         nodeToRanges.end(),
-                        uint64_t(0),
+                        uint64_t{0},
                         [](uint64_t total, decltype(nodeToRanges)::const_reference item) {
                             return total + item.second.size();
                         });

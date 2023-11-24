@@ -181,3 +181,27 @@ class TestNodePopulationNodeSet(unittest.TestCase):
 
         j = json.dumps({"NodeSet0": { "E-mapping-good": [0, 1, ] }})
         self.assertRaises(SonataError, NodeSets(j).materialize, "NodeSet0", self.population)
+
+    def test_extend(self):
+        ns0 = NodeSets(json.dumps({"NodeSet0": { "E-mapping-good": 0 }}))
+        dup = ns0.update(ns0)
+        self.assertEqual(dup, {"NodeSet0"})
+        self.assertEqual(ns0.names, {"NodeSet0"})
+
+        ns1 = NodeSets(json.dumps({"NodeSet1": { "E-mapping-good": 0 }}))
+        dup = ns0.update(ns1)
+        self.assertEqual(dup, set())
+        self.assertEqual(ns0.names, {"NodeSet0", "NodeSet1"})
+
+        ns0 = NodeSets(json.dumps({"NodeSet0": { "E-mapping-good": 0 }}))
+        ns1 = NodeSets(json.dumps({"NodeSet0": { "E-mapping-good": 0 }}))
+        dup = ns0.update(ns1)
+        self.assertEqual(dup, {"NodeSet0"})
+        self.assertEqual(ns0.names, {"NodeSet0"})
+
+        j0 = '''{"NodeSet0": { "attr-Y": [21, 22] } }'''
+        j1 = '''{"NodeSet0": { "attr-Y": [22] } }'''
+        ns = NodeSets(j0)
+        ns.update(NodeSets(j1))
+        sel = ns.materialize("NodeSet0", self.population)
+        self.assertEqual(sel, Selection(((1, 2), )))

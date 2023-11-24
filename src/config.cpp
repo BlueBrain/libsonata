@@ -10,12 +10,8 @@
  *************************************************************************/
 
 #include <bbp/sonata/config.h>
-#include <bbp/sonata/optional.hpp>
 
 #include <bbp/sonata/optional.hpp>
-#include <cassert>
-#include <fstream>
-#include <memory>
 #include <regex>
 #include <set>
 #include <string>
@@ -24,7 +20,6 @@
 #include <nlohmann/json.hpp>
 
 #include "../extlib/filesystem.hpp"
-#include "population.hpp"
 #include "utils.h"
 
 // Add a specialization of adl_serializer to the nlohmann namespace for conversion from/to
@@ -85,6 +80,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Sections,
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Type,
                              {{SimulationConfig::Report::Type::invalid, nullptr},
                               {SimulationConfig::Report::Type::compartment, "compartment"},
+                              {SimulationConfig::Report::Type::lfp, "lfp"},
                               {SimulationConfig::Report::Type::summation, "summation"},
                               {SimulationConfig::Report::Type::synapse, "synapse"}})
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Report::Scaling,
@@ -284,7 +280,7 @@ Variables readVariables(const nlohmann::json& json) {
         return variables;
     }
 
-    const auto manifest = json["manifest"];
+    const auto& manifest = json["manifest"];
 
     const std::regex regexVariable(R"(\$[a-zA-Z0-9_]*)");
 
@@ -306,7 +302,7 @@ std::string toAbsolute(const fs::path& base, const fs::path& path) {
     return absolute.lexically_normal().string();
 }
 
-template <typename Type, typename std::enable_if<std::is_enum<Type>::value>::type* = nullptr>
+template <typename Type, std::enable_if_t<std::is_enum<Type>::value>* = nullptr>
 void raiseIfInvalidEnum(const char* name,
                         const Type& buf,
                         const std::string& found_value,
@@ -444,6 +440,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
         parseOptional(valueIt, "random_seed", ret.randomSeed);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "rate", debugStr, ret.rate);
         parseMandatory(valueIt, "amp_mean", debugStr, ret.ampMean);
@@ -457,6 +454,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
         parseOptional(valueIt, "random_seed", ret.randomSeed);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
@@ -470,6 +468,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "rise_time", debugStr, ret.riseTime);
         parseMandatory(valueIt, "decay_time", debugStr, ret.decayTime);
         parseOptional(valueIt, "random_seed", ret.randomSeed);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean", debugStr, ret.mean);
@@ -500,7 +499,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputOrnsteinUhlenbeck ret;
         parseCommon(ret);
         parseMandatory(valueIt, "tau", debugStr, ret.tau);
-        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
 
@@ -512,7 +511,7 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputRelativeOrnsteinUhlenbeck ret;
         parseCommon(ret);
         parseMandatory(valueIt, "tau", debugStr, ret.tau);
-        parseOptional(valueIt, "reversal", ret.reversal);
+        parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
 
@@ -903,7 +902,7 @@ CircuitConfig::CircuitConfig(const std::string& contents, const std::string& bas
 }
 
 CircuitConfig CircuitConfig::fromFile(const std::string& path) {
-    return CircuitConfig(readFile(path), fs::path(path).parent_path());
+    return {readFile(path), fs::path(path).parent_path()};
 }
 
 CircuitConfig::ConfigStatus CircuitConfig::getCircuitConfigStatus() const {
@@ -972,6 +971,12 @@ class SimulationConfig::Parser
         parseOptional(*runIt, "ionchannel_seed", result.ionchannelSeed, {0});
         parseOptional(*runIt, "minis_seed", result.minisSeed, {0});
         parseOptional(*runIt, "synapse_seed", result.synapseSeed, {0});
+        parseOptional(*runIt, "electrodes_file", result.electrodesFile, {""});
+
+        if (!result.electrodesFile.empty()) {
+            result.electrodesFile = toAbsolute(_basePath, result.electrodesFile);
+        }
+
         return result;
     }
 

@@ -6,9 +6,9 @@
 
 constexpr double EPSILON = 1e-6;
 
-H5::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
+HighFive::EnumType<bbp::sonata::SpikeReader::Population::Sorting> create_enum_sorting() {
     using bbp::sonata::SpikeReader;
-    return H5::EnumType<SpikeReader::Population::Sorting>(
+    return HighFive::EnumType<SpikeReader::Population::Sorting>(
         {{"none", SpikeReader::Population::Sorting::none},
          {"by_id", SpikeReader::Population::Sorting::by_id},
          {"by_time", SpikeReader::Population::Sorting::by_time}});
@@ -95,11 +95,11 @@ inline void emplace_ids(CompartmentID& key, NodeID node_id, ElementID element_id
 namespace bbp {
 namespace sonata {
 
-SpikeReader::SpikeReader(const std::string& filename)
-    : filename_(filename) {}
+SpikeReader::SpikeReader(std::string filename)
+    : filename_(std::move(filename)) {}
 
 std::vector<std::string> SpikeReader::getPopulationNames() const {
-    H5::File file(filename_, H5::File::ReadOnly);
+    HighFive::File file(filename_, HighFive::File::ReadOnly);
     return file.getGroup("/spikes").listObjectNames();
 }
 
@@ -113,6 +113,18 @@ auto SpikeReader::openPopulation(const std::string& populationName) const -> con
 
 std::tuple<double, double> SpikeReader::Population::getTimes() const {
     return std::tie(tstart_, tstop_);
+}
+
+Spikes SpikeReader::Population::createSpikes() const {
+    Spikes spikes;
+    std::transform(spike_times_.node_ids.begin(),
+                   spike_times_.node_ids.end(),
+                   spike_times_.timestamps.begin(),
+                   std::back_inserter(spikes),
+                   [](Spike::first_type node_id, Spike::second_type timestamp) {
+                       return std::make_pair(node_id, timestamp);
+                   });
+    return spikes;
 }
 
 Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
@@ -133,7 +145,7 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
         return Spikes{};
     }
 
-    auto spikes = spikes_;
+    auto spikes = createSpikes();
     filterTimestamp(spikes, start, stop);
 
     if (node_ids) {
@@ -143,34 +155,60 @@ Spikes SpikeReader::Population::get(const nonstd::optional<Selection>& node_ids,
     return spikes;
 }
 
+const SpikeTimes& SpikeReader::Population::getRawArrays() const {
+    return spike_times_;
+}
+
+SpikeTimes SpikeReader::Population::getArrays(const nonstd::optional<Selection>& node_ids,
+                                              const nonstd::optional<double>& tstart,
+                                              const nonstd::optional<double>& tstop) const {
+    SpikeTimes filtered_spikes;
+    const auto& node_ids_selection = node_ids ? node_ids.value().flatten() : std::vector<NodeID>{};
+    // Create arrays directly for required data based on conditions
+    for (size_t i = 0; i < spike_times_.node_ids.size(); ++i) {
+        const auto& node_id = spike_times_.node_ids[i];
+        const auto& timestamp = spike_times_.timestamps[i];
+
+        // Check if node_id is found in node_ids_selection
+        bool node_ids_found = true;
+        if (node_ids) {
+            node_ids_found = std::find(node_ids_selection.begin(),
+                                       node_ids_selection.end(),
+                                       node_id) != node_ids_selection.end();
+        }
+
+        // Check if timestamp is within valid range
+        bool valid_timestamp = (!tstart || timestamp >= tstart.value()) &&
+                               (!tstop || timestamp <= tstop.value());
+
+        // Include data if both conditions are satisfied
+        if (node_ids_found && valid_timestamp) {
+            filtered_spikes.node_ids.emplace_back(node_id);
+            filtered_spikes.timestamps.emplace_back(timestamp);
+        }
+    }
+    return filtered_spikes;
+}
+
 SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
     return sorting_;
 }
 
 SpikeReader::Population::Population(const std::string& filename,
                                     const std::string& populationName) {
-    H5::File file(filename, H5::File::ReadOnly);
+    HighFive::File file(filename, HighFive::File::ReadOnly);
     const auto pop_path = std::string("/spikes/") + populationName;
     const auto pop = file.getGroup(pop_path);
+    auto& node_ids = spike_times_.node_ids;
+    auto& timestamps = spike_times_.timestamps;
 
-    std::vector<Spike::first_type> node_ids;
     pop.getDataSet("node_ids").read(node_ids);
-
-    std::vector<Spike::second_type> timestamps;
     pop.getDataSet("timestamps").read(timestamps);
 
     if (node_ids.size() != timestamps.size()) {
         throw SonataError(
             "In spikes file, 'node_ids' and 'timestamps' does not have the same size.");
     }
-
-    std::transform(std::make_move_iterator(node_ids.begin()),
-                   std::make_move_iterator(node_ids.end()),
-                   std::make_move_iterator(timestamps.begin()),
-                   std::back_inserter(spikes_),
-                   [](Spike::first_type&& node_id, Spike::second_type&& timestamp) {
-                       return std::make_pair(std::move(node_id), std::move(timestamp));
-                   });
 
     if (pop.hasAttribute("sorting")) {
         pop.getAttribute("sorting").read(sorting_);
@@ -203,7 +241,7 @@ void SpikeReader::Population::filterTimestamp(Spikes& spikes, double tstart, dou
 
 template <typename T>
 ReportReader<T>::ReportReader(const std::string& filename)
-    : file_(filename, H5::File::ReadOnly) {}
+    : file_(filename, HighFive::File::ReadOnly) {}
 
 template <typename T>
 std::vector<std::string> ReportReader<T>::getPopulationNames() const {
@@ -220,7 +258,8 @@ auto ReportReader<T>::openPopulation(const std::string& populationName) const ->
 }
 
 template <typename T>
-ReportReader<T>::Population::Population(const H5::File& file, const std::string& populationName)
+ReportReader<T>::Population::Population(const HighFive::File& file,
+                                        const std::string& populationName)
     : pop_group_(file.getGroup(std::string("/report/") + populationName))
     , is_node_ids_sorted_(false) {
     const auto mapping_group = pop_group_.getGroup("mapping");

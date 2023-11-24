@@ -1,6 +1,17 @@
 # Changelog
 
-## v0.1.21:
+## v0.1.24:
+ - small cosmetic fixes/py 3.12 wheels (#290)
+ - Fix toJSON incorrect empty, node_id and compound problems (#289)
+ - NodeSet `update`: merge NodeSet objects together (#283)
+
+## v0.1.23:
+ - Create non-tuple Spike Report access (#285)
+ - Add 'lfp' report type and 'electrodes_file' field (#271)
+ - Add missing reversal property of shotnoise family (#284)
+ - Move std::vector methods above scalar methods in bindings (#280)
+
+## v0.1.22:
  - bump HighFive to v2.7.1 (#278)
  - Extend metadata type to be int, float, bool and string (#277)
  - Prevent node_set materialization for `@libary` with integers (#276)

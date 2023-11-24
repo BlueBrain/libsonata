@@ -27,6 +27,14 @@ std::ostream& operator<<(std::ostream& oss, const Selection& selection) {
 
 
 TEST_CASE("EdgePopulation", "[edges]") {
+    // E-mapping-good              Dataset {6}
+    // Data:
+    //      2, 1, 2, 0, 2, 2
+    //
+    // @library/E-mapping-good     Dataset {3}
+    // Data:
+    //      "A", "B", "C"
+
     const EdgePopulation population("./data/edges1.h5", "", "edges-AB");
 
     CHECK(population.source() == "nodes-A");
@@ -60,8 +68,21 @@ TEST_CASE("EdgePopulation", "[edges]") {
     // duplicate node IDs are ignored; order of node IDs is not relevant
     CHECK(population.connectingEdges({2, 1, 2}, {2, 1, 2}) == Selection({{0, 4}}));
 
-    CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 3}})) ==
-          std::vector<size_t>{2, 2});
+    // Canonical.
+    CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{0, 1}, {2, 4}})) ==
+          std::vector<size_t>{2, 2, 0});
+
+    // Non-overlapping but not sorted.
+    CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{2, 4}, {0, 1}})) ==
+          std::vector<size_t>{2, 0, 2});
+
+    // Sorted, but overlapping.
+    CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{0, 2}, {1, 4}})) ==
+          std::vector<size_t>{2, 1, 1, 2, 0});
+
+    // Overlapping and not sorted.
+    CHECK(population.getAttribute<size_t>("E-mapping-good", Selection({{1, 4}, {0, 2}})) ==
+          std::vector<size_t>{1, 2, 0, 2, 1});
 
     CHECK(population.getAttribute<std::string>("E-mapping-good", Selection({{0, 1}})) ==
           std::vector<std::string>{"C"});

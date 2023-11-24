@@ -416,6 +416,8 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.ionchannel_seed, 222)
         self.assertEqual(self.config.run.minis_seed, 333)
         self.assertEqual(self.config.run.synapse_seed, 444)
+        self.assertEqual(self.config.run.electrodes_file,
+                         os.path.abspath(os.path.join(PATH, 'config/electrodes/electrode_weights.h5')))
 
         self.assertEqual(self.config.output.output_dir,
                          os.path.abspath(os.path.join(PATH, 'config/some/path/output')))
@@ -442,7 +444,7 @@ class TestSimulationConfig(unittest.TestCase):
                          "%s.gSK_E2bar_SK_E2 = 0")
 
         self.assertEqual(self.config.list_report_names,
-                         { "axonal_comp_centers", "cell_imembrane", "compartment", "soma" })
+                         { "axonal_comp_centers", "cell_imembrane", "compartment", "soma", "lfp" })
 
         self.assertEqual(self.config.report('soma').cells, 'Column')
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
@@ -462,6 +464,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.report('cell_imembrane').end_time, 500)
         self.assertEqual(self.config.report('cell_imembrane').type.name, 'summation')
         self.assertEqual(self.config.report('cell_imembrane').variable_name, 'i_membrane, IClamp')
+        self.assertEqual(self.config.report('lfp').type, Report.Type.lfp)
 
         self.assertEqual(self.config.network,
                          os.path.abspath(os.path.join(PATH, 'config/circuit_config.json')))
@@ -521,6 +524,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_subthreshold').percent_less, 80)
         self.assertEqual(self.config.input('ex_shotnoise').rise_time, 0.4)
         self.assertEqual(self.config.input('ex_shotnoise').amp_mean, 70)
+        self.assertEqual(self.config.input('ex_shotnoise').reversal, 10)
         self.assertEqual(self.config.input('ex_shotnoise').random_seed, None)
 
         self.assertEqual(self.config.input('ex_hyperpolarizing').duration, 1000)
@@ -543,6 +547,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_rel_shotnoise').node_set, "L5E")
         self.assertEqual(self.config.input('ex_rel_shotnoise').random_seed, 230522)
         self.assertEqual(self.config.input('ex_rel_shotnoise').dt, 0.25)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').reversal, 0)
 
         self.assertEqual(self.config.input('ex_replay').input_type.name, 'spikes')
         self.assertEqual(self.config.input('ex_replay').module.name, 'synapse_replay')
@@ -558,6 +563,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_abs_shotnoise').amp_cv, 0.63)
         self.assertEqual(self.config.input('ex_abs_shotnoise').mean, 50)
         self.assertEqual(self.config.input('ex_abs_shotnoise').sigma, 5)
+        self.assertEqual(self.config.input('ex_abs_shotnoise').reversal, 10)
         self.assertEqual(self.config.input('ex_abs_shotnoise').random_seed, None)
 
         self.assertEqual(self.config.input('ex_OU').module.name, "ornstein_uhlenbeck")
@@ -638,6 +644,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(conf.run.ionchannel_seed, 0)
         self.assertEqual(conf.run.minis_seed, 0)
         self.assertEqual(conf.run.synapse_seed, 0)
+        self.assertEqual(conf.run.electrodes_file, "")
 
     def test_simulation_config_failures(self):
         with self.assertRaises(SonataError) as e:

@@ -10,8 +10,6 @@
 #include <bbp/sonata/optional.hpp>
 #include <bbp/sonata/population.h>
 
-namespace H5 = HighFive;
-
 namespace bbp {
 namespace sonata {
 
@@ -27,6 +25,10 @@ struct SONATA_API DataFrame {
 
 using Spike = std::pair<NodeID, double>;
 using Spikes = std::vector<Spike>;
+struct SpikeTimes {
+    std::vector<NodeID> node_ids;
+    std::vector<double> timestamps;
+};
 
 /// Used to read spike files
 class SONATA_API SpikeReader
@@ -54,6 +56,18 @@ class SONATA_API SpikeReader
                    const nonstd::optional<double>& tstop = nonstd::nullopt) const;
 
         /**
+         * Return the raw node_ids and timestamps vectors
+         */
+        const SpikeTimes& getRawArrays() const;
+
+        /**
+         * Return the node_ids and timestamps vectors with all node_ids between 'tstart' and 'tstop'
+         */
+        SpikeTimes getArrays(const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
+                             const nonstd::optional<double>& tstart = nonstd::nullopt,
+                             const nonstd::optional<double>& tstop = nonstd::nullopt) const;
+
+        /**
          * Return the way data are sorted ('none', 'by_id', 'by_time')
          */
         Sorting getSorting() const;
@@ -61,18 +75,22 @@ class SONATA_API SpikeReader
       private:
         Population(const std::string& filename, const std::string& populationName);
 
-        Spikes spikes_;
+        SpikeTimes spike_times_;
         Sorting sorting_ = Sorting::none;
         // Use for clamping of user values
         double tstart_, tstop_;
 
         void filterNode(Spikes& spikes, const Selection& node_ids) const;
         void filterTimestamp(Spikes& spikes, double tstart, double tstop) const;
+        /**
+         * Create the spikes from the vectors of node_ids and timestamps
+         */
+        Spikes createSpikes() const;
 
         friend SpikeReader;
     };
 
-    explicit SpikeReader(const std::string& filename);
+    explicit SpikeReader(std::string filename);
 
     /**
      * Return a list of all population names.
@@ -161,7 +179,7 @@ class SONATA_API ReportReader
             Selection::Ranges min_max_blocks;
         };
 
-        Population(const H5::File& file, const std::string& populationName);
+        Population(const HighFive::File& file, const std::string& populationName);
         std::pair<size_t, size_t> getIndex(const nonstd::optional<double>& tstart,
                                            const nonstd::optional<double>& tstop) const;
         /**
@@ -177,7 +195,7 @@ class SONATA_API ReportReader
             const nonstd::optional<Selection>& node_ids = nonstd::nullopt,
             const nonstd::optional<size_t>& block_gap_limit = nonstd::nullopt) const;
 
-        H5::Group pop_group_;
+        HighFive::Group pop_group_;
         std::vector<NodeID> node_ids_;
         std::vector<Selection::Range> node_ranges_;
         std::vector<uint64_t> node_offsets_;
@@ -201,7 +219,7 @@ class SONATA_API ReportReader
     const Population& openPopulation(const std::string& populationName) const;
 
   private:
-    H5::File file_;
+    HighFive::File file_;
 
     // Lazy loaded population
     mutable std::map<std::string, Population> populations_;

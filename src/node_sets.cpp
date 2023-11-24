@@ -3,8 +3,6 @@
 #include <cmath>
 #include <fmt/format.h>
 #include <fstream>
-#include <sstream>
-#include <type_traits>
 
 #include "../extlib/filesystem.hpp"
 
@@ -28,7 +26,9 @@ using json = nlohmann::json;
 
 void replace_trailing_coma(std::string& s, char c) {
     s.pop_back();
-    s.pop_back();
+    if (s.back() == ',') {
+        s.pop_back();
+    }
     s.push_back(c);
 }
 
@@ -48,6 +48,12 @@ class NodeSets;
 class NodeSetRule
 {
   public:
+    NodeSetRule() = default;
+    NodeSetRule(const NodeSetRule&) = delete;
+    void operator=(const NodeSetRule&) = delete;
+    NodeSetRule(const NodeSetRule&&) = delete;
+    void operator=(const NodeSetRule&&) = delete;
+
     virtual ~NodeSetRule() = default;
 
     virtual Selection materialize(const NodeSets&, const NodePopulation&) const = 0;
@@ -55,6 +61,7 @@ class NodeSetRule
     virtual bool is_compound() const {
         return false;
     }
+    virtual std::unique_ptr<NodeSetRule> clone() const = 0;
 };
 
 using NodeSetRulePtr = std::unique_ptr<NodeSetRule>;
@@ -101,12 +108,34 @@ class NodeSets
         return getMapKeys(node_sets_);
     }
 
+    std::set<std::string> update(const NodeSets& other) {
+        if (&other == this) {
+            return names();
+        }
+        std::set<std::string> duplicates;
+        for (const auto& ns : other.node_sets_) {
+            if (node_sets_.count(ns.first) > 0) {
+                duplicates.insert(ns.first);
+            }
+            node_sets_[ns.first] = ns.second->clone();
+        }
+        return duplicates;
+    }
+
     std::string toJSON() const {
         std::string ret{"{\n"};
         for (const auto& pair : node_sets_) {
-            ret += fmt::format(R"(  "{}": {{)", pair.first);
-            ret += pair.second->toJSON();
-            ret += "},\n";
+            if (pair.second->is_compound()) {
+                ret += fmt::format("  {},\n", pair.second->toJSON());
+            } else {
+                std::string contents = pair.second->toJSON();
+                if (contents.empty()) {
+                    continue;
+                }
+                ret += fmt::format(R"(  "{}": {{)", pair.first);
+                ret += contents;
+                ret += "},\n";
+            }
         }
         replace_trailing_coma(ret, '\n');
         ret += "}";
@@ -125,6 +154,10 @@ class NodeSetNullRule: public NodeSetRule
     std::string toJSON() const final {
         return {};
     }
+
+    std::unique_ptr<NodeSetRule> clone() const final {
+        return std::make_unique<detail::NodeSetNullRule>();
+    }
 };
 
 // { 'region': ['region1', 'region2', ...] }
@@ -132,7 +165,7 @@ template <typename T>
 class NodeSetBasicRule: public NodeSetRule
 {
   public:
-    NodeSetBasicRule(std::string attribute, std::vector<T>& values)
+    NodeSetBasicRule(std::string attribute, const std::vector<T>& values)
         : attribute_(std::move(attribute))
         , values_(values) {}
 
@@ -152,6 +185,10 @@ class NodeSetBasicRule: public NodeSetRule
         return toString(attribute_, values_);
     }
 
+    std::unique_ptr<NodeSetRule> clone() const final {
+        return std::make_unique<detail::NodeSetBasicRule<T>>(attribute_, values_);
+    }
+
   private:
     std::string attribute_;
     std::vector<T> values_;
@@ -161,7 +198,7 @@ class NodeSetBasicRule: public NodeSetRule
 class NodeSetBasicPopulation: public NodeSetRule
 {
   public:
-    explicit NodeSetBasicPopulation(std::vector<std::string>& values)
+    explicit NodeSetBasicPopulation(const std::vector<std::string>& values)
         : values_(values) {}
 
     Selection materialize(const detail::NodeSets& /* unused */,
@@ -177,6 +214,10 @@ class NodeSetBasicPopulation: public NodeSetRule
         return toString("population", values_);
     }
 
+    std::unique_ptr<NodeSetRule> clone() const final {
+        return std::make_unique<detail::NodeSetBasicPopulation>(values_);
+    }
+
   private:
     std::vector<std::string> values_;
 };
@@ -185,8 +226,8 @@ class NodeSetBasicPopulation: public NodeSetRule
 class NodeSetBasicNodeIds: public NodeSetRule
 {
   public:
-    explicit NodeSetBasicNodeIds(Selection::Values&& values)
-        : values_(values) {}
+    explicit NodeSetBasicNodeIds(Selection::Values values)
+        : values_(std::move(values)) {}
 
     Selection materialize(const detail::NodeSets& /* unused */,
                           const NodePopulation& np) const final {
@@ -194,7 +235,11 @@ class NodeSetBasicNodeIds: public NodeSetRule
     }
 
     std::string toJSON() const final {
-        return toString("node_ids", values_);
+        return toString("node_id", values_);
+    }
+
+    std::unique_ptr<NodeSetRule> clone() const final {
+        return std::make_unique<detail::NodeSetBasicNodeIds>(values_);
     }
 
   private:
@@ -223,11 +268,24 @@ class NodeSetBasicMultiClause: public NodeSetRule
     std::string toJSON() const final {
         std::string ret;
         for (const auto& clause : clauses_) {
-            ret += clause->toJSON();
+            std::string contents = clause->toJSON();
+            if (contents.empty()) {
+                continue;
+            }
+            ret += contents;
             ret += ", ";
         }
         replace_trailing_coma(ret, ' ');
         return ret;
+    }
+
+    std::unique_ptr<NodeSetRule> clone() const final {
+        std::vector<NodeSetRulePtr> clauses;
+        clauses.reserve(clauses_.size());
+        for (const auto& clause : clauses_) {
+            clauses.push_back(clause->clone());
+        }
+        return std::make_unique<detail::NodeSetBasicMultiClause>(std::move(clauses));
     }
 
   private:
@@ -279,6 +337,12 @@ class NodeSetBasicOperatorString: public NodeSetRule
         }
     }
 
+    std::unique_ptr<NodeSetRule> clone() const final {
+        return std::make_unique<detail::NodeSetBasicOperatorString>(attribute_,
+                                                                    op2string(op_),
+                                                                    value_);
+    }
+
   private:
     Op op_;
     std::string attribute_;
@@ -298,13 +362,15 @@ class NodeSetBasicOperatorNumeric: public NodeSetRule
                           const NodePopulation& np) const final {
         switch (op_) {
         case Op::gt:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v > value_; });
+            return np.filterAttribute<double>(name_, [this](const double v) { return v > value_; });
         case Op::lt:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v < value_; });
+            return np.filterAttribute<double>(name_, [this](const double v) { return v < value_; });
         case Op::gte:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v >= value_; });
+            return np.filterAttribute<double>(name_,
+                                              [this](const double v) { return v >= value_; });
         case Op::lte:
-            return np.filterAttribute<double>(name_, [=](const double v) { return v <= value_; });
+            return np.filterAttribute<double>(name_,
+                                              [this](const double v) { return v <= value_; });
         default:              // LCOV_EXCL_LINE
             LIBSONATA_THROW_IF_REACHED  // LCOV_EXCL_LINE
         }
@@ -349,6 +415,10 @@ class NodeSetBasicOperatorNumeric: public NodeSetRule
         }
     }
 
+    std::unique_ptr<NodeSetRule> clone() const final {
+        return std::make_unique<detail::NodeSetBasicOperatorNumeric>(name_, op2string(op_), value_);
+    }
+
   private:
     std::string name_;
     double value_;
@@ -372,7 +442,7 @@ class NodeSetCompoundRule: public NodeSetRule
     }
 
     std::string toJSON() const final {
-        return toString("node_ids", targets_);
+        return toString(name_, targets_);
     }
 
     bool is_compound() const override {
@@ -380,6 +450,10 @@ class NodeSetCompoundRule: public NodeSetRule
     }
     const CompoundTargets& getTargets() const {
         return targets_;
+    }
+
+    std::unique_ptr<NodeSetRule> clone() const final {
+        return std::make_unique<detail::NodeSetCompoundRule>(name_, targets_);
     }
 
   private:
@@ -488,8 +562,8 @@ NodeSetRulePtr _dispatch_node(const std::string& attribute, const json& value) {
             throw SonataError(
                 fmt::format("Operator '{}' must have object with one key value pair", attribute));
         }
-        const auto& key = definition.begin().key();
-        const auto& value = definition.begin().value();
+        const auto key = definition.begin().key();
+        const auto value = definition.begin().value();
 
         if (value.is_number()) {
             return std::make_unique<NodeSetBasicOperatorNumeric>(attribute,
@@ -671,6 +745,10 @@ Selection NodeSets::materialize(const std::string& name, const NodePopulation& p
 
 std::set<std::string> NodeSets::names() const {
     return impl_->names();
+}
+
+std::set<std::string> NodeSets::update(const NodeSets& other) const {
+    return impl_->update(*other.impl_);
 }
 
 std::string NodeSets::toJSON() const {
