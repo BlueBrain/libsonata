@@ -29,8 +29,8 @@ namespace sonata {
 
 namespace {
 
-const char* const H5_DYNAMICS_PARAMS = "dynamics_params";
-const char* const H5_LIBRARY = "@library";
+constexpr const char* const H5_DYNAMICS_PARAMS = "dynamics_params";
+constexpr const char* const H5_LIBRARY = "@library";
 
 
 std::set<std::string> _listChildren(const HighFive::Group& group,
