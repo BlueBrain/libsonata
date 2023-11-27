@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.3)
-cmake_policy(VERSION 3.3)
+cmake_minimum_required(VERSION 3.16)
+cmake_policy(VERSION 3.16)
 
 if(NOT SONATA_VERSION)
     execute_process(COMMAND git describe --tags
