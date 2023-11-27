@@ -163,6 +163,13 @@ TEST_CASE("NodePopulationSelectAll", "[base]") {
 TEST_CASE("NodePopulationmatchAttributeValues", "[base]") {
     NodePopulation population("./data/nodes1.h5", "", "nodes-A");
 
+    SECTION("int") {
+        const auto sel = population.matchAttributeValues("A-int64", 1);
+        CHECK(sel.flatSize() == 0);
+
+        CHECK_THROWS_AS(population.matchAttributeValues("E-mapping-good", 1), SonataError);
+    }
+
     SECTION("String") {
         auto sel = population.matchAttributeValues<std::string>("attr-Z", "bb");
         CHECK(sel.flatSize() == 1);

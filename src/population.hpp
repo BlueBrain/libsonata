@@ -29,15 +29,15 @@ namespace sonata {
 
 namespace {
 
-const char* H5_DYNAMICS_PARAMS = "dynamics_params";
-const char* H5_LIBRARY = "@library";
+constexpr const char* const H5_DYNAMICS_PARAMS = "dynamics_params";
+constexpr const char* const H5_LIBRARY = "@library";
 
 
 std::set<std::string> _listChildren(const HighFive::Group& group,
                                     const std::set<std::string>& ignoreNames = {}) {
     std::set<std::string> result;
     for (const auto& name : group.listObjectNames()) {
-        if (ignoreNames.count(name)) {
+        if (ignoreNames.count(name) > 0) {
             continue;
         }
         result.insert(name);
@@ -57,7 +57,6 @@ std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group,
     return names;
 }
 
-
 template <typename T>
 std::vector<T> _readChunk(const HighFive::DataSet& dset, const Selection::Range& range) {
     std::vector<T> result;
@@ -70,6 +69,10 @@ std::vector<T> _readChunk(const HighFive::DataSet& dset, const Selection::Range&
 
 template <typename T, typename std::enable_if<!std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
+    if (selection.ranges().empty() || dset.getElementCount() == 0) {
+        return {};
+    }
+
     if (selection.ranges().size() == 1) {
         return _readChunk<T>(dset, selection.ranges().front());
     }
@@ -89,7 +92,7 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
 
 template <typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
-    if (selection.ranges().empty()) {
+    if (selection.ranges().empty() || dset.getElementCount() == 0) {
         return {};
     } else if (selection.ranges().size() == 1) {
         return _readChunk<T>(dset, selection.ranges().front());
