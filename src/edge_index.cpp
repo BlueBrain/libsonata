@@ -77,7 +77,6 @@ Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& 
         return range[0] >= range[1];
     });
 
-    // TODO check that the spec allows us to optimize this.
     primaryRange = bulk_read::sortAndMerge(primaryRange);
 
     auto secondaryRange = detail::readCanonicalSelection<std::array<uint64_t, 2>>(
