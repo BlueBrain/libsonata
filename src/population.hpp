@@ -20,6 +20,8 @@
 
 #include <fmt/format.h>
 
+#include "read_bulk.hpp"
+#include "read_canonical_selection.hpp"
 #include <highfive/H5File.hpp>
 
 namespace bbp {
@@ -58,45 +60,22 @@ std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group,
 }
 
 template <typename T>
-std::vector<T> _readChunk(const HighFive::DataSet& dset, const Selection::Range& range) {
-    std::vector<T> result;
-    assert(range.first < range.second);
-    auto chunkSize = static_cast<size_t>(range.second - range.first);
-    dset.select({static_cast<size_t>(range.first)}, {chunkSize}).read(result);
-    return result;
-}
-
-
-template <typename T, typename std::enable_if<!std::is_pod<T>::value>::type* = nullptr>
 std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
-    if (selection.ranges().empty() || dset.getElementCount() == 0) {
+    if (dset.getElementCount() == 0) {
         return {};
     }
 
-    if (selection.ranges().size() == 1) {
-        return _readChunk<T>(dset, selection.ranges().front());
+    if (bulk_read::detail::isCanonical(selection)) {
+        return detail::readCanonicalSelection<T>(dset, selection);
     }
 
-    std::vector<T> result;
-
-    // for POD types we can pre-allocate result vector... see below template specialization
-    for (const auto& range : selection.ranges()) {
-        for (auto& x : _readChunk<T>(dset, range)) {
-            result.emplace_back(std::move(x));
-        }
-    }
-
-    return result;
-}
-
-
-template <typename T, typename std::enable_if<std::is_pod<T>::value>::type* = nullptr>
-std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
-    if (selection.ranges().empty() || dset.getElementCount() == 0) {
-        return {};
-    } else if (selection.ranges().size() == 1) {
-        return _readChunk<T>(dset, selection.ranges().front());
-    }
+    // The fully general case:
+    //
+    // 1. Create a canonical selection and read into `linear_result`.
+    // 2. Copy values from the canonical `linear_results` to their final
+    //    destination.
+    auto canonicalRanges = bulk_read::sortAndMerge(selection, 0);
+    auto linear_result = detail::readCanonicalSelection<T>(dset, canonicalRanges);
 
     const auto ids = selection.flatten();
 
@@ -106,19 +85,15 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
         return ids[i0] < ids[i1];
     });
 
-    std::vector<std::size_t> ids_sorted;
-    ids_sorted.reserve(ids.size());
-    std::transform(ids_index.begin(),
-                   ids_index.end(),
-                   std::back_inserter(ids_sorted),
-                   [&ids](size_t i) { return static_cast<size_t>(ids[i]); });
+    std::vector<T> result(ids.size());
+    size_t linear_index = 0;
+    result[ids_index[0]] = linear_result[0];
+    for (size_t i = 1; i < ids.size(); ++i) {
+        if (ids[ids_index[i - 1]] != ids[ids_index[i]]) {
+            linear_index += 1;
+        }
 
-    std::vector<T> linear_result;
-    dset.select(HighFive::ElementSet{ids_sorted}).read(linear_result);
-
-    std::vector<T> result(ids_sorted.size());
-    for (size_t i = 0; i < ids_sorted.size(); ++i) {
-        result[ids_index[i]] = linear_result[i];
+        result[ids_index[i]] = linear_result[linear_index];
     }
 
     return result;
