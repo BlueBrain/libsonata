@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "read_bulk.hpp"
+#include "read_canonical_selection.hpp"
 
 namespace bbp {
 namespace sonata {
@@ -54,78 +55,32 @@ const HighFive::Group targetIndex(const HighFive::Group& h5Root) {
     return h5Root.getGroup(TARGET_INDEX_GROUP);
 }
 
-Selection resolve(const HighFive::Group& indexGroup, const NodeID nodeID) {
-    if (nodeID >= indexGroup.getDataSet(NODE_ID_TO_RANGES_DSET).getSpace().getDimensions()[0]) {
-        // Returning empty set for out-of-range node IDs, to be aligned with SYN2 reader
-        // implementation
-        // TODO: throw a SonataError instead
-        return Selection({});
-    }
-
-    RawIndex primaryRange;
-    indexGroup.getDataSet(NODE_ID_TO_RANGES_DSET)
-        .select({static_cast<size_t>(nodeID), 0}, {1, 2})
-        .read(primaryRange);
-
-    const uint64_t primaryRangeBegin = primaryRange[0][0];
-    const uint64_t primaryRangeEnd = primaryRange[0][1];
-
-    if (primaryRangeBegin >= primaryRangeEnd) {
-        return Selection({});
-    }
-
-    RawIndex secondaryRange;
-    indexGroup.getDataSet(RANGE_TO_EDGE_ID_DSET)
-        .select({static_cast<size_t>(primaryRangeBegin), 0},
-                {static_cast<size_t>(primaryRangeEnd - primaryRangeBegin), 2})
-        .read(secondaryRange);
-
-    Selection::Ranges ranges;
-    ranges.reserve(secondaryRange.size());
-
-    for (const auto& row : secondaryRange) {
-        ranges.emplace_back(row[0], row[1]);
-    }
-
-    return Selection(std::move(ranges));
-}
-
 Selection resolve(const HighFive::Group& indexGroup, const std::vector<NodeID>& nodeIDs) {
-    constexpr size_t min_gap_size = SONATA_PAGESIZE / (2 * sizeof(uint64_t));
-    constexpr size_t max_aggregated_block_size = 128 * min_gap_size;
+    auto node2ranges_dset = indexGroup.getDataSet(NODE_ID_TO_RANGES_DSET);
+    auto node_dim = node2ranges_dset.getSpace().getDimensions()[0];
+    auto sortedNodeIds = nodeIDs;
+    bulk_read::detail::erase_if(sortedNodeIds, [node_dim](auto id) {
+        // Filter out `nodeIDs[i] >= dims`; because SYN2 used to return an
+        // empty range for an out-of-range `nodeId`s.
+        return id >= node_dim;
+    });
+    std::sort(sortedNodeIds.begin(), sortedNodeIds.end());
+    sortedNodeIds.erase(std::unique(sortedNodeIds.begin(), sortedNodeIds.end()),
+                        sortedNodeIds.end());
 
-    if (nodeIDs.size() == 1) {
-        return resolve(indexGroup, nodeIDs[0]);
-    }
+    auto nodeSelection = Selection::fromValues(sortedNodeIds);
+    auto primaryRange = detail::readCanonicalSelection<std::array<uint64_t, 2>>(
+        node2ranges_dset, nodeSelection.ranges(), RawIndex{{0, 2}});
 
-    auto readBlock = [&indexGroup](auto& buffer, const auto& range, const std::string& dset_name) {
-        size_t i_begin = std::get<0>(range);
-        size_t i_end = std::get<1>(range);
+    bulk_read::detail::erase_if(primaryRange, [](const auto& range) {
+        // Filter out any invalid ranges `start >= end`.
+        return range[0] >= range[1];
+    });
 
-        indexGroup.getDataSet(dset_name).select({i_begin, 0}, {i_end - i_begin, 2}).read(buffer);
-    };
-
-    auto primaryRange = bulk_read::bulkRead<std::array<uint64_t, 2>>(
-        [&readBlock](auto& buffer, const auto& range) {
-            readBlock(buffer, range, NODE_ID_TO_RANGES_DSET);
-        },
-        Selection::fromValues(nodeIDs),
-        min_gap_size,
-        max_aggregated_block_size);
-
-    // Sort and eliminate empty ranges.
     primaryRange = bulk_read::sortAndMerge(primaryRange);
-    if (primaryRange.empty()) {
-        return Selection({});
-    }
 
-    auto secondaryRange = bulk_read::bulkRead<std::array<uint64_t, 2>>(
-        [&readBlock](auto& buffer, const auto& range) {
-            readBlock(buffer, range, RANGE_TO_EDGE_ID_DSET);
-        },
-        primaryRange,
-        min_gap_size,
-        max_aggregated_block_size);
+    auto secondaryRange = detail::readCanonicalSelection<std::array<uint64_t, 2>>(
+        indexGroup.getDataSet(RANGE_TO_EDGE_ID_DSET), primaryRange, RawIndex{{0, 2}});
 
     // Sort and eliminate empty ranges.
     secondaryRange = bulk_read::sortAndMerge(secondaryRange);
