@@ -429,7 +429,7 @@ PYBIND11_MODULE(_libsonata, m) {
                          if (raw(i, 0) < 0 || raw(i, 1) < 0) {
                              throw SonataError("Negative value passed to Selection");
                          }
-                         ranges.emplace_back(raw(i, 0), raw(i, 1));
+                         ranges.push_back({uint64_t(raw(i, 0)), uint64_t(raw(i, 1))});
                      }
                      return Selection(ranges);
                  }
@@ -445,7 +445,19 @@ PYBIND11_MODULE(_libsonata, m) {
              }),
              "values"_a,
              "Selection from list of IDs: passing np.array with dtype np.uint64 is faster")
-        .def_property_readonly("ranges", &Selection::ranges, DOC_SEL(ranges))
+        .def_property_readonly(
+            "ranges",
+            [](const Selection& obj) {
+                const auto& ranges = obj.ranges();
+                auto list = py::list(ranges.size());
+                for (size_t i = 0; i < ranges.size(); ++i) {
+                    const auto& range = ranges[i];
+                    list[i] = py::make_tuple(std::get<0>(range), std::get<1>(range));
+                }
+
+                return list;
+            },
+            DOC_SEL(ranges))
         .def(
             "flatten", [](Selection& obj) { return asArray(obj.flatten()); }, DOC_SEL(flatten))
         .def_property_readonly("flat_size", &Selection::flatSize, DOC_SEL(flatSize))

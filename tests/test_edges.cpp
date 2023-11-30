@@ -17,7 +17,7 @@ namespace std {
 std::ostream& operator<<(std::ostream& oss, const Selection& selection) {
     oss << "{ ";
     for (const auto& range : selection.ranges()) {
-        oss << range.first << ":" << range.second << " ";
+        oss << std::get<0>(range) << ":" << std::get<1>(range) << " ";
     }
     oss << "}";
     return oss;

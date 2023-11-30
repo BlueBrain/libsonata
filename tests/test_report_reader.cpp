@@ -48,9 +48,6 @@ TEST_CASE("SomaReportReader limits", "[base]") {
     // Inverted id
     REQUIRE_THROWS(pop.get(Selection({{2, 1}})));
 
-    // Negative ids
-    REQUIRE_THROWS(pop.get(Selection({{-1, 1}})));
-
     // Times out of range
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 100., 101.));
 
@@ -119,9 +116,6 @@ TEST_CASE("ElementReportReader limits", "[base]") {
 
     // Inverted id
     REQUIRE_THROWS(pop.get(Selection({{2, 1}})));
-
-    // Negative ids
-    REQUIRE_THROWS(pop.get(Selection({{-1, 1}})));
 
     // Times out of range
     REQUIRE_THROWS(pop.get(Selection({{1, 2}}), 100., 101.));

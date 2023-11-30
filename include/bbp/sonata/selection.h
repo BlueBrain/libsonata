@@ -14,7 +14,7 @@ class SONATA_API Selection
   public:
     using Value = uint64_t;
     using Values = std::vector<Value>;
-    using Range = std::pair<Value, Value>;
+    using Range = std::array<Value, 2>;
     using Ranges = std::vector<Range>;
 
     Selection(Ranges ranges);
@@ -57,19 +57,19 @@ Selection Selection::fromValues(Iterator first, Iterator last) {
     Selection::Range range{0, 0};
     while (first != last) {
         const auto v = *first;
-        if (v == range.second) {
-            ++range.second;
+        if (v == std::get<1>(range)) {
+            ++std::get<1>(range);
         } else {
-            if (range.first < range.second) {
+            if (std::get<0>(range) < std::get<1>(range)) {
                 ranges.push_back(range);
             }
-            range.first = v;
-            range.second = v + 1;
+            std::get<0>(range) = v;
+            std::get<1>(range) = v + 1;
         }
         ++first;
     }
 
-    if (range.first < range.second) {
+    if (std::get<0>(range) < std::get<1>(range)) {
         ranges.push_back(range);
     }
 
