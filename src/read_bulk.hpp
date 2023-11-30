@@ -43,18 +43,6 @@ size_t flatSize(const std::vector<Range>& ranges) {
     return size;
 }
 
-template <class Int, class Range>
-std::vector<Int> flattenRanges(const std::vector<Range>& ranges) {
-    std::vector<Int> result;
-    result.reserve(flatSize(ranges));
-    for (const auto& range : ranges) {
-        for (auto v = std::get<0>(range); v < std::get<1>(range); ++v) {
-            result.emplace_back(v);
-        }
-    }
-    return result;
-}
-
 template <class T, class Pred>
 void erase_if(std::vector<T>& v, Pred pred) {
     auto it = std::remove_if(v.begin(), v.end(), pred);
