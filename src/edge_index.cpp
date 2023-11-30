@@ -88,13 +88,6 @@ Selection resolve(const HighFive::Group& indexGroup,
     return Selection(std::move(secondaryRange));
 }
 
-Selection resolve(const HighFive::Group& indexGroup,
-                  const NodeID nodeID,
-                  const Hdf5Reader& reader) {
-    return resolve(indexGroup, std::vector<NodeID>{nodeID}, reader);
-}
-
-
 namespace {
 
 std::unordered_map<NodeID, RawIndex> _groupNodeRanges(const std::vector<NodeID>& nodeIDs) {
