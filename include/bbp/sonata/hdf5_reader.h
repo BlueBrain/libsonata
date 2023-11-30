@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <bbp/sonata/selection.h>
-#include <bbp/sonata/unique_tuple.h>
 #include <highfive/H5File.hpp>
 
 namespace bbp {
@@ -124,20 +123,22 @@ class Hdf5Reader
   public:
     // The issue here is that on a mac `size_t` is different from
     // `{,u}int{8,16,32,64}_t` but not on the other two OSes.
-    using supported_1D_types = detail::unique_tuple<uint8_t,
-                                                    uint16_t,
-                                                    uint32_t,
-                                                    uint64_t,
-                                                    int8_t,
-                                                    int16_t,
-                                                    int32_t,
-                                                    int64_t,
-                                                    float,
-                                                    double,
-                                                    size_t,
-                                                    std::string>;
+    using supported_1D_types = std::tuple<uint8_t,
+                                          uint16_t,
+                                          uint32_t,
+                                          uint64_t,
+                                          int8_t,
+                                          int16_t,
+                                          int32_t,
+                                          int64_t,
+                                          float,
+                                          double,
+#ifdef __APPLE__
+                                          size_t,
+#endif
+                                          std::string>;
 
-    using supported_2D_types = detail::unique_tuple<std::array<uint64_t, 2>>;
+    using supported_2D_types = std::tuple<std::array<uint64_t, 2>>;
 
     /// Create a valid Hdf5Reader with the default plugin.
     Hdf5Reader();
