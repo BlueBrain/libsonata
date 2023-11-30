@@ -28,9 +28,6 @@ class Hdf5PluginRead1DInterface
 template <class T>
 class Hdf5PluginRead2DInterface
 {
-  private:
-    using AltRanges = std::vector<std::array<uint64_t, 2>>;
-
   public:
     virtual ~Hdf5PluginRead2DInterface() = default;
 
@@ -41,18 +38,6 @@ class Hdf5PluginRead2DInterface
     virtual std::vector<std::array<uint64_t, 2>> readSelection(const HighFive::DataSet& dset,
                                                                const Selection& xsel,
                                                                const Selection& ysel) const = 0;
-
-    virtual std::vector<std::array<uint64_t, 2>> readSelection(const HighFive::DataSet& dset,
-                                                               const AltRanges& xsel,
-                                                               const Selection& ysel) const = 0;
-
-    virtual std::vector<std::array<uint64_t, 2>> readSelection(const HighFive::DataSet& dset,
-                                                               const Selection& xsel,
-                                                               const AltRanges& ysel) const = 0;
-
-    virtual std::vector<std::array<uint64_t, 2>> readSelection(const HighFive::DataSet& dset,
-                                                               const AltRanges& xsel,
-                                                               const AltRanges& ysel) const = 0;
 };
 
 template <class T, class U>
@@ -180,10 +165,10 @@ class Hdf5Reader
     ///
     /// Both selections are canonical, i.e. sorted and non-overlapping. The dataset
     /// is obtained from a `HighFive::File` opened via `this->openFile`.
-    template <class T, class XSel, class YSel>
+    template <class T>
     std::vector<T> readSelection(const HighFive::DataSet& dset,
-                                 const XSel& xsel,
-                                 const YSel& ysel) const {
+                                 const Selection& xsel,
+                                 const Selection& ysel) const {
         return static_cast<const Hdf5PluginRead2DInterface<T>&>(*impl).readSelection(dset,
                                                                                      xsel,
                                                                                      ysel);

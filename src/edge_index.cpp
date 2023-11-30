@@ -70,7 +70,7 @@ Selection resolve(const HighFive::Group& indexGroup,
     auto nodeSelection = Selection::fromValues(sortedNodeIds);
     auto primaryRange = reader.readSelection<std::array<uint64_t, 2>>(node2ranges_dset,
                                                                       nodeSelection,
-                                                                      RawIndex{{0, 2}});
+                                                                      Selection(RawIndex{{0, 2}}));
 
     bulk_read::detail::erase_if(primaryRange, [](const auto& range) {
         // Filter out any invalid ranges `start >= end`.

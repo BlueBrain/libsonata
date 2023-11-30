@@ -40,39 +40,10 @@ class Hdf5PluginRead1DDefault: virtual public Hdf5PluginRead1DInterface<T>
 template <class T>
 class Hdf5PluginRead2DDefault: virtual public Hdf5PluginRead2DInterface<T>
 {
-  private:
-    using AltRanges = std::vector<std::array<uint64_t, 2>>;
-
   public:
     std::vector<T> readSelection(const HighFive::DataSet& dset,
                                  const Selection& xsel,
                                  const Selection& ysel) const override {
-        return readSelectionImpl(dset, xsel.ranges(), ysel.ranges());
-    }
-
-    std::vector<T> readSelection(const HighFive::DataSet& dset,
-                                 const AltRanges& xsel,
-                                 const Selection& ysel) const override {
-        return readSelectionImpl(dset, xsel, ysel.ranges());
-    }
-
-    std::vector<T> readSelection(const HighFive::DataSet& dset,
-                                 const Selection& xsel,
-                                 const AltRanges& ysel) const override {
-        return readSelectionImpl(dset, xsel.ranges(), ysel);
-    }
-
-    std::vector<T> readSelection(const HighFive::DataSet& dset,
-                                 const AltRanges& xsel,
-                                 const AltRanges& ysel) const override {
-        return readSelectionImpl(dset, xsel, ysel);
-    }
-
-  private:
-    template <class XRange, class YRange>
-    std::vector<T> readSelectionImpl(const HighFive::DataSet& dset,
-                                     const std::vector<XRange>& xsel,
-                                     const std::vector<YRange>& ysel) const {
         return detail::readCanonicalSelection<T>(dset, xsel, ysel);
     }
 };
@@ -86,9 +57,6 @@ class Hdf5PluginDefault<std::tuple<Ts...>, std::tuple<Us...>>
       virtual public Hdf5PluginRead1DDefault<Ts>...,
       virtual public Hdf5PluginRead2DDefault<Us>...
 {
-  private:
-    using AltRanges = std::vector<std::array<uint64_t, 2>>;
-
   public:
     HighFive::File openFile(const std::string& path) const override {
         return HighFive::File(path);
