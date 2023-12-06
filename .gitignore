@@ -4,7 +4,7 @@ build
 spack-build*
 .eggs/
 .tox/
-libsonata.cpython-*.so
+_libsonata.cpython-*.so
 python/__pycache__/
 python/libsonata.egg-info/
 *.pyc
