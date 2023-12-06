@@ -45,4 +45,5 @@ __all__ = [
     "SpikePopulation",
     "SpikeReader",
     "version",
+    "Hdf5Reader",
 ]

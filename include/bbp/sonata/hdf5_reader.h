@@ -118,7 +118,7 @@ class Hdf5PluginInterface<std::tuple<Ts...>, std::tuple<Us...>>
 ///      }
 ///    }
 ///
-class Hdf5Reader
+class SONATA_API Hdf5Reader
 {
   public:
     // The issue here is that on a mac `size_t` is different from
