@@ -33,11 +33,17 @@ namespace bbp {
 namespace sonata {
 
 //--------------------------------------------------------------------------------------------------
-
+//
 EdgePopulation::EdgePopulation(const std::string& h5FilePath,
                                const std::string& csvFilePath,
                                const std::string& name)
-    : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
+    : Population(h5FilePath, csvFilePath, name, ELEMENT, Hdf5Reader()) {}
+
+EdgePopulation::EdgePopulation(const std::string& h5FilePath,
+                               const std::string& csvFilePath,
+                               const std::string& name,
+                               const Hdf5Reader& hdf5_reader)
+    : Population(h5FilePath, csvFilePath, name, ELEMENT, hdf5_reader) {}
 
 
 std::string EdgePopulation::source() const {
@@ -59,26 +65,26 @@ std::string EdgePopulation::target() const {
 std::vector<NodeID> EdgePopulation::sourceNodeIDs(const Selection& selection) const {
     HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet(SOURCE_NODE_ID_DSET);
-    return _readSelection<NodeID>(dset, selection);
+    return _readSelection<NodeID>(dset, selection, impl_->hdf5_reader);
 }
 
 
 std::vector<NodeID> EdgePopulation::targetNodeIDs(const Selection& selection) const {
     HDF5_LOCK_GUARD
     const auto dset = impl_->h5Root.getDataSet(TARGET_NODE_ID_DSET);
-    return _readSelection<NodeID>(dset, selection);
+    return _readSelection<NodeID>(dset, selection, impl_->hdf5_reader);
 }
 
 
 Selection EdgePopulation::afferentEdges(const std::vector<NodeID>& target) const {
     HDF5_LOCK_GUARD
-    return edge_index::resolve(edge_index::targetIndex(impl_->h5Root), target);
+    return edge_index::resolve(edge_index::targetIndex(impl_->h5Root), target, impl_->hdf5_reader);
 }
 
 
 Selection EdgePopulation::efferentEdges(const std::vector<NodeID>& source) const {
     HDF5_LOCK_GUARD
-    return edge_index::resolve(edge_index::sourceIndex(impl_->h5Root), source);
+    return edge_index::resolve(edge_index::sourceIndex(impl_->h5Root), source, impl_->hdf5_reader);
 }
 
 

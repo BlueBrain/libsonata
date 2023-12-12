@@ -23,6 +23,7 @@ from libsonata._libsonata import (
     SpikePopulation,
     SpikeReader,
     version,
+    Hdf5Reader,
 )
 
 __all__ = [
@@ -44,4 +45,5 @@ __all__ = [
     "SpikePopulation",
     "SpikeReader",
     "version",
+    "Hdf5Reader",
 ]

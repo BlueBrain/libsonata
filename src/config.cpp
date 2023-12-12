@@ -202,9 +202,13 @@ PopulationType getPopulationProperties(
 
 template <typename PopulationType, typename PopulationPropertiesT>
 PopulationType getPopulation(const std::string& populationName,
-                             const std::unordered_map<std::string, PopulationPropertiesT>& src) {
+                             const std::unordered_map<std::string, PopulationPropertiesT>& src,
+                             const Hdf5Reader& hdf5_reader) {
     const auto properties = getPopulationProperties(populationName, src);
-    return PopulationType(properties.elementsPath, properties.typesPath, populationName);
+    return PopulationType(properties.elementsPath,
+                          properties.typesPath,
+                          populationName,
+                          hdf5_reader);
 }
 
 std::map<std::string, std::string> replaceVariables(std::map<std::string, std::string> variables) {
@@ -918,7 +922,12 @@ std::set<std::string> CircuitConfig::listNodePopulations() const {
 }
 
 NodePopulation CircuitConfig::getNodePopulation(const std::string& name) const {
-    return getPopulation<NodePopulation>(name, _nodePopulationProperties);
+    return getNodePopulation(name, Hdf5Reader());
+}
+
+NodePopulation CircuitConfig::getNodePopulation(const std::string& name,
+                                                const Hdf5Reader& hdf5_reader) const {
+    return getPopulation<NodePopulation>(name, _nodePopulationProperties, hdf5_reader);
 }
 
 std::set<std::string> CircuitConfig::listEdgePopulations() const {
@@ -926,7 +935,12 @@ std::set<std::string> CircuitConfig::listEdgePopulations() const {
 }
 
 EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name) const {
-    return getPopulation<EdgePopulation>(name, _edgePopulationProperties);
+    return getPopulation<EdgePopulation>(name, _edgePopulationProperties, Hdf5Reader());
+}
+
+EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name,
+                                                const Hdf5Reader& hdf5_reader) const {
+    return getPopulation<EdgePopulation>(name, _edgePopulationProperties, hdf5_reader);
 }
 
 NodePopulationProperties CircuitConfig::getNodePopulationProperties(const std::string& name) const {

@@ -19,6 +19,7 @@
 #include <utility>  // std::move
 #include <vector>
 
+#include <bbp/sonata/hdf5_reader.h>
 #include <bbp/sonata/selection.h>
 
 namespace bbp {
@@ -169,7 +170,8 @@ class SONATA_API Population
     Population(const std::string& h5FilePath,
                const std::string& csvFilePath,
                const std::string& name,
-               const std::string& prefix);
+               const std::string& prefix,
+               const Hdf5Reader& hdf5_reader);
 
     Population(const Population&) = delete;
 
@@ -194,7 +196,12 @@ template <typename Population>
 class SONATA_API PopulationStorage
 {
   public:
-    PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath = "");
+    PopulationStorage(const std::string& h5FilePath);
+    PopulationStorage(const std::string& h5FilePath, const std::string& csvFilePath);
+    PopulationStorage(const std::string& h5FilePath, const Hdf5Reader& hdf5_reader);
+    PopulationStorage(const std::string& h5FilePath,
+                      const std::string& csvFilePath,
+                      const Hdf5Reader& hdf5_reader);
 
     PopulationStorage(const PopulationStorage&) = delete;
 
