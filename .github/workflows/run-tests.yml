@@ -47,8 +47,8 @@ jobs:
 
       - name: Build and run unittests
         env:
-          CC: ${{ matrix.compiler.CC }}
-          CXX: ${{ matrix.compiler.CXX }}
+          CC: mpicc
+          CXX: mpic++
         run: |
           ./ci/cpp_test.sh
 
