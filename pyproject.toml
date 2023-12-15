@@ -1,11 +1,46 @@
 [build-system]
 requires = [
-    "cmake",
-    "oldest-supported-numpy",
-    "setuptools",
-    "wheel",
+    "scikit-build-core",
+    "setuptools_scm>=8",
+    "cmake>=3.14",
+    "ninja",
+    "pybind11",
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "libsonata"
+description = "SONATA files reader"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = { file = "COPYING" }
+authors = [
+    { name = "Blue Brain Project, EPFL" },
+]
+classifiers = [
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+]
+dynamic = ["version"]
+
+[tool.setuptools_scm]
+
+[tool.scikit-build]
+cmake.targets = ["sonata_python"]
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+wheel.packages = ["libsonata", "python/libsonata"]
+cmake.args = [
+            "-DSONATA_TESTS=OFF",
+            "-DEXTLIB_FROM_SUBMODULES=ON",
+            "-DSONATA_PYTHON=ON",
+            #"-DSONATA_VERSION=" + self.distribution.get_version(),
+            #"-DCMAKE_BUILD_TYPE={}".format(build_type),
+            "-DSONATA_CXX_WARNINGS=OFF",
+    ]
 
 [tool.cibuildwheel.linux]
 before-all = "bash ci/ci-buildwheel-prepare-linux.sh"

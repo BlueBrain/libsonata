@@ -18,3 +18,5 @@ target_link_libraries(sonata_python
     PRIVATE fmt::fmt-header-only
     PRIVATE pybind11::module
 )
+
+install(TARGETS sonata_python DESTINATION libsonata)
