@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 cmake_policy(VERSION 3.16)
 
+set(SONATA_VERSION  ${SKBUILD_PROJECT_VERSION})
+
 if(NOT SONATA_VERSION)
     execute_process(COMMAND git describe --tags
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
