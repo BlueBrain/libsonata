@@ -137,6 +137,8 @@ foreach(TARGET sonata_shared sonata_static)
             PRIVATE gcov
         )
     endif()
+
+    add_library(sonata::${TARGET} ALIAS ${TARGET})
 endforeach(TARGET)
 
 set_target_properties(sonata_shared
