@@ -27,6 +27,14 @@ classifiers = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+docs = [
+    "sphinx-bluebrain-theme",
+]
+test = [
+    "numpy",
+]
+
 [tool.setuptools_scm]
 
 [tool.scikit-build]

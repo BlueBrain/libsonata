@@ -15,7 +15,7 @@ source $BIN/activate
 set -u
 
 $BIN/pip -v install --upgrade pip setuptools wheel
-$BIN/pip -v install --force .
+$BIN/pip -v install --force ".[test]"
 
 pushd python/tests
 $BIN/python -m unittest -v 

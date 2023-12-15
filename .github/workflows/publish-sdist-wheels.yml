@@ -5,7 +5,7 @@ env:
   CIBW_BUILD_VERBOSITY: 3
   CIBW_BUILD: 'cp*'
   CIBW_SKIP: 'cp35-* cp36-* cp37-* *-musllinux_* *-manylinux_i686'
-  CIBW_TEST_COMMAND: ( cd {project}/python/tests; python -m unittest -v )
+  CIBW_TEST_COMMAND: ( pip install numpy; cd {project}/python/tests; python -m unittest -v )
 
 jobs:
   build_wheels:

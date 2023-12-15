@@ -18,8 +18,10 @@ set +u  # ignore missing variables in activation script
 source "$BIN/activate"
 set -u
 
-"$BIN/pip" install -U setuptools pip twine
-"$BIN/python" setup.py sdist
+"$BIN/pip" install -U setuptools pip
+"$BIN/pip" install -U twine build
+
+"$BIN/python" -m build
 
 ls -al dist
 
