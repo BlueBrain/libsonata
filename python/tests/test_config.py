@@ -625,6 +625,19 @@ class TestSimulationConfig(unittest.TestCase):
         conf = SimulationConfig(contents, "./")
         self.assertEqual(conf.connection_overrides(), [])
 
+    def test_empty_conditions(self):
+        contents = """
+        {
+          "manifest": { "$CIRCUIT_DIR": "./circuit" },
+          "network": "$CIRCUIT_DIR/circuit_config.json",
+          "run": { "random_seed": 12345, "dt": 0.05, "tstop": 1000 },
+          "connection_overrides": []
+        }
+        """
+        conf = SimulationConfig(contents, "./")
+        self.assertEqual(conf.conditions.celsius, 34.0)
+        self.assertEqual(conf.conditions.v_init, -80)
+
     def test_run(self):
         contents = """
         {
