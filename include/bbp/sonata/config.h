@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <memory>  // std::unique_ptr
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -266,6 +265,13 @@ class SONATA_API SimulationConfig
     struct Run {
         enum class IntegrationMethod { invalid = -1, euler, nicholson, nicholson_ion };
 
+        static constexpr int DEFAULT_spikeThreshold = -30;
+        static constexpr IntegrationMethod DEFAULT_IntegrationMethod = IntegrationMethod::euler;
+        static constexpr int DEFAULT_stimulusSeed = 0;
+        static constexpr int DEFAULT_ionchannelSeed = 0;
+        static constexpr int DEFAULT_minisSeed = 0;
+        static constexpr int DEFAULT_synapseSeed = 0;
+
         /// Biological simulation end time in milliseconds
         double tstop{};
         /// Integration step duration in milliseconds
@@ -273,20 +279,20 @@ class SONATA_API SimulationConfig
         /// Random seed
         int randomSeed{};
         /// The spike detection threshold. Default is -30mV
-        int spikeThreshold;
+        int spikeThreshold = DEFAULT_spikeThreshold;
         /// Selects the NEURON/CoreNEURON integration method. This parameter sets the NEURON
         /// global variable h.secondorder. Default 0 ('euler')
-        IntegrationMethod integrationMethod;
+        IntegrationMethod integrationMethod = DEFAULT_IntegrationMethod;
         /// A non-negative integer used for seeding noise stimuli and any other future stochastic
         /// stimuli, default is 0.
-        int stimulusSeed;
+        int stimulusSeed = DEFAULT_stimulusSeed;
         /// A non-negative integer used for seeding stochastic ion channels, default is 0.
-        int ionchannelSeed;
+        int ionchannelSeed = DEFAULT_ionchannelSeed;
         /// A non-negative integer used for seeding the Poisson processes that drives the minis,
         /// default is 0.
-        int minisSeed;
+        int minisSeed = DEFAULT_minisSeed;
         /// A non-negative integer used for seeding stochastic synapses, default is 0.
-        int synapseSeed;
+        int synapseSeed = DEFAULT_synapseSeed;
         /// Filename that contains the weights for the LFP calculation.
         std::string electrodesFile;
     };
@@ -296,14 +302,19 @@ class SONATA_API SimulationConfig
     struct Output {
         enum class SpikesSortOrder { invalid = -1, none, by_id, by_time };
 
+        static constexpr char DEFAULT_outputDir[] = "output";
+        static constexpr char DEFAULT_logFile[] = "";
+        static constexpr char DEFAULT_spikesFile[] = "out.h5";
+        static constexpr SpikesSortOrder DEFAULT_sortOrder = SpikesSortOrder::by_time;
+
         /// Spike report file output directory. Default is "output"
-        std::string outputDir;
+        std::string outputDir = DEFAULT_outputDir;
         /// Filename where console output is written. Default is STDOUT.
-        std::string logFile;
+        std::string logFile = DEFAULT_logFile;
         /// Spike report file name. Default is "out.h5"
-        std::string spikesFile;
+        std::string spikesFile = DEFAULT_spikesFile;
         /// The sorting order of the spike report. Default is "by_time"
-        SpikesSortOrder sortOrder;
+        SpikesSortOrder sortOrder = DEFAULT_sortOrder;
     };
 
     struct ModificationBase {
@@ -333,19 +344,23 @@ class SONATA_API SimulationConfig
      */
     struct Conditions {
         enum class SpikeLocation { invalid = -1, soma, AIS };
+        static constexpr double DEFAULT_celsius = 34.0;
+        static constexpr double DEFAULT_vInit = -80.0;
+        static constexpr SpikeLocation DEFAULT_spikeLocation = SpikeLocation::soma;
+        static constexpr bool DEFAULT_randomizeGabaRiseTime = false;
 
         /// Temperature of experiment. Default is 34.0
-        double celsius;
+        double celsius = DEFAULT_celsius;
         /// Initial membrane voltage in mV. Default is -80
-        double vInit;
+        double vInit = DEFAULT_vInit;
         /// The spike detection location. Can be either ‘soma’ or 'AIS'. Default is 'soma'
-        SpikeLocation spikeLocation;
+        SpikeLocation spikeLocation = DEFAULT_spikeLocation;
         /// Extracellular calcium concentration, being applied to the synapse uHill parameter in
         /// order to scale the U parameter of synapses. Default is None.
         nonstd::optional<double> extracellularCalcium{nonstd::nullopt};
         /// Enable legacy behavior to randomize the GABA_A rise time in the helper functions.
         /// Default is false
-        bool randomizeGabaRiseTime;
+        bool randomizeGabaRiseTime = DEFAULT_randomizeGabaRiseTime;
         /// Properties to assign values to variables in synapse MOD files.
         /// The format is a dictionary with keys being the SUFFIX names and values being
         /// dictionaries of variables' names and values.
