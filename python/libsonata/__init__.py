@@ -29,6 +29,7 @@ from libsonata._libsonata import (
 __all__ = [
     "CircuitConfig",
     "CircuitConfigStatus",
+    "SimulationConfig",
     "EdgePopulation",
     "EdgeStorage",
     "ElementDataFrame",
