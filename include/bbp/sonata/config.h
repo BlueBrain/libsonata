@@ -265,7 +265,7 @@ class SONATA_API SimulationConfig
     struct Run {
         enum class IntegrationMethod { invalid = -1, euler, nicholson, nicholson_ion };
 
-        static constexpr int DEFAULT_spikeThreshold = -30;
+        static constexpr double DEFAULT_spikeThreshold = -30.0;
         static constexpr IntegrationMethod DEFAULT_IntegrationMethod = IntegrationMethod::euler;
         static constexpr int DEFAULT_stimulusSeed = 0;
         static constexpr int DEFAULT_ionchannelSeed = 0;
@@ -279,7 +279,7 @@ class SONATA_API SimulationConfig
         /// Random seed
         int randomSeed{};
         /// The spike detection threshold. Default is -30mV
-        int spikeThreshold = DEFAULT_spikeThreshold;
+        double spikeThreshold = DEFAULT_spikeThreshold;
         /// Selects the NEURON/CoreNEURON integration method. This parameter sets the NEURON
         /// global variable h.secondorder. Default 0 ('euler')
         IntegrationMethod integrationMethod = DEFAULT_IntegrationMethod;

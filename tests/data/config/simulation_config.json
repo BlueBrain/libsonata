@@ -27,7 +27,8 @@
          "synapse_seed": 444,
          "integration_method" : 2,
          "forward_skip": 500,
-         "electrodes_file": "$ELECTRODES_DIR/electrode_weights.h5"
+         "electrodes_file": "$ELECTRODES_DIR/electrode_weights.h5",
+         "spike_threshold": -35.5
     },
     "output": {
          "output_dir": "$OUTPUT_DIR/output",
