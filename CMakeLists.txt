@@ -53,7 +53,6 @@ set(ENABLE_COVERAGE ${SONATA_ENABLE_COVERAGE})
 option(SONATA_CXX_WARNINGS "Compile C++ with warnings as errors, for glibcxx turn on assertions" ON)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
-set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
 set(SONATA_CXX_MINIMUM_STANDARD 14)
 if(NOT "${CMAKE_CXX_STANDARD}")
@@ -96,6 +95,7 @@ set(SONATA_SRC
     src/edge_index.cpp
     src/edges.cpp
     src/hdf5_mutex.cpp
+    src/hdf5_reader.cpp
     src/node_sets.cpp
     src/nodes.cpp
     src/population.cpp
@@ -137,6 +137,8 @@ foreach(TARGET sonata_shared sonata_static)
             PRIVATE gcov
         )
     endif()
+
+    add_library(sonata::${TARGET} ALIAS ${TARGET})
 endforeach(TARGET)
 
 set_target_properties(sonata_shared

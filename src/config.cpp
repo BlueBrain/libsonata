@@ -132,6 +132,25 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
      {SimulationConfig::ModificationBase::ModificationType::ConfigureAllSections,
       "ConfigureAllSections"}})
 
+// { in C++14; one has to declare static constexpr members; this can go away in c++17
+#define D(name) decltype(SimulationConfig::name) constexpr SimulationConfig::name;
+D(Output::DEFAULT_outputDir)
+D(Conditions::DEFAULT_randomizeGabaRiseTime)
+D(Output::DEFAULT_logFile)
+D(Run::DEFAULT_stimulusSeed)
+D(Conditions::DEFAULT_spikeLocation)
+D(Run::DEFAULT_ionchannelSeed)
+D(Output::DEFAULT_sortOrder)
+D(Run::DEFAULT_IntegrationMethod)
+D(Conditions::DEFAULT_vInit)
+D(Run::DEFAULT_minisSeed)
+D(Output::DEFAULT_spikesFile)
+D(Conditions::DEFAULT_celsius)
+D(Run::DEFAULT_synapseSeed)
+D(Run::DEFAULT_spikeThreshold)
+#undef D
+// }
+
 namespace {
 // to be replaced by std::filesystem once C++17 is used
 namespace fs = ghc::filesystem;
@@ -202,9 +221,13 @@ PopulationType getPopulationProperties(
 
 template <typename PopulationType, typename PopulationPropertiesT>
 PopulationType getPopulation(const std::string& populationName,
-                             const std::unordered_map<std::string, PopulationPropertiesT>& src) {
+                             const std::unordered_map<std::string, PopulationPropertiesT>& src,
+                             const Hdf5Reader& hdf5_reader) {
     const auto properties = getPopulationProperties(populationName, src);
-    return PopulationType(properties.elementsPath, properties.typesPath, populationName);
+    return PopulationType(properties.elementsPath,
+                          properties.typesPath,
+                          populationName,
+                          hdf5_reader);
 }
 
 std::map<std::string, std::string> replaceVariables(std::map<std::string, std::string> variables) {
@@ -918,7 +941,12 @@ std::set<std::string> CircuitConfig::listNodePopulations() const {
 }
 
 NodePopulation CircuitConfig::getNodePopulation(const std::string& name) const {
-    return getPopulation<NodePopulation>(name, _nodePopulationProperties);
+    return getNodePopulation(name, Hdf5Reader());
+}
+
+NodePopulation CircuitConfig::getNodePopulation(const std::string& name,
+                                                const Hdf5Reader& hdf5_reader) const {
+    return getPopulation<NodePopulation>(name, _nodePopulationProperties, hdf5_reader);
 }
 
 std::set<std::string> CircuitConfig::listEdgePopulations() const {
@@ -926,7 +954,12 @@ std::set<std::string> CircuitConfig::listEdgePopulations() const {
 }
 
 EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name) const {
-    return getPopulation<EdgePopulation>(name, _edgePopulationProperties);
+    return getPopulation<EdgePopulation>(name, _edgePopulationProperties, Hdf5Reader());
+}
+
+EdgePopulation CircuitConfig::getEdgePopulation(const std::string& name,
+                                                const Hdf5Reader& hdf5_reader) const {
+    return getPopulation<EdgePopulation>(name, _edgePopulationProperties, hdf5_reader);
 }
 
 NodePopulationProperties CircuitConfig::getNodePopulationProperties(const std::string& name) const {
@@ -962,15 +995,21 @@ class SimulationConfig::Parser
         parseMandatory(*runIt, "tstop", "run", result.tstop);
         parseMandatory(*runIt, "dt", "run", result.dt);
         parseMandatory(*runIt, "random_seed", "run", result.randomSeed);
-        parseOptional(*runIt, "spike_threshold", result.spikeThreshold, {-30});
+        parseOptional(*runIt,
+                      "spike_threshold",
+                      result.spikeThreshold,
+                      {Run::DEFAULT_spikeThreshold});
         parseOptional(*runIt,
                       "integration_method",
                       result.integrationMethod,
-                      {Run::IntegrationMethod::euler});
-        parseOptional(*runIt, "stimulus_seed", result.stimulusSeed, {0});
-        parseOptional(*runIt, "ionchannel_seed", result.ionchannelSeed, {0});
-        parseOptional(*runIt, "minis_seed", result.minisSeed, {0});
-        parseOptional(*runIt, "synapse_seed", result.synapseSeed, {0});
+                      {Run::DEFAULT_IntegrationMethod});
+        parseOptional(*runIt, "stimulus_seed", result.stimulusSeed, {Run::DEFAULT_stimulusSeed});
+        parseOptional(*runIt,
+                      "ionchannel_seed",
+                      result.ionchannelSeed,
+                      {Run::DEFAULT_ionchannelSeed});
+        parseOptional(*runIt, "minis_seed", result.minisSeed, {Run::DEFAULT_minisSeed});
+        parseOptional(*runIt, "synapse_seed", result.synapseSeed, {Run::DEFAULT_synapseSeed});
         parseOptional(*runIt, "electrodes_file", result.electrodesFile, {""});
 
         if (!result.electrodesFile.empty()) {
@@ -987,13 +1026,13 @@ class SimulationConfig::Parser
         if (outputIt == _json.end()) {
             return result;
         }
-        parseOptional(*outputIt, "output_dir", result.outputDir, {"output"});
-        parseOptional(*outputIt, "log_file", result.logFile, {""});
-        parseOptional(*outputIt, "spikes_file", result.spikesFile, {"out.h5"});
+        parseOptional(*outputIt, "output_dir", result.outputDir, {Output::DEFAULT_outputDir});
+        parseOptional(*outputIt, "log_file", result.logFile, {Output::DEFAULT_logFile});
+        parseOptional(*outputIt, "spikes_file", result.spikesFile, {Output::DEFAULT_spikesFile});
         parseOptional(*outputIt,
                       "spikes_sort_order",
                       result.sortOrder,
-                      {Output::SpikesSortOrder::by_time});
+                      {Output::DEFAULT_sortOrder});
 
         result.outputDir = toAbsolute(_basePath, result.outputDir);
 
@@ -1001,23 +1040,23 @@ class SimulationConfig::Parser
     }
 
     SimulationConfig::Conditions parseConditions() const {
-        SimulationConfig::Conditions result{};
+        SimulationConfig::Conditions result;
 
         const auto conditionsIt = _json.find("conditions");
         if (conditionsIt == _json.end()) {
             return result;
         }
-        parseOptional(*conditionsIt, "celsius", result.celsius, {34.0});
-        parseOptional(*conditionsIt, "v_init", result.vInit, {-80});
+        parseOptional(*conditionsIt, "celsius", result.celsius, {Conditions::DEFAULT_celsius});
+        parseOptional(*conditionsIt, "v_init", result.vInit, {Conditions::DEFAULT_vInit});
         parseOptional(*conditionsIt,
                       "spike_location",
                       result.spikeLocation,
-                      {Conditions::SpikeLocation::soma});
+                      {Conditions::DEFAULT_spikeLocation});
         parseOptional(*conditionsIt, "extracellular_calcium", result.extracellularCalcium);
         parseOptional(*conditionsIt,
                       "randomize_gaba_rise_time",
                       result.randomizeGabaRiseTime,
-                      {false});
+                      {Conditions::DEFAULT_randomizeGabaRiseTime});
         parseConditionsMechanisms(*conditionsIt, result.mechanisms);
         parseConditionsModifications(*conditionsIt, result.modifications);
         return result;
@@ -1079,7 +1118,7 @@ class SimulationConfig::Parser
     }
 
     SimulationConfig::SimulatorType parseTargetSimulator() const {
-        SimulationConfig::SimulatorType val;
+        SimulationConfig::SimulatorType val = SimulationConfig::SimulatorType::NEURON;
         parseOptional(_json, "target_simulator", val, {SimulationConfig::SimulatorType::NEURON});
         return val;
     }
@@ -1121,7 +1160,7 @@ class SimulationConfig::Parser
             const auto& valueIt = it.value();
             const auto debugStr = fmt::format("input {}", it.key());
 
-            InputBase::Module module;
+            InputBase::Module module = InputBase::Module::invalid;
             parseMandatory(valueIt, "module", debugStr, module);
 
             const auto input = parseInputModule(valueIt, module, _basePath, debugStr);

@@ -55,8 +55,8 @@ static const char *__doc_bbp_sonata_CircuitConfig_Components_vasculatureMesh = R
 static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_complete =
-R"doc(all mandatory properties exist, and the the config should return
-correct values in all possible cases)doc";
+R"doc(all mandatory properties exist, and the config should return correct
+values in all possible cases)doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_ConfigStatus_invalid = R"doc(needed for parsing json contents that are null / not an enum value)doc";
 
@@ -95,6 +95,8 @@ Throws:
     SonataError if the given population does not exist in any edge
     network.)doc";
 
+static const char *__doc_bbp_sonata_CircuitConfig_getEdgePopulation_2 = R"doc()doc";
+
 static const char *__doc_bbp_sonata_CircuitConfig_getEdgePopulationProperties =
 R"doc(Return a structure containing edge population specific properties,
 falling back to network properties if there are no population-specific
@@ -115,6 +117,8 @@ given population, and the node network it belongs to.
 Throws:
     SonataError if the given population does not exist in any node
     network.)doc";
+
+static const char *__doc_bbp_sonata_CircuitConfig_getNodePopulation_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CircuitConfig_getNodePopulationProperties =
 R"doc(Return a structure containing node population specific properties,
@@ -139,7 +143,7 @@ static const char *__doc_bbp_sonata_CircuitConfig_nodePopulationProperties = R"d
 
 static const char *__doc_bbp_sonata_CircuitConfig_nodeSetsFile = R"doc()doc";
 
-static const char *__doc_bbp_sonata_CircuitConfig_status = R"doc(How strict we are checking the circuit config)doc";
+static const char *__doc_bbp_sonata_CircuitConfig_status = R"doc()doc";
 
 static const char *__doc_bbp_sonata_CommonPopulationProperties = R"doc()doc";
 
@@ -179,6 +183,8 @@ static const char *__doc_bbp_sonata_EdgePopulationProperties_spatialSynapseIndex
 
 static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation = R"doc()doc";
 
+static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation_2 = R"doc()doc";
+
 static const char *__doc_bbp_sonata_EdgePopulation_afferentEdges = R"doc(Return inbound edges for given node IDs.)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_connectingEdges = R"doc(Return edges connecting two given nodes.)doc";
@@ -194,6 +200,97 @@ static const char *__doc_bbp_sonata_EdgePopulation_target = R"doc(Name of target
 static const char *__doc_bbp_sonata_EdgePopulation_targetNodeIDs = R"doc(Return target node IDs for a given edge selection)doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_writeIndices = R"doc(Write bidirectional node->edge indices to EdgePopulation HDF5.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5PluginInterface = R"doc()doc";
+
+static const char *__doc_bbp_sonata_Hdf5PluginRead1DInterface = R"doc(Interface for implementing `readSelection<T>(dset, selection)`.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5PluginRead1DInterface_readSelection =
+R"doc(Read the selected subset of the one-dimensional array.
+
+The selection is canonical, i.e. sorted and non-overlapping. The
+dataset is obtained from a `HighFive::File` opened via
+`this->openFile`.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5PluginRead2DInterface = R"doc()doc";
+
+static const char *__doc_bbp_sonata_Hdf5PluginRead2DInterface_readSelection =
+R"doc(Read the Cartesian product of the two selections.
+
+Both selections are canonical, i.e. sorted and non-overlapping. The
+dataset is obtained from a `HighFive::File` opened via
+`this->openFile`.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5Reader =
+R"doc(Abstraction for reading HDF5 datasets.
+
+The Hdf5Reader provides an interface for reading canonical selections
+from datasets. Selections are canonical if they are sorted and don't
+overlap. This allows implementing different optimization strategies,
+such as minimizing bytes read, aggregating nearby reads or using MPI
+collective I/O.
+
+The design uses virtual inheritance, which enables users to inject
+their own reader if needed. This class is the interface used within
+libsonata. It simply delegates to a "plugin", that satisfies the
+interface `Hdf5PluginInterface`.
+
+To enable MPI collective I/O, `libsonata` must call all methods in an
+MPI-collective manner. This implies that the number of times any
+function in `libsonata` calls any of the `Hdf5Reader` methods must not
+depend on the arguments to the function.
+
+Examples:
+
+void wrong(Selection selection) { // Wrong because some MPI ranks
+might return without // calling `readSelection`. if(selection.empty())
+{ return; } hdf5_reader.readSelection(dset, selection); }
+
+void also_wrong(Selection selection) { // Wrong because `hdf5_reader`
+is called `selection.ranges().size()` // number of times. Which could
+be different on each MPI rank. for(auto range : selection.ranges()) {
+hdf5_reader.readSelection(dset, Selection(std::vector{range})); } }
+
+void subtle(Selection selection, bool flag) { // If the flag can
+differ between MPI ranks, this is wrong because // `readSelection` is
+called with different `dset`s. If the `flag` must // be the same on
+all MPI ranks, this is correct. If this happens in // the libsonata
+API, then passing the same `flag` on all MPI ranks becomes // a
+requirement for the users, when using a collective reader. Example: //
+pop.get_attribute(attr_name, selection) if(flag) {
+hdf5_reader.readSelection(dset1, selection); } else {
+hdf5_reader.readSelection(dset2, selection); } }
+
+void correct(Selection selection) { // Correct because no matter which
+branch is taken // `hdf5_reader.readSelection` is called exactly once.
+if(selection.size % 2 == 0) { hdf5_reader.readSelection(dset,
+selection); } else { hdf5_reader.readSelection(dset, {}); } })doc";
+
+static const char *__doc_bbp_sonata_Hdf5Reader_Hdf5Reader = R"doc(Create a valid Hdf5Reader with the default plugin.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5Reader_Hdf5Reader_2 = R"doc(Create an Hdf5Reader with a user supplied plugin.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5Reader_impl = R"doc()doc";
+
+static const char *__doc_bbp_sonata_Hdf5Reader_openFile =
+R"doc(Open the HDF5.
+
+The dataset passed to `readSelection` must be obtained from a file
+open via this method.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5Reader_readSelection =
+R"doc(Read the selected subset of the one-dimensional array.
+
+Both selections are canonical, i.e. sorted and non-overlapping. The
+dataset is obtained from a `HighFive::File` opened via
+`this->openFile`.)doc";
+
+static const char *__doc_bbp_sonata_Hdf5Reader_readSelection_2 =
+R"doc(Read the Cartesian product of the two selections.
+
+Both selections are canonical, i.e. sorted and non-overlapping. The
+dataset is obtained from a `HighFive::File` opened via
+`this->openFile`.)doc";
 
 static const char *__doc_bbp_sonata_NodePopulation = R"doc()doc";
 
@@ -216,6 +313,8 @@ R"doc(Path to the .obj file containing the mesh of a vasculature morphology.
 Only for vasculature node populations where it is mandatory.)doc";
 
 static const char *__doc_bbp_sonata_NodePopulation_NodePopulation = R"doc()doc";
+
+static const char *__doc_bbp_sonata_NodePopulation_NodePopulation_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_NodePopulation_matchAttributeValues =
 R"doc(Return selection of where attribute values match value
@@ -274,18 +373,18 @@ Parameter ``name``:
     is the name of the node_set rule to be evaluated
 
 Parameter ``population``:
-    is the population overwhich the returned selection will be valid)doc";
+    is the population for which the returned selection will be valid)doc";
 
 static const char *__doc_bbp_sonata_NodeSets_names = R"doc(Names of the node sets available)doc";
 
 static const char *__doc_bbp_sonata_NodeSets_operator_assign = R"doc()doc";
 
-static const char *__doc_bbp_sonata_NodeSets_toJSON = R"doc(Return string version of node sets)doc";
+static const char *__doc_bbp_sonata_NodeSets_toJSON = R"doc(Return the nodesets as a JSON string.)doc";
 
 static const char *__doc_bbp_sonata_NodeSets_update =
-R"doc(Update this NodeSets to include the `other` nodeset
+R"doc(Update `this` to include all nodesets from `this` and `other`.
 
-Duplicate names are overriden with the values from `other`
+Duplicate names are overridden with the values from `other`.
 
 The duplicate names are returned.)doc";
 
@@ -300,6 +399,12 @@ static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage = R"doc(
 static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage_3 = R"doc()doc";
+
+static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage_4 = R"doc()doc";
+
+static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage_5 = R"doc()doc";
+
+static const char *__doc_bbp_sonata_PopulationStorage_PopulationStorage_6 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_PopulationStorage_impl = R"doc()doc";
 
@@ -574,8 +679,6 @@ static const char *__doc_bbp_sonata_ReportReader_populations = R"doc()doc";
 static const char *__doc_bbp_sonata_Selection = R"doc()doc";
 
 static const char *__doc_bbp_sonata_Selection_Selection = R"doc()doc";
-
-static const char *__doc_bbp_sonata_Selection_Selection_2 = R"doc()doc";
 
 static const char *__doc_bbp_sonata_Selection_empty = R"doc()doc";
 
@@ -989,7 +1092,9 @@ R"doc(For compartment type, select compartments to report. Default value:
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_dt = R"doc(Interval between reporting steps in milliseconds)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Report_enabled = R"doc(Allows for supressing a report so that is not created. Default is true)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Report_enabled =
+R"doc(Allows for suppressing a report so that is not created. Default is
+true)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Report_endTime = R"doc(Time to stop reporting in milliseconds)doc";
 

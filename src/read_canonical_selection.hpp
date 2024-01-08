@@ -30,10 +30,12 @@ std::vector<T> readCanonicalSelection(const HighFive::DataSet& dset, const Selec
     return dset.select(make_hyperslab(selection.ranges())).template read<std::vector<T>>();
 }
 
-template <class T, class XRange, class YRange>
+template <class T>
 std::vector<T> readCanonicalSelection(const HighFive::DataSet& dset,
-                                      const std::vector<XRange>& xranges,
-                                      const std::vector<YRange>& yranges) {
+                                      const Selection& xsel,
+                                      const Selection& ysel) {
+    const auto& xranges = xsel.ranges();
+    const auto& yranges = ysel.ranges();
     if (yranges.size() != 1) {
         throw SonataError("Only yranges.size() == 1 has been implemented.");
     }

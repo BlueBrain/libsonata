@@ -21,7 +21,6 @@
 #include <fmt/format.h>
 
 #include "read_bulk.hpp"
-#include "read_canonical_selection.hpp"
 #include <highfive/H5File.hpp>
 
 namespace bbp {
@@ -60,13 +59,15 @@ std::set<std::string> _listExplicitEnumerations(const HighFive::Group h5Group,
 }
 
 template <typename T>
-std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& selection) {
+std::vector<T> _readSelection(const HighFive::DataSet& dset,
+                              const Selection& selection,
+                              const Hdf5Reader& hdf5_reader) {
     if (dset.getElementCount() == 0) {
         return {};
     }
 
     if (bulk_read::detail::isCanonical(selection)) {
-        return detail::readCanonicalSelection<T>(dset, selection);
+        return hdf5_reader.readSelection<T>(dset, selection);
     }
 
     // The fully general case:
@@ -75,7 +76,7 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
     // 2. Copy values from the canonical `linear_results` to their final
     //    destination.
     auto canonicalRanges = bulk_read::sortAndMerge(selection, 0);
-    auto linear_result = detail::readCanonicalSelection<T>(dset, canonicalRanges);
+    auto linear_result = hdf5_reader.readSelection<T>(dset, canonicalRanges);
 
     const auto ids = selection.flatten();
 
@@ -102,14 +103,19 @@ std::vector<T> _readSelection(const HighFive::DataSet& dset, const Selection& se
 }  // unnamed namespace
 
 
+inline HighFive::File open_hdf5_file(const std::string& filename, const Hdf5Reader& hdf5_reader) {
+    return hdf5_reader.openFile(filename);
+}
+
 struct Population::Impl {
     Impl(const std::string& h5FilePath,
          const std::string&,
          const std::string& _name,
-         const std::string& _prefix)
+         const std::string& _prefix,
+         const Hdf5Reader& hdf5_reader)
         : name(_name)
         , prefix(_prefix)
-        , h5File(h5FilePath)
+        , h5File(open_hdf5_file(h5FilePath, hdf5_reader))
         , h5Root(h5File.getGroup(fmt::format("/{}s", prefix)).getGroup(name))
         , attributeNames(_listChildren(h5Root.getGroup("0"), {H5_DYNAMICS_PARAMS, H5_LIBRARY}))
         , attributeEnumNames(
@@ -120,7 +126,8 @@ struct Population::Impl {
         , dynamicsAttributeNames(
               h5Root.getGroup("0").exist(H5_DYNAMICS_PARAMS)
                   ? _listChildren(h5Root.getGroup("0").getGroup(H5_DYNAMICS_PARAMS))
-                  : std::set<std::string>{}) {
+                  : std::set<std::string>{})
+        , hdf5_reader(hdf5_reader) {
         if (h5Root.exist("1")) {
             throw SonataError("Only single-group populations are supported at the moment");
         }
@@ -154,17 +161,27 @@ struct Population::Impl {
     const std::set<std::string> attributeNames;
     const std::set<std::string> attributeEnumNames;
     const std::set<std::string> dynamicsAttributeNames;
+    const Hdf5Reader hdf5_reader;
 };
 
 //--------------------------------------------------------------------------------------------------
 
 template <typename Population>
 struct PopulationStorage<Population>::Impl {
-    Impl(const std::string& _h5FilePath, const std::string& _csvFilePath)
+    Impl(const std::string& _h5FilePath)
+        : Impl(_h5FilePath, Hdf5Reader()) {}
+
+    Impl(const std::string& _h5FilePath, const Hdf5Reader& hdf5_reader)
+        : Impl(_h5FilePath, std::string(), hdf5_reader) {}
+
+    Impl(const std::string& _h5FilePath,
+         const std::string& _csvFilePath,
+         const Hdf5Reader& hdf5_reader)
         : h5FilePath(_h5FilePath)
         , csvFilePath(_csvFilePath)
         , h5File(h5FilePath)
-        , h5Root(h5File.getGroup(fmt::format("/{}s", Population::ELEMENT))) {
+        , h5Root(h5File.getGroup(fmt::format("/{}s", Population::ELEMENT)))
+        , hdf5_reader(hdf5_reader) {
         if (!csvFilePath.empty()) {
             throw SonataError("CSV not supported at the moment");
         }
@@ -174,15 +191,30 @@ struct PopulationStorage<Population>::Impl {
     const std::string csvFilePath;
     const HighFive::File h5File;
     const HighFive::Group h5Root;
+    const Hdf5Reader hdf5_reader;
 };
 
+template <typename Population>
+PopulationStorage<Population>::PopulationStorage(const std::string& h5FilePath)
+    : PopulationStorage(h5FilePath, Hdf5Reader()) {}
+
+template <typename Population>
+PopulationStorage<Population>::PopulationStorage(const std::string& h5FilePath,
+                                                 const Hdf5Reader& hdf5_reader)
+    : PopulationStorage(h5FilePath, std::string(), hdf5_reader) {}
 
 template <typename Population>
 PopulationStorage<Population>::PopulationStorage(const std::string& h5FilePath,
                                                  const std::string& csvFilePath)
-    : impl_([h5FilePath, csvFilePath] {
+    : PopulationStorage(h5FilePath, csvFilePath, Hdf5Reader()) {}
+
+template <typename Population>
+PopulationStorage<Population>::PopulationStorage(const std::string& h5FilePath,
+                                                 const std::string& csvFilePath,
+                                                 const Hdf5Reader& hdf5_reader)
+    : impl_([h5FilePath, csvFilePath, hdf5_reader] {
         HDF5_LOCK_GUARD
-        return new PopulationStorage::Impl(h5FilePath, csvFilePath);
+        return new PopulationStorage::Impl(h5FilePath, csvFilePath, hdf5_reader);
     }()) {}
 
 
@@ -211,7 +243,10 @@ std::shared_ptr<Population> PopulationStorage<Population>::openPopulation(
             throw SonataError(fmt::format("No such population: '{}'", name));
         }
     }
-    return std::make_shared<Population>(impl_->h5FilePath, impl_->csvFilePath, name);
+    return std::make_shared<Population>(impl_->h5FilePath,
+                                        impl_->csvFilePath,
+                                        name,
+                                        impl_->hdf5_reader);
 }
 
 //--------------------------------------------------------------------------------------------------

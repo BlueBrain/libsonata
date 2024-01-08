@@ -92,7 +92,13 @@ Selection _filterStringAttribute(const NodePopulation& population,
 NodePopulation::NodePopulation(const std::string& h5FilePath,
                                const std::string& csvFilePath,
                                const std::string& name)
-    : Population(h5FilePath, csvFilePath, name, ELEMENT) {}
+    : NodePopulation(h5FilePath, csvFilePath, name, Hdf5Reader()) {}
+
+NodePopulation::NodePopulation(const std::string& h5FilePath,
+                               const std::string& csvFilePath,
+                               const std::string& name,
+                               const Hdf5Reader& hdf5_reader)
+    : Population(h5FilePath, csvFilePath, name, ELEMENT, hdf5_reader) {}
 
 Selection NodePopulation::regexMatch(const std::string& attribute, const std::string& regex) const {
     std::regex re(regex);

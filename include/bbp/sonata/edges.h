@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include "hdf5_reader.h"
+
 
 namespace bbp {
 namespace sonata {
@@ -29,6 +31,11 @@ class SONATA_API EdgePopulation: public Population
     EdgePopulation(const std::string& h5FilePath,
                    const std::string& csvFilePath,
                    const std::string& name);
+
+    EdgePopulation(const std::string& h5FilePath,
+                   const std::string& csvFilePath,
+                   const std::string& name,
+                   const Hdf5Reader& hdf5_reader);
 
     /**
      * Name of source population extracted from 'source_node_id' dataset
