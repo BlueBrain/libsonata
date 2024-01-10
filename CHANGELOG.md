@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.1.25:
+
+### Added:
+ - Implement fall-back for `make_collective_reader`. (#326)
+ - Inject dataset reading via `Hdf5Reader`. (#307)
+ - Use `using Range = std::array<Value, 2>`. (#319)
+
+### Fixed:
+ - SimulationConfig: `spike_threshold` is float (#340)
+ - Check more variants of CMake invocations. (#333)
+ - Remove `CMAKE_SKIP_INSTALL_ALL_DEPENDENCY`. (#336)
+ - add SimulationConfig to `__all__` (#339)
+ - Make sure defaults for condition blocks and others are applied (#338)
+ - Allow `sonata::sonata_{shared,static}`. (#335)
+ - Update `pybind11==2.11.1`. (#332)
+ - Refactor `edge_index::resolve`. (#314)
+ - Refactor `_readSelection`. (#315)
+ - Prevent pytest from picking up pybind11 tests. (#320)
+ - update to require using cmake 3.16 (#321)
+ - test for completely empty datasets (#281)
+ - Update HighFive to v2.8.0. (#318)
+ - be neighborly, do not use `using` in headers (#316)
+ - work around brew erroring in github actions (#317)
+ - Move `Selection` to its own header. (#306)
+ - Simplify HighFive usage. (#304)
+ - Simplify single group check. (#303)
+ - Optimize loading `?fferent_edges`. (#298)
+ - Allow disabling coverage an 'Debug'. (#299)
+ - Simplify `Selection::Selection`. (#300)
+ - Use `RawIndex = std::vector<std::array<.., 2>>`. (#294)
+
 ## v0.1.24:
  - small cosmetic fixes/py 3.12 wheels (#290)
  - Fix toJSON incorrect empty, node_id and compound problems (#289)
