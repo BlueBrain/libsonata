@@ -309,7 +309,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().tstop == 1000);
         CHECK(config.getRun().dt == 0.025);
         CHECK(config.getRun().randomSeed == 201506);
-        CHECK(config.getRun().spikeThreshold == -30);
+        CHECK(config.getRun().spikeThreshold == -35.5);
         CHECK(config.getRun().integrationMethod == SimulationConfig::Run::IntegrationMethod::nicholson_ion);
         CHECK(config.getRun().stimulusSeed == 111);
         CHECK(config.getRun().ionchannelSeed == 222);
@@ -638,6 +638,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().minisSeed == 0);
         CHECK(config.getRun().synapseSeed == 0);
         CHECK(config.getRun().electrodesFile == "");
+        CHECK(config.getRun().spikeThreshold == -30.0);
     }
 
     SECTION("Exception") {

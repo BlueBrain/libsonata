@@ -410,7 +410,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.tstop, 1000)
         self.assertEqual(self.config.run.dt, 0.025)
         self.assertEqual(self.config.run.random_seed, 201506)
-        self.assertEqual(self.config.run.spike_threshold, -30)
+        self.assertEqual(self.config.run.spike_threshold, -35.5)
         self.assertEqual(self.config.run.integration_method, Run.IntegrationMethod.nicholson_ion)
         self.assertEqual(self.config.run.stimulus_seed, 111)
         self.assertEqual(self.config.run.ionchannel_seed, 222)
@@ -658,6 +658,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(conf.run.minis_seed, 0)
         self.assertEqual(conf.run.synapse_seed, 0)
         self.assertEqual(conf.run.electrodes_file, "")
+        self.assertEqual(conf.run.spike_threshold, -30.0)
 
     def test_simulation_config_failures(self):
         with self.assertRaises(SonataError) as e:
