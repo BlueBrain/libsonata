@@ -34,6 +34,30 @@ jobs:
         run: |
           ./ci/cpp_test.sh
 
+  build-linux-cpp-phdf5:
+    name: Run tests on ubuntu-22.04 with pHDF5.
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        compiler:
+          - CC: gcc
+            CXX: g++
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install libhdf5-openmpi-dev
+
+      - name: Build and run unittests
+        env:
+          CC: mpicc
+          CXX: mpic++
+        run: |
+          ./ci/cpp_test.sh
+
   build-linux-python:
     name: Run python tests on ubuntu-20.04
     runs-on: ubuntu-20.04
