@@ -2,6 +2,8 @@ name: Publish sdist and wheels for macos, and manylinux, publish to pypi if a re
 on: [pull_request, push]
 
 env:
+  apt_options: -o Acquire::Retries=3
+
   CIBW_BUILD_VERBOSITY: 3
   CIBW_BUILD: 'cp*'
   CIBW_SKIP: 'cp35-* cp36-* cp37-* *-musllinux_* *-manylinux_i686'
@@ -56,7 +58,7 @@ jobs:
           python -m cibuildwheel --output-dir dist
 
       - name: Store wheel as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist/*.whl
@@ -77,14 +79,16 @@ jobs:
           python-version: 3.11
 
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install libhdf5-dev
+        run: |
+          sudo apt-get ${{env.apt_options}} update -y
+          sudo apt-get ${{env.apt_options}} install -y libhdf5-dev
 
       - name: Build a source tarball, check it installs
         run:
           ./ci/python_build_sdist.sh
 
       - name: Store sdist as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist/*.tar.gz
@@ -98,7 +102,7 @@ jobs:
 
     steps:
       - name: Download artifacts produced during the build_wheels and build_sdist jobs
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist/

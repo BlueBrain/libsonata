@@ -7,6 +7,9 @@ on:
     branches:
       - master
 
+env:
+  apt_options: -o Acquire::Retries=3
+
 jobs:
   build-linux-cpp:
     name: Run tests on ubuntu-20.04
@@ -25,7 +28,9 @@ jobs:
           submodules: 'true'
 
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install libhdf5-dev
+        run: |
+          sudo apt-get ${{env.apt_options}} update -y
+          sudo apt-get ${{env.apt_options}} install -y libhdf5-dev
 
       - name: Build and run unittests
         env:
@@ -49,7 +54,9 @@ jobs:
           submodules: 'true'
 
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install libhdf5-openmpi-dev
+        run: |
+          sudo apt-get ${{env.apt_options}} update -y
+          sudo apt-get ${{env.apt_options}} install -y libhdf5-openmpi-dev
 
       - name: Build and run unittests
         env:
@@ -78,7 +85,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install libhdf5-dev doxygen
+        run: |
+          sudo apt-get ${{env.apt_options}} update -y
+          sudo apt-get ${{env.apt_options}} install -y libhdf5-dev doxygen
 
       - name: Build and run unittests
         run: |
