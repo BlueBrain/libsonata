@@ -96,6 +96,11 @@ jobs:
   build-macos:
     name: Run tests on macos
     runs-on: macos-latest
+    env:
+      CIBW_ARCHS_MACOS: "x86_64"
+      CMAKE_OSX_ARCHITECTURES: "x86_64"
+      UNIXY_AEC_VERSION: 1.0.4
+      UNIXY_HDF5_VERSION: 1.14.2
 
     steps:
       - name: Checkout repository
@@ -103,18 +108,24 @@ jobs:
         with:
           submodules: 'true'
 
+      - name: Cache HDF5 On Linux/macOS
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        uses: actions/cache@v3
+        id: cache-hdf5-posix
+        env:
+          cache-name: cache-hdf5-posix
+        with:
+          path: src-cache/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+
       - name: Install packages on MacOS
         run: |
-            # Unlink and re-link to prevent errors when GitHub macOS runner images
-            # install Python outside of brew; See actions/setup-python#577 
-            brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
-
-            brew update
-            brew install cmake || true  # macos image has cmake installed, but a new version may exist; ignore it if so
-            brew install doxygen
-            brew install hdf5
+            mkdir -p $PWD/src-cache
+            ln -s $PWD/src-cache /Users/runner/work/src-cache
+            bash ci/hdf5-build.sh /Users/runner/work/src-cache
 
       - name: Build and run unittests
         run: |
+            export HDF5_ROOT=/Users/runner/work/src-cache/install-$CIBW_ARCHS_MACOS
             ./ci/cpp_test.sh
             ./ci/python_test.sh
