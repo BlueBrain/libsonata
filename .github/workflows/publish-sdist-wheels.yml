@@ -5,7 +5,7 @@ env:
   apt_options: -o Acquire::Retries=3
 
   CIBW_BUILD_VERBOSITY: 3
-  CIBW_BUILD: 'cp*'
+  CIBW_BUILD: 'cp310-*'
   CIBW_SKIP: 'cp35-* cp36-* cp37-* *-musllinux_* *-manylinux_i686'
   CIBW_TEST_COMMAND: ( cd {project}/python/tests; python -m unittest -v )
 
@@ -18,7 +18,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-latest]
+        os: [macos-latest, ]
+        #os: [ubuntu-20.04, macos-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -64,7 +65,7 @@ jobs:
             ln -s $PWD/src-cache /Users/runner/work/src-cache
             bash ci/hdf5-build.sh /Users/runner/work/src-cache
           UNIXY_AEC_VERSION: 1.0.4
-          UNIXY_HDF5_VERSION: 1.14.2
+          UNIXY_HDF5_VERSION: 1.12.2
         run: |
           # x86_64 macOS allows for cross compilation; first we do arm64,
           # only for the 11.0 target; and store in the cache the compiled code...
