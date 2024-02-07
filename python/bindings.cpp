@@ -527,7 +527,7 @@ PYBIND11_MODULE(_libsonata, m) {
 
     bindStorageClass<NodeStorage>(m, "NodeStorage", "NodePopulation");
 
-    py::class_<NodeSets>(m, "NodeSets", "")
+    py::class_<NodeSets>(m, "NodeSets", "NodeSets")
         .def(py::init<const std::string&>())
         .def_static("from_file", [](py::object path) { return NodeSets::fromFile(py::str(path)); })
         .def_property_readonly("names", &NodeSets::names, DOC_NODESETS(names))
@@ -589,11 +589,11 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("complete", CircuitConfig::ConfigStatus::complete)
         .value("partial", CircuitConfig::ConfigStatus::partial);
 
-    py::class_<CircuitConfig>(m, "CircuitConfig", "")
+    py::class_<CircuitConfig>(m, "CircuitConfig", "Circuit Configuration")
         .def(py::init<const std::string&, const std::string&>())
         .def_static("from_file",
                     [](py::object path) { return CircuitConfig::fromFile(py::str(path)); })
-        .def_property_readonly("config_status", &CircuitConfig::getCircuitConfigStatus)
+        .def_property_readonly("config_status", &CircuitConfig::getCircuitConfigStatus, "ibid")
         .def_property_readonly("node_sets_path", &CircuitConfig::getNodeSetsPath)
         .def_property_readonly("node_populations", &CircuitConfig::listNodePopulations)
         .def("node_population",
@@ -613,7 +613,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def("edge_population_properties", &CircuitConfig::getEdgePopulationProperties, "name"_a)
         .def_property_readonly("expanded_json", &CircuitConfig::getExpandedJSON);
 
-    py::class_<SimulationConfig::Run> run(m,
+    py::class_<SimulationConfig> simConf(m, "SimulationConfig", "Simulation Configuration");
+    py::class_<SimulationConfig::Run> run(simConf,
                                           "Run",
                                           "Stores parameters defining global simulation settings");
     run.def_readonly("tstop", &SimulationConfig::Run::tstop, DOC_SIMULATIONCONFIG(Run, tstop))
@@ -648,7 +649,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("nicholson", SimulationConfig::Run::IntegrationMethod::nicholson)
         .value("nicholson_ion", SimulationConfig::Run::IntegrationMethod::nicholson_ion);
 
-    py::class_<SimulationConfig::Output> output(m, "Output", "Parameters of simulation output");
+    py::class_<SimulationConfig::Output> output(simConf,
+                                                "Output",
+                                                "Parameters of simulation output");
     output
         .def_readonly("output_dir",
                       &SimulationConfig::Output::outputDir,
@@ -672,7 +675,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("by_time", SimulationConfig::Output::SpikesSortOrder::by_time);
 
     py::class_<SimulationConfig::Conditions> conditions(
-        m, "Conditions", "Parameters defining global experimental conditions");
+        simConf, "Conditions", "Parameters defining global experimental conditions");
     conditions
         .def_readonly("celsius",
                       &SimulationConfig::Conditions::celsius,
@@ -705,7 +708,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("soma", SimulationConfig::Conditions::SpikeLocation::soma)
         .value("AIS", SimulationConfig::Conditions::SpikeLocation::AIS);
 
-    py::class_<SimulationConfig::ModificationBase> modificationBase(m, "ModificationBase");
+    py::class_<SimulationConfig::ModificationBase> modificationBase(simConf, "ModificationBase");
     modificationBase
         .def_readonly("node_set",
                       &SimulationConfig::ModificationBase::nodeSet,
@@ -715,10 +718,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(ModificationBase, type));
 
     py::class_<SimulationConfig::ModificationTTX, SimulationConfig::ModificationBase>(
-        m, "ModificationTTX");
+        simConf, "ModificationTTX");
 
     py::class_<SimulationConfig::ModificationConfigureAllSections,
-               SimulationConfig::ModificationBase>(m, "ModificationConfigureAllSections")
+               SimulationConfig::ModificationBase>(simConf, "ModificationConfigureAllSections")
         .def_readonly("section_configure",
                       &SimulationConfig::ModificationConfigureAllSections::sectionConfigure,
                       DOC_SIMULATIONCONFIG(ModificationConfigureAllSections, sectionConfigure));
@@ -732,7 +735,7 @@ PYBIND11_MODULE(_libsonata, m) {
                SimulationConfig::ModificationBase::ModificationType::ConfigureAllSections,
                DOC_SIMULATIONCONFIG(ModificationBase, ModificationType, ConfigureAllSections));
 
-    py::class_<SimulationConfig::Report> report(m, "Report", "Parameters of a report");
+    py::class_<SimulationConfig::Report> report(simConf, "Report", "Parameters of a report");
     report
         .def_readonly("cells",
                       &SimulationConfig::Report::cells,
@@ -796,7 +799,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("center", SimulationConfig::Report::Compartments::center)
         .value("all", SimulationConfig::Report::Compartments::all);
 
-    py::class_<SimulationConfig::InputBase> inputBase(m, "InputBase");
+    py::class_<SimulationConfig::InputBase> inputBase(simConf, "InputBase");
     inputBase
         .def_readonly("module",
                       &SimulationConfig::InputBase::module,
@@ -814,7 +817,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputBase::nodeSet,
                       DOC_SIMULATIONCONFIG(InputBase, nodeSet));
 
-    py::class_<SimulationConfig::InputLinear, SimulationConfig::InputBase>(m, "Linear")
+    py::class_<SimulationConfig::InputLinear, SimulationConfig::InputBase>(simConf, "Linear")
         .def_readonly("amp_start",
                       &SimulationConfig::InputLinear::ampStart,
                       DOC_SIMULATIONCONFIG(InputLinear, ampStart))
@@ -822,7 +825,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputLinear::ampEnd,
                       DOC_SIMULATIONCONFIG(InputLinear, ampEnd));
 
-    py::class_<SimulationConfig::InputRelativeLinear, SimulationConfig::InputBase>(m,
+    py::class_<SimulationConfig::InputRelativeLinear, SimulationConfig::InputBase>(simConf,
                                                                                    "RelativeLinear")
         .def_readonly("percent_start",
                       &SimulationConfig::InputRelativeLinear::percentStart,
@@ -831,7 +834,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputRelativeLinear::percentEnd,
                       DOC_SIMULATIONCONFIG(InputRelativeLinear, percentEnd));
 
-    py::class_<SimulationConfig::InputPulse, SimulationConfig::InputBase>(m, "Pulse")
+    py::class_<SimulationConfig::InputPulse, SimulationConfig::InputBase>(simConf, "Pulse")
         .def_readonly("amp_start",
                       &SimulationConfig::InputPulse::ampStart,
                       DOC_SIMULATIONCONFIG(InputPulse, ampStart))
@@ -845,15 +848,16 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputPulse::frequency,
                       DOC_SIMULATIONCONFIG(InputPulse, frequency));
 
-    py::class_<SimulationConfig::InputSubthreshold, SimulationConfig::InputBase>(m, "Subthreshold")
+    py::class_<SimulationConfig::InputSubthreshold, SimulationConfig::InputBase>(simConf,
+                                                                                 "Subthreshold")
         .def_readonly("percent_less",
                       &SimulationConfig::InputSubthreshold::percentLess,
                       DOC_SIMULATIONCONFIG(InputSubthreshold, percentLess));
 
     py::class_<SimulationConfig::InputHyperpolarizing, SimulationConfig::InputBase>(
-        m, "Hyperpolarizing");
+        simConf, "Hyperpolarizing");
 
-    py::class_<SimulationConfig::InputSynapseReplay, SimulationConfig::InputBase>(m,
+    py::class_<SimulationConfig::InputSynapseReplay, SimulationConfig::InputBase>(simConf,
                                                                                   "SynapseReplay")
         .def_readonly("spike_file",
                       &SimulationConfig::InputSynapseReplay::spikeFile,
@@ -862,7 +866,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputSynapseReplay::source,
                       DOC_SIMULATIONCONFIG(InputSynapseReplay, source));
 
-    py::class_<SimulationConfig::InputSeclamp, SimulationConfig::InputBase>(m, "Seclamp")
+    py::class_<SimulationConfig::InputSeclamp, SimulationConfig::InputBase>(simConf, "Seclamp")
         .def_readonly("voltage",
                       &SimulationConfig::InputSeclamp::voltage,
                       DOC_SIMULATIONCONFIG(InputSeclamp, voltage))
@@ -870,7 +874,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputSeclamp::seriesResistance,
                       DOC_SIMULATIONCONFIG(InputSeclamp, seriesResistance));
 
-    py::class_<SimulationConfig::InputNoise, SimulationConfig::InputBase>(m, "Noise")
+    py::class_<SimulationConfig::InputNoise, SimulationConfig::InputBase>(simConf, "Noise")
         .def_readonly("mean",
                       &SimulationConfig::InputNoise::mean,
                       DOC_SIMULATIONCONFIG(InputNoise, mean))
@@ -881,7 +885,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputNoise::variance,
                       DOC_SIMULATIONCONFIG(InputNoise, variance));
 
-    py::class_<SimulationConfig::InputShotNoise, SimulationConfig::InputBase>(m, "ShotNoise")
+    py::class_<SimulationConfig::InputShotNoise, SimulationConfig::InputBase>(simConf, "ShotNoise")
         .def_readonly("rise_time",
                       &SimulationConfig::InputShotNoise::riseTime,
                       DOC_SIMULATIONCONFIG(InputShotNoise, riseTime))
@@ -908,7 +912,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputShotNoise, ampVar));
 
     py::class_<SimulationConfig::InputRelativeShotNoise, SimulationConfig::InputBase>(
-        m, "RelativeShotNoise")
+        simConf, "RelativeShotNoise")
         .def_readonly("rise_time",
                       &SimulationConfig::InputRelativeShotNoise::riseTime,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, riseTime))
@@ -935,7 +939,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, meanPercent));
 
     py::class_<SimulationConfig::InputAbsoluteShotNoise, SimulationConfig::InputBase>(
-        m, "AbsoluteShotNoise")
+        simConf, "AbsoluteShotNoise")
         .def_readonly("rise_time",
                       &SimulationConfig::InputAbsoluteShotNoise::riseTime,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, riseTime))
@@ -962,7 +966,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, sigma));
 
     py::class_<SimulationConfig::InputOrnsteinUhlenbeck, SimulationConfig::InputBase>(
-        m, "OrnsteinUhlenbeck")
+        simConf, "OrnsteinUhlenbeck")
         .def_readonly("tau",
                       &SimulationConfig::InputOrnsteinUhlenbeck::tau,
                       DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, tau))
@@ -983,7 +987,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, sigma));
 
     py::class_<SimulationConfig::InputRelativeOrnsteinUhlenbeck, SimulationConfig::InputBase>(
-        m, "RelativeOrnsteinUhlenbeck")
+        simConf, "RelativeOrnsteinUhlenbeck")
         .def_readonly("tau",
                       &SimulationConfig::InputRelativeOrnsteinUhlenbeck::tau,
                       DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, tau))
@@ -1027,7 +1031,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("voltage_clamp", SimulationConfig::InputBase::InputType::voltage_clamp)
         .value("conductance", SimulationConfig::InputBase::InputType::conductance);
 
-    py::class_<SimulationConfig::ConnectionOverride>(m,
+    py::class_<SimulationConfig::ConnectionOverride>(simConf,
                                                      "ConnectionOverride",
                                                      "List of parameters of a connection")
         .def_readonly("name",
@@ -1064,7 +1068,6 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::ConnectionOverride::neuromodulationStrength,
                       DOC_SIMULATIONCONFIG(ConnectionOverride, neuromodulationStrength));
 
-    py::class_<SimulationConfig> simConf(m, "SimulationConfig", "");
     simConf.def(py::init<const std::string&, const std::string&>())
         .def_static(
             "from_file",
@@ -1113,7 +1116,7 @@ PYBIND11_MODULE(_libsonata, m) {
                                &SimulationConfig::getBetaFeatures,
                                DOC_SIMULATIONCONFIG(getBetaFeatures));
 
-    py::enum_<SimulationConfig::SimulatorType>(simConf, "SimulatorType")
+    py::enum_<SimulationConfig::SimulatorType>(simConf, "SimulatorType", "SimulatorType Enum")
         .value("NEURON", SimulationConfig::SimulatorType::NEURON)
         .value("CORENEURON", SimulationConfig::SimulatorType::CORENEURON);
 
