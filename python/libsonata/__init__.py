@@ -26,6 +26,7 @@ from libsonata._libsonata import (
     Hdf5Reader,
 )
 
+
 __all__ = [
     "CircuitConfig",
     "CircuitConfigStatus",

@@ -6,9 +6,6 @@ from libsonata import (CircuitConfig, CircuitConfigStatus, SimulationConfig, Son
                        )
 
 
-from libsonata._libsonata import Report, Output, Run, Conditions
-
-
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                     '../../tests/data')
 
@@ -411,7 +408,8 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.dt, 0.025)
         self.assertEqual(self.config.run.random_seed, 201506)
         self.assertEqual(self.config.run.spike_threshold, -35.5)
-        self.assertEqual(self.config.run.integration_method, Run.IntegrationMethod.nicholson_ion)
+        self.assertEqual(self.config.run.integration_method,
+                         SimulationConfig.Run.IntegrationMethod.nicholson_ion)
         self.assertEqual(self.config.run.stimulus_seed, 111)
         self.assertEqual(self.config.run.ionchannel_seed, 222)
         self.assertEqual(self.config.run.minis_seed, 333)
@@ -423,11 +421,13 @@ class TestSimulationConfig(unittest.TestCase):
                          os.path.abspath(os.path.join(PATH, 'config/some/path/output')))
         self.assertEqual(self.config.output.spikes_file, 'out.h5')
         self.assertEqual(self.config.output.log_file, '')
-        self.assertEqual(self.config.output.spikes_sort_order, Output.SpikesSortOrder.by_id)
+        self.assertEqual(self.config.output.spikes_sort_order,
+                         SimulationConfig.Output.SpikesSortOrder.by_id)
 
         self.assertEqual(self.config.conditions.celsius, 35.0)
         self.assertEqual(self.config.conditions.v_init, -80)
-        self.assertEqual(self.config.conditions.spike_location, Conditions.SpikeLocation.AIS)
+        self.assertEqual(self.config.conditions.spike_location,
+                         SimulationConfig.Conditions.SpikeLocation.AIS)
         self.assertEqual(self.config.conditions.extracellular_calcium, None)
         self.assertEqual(self.config.conditions.randomize_gaba_rise_time, False)
         self.assertEqual(self.config.conditions.mechanisms, {'ProbAMPANMDA_EMS': {'property2': -1,
@@ -446,6 +446,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.list_report_names,
                          { "axonal_comp_centers", "cell_imembrane", "compartment", "soma", "lfp" })
 
+        Report = SimulationConfig.Report
         self.assertEqual(self.config.report('soma').cells, 'Column')
         self.assertEqual(self.config.report('soma').type, Report.Type.compartment)
         self.assertEqual(self.config.report('soma').compartments, Report.Compartments.center)
