@@ -488,10 +488,8 @@ class SONATA_API SimulationConfig
     struct InputHyperpolarizing: public InputBase {};
 
     struct InputSynapseReplay: public InputBase {
-        /// The location of the file with the spike info for injection
+        /// The location of the file with the spike info for injection, file extension must be .h5
         std::string spikeFile;
-        /// The node set to replay spikes from
-        std::string source;
     };
 
     struct InputSeclamp: public InputBase {

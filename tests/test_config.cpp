@@ -506,8 +506,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.delay == 0);
             CHECK(input.duration == 40000);
             CHECK(input.nodeSet == "Column");
-            CHECK(endswith(input.spikeFile, "replay.dat"));
-            CHECK(input.source == "ML_afferents");
+            CHECK(endswith(input.spikeFile, "replay.h5"));
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputSeclamp>(config.getInput("ex_seclamp"));
@@ -1196,6 +1195,27 @@ TEST_CASE("SimulationConfig") {
                 "random_seed": 12345,
                 "dt": 0.05,
                 "tstop": 1000
+              }
+            })";
+            CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
+        }
+        {
+            // Replay with a non-h5 file
+            auto contents = R"({
+              "run": {
+                "random_seed": 12345,
+                "dt": 0.05,
+                "tstop": 1000
+              },
+              "inputs" : {
+                "ex_replay": {
+                    "input_type": "spikes",
+                    "module": "synapse_replay",
+                    "delay": 0.0,
+                    "duration": 40000.0,
+                    "spike_file": "replay.dat",
+                    "node_set": "Column"
+                }
               }
             })";
             CHECK_THROWS_AS(SimulationConfig(contents, "./"), SonataError);
