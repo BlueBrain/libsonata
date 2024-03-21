@@ -988,9 +988,9 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputSubthreshold_percentLe
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_source = R"doc(The node set to replay spikes from)doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_spikeFile = R"doc(The location of the file with the spike info for injection)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay_spikeFile =
+R"doc(The location of the file with the spike info for injection, file
+extension must be .h5)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ModificationBase = R"doc()doc";
 

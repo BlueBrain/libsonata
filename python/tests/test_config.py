@@ -556,8 +556,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_replay').duration, 40000)
         self.assertEqual(self.config.input('ex_replay').node_set, "Column")
         self.assertEqual(self.config.input('ex_replay').spike_file,
-                         os.path.abspath(os.path.join(PATH, 'config/replay.dat')))
-        self.assertEqual(self.config.input('ex_replay').source, "ML_afferents")
+                         os.path.abspath(os.path.join(PATH, 'config/replay.h5')))
         self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
         self.assertEqual(self.config.input('ex_abs_shotnoise').input_type.name, "conductance")
@@ -675,3 +674,22 @@ class TestSimulationConfig(unittest.TestCase):
             """
             SimulationConfig(contents, "./")
         self.assertEqual(e.exception.args, ('`connection_overrides` must be an array', ))
+
+        with self.assertRaises(SonataError) as e:
+            contents = """
+            {
+              "run": { "random_seed": 12345, "dt": 0.05, "tstop": 1000 },
+              "inputs" : {
+                "ex_replay": {
+                    "input_type": "spikes",
+                    "module": "synapse_replay",
+                    "delay": 0.0,
+                    "duration": 40000.0,
+                    "spike_file": "replay.dat",
+                    "node_set": "Column"
+                }
+              }
+            }
+            """
+            SimulationConfig(contents, "./")
+        self.assertEqual(e.exception.args, ('Replay spike_file should be a SONATA h5 file', ))
