@@ -507,8 +507,11 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         SimulationConfig::InputSynapseReplay ret;
         parseCommon(ret);
         parseMandatory(valueIt, "spike_file", debugStr, ret.spikeFile);
-        parseOptional(valueIt, "source", ret.source);
         ret.spikeFile = toAbsolute(basePath, ret.spikeFile);
+        const auto extension = fs::path(ret.spikeFile).extension().string();
+        if (extension != ".h5") {
+            throw SonataError("Replay spike_file should be a SONATA h5 file");
+        }
         return ret;
     }
     case Module::seclamp: {

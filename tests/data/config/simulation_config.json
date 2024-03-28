@@ -175,8 +175,7 @@
             "module": "synapse_replay",
             "delay": 0.0,
             "duration": 40000.0,
-            "spike_file": "replay.dat",
-            "source": "ML_afferents",
+            "spike_file": "replay.h5",
             "node_set": "Column"
         },
         "ex_extracellular_stimulation": {
@@ -184,7 +183,7 @@
             "module": "synapse_replay",
             "delay": 0.0,
             "duration": 40000.0,
-            "spike_file": "replay.dat",
+            "spike_file": "replay.h5",
             "node_set": "Column"
         },
         "ex_OU": {

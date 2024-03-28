@@ -861,10 +861,7 @@ PYBIND11_MODULE(_libsonata, m) {
                                                                                   "SynapseReplay")
         .def_readonly("spike_file",
                       &SimulationConfig::InputSynapseReplay::spikeFile,
-                      DOC_SIMULATIONCONFIG(InputSynapseReplay, spikeFile))
-        .def_readonly("source",
-                      &SimulationConfig::InputSynapseReplay::source,
-                      DOC_SIMULATIONCONFIG(InputSynapseReplay, source));
+                      DOC_SIMULATIONCONFIG(InputSynapseReplay, spikeFile));
 
     py::class_<SimulationConfig::InputSeclamp, SimulationConfig::InputBase>(simConf, "Seclamp")
         .def_readonly("voltage",
