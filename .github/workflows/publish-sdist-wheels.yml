@@ -8,6 +8,7 @@ env:
   CIBW_BUILD: 'cp*'
   CIBW_SKIP: 'cp35-* cp36-* cp37-* *-musllinux_* *-manylinux_i686'
   CIBW_TEST_COMMAND: ( cd {project}/python/tests; python -m unittest -v )
+  UNIXY_HDF5_VERSION: 1.14.3
 
 jobs:
   build_wheels:
@@ -19,7 +20,8 @@ jobs:
     strategy:
       matrix:
         #os: [ubuntu-20.04, macos-latest]
-        os: [macos-latest]
+        os: [ubuntu-20.04]
+        #os: [macos-latest]
 
     steps:
       - uses: actions/checkout@v3
@@ -48,7 +50,20 @@ jobs:
 
       - name: Build wheels on Linux
         if: runner.os == 'Linux'
+        env:
+          CIBW_ENVIRONMENT_PASS: "STATIC_HDF5 CMAKE_PREFIX_PATH"
+          CIBW_BEFORE_BUILD: |
+            # CMake complains if the dependencies come from within the same tree
+            # as the source, so we'll just pretend they are elsewhere
+            mkdir -p /host/home/runner/work/src-cache
+            ln -s /host/home/runner/work/src-cache /opt/hdf5-static
+            bash ci/hdf5-build.sh /opt/hdf5-static
+
         run: |
+          # used by setup.py to decide if to set `FindHDF5` to use static hdf5 libraries
+          export STATIC_HDF5=True
+          export CMAKE_PREFIX_PATH=/opt/hdf5-static/install-/install/
+
           CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014 python -m cibuildwheel --output-dir dist
           CIBW_MANYLINUX_X86_64_IMAGE=manylinux_2_28 python -m cibuildwheel --output-dir dist
 
@@ -63,7 +78,6 @@ jobs:
             mkdir -p $PWD/src-cache
             ln -s $PWD/src-cache /Users/runner/work/src-cache
             bash ci/hdf5-build.sh /Users/runner/work/src-cache
-          UNIXY_HDF5_VERSION: 1.14.3
         run: |
           # used by setup.py to decide if to set `FindHDF5` to use static hdf5 libraries
           export STATIC_HDF5=True

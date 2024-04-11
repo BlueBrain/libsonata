@@ -19,14 +19,14 @@ function download_unpack_hdf5 {
 }
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    lib_name=libhdf5.dylib
     NPROC=$(sysctl -n hw.ncpu)
 else
-    lib_name=libhdf5.so
     NPROC=$(nproc)
 fi
 
-if [[ -f "$OUTPUT/lib/$lib_name" ]]; then
+INSTALL="$OUTPUT/install"
+
+if [[ -f "$INSTALL/lib/libhdf5.a" ]]; then
     echo "using cached build"
 else
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -40,7 +40,6 @@ else
     echo "Building & installing hdf5"
     download_unpack_hdf5
 
-    install="$OUTPUT/install"
     mkdir -p "$OUTPUT/build"
     pushd "$OUTPUT/build"
     cmake -G'Unix Makefiles' \
@@ -51,11 +50,11 @@ else
         -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
         -DBUILD_TESTING:BOOL=OFF \
         -DHDF5_BUILD_TOOLS:BOOL=OFF \
-        -DCMAKE_INSTALL_PREFIX="$install" \
+        -DCMAKE_INSTALL_PREFIX="$INSTALL" \
         "$INPUT/CMake-hdf5-$UNIXY_HDF5_VERSION/hdf5-$UNIXY_HDF5_VERSION"
     make -j "$NPROC"
     make install
     popd
-
-    find "$OUTPUT"
 fi
+
+find "$OUTPUT"
