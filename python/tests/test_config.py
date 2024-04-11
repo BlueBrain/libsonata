@@ -565,6 +565,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_abs_shotnoise').sigma, 5)
         self.assertEqual(self.config.input('ex_abs_shotnoise').reversal, 10)
         self.assertEqual(self.config.input('ex_abs_shotnoise').random_seed, None)
+        self.assertEqual(self.config.input('ex_abs_shotnoise').represents_physical_electrode, True)
 
         self.assertEqual(self.config.input('ex_OU').module.name, "ornstein_uhlenbeck")
         self.assertEqual(self.config.input('ex_OU').input_type.name, "conductance")
@@ -573,6 +574,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_OU').mean, 50)
         self.assertEqual(self.config.input('ex_OU').sigma, 5)
         self.assertEqual(self.config.input('ex_OU').random_seed, None)
+        self.assertEqual(self.config.input('ex_OU').represents_physical_electrode, False)
 
         self.assertEqual(self.config.input('ex_rel_OU').input_type.name, "current_clamp")
         self.assertEqual(self.config.input('ex_rel_OU').tau, 2.8)

@@ -528,6 +528,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.sigma == 5);
             CHECK(input.reversal == 10);
             CHECK(input.randomSeed == nonstd::nullopt);
+            CHECK(input.representsPhysicalElectrode == true);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputOrnsteinUhlenbeck>(
@@ -539,6 +540,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.mean == 50);
             CHECK(input.sigma == 5);
             CHECK(input.randomSeed == nonstd::nullopt);
+            CHECK(input.representsPhysicalElectrode == false);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputRelativeOrnsteinUhlenbeck>(

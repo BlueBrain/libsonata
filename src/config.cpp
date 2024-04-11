@@ -409,6 +409,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseCommon(ret);
         parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
         parseOptional(valueIt, "amp_end", ret.ampEnd, {ret.ampStart});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         return ret;
     }
     case Module::relative_linear: {
@@ -416,6 +420,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseCommon(ret);
         parseMandatory(valueIt, "percent_start", debugStr, ret.percentStart);
         parseOptional(valueIt, "percent_end", ret.percentEnd, {ret.percentStart});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         return ret;
     }
     case Module::pulse: {
@@ -425,12 +433,20 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "width", debugStr, ret.width);
         parseMandatory(valueIt, "frequency", debugStr, ret.frequency);
         parseOptional(valueIt, "amp_end", ret.ampEnd, {ret.ampStart});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         return ret;
     }
     case Module::subthreshold: {
         SimulationConfig::InputSubthreshold ret;
         parseCommon(ret);
         parseMandatory(valueIt, "percent_less", debugStr, ret.percentLess);
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         return ret;
     }
     case Module::noise: {
@@ -455,6 +471,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         }
 
         parseOptional(valueIt, "variance", ret.variance);
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         return ret;
     }
     case Module::shot_noise: {
@@ -465,6 +485,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         parseMandatory(valueIt, "rate", debugStr, ret.rate);
         parseMandatory(valueIt, "amp_mean", debugStr, ret.ampMean);
         parseMandatory(valueIt, "amp_var", debugStr, ret.ampVar);
@@ -479,6 +503,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
         parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
@@ -493,6 +521,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "dt", ret.dt, {0.25});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean", debugStr, ret.mean);
         parseMandatory(valueIt, "sigma", debugStr, ret.sigma);
@@ -501,6 +533,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
     case Module::hyperpolarizing: {
         SimulationConfig::InputHyperpolarizing ret;
         parseCommon(ret);
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
         return ret;
     }
     case Module::synapse_replay: {
@@ -528,6 +564,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
 
         parseMandatory(valueIt, "mean", debugStr, ret.mean);
         parseMandatory(valueIt, "sigma", debugStr, ret.sigma);
@@ -540,6 +580,10 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseOptional(valueIt, "reversal", ret.reversal, {0.0});
         parseOptional(valueIt, "random_seed", ret.randomSeed);
         parseOptional(valueIt, "dt", ret.dt, {0.25});
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
 
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
         parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
