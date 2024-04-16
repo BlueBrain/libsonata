@@ -43,13 +43,15 @@ else
     mkdir -p "$OUTPUT/build"
     pushd "$OUTPUT/build"
     cmake -G'Unix Makefiles' \
-        -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DBUILD_SHARED_LIBS:BOOL=OFF \
-        -DHDF5_BUILD_UTILS:BOOL=OFF \
-        -DHDF5_BUILD_HL_LIB:BOOL=OFF \
-        -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
-        -DBUILD_TESTING:BOOL=OFF \
-        -DHDF5_BUILD_TOOLS:BOOL=OFF \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DHDF5_BUILD_UTILS=OFF \
+        -DHDF5_BUILD_HL_LIB=OFF \
+        -DHDF5_BUILD_EXAMPLES=OFF \
+        -DBUILD_TESTING=OFF \
+        -DHDF5_BUILD_TOOLS=OFF \
+        -DHDF5_ENABLE_SZIP_ENCODING=OFF \
+        -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF \
         -DCMAKE_INSTALL_PREFIX="$INSTALL" \
         "$INPUT/CMake-hdf5-$UNIXY_HDF5_VERSION/hdf5-$UNIXY_HDF5_VERSION"
     make -j "$NPROC"
