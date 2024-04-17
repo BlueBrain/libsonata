@@ -52,9 +52,9 @@ else
         -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF \
         -DCMAKE_INSTALL_PREFIX="$INSTALL" \
         -S "$INPUT/CMake-hdf5-$UNIXY_HDF5_VERSION/hdf5-$UNIXY_HDF5_VERSION"
+
     cmake --build "$OUTPUT/build" -j "$NPROC"
     cmake --install "$OUTPUT/build"
-    popd
 fi
 
 find "$OUTPUT"
