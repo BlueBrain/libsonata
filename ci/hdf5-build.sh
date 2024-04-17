@@ -40,9 +40,7 @@ else
     echo "Building & installing hdf5"
     download_unpack_hdf5
 
-    mkdir -p "$OUTPUT/build"
-    pushd "$OUTPUT/build"
-    cmake -G'Unix Makefiles' \
+    cmake -B "$OUTPUT/build" -G'Unix Makefiles' \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DBUILD_SHARED_LIBS=OFF \
         -DHDF5_BUILD_UTILS=OFF \
@@ -53,9 +51,9 @@ else
         -DHDF5_ENABLE_SZIP_ENCODING=OFF \
         -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF \
         -DCMAKE_INSTALL_PREFIX="$INSTALL" \
-        "$INPUT/CMake-hdf5-$UNIXY_HDF5_VERSION/hdf5-$UNIXY_HDF5_VERSION"
-    make -j "$NPROC"
-    make install
+        -S "$INPUT/CMake-hdf5-$UNIXY_HDF5_VERSION/hdf5-$UNIXY_HDF5_VERSION"
+    cmake --build "$OUTPUT/build" -j "$NPROC"
+    cmake --install "$OUTPUT/build"
     popd
 fi
 
