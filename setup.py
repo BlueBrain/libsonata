@@ -66,6 +66,9 @@ class CMakeBuild(build_ext):
             '-DPYTHON_EXECUTABLE=' + sys.executable
         ]
 
+        if "STATIC_HDF5" in os.environ:
+            cmake_args += ["-DHDF5_USE_STATIC_LIBRARIES=True", ]
+
         build_args = ["--config", build_type,
                       "--target", self.target,
                       "--",
