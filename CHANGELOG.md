@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.26:
+### Added:
+* Simulation config: synapse_replay input files must be .h5 (#351)
+* SimulationConfig: Adds "represents_physical_electrode" field in "inputs" section (#354)
+
+### Fixed:
+* Update HighFive SHA to `2.9.0`. (#343)
+* Make documentation available for Python API (#345)
+* Build static macos and linux wheels (#355)
+
 ## v0.1.25:
 
 ### Added:
