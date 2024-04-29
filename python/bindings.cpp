@@ -823,7 +823,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputLinear, ampStart))
         .def_readonly("amp_end",
                       &SimulationConfig::InputLinear::ampEnd,
-                      DOC_SIMULATIONCONFIG(InputLinear, ampEnd));
+                      DOC_SIMULATIONCONFIG(InputLinear, ampEnd))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputLinear::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputLinear, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputRelativeLinear, SimulationConfig::InputBase>(simConf,
                                                                                    "RelativeLinear")
@@ -832,7 +835,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputRelativeLinear, percentStart))
         .def_readonly("percent_end",
                       &SimulationConfig::InputRelativeLinear::percentEnd,
-                      DOC_SIMULATIONCONFIG(InputRelativeLinear, percentEnd));
+                      DOC_SIMULATIONCONFIG(InputRelativeLinear, percentEnd))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputRelativeLinear::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputRelativeLinear, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputPulse, SimulationConfig::InputBase>(simConf, "Pulse")
         .def_readonly("amp_start",
@@ -846,16 +852,25 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputPulse, width))
         .def_readonly("frequency",
                       &SimulationConfig::InputPulse::frequency,
-                      DOC_SIMULATIONCONFIG(InputPulse, frequency));
+                      DOC_SIMULATIONCONFIG(InputPulse, frequency))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputPulse::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputPulse, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputSubthreshold, SimulationConfig::InputBase>(simConf,
                                                                                  "Subthreshold")
         .def_readonly("percent_less",
                       &SimulationConfig::InputSubthreshold::percentLess,
-                      DOC_SIMULATIONCONFIG(InputSubthreshold, percentLess));
+                      DOC_SIMULATIONCONFIG(InputSubthreshold, percentLess))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputSubthreshold::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputSubthreshold, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputHyperpolarizing, SimulationConfig::InputBase>(
-        simConf, "Hyperpolarizing");
+        simConf, "Hyperpolarizing")
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputHyperpolarizing::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputHyperpolarizing, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputSynapseReplay, SimulationConfig::InputBase>(simConf,
                                                                                   "SynapseReplay")
@@ -880,7 +895,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputNoise, meanPercent))
         .def_readonly("variance",
                       &SimulationConfig::InputNoise::variance,
-                      DOC_SIMULATIONCONFIG(InputNoise, variance));
+                      DOC_SIMULATIONCONFIG(InputNoise, variance))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputNoise::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputNoise, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputShotNoise, SimulationConfig::InputBase>(simConf, "ShotNoise")
         .def_readonly("rise_time",
@@ -906,7 +924,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputShotNoise, ampMean))
         .def_readonly("amp_var",
                       &SimulationConfig::InputShotNoise::ampVar,
-                      DOC_SIMULATIONCONFIG(InputShotNoise, ampVar));
+                      DOC_SIMULATIONCONFIG(InputShotNoise, ampVar))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputShotNoise::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputShotNoise, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputRelativeShotNoise, SimulationConfig::InputBase>(
         simConf, "RelativeShotNoise")
@@ -933,7 +954,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, sdPercent))
         .def_readonly("mean_percent",
                       &SimulationConfig::InputRelativeShotNoise::meanPercent,
-                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, meanPercent));
+                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, meanPercent))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputRelativeShotNoise::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputAbsoluteShotNoise, SimulationConfig::InputBase>(
         simConf, "AbsoluteShotNoise")
@@ -960,7 +984,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, mean))
         .def_readonly("sigma",
                       &SimulationConfig::InputAbsoluteShotNoise::sigma,
-                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, sigma));
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, sigma))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputAbsoluteShotNoise::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputOrnsteinUhlenbeck, SimulationConfig::InputBase>(
         simConf, "OrnsteinUhlenbeck")
@@ -981,7 +1008,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, mean))
         .def_readonly("sigma",
                       &SimulationConfig::InputOrnsteinUhlenbeck::sigma,
-                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, sigma));
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, sigma))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputOrnsteinUhlenbeck::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputOrnsteinUhlenbeck, representsPhysicalElectrode));
 
     py::class_<SimulationConfig::InputRelativeOrnsteinUhlenbeck, SimulationConfig::InputBase>(
         simConf, "RelativeOrnsteinUhlenbeck")
@@ -1002,7 +1032,11 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, meanPercent))
         .def_readonly("sd_percent",
                       &SimulationConfig::InputRelativeOrnsteinUhlenbeck::sdPercent,
-                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, sdPercent));
+                      DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, sdPercent))
+        .def_readonly(
+            "represents_physical_electrode",
+            &SimulationConfig::InputRelativeOrnsteinUhlenbeck::representsPhysicalElectrode,
+            DOC_SIMULATIONCONFIG(InputRelativeOrnsteinUhlenbeck, representsPhysicalElectrode));
 
     py::enum_<SimulationConfig::InputBase::Module>(inputBase, "Module")
         .value("linear", SimulationConfig::InputBase::Module::linear)

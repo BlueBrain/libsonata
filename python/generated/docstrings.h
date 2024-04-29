@@ -800,6 +800,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_rise
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_sigma = R"doc(signal std dev in nA (current_clamp) or uS (conductance).)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_InputType = R"doc()doc";
@@ -858,11 +860,15 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputBase_nodeSet = R"doc(N
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputHyperpolarizing = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputHyperpolarizing_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputLinear = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputLinear_ampEnd = R"doc(The final current when a stimulus concludes (nA))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputLinear_ampStart = R"doc(The amount of current initially injected (nA))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputLinear_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputNoise = R"doc()doc";
 
@@ -875,6 +881,8 @@ current, default = None)doc";
 static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_variance =
 R"doc(State var to track whether the value of injected noise current is mean
 or mean_percent)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputNoise_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck = R"doc()doc";
 
@@ -892,6 +900,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_sigm
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_tau = R"doc(Relaxation time constant in ms)doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputOrnsteinUhlenbeck_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_ampEnd = R"doc(The final current when a stimulus concludes (nA))doc";
@@ -902,11 +912,15 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_frequency = R"do
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_width = R"doc(The length of time each pulse lasts (ms))doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear_percentEnd = R"doc(The percentage of a cell's threshold current to inject at the end)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear_percentStart = R"doc(The percentage of a cell's threshold current to inject)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck = R"doc()doc";
 
@@ -927,6 +941,8 @@ R"doc(Signal std dev as percentage of a cell’s threshold current
 (current_clamp) or inverse input resistance (conductance))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_tau = R"doc(Relaxation time constant in ms)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenbeck_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise = R"doc()doc";
 
@@ -951,6 +967,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_rise
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_sdPercent =
 R"doc(signal std dev as percentage of a cell’s threshold current
 (current_clamp) or inverse input resistance (conductance).)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSeclamp = R"doc()doc";
 
@@ -982,9 +1000,13 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_reversal = R
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputSubthreshold = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSubthreshold_percentLess = R"doc(A percentage adjusted from 100 of a cell's threshold current)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSubthreshold_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSynapseReplay = R"doc()doc";
 

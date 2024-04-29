@@ -460,6 +460,8 @@ class SONATA_API SimulationConfig
         double ampStart{};
         /// The final current when a stimulus concludes (nA)
         double ampEnd{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputRelativeLinear: public InputBase {
@@ -467,6 +469,8 @@ class SONATA_API SimulationConfig
         double percentStart{};
         /// The percentage of a cell's threshold current to inject at the end
         double percentEnd{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputPulse: public InputBase {
@@ -478,14 +482,21 @@ class SONATA_API SimulationConfig
         double width{};
         /// The frequency of pulse trains (Hz)
         double frequency{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputSubthreshold: public InputBase {
         /// A percentage adjusted from 100 of a cell's threshold current
         double percentLess{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
-    struct InputHyperpolarizing: public InputBase {};
+    struct InputHyperpolarizing: public InputBase {
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
+    };
 
     struct InputSynapseReplay: public InputBase {
         /// The location of the file with the spike info for injection, file extension must be .h5
@@ -507,6 +518,8 @@ class SONATA_API SimulationConfig
         /// State var to track whether the value of injected noise current is mean or
         /// mean_percent
         double variance{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputShotNoise: public InputBase {
@@ -527,6 +540,8 @@ class SONATA_API SimulationConfig
         /// The variance of gamma-distributed amplitudes in nA^2 (current_clamp) or uS^2
         /// (conductance)
         double ampVar{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputRelativeShotNoise: public InputBase {
@@ -548,6 +563,8 @@ class SONATA_API SimulationConfig
         /// signal std dev as percentage of a cell’s threshold current (current_clamp) or inverse
         /// input resistance (conductance).
         double sdPercent{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputAbsoluteShotNoise: public InputBase {
@@ -567,6 +584,8 @@ class SONATA_API SimulationConfig
         double mean{};
         /// signal std dev in nA (current_clamp) or uS (conductance).
         double sigma{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputOrnsteinUhlenbeck: public InputBase {
@@ -582,6 +601,8 @@ class SONATA_API SimulationConfig
         double mean{};
         /// Signal std dev in nA (current_clamp) or uS (conductance)
         double sigma{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     struct InputRelativeOrnsteinUhlenbeck: public InputBase {
@@ -599,6 +620,8 @@ class SONATA_API SimulationConfig
         /// Signal std dev as percentage of a cell’s threshold current (current_clamp) or inverse
         /// input resistance (conductance)
         double sdPercent{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
     };
 
     using Input = nonstd::variant<InputLinear,

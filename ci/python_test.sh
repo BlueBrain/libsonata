@@ -15,8 +15,13 @@ source $BIN/activate
 set -u
 
 $BIN/pip -v install --upgrade pip setuptools wheel
+
+which python
+which pip
+pip debug
+
 $BIN/pip -v install --force .
 
 pushd python/tests
-$BIN/python -m unittest -v 
+$BIN/python -m unittest -v
 popd

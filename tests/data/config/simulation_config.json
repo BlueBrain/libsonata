@@ -168,6 +168,7 @@
             "amp_cv": 0.63,
             "mean": 50,
             "sigma": 5,
+            "represents_physical_electrode": true,
             "node_set": "L5E"
         },
         "ex_replay": {

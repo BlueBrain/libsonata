@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e -x
 
+: "${UNIXY_HDF5_VERSION:=1.14.3}"
+: "${CIBW_ARCHS_MACOS:=$(uname -m)}"
 
 export INPUT=$(cd $(dirname "$1") && pwd -P)/$(basename "$1")
 export OUTPUT="$INPUT/install-$CIBW_ARCHS_MACOS"
 
-: "${UNIXY_HDF5_VERSION:=1.14.3}"
 
 function download_unpack_hdf5 {
     pushd "$INPUT"

@@ -97,10 +97,7 @@ jobs:
     name: Run tests on macos
     runs-on: macos-latest
     env:
-      CIBW_ARCHS_MACOS: "x86_64"
-      CMAKE_OSX_ARCHITECTURES: "x86_64"
       UNIXY_HDF5_VERSION: 1.14.3
-      MACOSX_DEPLOYMENT_TARGET: "11.0"
 
     steps:
       - name: Checkout repository
@@ -124,10 +121,18 @@ jobs:
             ln -s $PWD/src-cache /Users/runner/work/src-cache
             bash ci/hdf5-build.sh /Users/runner/work/src-cache
 
-      - name: Build and run unittests
+      - name: Build and run unittests C++ tests
         run: |
+            : "${CIBW_ARCHS_MACOS:=$(uname -m)}"
             export CMAKE_PREFIX_PATH=/Users/runner/work/src-cache/install-$CIBW_ARCHS_MACOS/install
             export STATIC_HDF5=True
 
             ./ci/cpp_test.sh
+
+      - name: Build and run unittests python tests
+        run: |
+            : "${CIBW_ARCHS_MACOS:=$(uname -m)}"
+            export CMAKE_PREFIX_PATH=/Users/runner/work/src-cache/install-$CIBW_ARCHS_MACOS/install
+            export STATIC_HDF5=True
+
             ./ci/python_test.sh
