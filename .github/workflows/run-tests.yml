@@ -97,8 +97,6 @@ jobs:
     name: Run tests on macos
     runs-on: macos-latest
     env:
-      CIBW_ARCHS_MACOS: "x86_64"
-      CMAKE_OSX_ARCHITECTURES: "x86_64"
       UNIXY_HDF5_VERSION: 1.14.3
 
     steps:
@@ -125,6 +123,7 @@ jobs:
 
       - name: Build and run unittests C++ tests
         run: |
+            : "${CIBW_ARCHS_MACOS:=$(uname -m)}"
             export CMAKE_PREFIX_PATH=/Users/runner/work/src-cache/install-$CIBW_ARCHS_MACOS/install
             export STATIC_HDF5=True
 
@@ -132,6 +131,7 @@ jobs:
 
       - name: Build and run unittests python tests
         run: |
+            : "${CIBW_ARCHS_MACOS:=$(uname -m)}"
             export CMAKE_PREFIX_PATH=/Users/runner/work/src-cache/install-$CIBW_ARCHS_MACOS/install
             export STATIC_HDF5=True
 
