@@ -612,11 +612,16 @@ void parseConditionsMechanisms(
 }
 
 void parseConditionsModifications(const nlohmann::json& it,
-                                  SimulationConfig::ModificationMap& buf) {
+                                  std::vector<SimulationConfig::Modification>& buf) {
     const auto sectionIt = it.find("modifications");
-    if (sectionIt == it.end()) {
+    if (sectionIt == it.end() || sectionIt->is_null()) {
         return;
     }
+    if (!sectionIt->is_array()) {
+            throw SonataError("`modifications` must be an array");
+    }
+    buf.reserve(sectionIt->size());
+
     for (auto& mIt : sectionIt->items()) {
         const auto valueIt = mIt.value();
         const auto debugStr = fmt::format("modification {}", mIt.key());
@@ -628,16 +633,18 @@ void parseConditionsModifications(const nlohmann::json& it,
         case SimulationConfig::ModificationBase::ModificationType::TTX: {
             SimulationConfig::ModificationTTX result;
             result.type = type;
+            parseMandatory(valueIt, "name", debugStr, result.name);
             parseMandatory(valueIt, "node_set", debugStr, result.nodeSet);
-            buf[mIt.key()] = result;
+            buf.push_back(std::move(result));
             break;
         }
         case SimulationConfig::ModificationBase::ModificationType::ConfigureAllSections: {
             SimulationConfig::ModificationConfigureAllSections result;
             result.type = type;
+            parseMandatory(valueIt, "name", debugStr, result.name);
             parseMandatory(valueIt, "node_set", debugStr, result.nodeSet);
             parseMandatory(valueIt, "section_configure", debugStr, result.sectionConfigure);
-            buf[mIt.key()] = result;
+            buf.push_back(std::move(result));
             break;
         }
         default:
@@ -1383,6 +1390,11 @@ const SimulationConfig::Conditions& SimulationConfig::getConditions() const noex
     return _conditions;
 }
 
+const std::vector<SimulationConfig::Modification>& SimulationConfig::Conditions::getModifications()
+    const noexcept {
+    return modifications;
+}
+
 const std::string& SimulationConfig::getNetwork() const noexcept {
     return _network;
 }
@@ -1443,21 +1455,6 @@ const std::unordered_map<std::string, variantValueType>& SimulationConfig::getBe
 
 const std::string& SimulationConfig::getExpandedJSON() const {
     return _expandedJSON;
-}
-
-std::set<std::string> SimulationConfig::Conditions::listModificationNames() const {
-    return getMapKeys(modifications);
-}
-
-const SimulationConfig::Modification& SimulationConfig::Conditions::getModification(
-    const std::string& name) const {
-    const auto it = modifications.find(name);
-    if (it == modifications.end()) {
-        throw SonataError(
-            fmt::format("The modification '{}' is not present in the simulation config file",
-                        name));
-    }
-    return it->second;
 }
 
 }  // namespace sonata

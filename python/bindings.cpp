@@ -695,13 +695,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("mechanisms",
                       &SimulationConfig::Conditions::mechanisms,
                       DOC_SIMULATIONCONFIG(Conditions, mechanisms))
-        .def_property_readonly("list_modification_names",
-                               &SimulationConfig::Conditions::listModificationNames,
-                               DOC_SIMULATIONCONFIG(Conditions, listModificationNames))
-        .def("modification",
-             &SimulationConfig::Conditions::getModification,
-             "name"_a,
-             DOC_SIMULATIONCONFIG(Conditions, getModification));
+        .def("modifications",
+             &SimulationConfig::Conditions::getModifications);
 
 
     py::enum_<SimulationConfig::Conditions::SpikeLocation>(conditions, "SpikeLocation")
@@ -710,6 +705,8 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::class_<SimulationConfig::ModificationBase> modificationBase(simConf, "ModificationBase");
     modificationBase
+        .def_readonly("name",
+                      &SimulationConfig::ModificationBase::name)
         .def_readonly("node_set",
                       &SimulationConfig::ModificationBase::nodeSet,
                       DOC_SIMULATIONCONFIG(ModificationBase, nodeSet))
