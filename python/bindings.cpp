@@ -695,13 +695,8 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("mechanisms",
                       &SimulationConfig::Conditions::mechanisms,
                       DOC_SIMULATIONCONFIG(Conditions, mechanisms))
-        .def_property_readonly("list_modification_names",
-                               &SimulationConfig::Conditions::listModificationNames,
-                               DOC_SIMULATIONCONFIG(Conditions, listModificationNames))
-        .def("modification",
-             &SimulationConfig::Conditions::getModification,
-             "name"_a,
-             DOC_SIMULATIONCONFIG(Conditions, getModification));
+        .def("modifications",
+             &SimulationConfig::Conditions::getModifications);
 
 
     py::enum_<SimulationConfig::Conditions::SpikeLocation>(conditions, "SpikeLocation")
@@ -710,12 +705,16 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::class_<SimulationConfig::ModificationBase> modificationBase(simConf, "ModificationBase");
     modificationBase
+        .def_readonly("name",
+                      &SimulationConfig::ModificationBase::name)
         .def_readonly("node_set",
                       &SimulationConfig::ModificationBase::nodeSet,
                       DOC_SIMULATIONCONFIG(ModificationBase, nodeSet))
         .def_readonly("type",
                       &SimulationConfig::ModificationBase::type,
-                      DOC_SIMULATIONCONFIG(ModificationBase, type));
+                      DOC_SIMULATIONCONFIG(ModificationBase, type))
+        .def_readonly("delay",
+                      &SimulationConfig::ModificationBase::delay);
 
     py::class_<SimulationConfig::ModificationTTX, SimulationConfig::ModificationBase>(
         simConf, "ModificationTTX");
@@ -724,7 +723,9 @@ PYBIND11_MODULE(_libsonata, m) {
                SimulationConfig::ModificationBase>(simConf, "ModificationConfigureAllSections")
         .def_readonly("section_configure",
                       &SimulationConfig::ModificationConfigureAllSections::sectionConfigure,
-                      DOC_SIMULATIONCONFIG(ModificationConfigureAllSections, sectionConfigure));
+                      DOC_SIMULATIONCONFIG(ModificationConfigureAllSections, sectionConfigure))
+        .def_readonly("delay",
+                      &SimulationConfig::ModificationConfigureAllSections::delay);
 
     py::enum_<SimulationConfig::ModificationBase::ModificationType>(modificationBase,
                                                                     "ModificationType")
