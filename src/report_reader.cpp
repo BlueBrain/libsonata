@@ -1,8 +1,9 @@
 #include <bbp/sonata/report_reader.h>
 #include <fmt/format.h>
 
-#include <algorithm>  // std::copy, std::find, std::lower_bound, std::upper_bound
-#include <iterator>   // std::advance, std::next
+#include <algorithm>      // std::copy, std::find, std::lower_bound, std::upper_bound
+#include <iterator>       // std::advance, std::next
+#include <unordered_set>  // std::unordered_set
 
 constexpr double EPSILON = 1e-6;
 
@@ -27,9 +28,10 @@ using bbp::sonata::Spikes;
 
 void filterNodeIDUnsorted(Spikes& spikes, const Selection& node_ids) {
     const auto values = node_ids.flatten();
+    const auto selected_values = std::unordered_set<Selection::Value>(values.begin(), values.end());
     const auto new_end =
-        std::remove_if(spikes.begin(), spikes.end(), [&values](const Spike& spike) {
-            return std::find(values.cbegin(), values.cend(), spike.first) == values.cend();
+        std::remove_if(spikes.begin(), spikes.end(), [&selected_values](const Spike& spike) {
+            return selected_values.find(spike.first) == selected_values.end();
         });
     spikes.erase(new_end, spikes.end());
 }
