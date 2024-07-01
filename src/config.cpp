@@ -432,7 +432,6 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
         parseMandatory(valueIt, "width", debugStr, ret.width);
         parseMandatory(valueIt, "frequency", debugStr, ret.frequency);
-        parseOptional(valueIt, "amp_end", ret.ampEnd, {ret.ampStart});
         parseOptional(valueIt,
                       "represents_physical_electrode",
                       ret.representsPhysicalElectrode,

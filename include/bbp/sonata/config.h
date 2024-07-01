@@ -476,8 +476,6 @@ class SONATA_API SimulationConfig
     struct InputPulse: public InputBase {
         /// The amount of current initially injected (nA)
         double ampStart{};
-        /// The final current when a stimulus concludes (nA)
-        double ampEnd{};
         /// The length of time each pulse lasts (ms)
         double width{};
         /// The frequency of pulse trains (Hz)

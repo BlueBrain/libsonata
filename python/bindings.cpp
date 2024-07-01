@@ -844,9 +844,6 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("amp_start",
                       &SimulationConfig::InputPulse::ampStart,
                       DOC_SIMULATIONCONFIG(InputPulse, ampStart))
-        .def_readonly("amp_end",
-                      &SimulationConfig::InputPulse::ampEnd,
-                      DOC_SIMULATIONCONFIG(InputPulse, ampEnd))
         .def_readonly("width",
                       &SimulationConfig::InputPulse::width,
                       DOC_SIMULATIONCONFIG(InputPulse, width))
