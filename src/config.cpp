@@ -618,7 +618,7 @@ void parseConditionsModifications(const nlohmann::json& it,
         return;
     }
     if (!sectionIt->is_array()) {
-            throw SonataError("`modifications` must be an array");
+        throw SonataError("`modifications` must be an array");
     }
     buf.reserve(sectionIt->size());
 
