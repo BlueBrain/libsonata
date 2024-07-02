@@ -368,7 +368,7 @@ class SONATA_API SimulationConfig
             mechanisms;
         /// List of modifications that mimics experimental manipulations to the circuit.
         std::vector<Modification> modifications;
-        //  Method to return the full list of modifications in the Conditions section
+        /// Method to return the full list of modifications in the Conditions section.
         const std::vector<Modification>& getModifications() const noexcept;
     };
     /**

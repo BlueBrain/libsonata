@@ -713,13 +713,9 @@ R"doc(Extracellular calcium concentration, being applied to the synapse
 uHill parameter in order to scale the U parameter of synapses. Default
 is None.)doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_Conditions_getModification =
-R"doc(Returns the given modification parameters
-
-Throws:
-    SonataError if the given modification name does not exist)doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Conditions_listModificationNames = R"doc(Returns the names of the modifications)doc";
+static const char *__doc_bbp_sonata_SimulationConfig_Conditions_getModifications =
+R"doc(Method to return the full list of modifications in the Conditions
+section.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_mechanisms =
 R"doc(Properties to assign values to variables in synapse MOD files. The
@@ -727,8 +723,8 @@ format is a dictionary with keys being the SUFFIX names and values
 being dictionaries of variables' names and values.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_modifications =
-R"doc(Collection of dictionaries with each member decribing a modification
-that mimics experimental manipulations to the circuit.)doc";
+R"doc(List of modifications that mimics experimental manipulations to the
+circuit.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Conditions_randomizeGabaRiseTime =
 R"doc(Enable legacy behavior to randomize the GABA_A rise time in the helper
@@ -1021,6 +1017,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_ModificationBase_Modificati
 static const char *__doc_bbp_sonata_SimulationConfig_ModificationBase_ModificationType_TTX = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ModificationBase_ModificationType_invalid = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_ModificationBase_name = R"doc(Name of the modification setting.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_ModificationBase_nodeSet = R"doc(Node set which receives the manipulation)doc";
 
