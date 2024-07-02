@@ -434,14 +434,12 @@ class TestSimulationConfig(unittest.TestCase):
                                                                                   'property1': False},
                                                              'GluSynapse': {'property4': 'test',
                                                                             'property3': 0.025}})
-        self.assertEqual(self.config.conditions.list_modification_names, {"applyTTX", "no_SK_E2"})
-        self.assertEqual(self.config.conditions.modification("applyTTX").type.name, "TTX")
-        self.assertEqual(self.config.conditions.modification("applyTTX").node_set, "single")
-        self.assertEqual(self.config.conditions.modification("no_SK_E2").type.name,
-                         "ConfigureAllSections")
-        self.assertEqual(self.config.conditions.modification("no_SK_E2").node_set, "single")
-        self.assertEqual(self.config.conditions.modification("no_SK_E2").section_configure,
-                         "%s.gSK_E2bar_SK_E2 = 0")
+        modifications = {o.name: o for o in self.config.conditions.modifications()}
+        self.assertEqual(modifications["applyTTX"].type.name, "TTX")
+        self.assertEqual(modifications["applyTTX"].node_set, "single")
+        self.assertEqual(modifications["no_SK_E2"].type.name, "ConfigureAllSections")
+        self.assertEqual(modifications["no_SK_E2"].node_set, "single")
+        self.assertEqual(modifications["no_SK_E2"].section_configure, "%s.gSK_E2bar_SK_E2 = 0")
 
         self.assertEqual(self.config.list_report_names,
                          { "axonal_comp_centers", "cell_imembrane", "compartment", "soma", "lfp" })

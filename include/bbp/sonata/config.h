@@ -324,6 +324,8 @@ class SONATA_API SimulationConfig
         std::string nodeSet;
         /// Name of the manipulation. Supported values are “TTX” and “ConfigureAllSections”.
         ModificationType type;
+        /// Name of the modification setting.
+        std::string name;
     };
 
     struct ModificationTTX: public ModificationBase {};
@@ -336,8 +338,6 @@ class SONATA_API SimulationConfig
     };
 
     using Modification = nonstd::variant<ModificationTTX, ModificationConfigureAllSections>;
-
-    using ModificationMap = std::unordered_map<std::string, Modification>;
 
     /**
      * Parameters defining global experimental conditions.
@@ -366,14 +366,10 @@ class SONATA_API SimulationConfig
         /// dictionaries of variables' names and values.
         std::unordered_map<std::string, std::unordered_map<std::string, variantValueType>>
             mechanisms;
-        /// Collection of dictionaries with each member decribing a modification that mimics
-        /// experimental manipulations to the circuit.
-        ModificationMap modifications;
-        /// Returns the names of the modifications
-        std::set<std::string> listModificationNames() const;
-        /// Returns the given modification parameters
-        /// \throws SonataError if the given modification name does not exist
-        const Modification& getModification(const std::string& name) const;
+        /// List of modifications that mimics experimental manipulations to the circuit.
+        std::vector<Modification> modifications;
+        /// Method to return the full list of modifications in the Conditions section.
+        const std::vector<Modification>& getModifications() const noexcept;
     };
     /**
      * List of report parameters collected during the simulation
