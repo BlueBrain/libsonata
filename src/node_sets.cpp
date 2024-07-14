@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <fstream>
 
 #include "../extlib/filesystem.hpp"
