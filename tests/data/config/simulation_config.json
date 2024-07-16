@@ -166,7 +166,7 @@
             "decay_time": 4,
             "reversal": 10,
             "rise_time": 0.4,
-            "relataive_skew": 0.1,
+            "relative_skew": 0.1,
             "mean": 50,
             "sigma": 5,
             "represents_physical_electrode": true,

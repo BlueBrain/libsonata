@@ -527,7 +527,7 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.reversal == 10);
             CHECK(input.randomSeed == nonstd::nullopt);
             CHECK(input.representsPhysicalElectrode == true);
-            CHECK(input.relativeSkew == 0.5);
+            CHECK(input.relativeSkew == 0.1);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputOrnsteinUhlenbeck>(
