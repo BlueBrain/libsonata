@@ -48,17 +48,19 @@
           "property4": "test"
         }
       },
-      "modifications": {
-        "applyTTX": {
+      "modifications": [
+        {
             "node_set": "single",
-            "type": "TTX"
+            "type": "TTX",
+            "name": "applyTTX"
         },
-        "no_SK_E2": {
+        {
             "node_set": "single",
             "type": "ConfigureAllSections",
-            "section_configure": "%s.gSK_E2bar_SK_E2 = 0"
+            "section_configure": "%s.gSK_E2bar_SK_E2 = 0",
+            "name": "no_SK_E2"
         }
-      }
+        ]
     },
     "inputs": {
         "ex_linear": {
