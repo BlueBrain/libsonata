@@ -549,8 +549,6 @@ class SONATA_API SimulationConfig
         double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
-        /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
-        double ampCv{};
         /// Signal mean as percentage of a cell’s threshold current (current_clamp) or inverse input
         /// resistance (conductance)
         double meanPercent{};
@@ -559,6 +557,9 @@ class SONATA_API SimulationConfig
         double sdPercent{};
         /// Whether this input represents a physical electrode. Default is false
         bool representsPhysicalElectrode = false;
+        /// Signal skewness as a fraction in [0, 1] representing a value between the minimum and maximum skewness values
+        /// compatible with the given signal mean and std dev. Default is 0.5.
+        double relativeSkew{};
     };
 
     struct InputAbsoluteShotNoise: public InputBase {
@@ -572,14 +573,15 @@ class SONATA_API SimulationConfig
         double reversal{};
         /// Timestep of generated signal in ms. Default is 0.25 ms
         double dt{};
-        /// The coefficient of variation (sd/mean) of gamma-distributed amplitudes
-        double ampCv{};
         /// Signal mean in nA (current_clamp) or uS (conductance).
         double mean{};
         /// signal std dev in nA (current_clamp) or uS (conductance).
         double sigma{};
         /// Whether this input represents a physical electrode. Default is false
         bool representsPhysicalElectrode = false;
+        /// Signal skewness as a fraction in [0, 1] representing a value between the minimum and maximum skewness values
+        /// compatible with the given signal mean and std dev. Default is 0.5.
+        double relativeSkew{};
     };
 
     struct InputOrnsteinUhlenbeck: public InputBase {

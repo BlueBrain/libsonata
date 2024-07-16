@@ -482,13 +482,13 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.delay == 0);
             CHECK(input.duration == 1000);
             CHECK(input.nodeSet == "L5E");
-            CHECK(input.ampCv == 0.63);
             CHECK(input.meanPercent == 70);
             CHECK(input.sdPercent == 40);
             CHECK(input.randomSeed == 230522);
             CHECK(input.riseTime == 0.4);
             CHECK(input.decayTime == 4);
             CHECK(input.reversal == 0);
+            CHECK(input.relativeSkew == 0.5);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputHyperpolarizing>(config.getInput("ex_hyperpolarizing"));
@@ -522,12 +522,12 @@ TEST_CASE("SimulationConfig") {
                 config.getInput("ex_abs_shotnoise"));
             CHECK(input.inputType == InputType::conductance);
             CHECK(input.module == Module::absolute_shot_noise);
-            CHECK(input.ampCv == 0.63);
             CHECK(input.mean == 50);
             CHECK(input.sigma == 5);
             CHECK(input.reversal == 10);
             CHECK(input.randomSeed == nonstd::nullopt);
             CHECK(input.representsPhysicalElectrode == true);
+            CHECK(input.relativeSkew == 0.5);
         }
         {
             const auto input = nonstd::get<SimulationConfig::InputOrnsteinUhlenbeck>(
