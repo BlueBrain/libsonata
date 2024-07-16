@@ -946,9 +946,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("represents_physical_electrode",
                       &SimulationConfig::InputRelativeShotNoise::representsPhysicalElectrode,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, representsPhysicalElectrode))
-        .def_readlonly("relative_skew",
-                       &SimulationConfig::InputRelativeShotNoise::relativeSkew,
-                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, relativeSkew));
+        .def_readonly("relative_skew",
+                      &SimulationConfig::InputRelativeShotNoise::relativeSkew,
+                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, relativeSkew));
 
     py::class_<SimulationConfig::InputAbsoluteShotNoise, SimulationConfig::InputBase>(
         simConf, "AbsoluteShotNoise")
@@ -977,8 +977,9 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputAbsoluteShotNoise::representsPhysicalElectrode,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, representsPhysicalElectrode))
         .def_readonly("relative_skew",
-                       &SimulationConfig::InputAbsoluteShotNoise::relativeSkew,
-                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, relativeSkew));;
+                      &SimulationConfig::InputAbsoluteShotNoise::relativeSkew,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, relativeSkew));
+    ;
 
     py::class_<SimulationConfig::InputOrnsteinUhlenbeck, SimulationConfig::InputBase>(
         simConf, "OrnsteinUhlenbeck")

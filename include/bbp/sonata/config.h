@@ -557,8 +557,9 @@ class SONATA_API SimulationConfig
         double sdPercent{};
         /// Whether this input represents a physical electrode. Default is false
         bool representsPhysicalElectrode = false;
-        /// Signal skewness as a fraction in [0, 1] representing a value between the minimum and maximum skewness values
-        /// compatible with the given signal mean and std dev. Default is 0.5.
+        /// Signal skewness as a fraction in [0, 1] representing a value between the minimum and
+        /// maximum skewness values compatible with the given signal mean and std dev. Default is
+        /// 0.5.
         double relativeSkew{};
     };
 
@@ -579,8 +580,9 @@ class SONATA_API SimulationConfig
         double sigma{};
         /// Whether this input represents a physical electrode. Default is false
         bool representsPhysicalElectrode = false;
-        /// Signal skewness as a fraction in [0, 1] representing a value between the minimum and maximum skewness values
-        /// compatible with the given signal mean and std dev. Default is 0.5.
+        /// Signal skewness as a fraction in [0, 1] representing a value between the minimum and
+        /// maximum skewness values compatible with the given signal mean and std dev. Default is
+        /// 0.5.
         double relativeSkew{};
     };
 
