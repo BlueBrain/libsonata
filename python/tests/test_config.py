@@ -547,7 +547,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_rel_shotnoise').random_seed, 230522)
         self.assertEqual(self.config.input('ex_rel_shotnoise').dt, 0.25)
         self.assertEqual(self.config.input('ex_rel_shotnoise').reversal, 0)
-        self.assertEqual(self.config.input('ex_abs_shotnoise').relative_skew, 0.5)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').relative_skew, 0.5)
 
         self.assertEqual(self.config.input('ex_replay').input_type.name, 'spikes')
         self.assertEqual(self.config.input('ex_replay').module.name, 'synapse_replay')
