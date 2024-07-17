@@ -506,9 +506,9 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
                       "represents_physical_electrode",
                       ret.representsPhysicalElectrode,
                       {false});
-        parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean_percent", debugStr, ret.meanPercent);
         parseMandatory(valueIt, "sd_percent", debugStr, ret.sdPercent);
+        parseOptional(valueIt, "relative_skew", ret.relativeSkew, {0.5});
         return ret;
     }
     case Module::absolute_shot_noise: {
@@ -524,9 +524,9 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
                       "represents_physical_electrode",
                       ret.representsPhysicalElectrode,
                       {false});
-        parseMandatory(valueIt, "amp_cv", debugStr, ret.ampCv);
         parseMandatory(valueIt, "mean", debugStr, ret.mean);
         parseMandatory(valueIt, "sigma", debugStr, ret.sigma);
+        parseOptional(valueIt, "relative_skew", ret.relativeSkew, {0.5});
         return ret;
     }
     case Module::hyperpolarizing: {

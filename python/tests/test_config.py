@@ -547,6 +547,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_rel_shotnoise').random_seed, 230522)
         self.assertEqual(self.config.input('ex_rel_shotnoise').dt, 0.25)
         self.assertEqual(self.config.input('ex_rel_shotnoise').reversal, 0)
+        self.assertEqual(self.config.input('ex_rel_shotnoise').relative_skew, 0.5)
 
         self.assertEqual(self.config.input('ex_replay').input_type.name, 'spikes')
         self.assertEqual(self.config.input('ex_replay').module.name, 'synapse_replay')
@@ -558,12 +559,12 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_extracellular_stimulation').node_set, 'Column')
 
         self.assertEqual(self.config.input('ex_abs_shotnoise').input_type.name, "conductance")
-        self.assertEqual(self.config.input('ex_abs_shotnoise').amp_cv, 0.63)
         self.assertEqual(self.config.input('ex_abs_shotnoise').mean, 50)
         self.assertEqual(self.config.input('ex_abs_shotnoise').sigma, 5)
         self.assertEqual(self.config.input('ex_abs_shotnoise').reversal, 10)
         self.assertEqual(self.config.input('ex_abs_shotnoise').random_seed, None)
         self.assertEqual(self.config.input('ex_abs_shotnoise').represents_physical_electrode, True)
+        self.assertEqual(self.config.input('ex_abs_shotnoise').relative_skew, 0.1)
 
         self.assertEqual(self.config.input('ex_OU').module.name, "ornstein_uhlenbeck")
         self.assertEqual(self.config.input('ex_OU').input_type.name, "conductance")

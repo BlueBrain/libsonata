@@ -778,8 +778,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_ConnectionOverride_weight =
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_ampCv = R"doc(The coefficient of variation (sd/mean) of gamma-distributed amplitudes)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
@@ -789,6 +787,11 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_mean
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_randomSeed =
 R"doc(Override the random seed to introduce correlations between cells,
 default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_relativeSkew =
+R"doc(Signal skewness as a fraction in [0, 1] representing a value between
+the minimum and maximum skewness values compatible with the given
+signal mean and std dev. Default is 0.5.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputAbsoluteShotNoise_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
@@ -940,8 +943,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeOrnsteinUhlenb
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_ampCv = R"doc(The coefficient of variation (sd/mean) of gamma-distributed amplitudes)doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_decayTime = R"doc(The decay time of the bi-exponential shots (ms))doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_dt = R"doc(Timestep of generated signal in ms. Default is 0.25 ms)doc";
@@ -953,6 +954,11 @@ R"doc(Signal mean as percentage of a cell’s threshold current
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_randomSeed =
 R"doc(Override the random seed to introduce correlations between cells,
 default = None)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_relativeSkew =
+R"doc(Signal skewness as a fraction in [0, 1] representing a value between
+the minimum and maximum skewness values compatible with the given
+signal mean and std dev. Default is 0.5.)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeShotNoise_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 

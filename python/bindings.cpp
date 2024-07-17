@@ -695,7 +695,9 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("mechanisms",
                       &SimulationConfig::Conditions::mechanisms,
                       DOC_SIMULATIONCONFIG(Conditions, mechanisms))
-        .def("modifications", &SimulationConfig::Conditions::getModifications);
+        .def("modifications",
+             &SimulationConfig::Conditions::getModifications,
+             DOC_SIMULATIONCONFIG(Conditions, getModifications));
 
 
     py::enum_<SimulationConfig::Conditions::SpikeLocation>(conditions, "SpikeLocation")
@@ -703,7 +705,10 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("AIS", SimulationConfig::Conditions::SpikeLocation::AIS);
 
     py::class_<SimulationConfig::ModificationBase> modificationBase(simConf, "ModificationBase");
-    modificationBase.def_readonly("name", &SimulationConfig::ModificationBase::name)
+    modificationBase
+        .def_readonly("name",
+                      &SimulationConfig::ModificationBase::name,
+                      DOC_SIMULATIONCONFIG(ModificationBase, name))
         .def_readonly("node_set",
                       &SimulationConfig::ModificationBase::nodeSet,
                       DOC_SIMULATIONCONFIG(ModificationBase, nodeSet))
@@ -937,9 +942,6 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("dt",
                       &SimulationConfig::InputRelativeShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, dt))
-        .def_readonly("amp_cv",
-                      &SimulationConfig::InputRelativeShotNoise::ampCv,
-                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, ampCv))
         .def_readonly("sd_percent",
                       &SimulationConfig::InputRelativeShotNoise::sdPercent,
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, sdPercent))
@@ -948,7 +950,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputRelativeShotNoise, meanPercent))
         .def_readonly("represents_physical_electrode",
                       &SimulationConfig::InputRelativeShotNoise::representsPhysicalElectrode,
-                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, representsPhysicalElectrode));
+                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, representsPhysicalElectrode))
+        .def_readonly("relative_skew",
+                      &SimulationConfig::InputRelativeShotNoise::relativeSkew,
+                      DOC_SIMULATIONCONFIG(InputRelativeShotNoise, relativeSkew));
 
     py::class_<SimulationConfig::InputAbsoluteShotNoise, SimulationConfig::InputBase>(
         simConf, "AbsoluteShotNoise")
@@ -967,9 +972,6 @@ PYBIND11_MODULE(_libsonata, m) {
         .def_readonly("dt",
                       &SimulationConfig::InputAbsoluteShotNoise::dt,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, dt))
-        .def_readonly("amp_cv",
-                      &SimulationConfig::InputAbsoluteShotNoise::ampCv,
-                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, ampCv))
         .def_readonly("mean",
                       &SimulationConfig::InputAbsoluteShotNoise::mean,
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, mean))
@@ -978,7 +980,11 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, sigma))
         .def_readonly("represents_physical_electrode",
                       &SimulationConfig::InputAbsoluteShotNoise::representsPhysicalElectrode,
-                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, representsPhysicalElectrode));
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, representsPhysicalElectrode))
+        .def_readonly("relative_skew",
+                      &SimulationConfig::InputAbsoluteShotNoise::relativeSkew,
+                      DOC_SIMULATIONCONFIG(InputAbsoluteShotNoise, relativeSkew));
+    ;
 
     py::class_<SimulationConfig::InputOrnsteinUhlenbeck, SimulationConfig::InputBase>(
         simConf, "OrnsteinUhlenbeck")
