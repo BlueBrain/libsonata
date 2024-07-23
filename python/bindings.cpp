@@ -1283,7 +1283,10 @@ PYBIND11_MODULE(_libsonata, m) {
             DOC_SPIKEREADER_POP(getSorting))
         .def_property_readonly("times",
                                &SpikeReader::Population::getTimes,
-                               DOC_SPIKEREADER_POP(getTimes));
+                               DOC_SPIKEREADER_POP(getTimes))
+        .def_property_readonly("time_units",
+                               &SpikeReader::Population::getTimeUnits,
+                               DOC_REPORTREADER_POP(getTimeUnits));
     py::class_<SpikeReader>(m, "SpikeReader", DOC(bbp, sonata, SpikeReader))
         .def(py::init([](py::object h5_filepath) { return SpikeReader(py::str(h5_filepath)); }),
              "h5_filepath"_a)

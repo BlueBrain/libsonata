@@ -1324,6 +1324,8 @@ static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc(Re
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_getTimes = R"doc(Return (tstart, tstop) of the population)doc";
 
+static const char *__doc_bbp_sonata_SpikeReader_Population_getTimeUnits = R"doc(Return the unit of time)doc";
+
 static const char *__doc_bbp_sonata_SpikeReader_Population_sorting = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_spike_times = R"doc()doc";

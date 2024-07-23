@@ -196,6 +196,10 @@ SpikeReader::Population::Sorting SpikeReader::Population::getSorting() const {
     return sorting_;
 }
 
+std::string SpikeReader::Population::getTimeUnits() const {
+    return time_units_;
+}
+
 SpikeReader::Population::Population(const std::string& filename,
                                     const std::string& populationName) {
     HighFive::File file(filename, HighFive::File::ReadOnly);
@@ -206,6 +210,7 @@ SpikeReader::Population::Population(const std::string& filename,
 
     pop.getDataSet("node_ids").read(node_ids);
     pop.getDataSet("timestamps").read(timestamps);
+    pop.getDataSet("timestamps").getAttribute("units").read(time_units_);
 
     if (node_ids.size() != timestamps.size()) {
         throw SonataError(
