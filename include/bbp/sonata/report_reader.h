@@ -72,6 +72,11 @@ class SONATA_API SpikeReader
          */
         Sorting getSorting() const;
 
+        /**
+         * Return the unit of time
+         */
+        std::string getTimeUnits() const;
+
       private:
         Population(const std::string& filename, const std::string& populationName);
 
@@ -79,6 +84,7 @@ class SONATA_API SpikeReader
         Sorting sorting_ = Sorting::none;
         // Use for clamping of user values
         double tstart_, tstop_;
+        std::string time_units_;
 
         void filterNode(Spikes& spikes, const Selection& node_ids) const;
         void filterTimestamp(Spikes& spikes, double tstart, double tstop) const;

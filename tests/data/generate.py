@@ -204,13 +204,15 @@ def write_spikes(filepath):
         gpop_all = h5f.create_group('/spikes/' + population_names[0])
         gpop_all.attrs.create('sorting', data=2, dtype=sorting_type)
         timestamps, node_ids = zip(*sorted(zip(timestamps_base, node_ids_base)))
-        set = gpop_all.create_dataset('timestamps', data=timestamps, dtype=np.double)
+        dtimestamps = gpop_all.create_dataset('timestamps', data=timestamps, dtype=np.double)
+        dtimestamps.attrs.create('units', data="ms", dtype=string_dtype)
         gpop_all.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
 
         gpop_spikes1 = h5f.create_group('/spikes/' + population_names[1])
         gpop_spikes1.attrs.create('sorting', data=1, dtype=sorting_type)
         node_ids, timestamps = zip(*sorted(zip(node_ids_base, timestamps_base)))
-        gpop_spikes1.create_dataset('timestamps', data=timestamps, dtype=np.double)
+        dtimestamps = gpop_spikes1.create_dataset('timestamps', data=timestamps, dtype=np.double)
+        dtimestamps.attrs.create('units', data="ms", dtype=string_dtype)
         gpop_spikes1.create_dataset('node_ids', data=node_ids, dtype=np.uint64)
 
         gpop_spikes2 = h5f.create_group('/spikes/' + population_names[2])
@@ -222,6 +224,7 @@ def write_spikes(filepath):
         gpop_empty = h5f.create_group('/spikes/' + population_names[3])
         gpop_empty.attrs.create('sorting', data=1, dtype=sorting_type)
         dtimestamps = gpop_empty.create_dataset('timestamps', data=[], dtype=np.double)
+        dtimestamps.attrs.create('units', data="ms", dtype=string_dtype)
         gpop_empty.create_dataset('node_ids', data=[], dtype=np.uint64)
 
 if __name__ == '__main__':

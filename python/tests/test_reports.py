@@ -44,6 +44,7 @@ class TestSpikeReader(unittest.TestCase):
         self.assertEqual(self.test_obj['All'].sorting, "by_time")
         self.assertEqual(self.test_obj['spikes1'].sorting, "by_id")
         self.assertEqual(self.test_obj['spikes2'].sorting, "none")
+        self.assertEqual(self.test_obj['spikes2'].time_units, 'ms')
         self.assertEqual(self.test_obj['empty'].get(), [])
 
         self.assertEqual(len(self.test_obj['All'].get(node_ids=[])), 0)

@@ -35,6 +35,7 @@ TEST_CASE("SpikeReader", "[base]") {
     REQUIRE(reader.openPopulation("empty").get() == std::vector<std::pair<uint64_t, double>>{});
 
     REQUIRE(reader.openPopulation("All").getTimes() == std::make_tuple(0.1, 1.3));
+    REQUIRE(reader.openPopulation("All").getTimeUnits() == "ms");
 }
 
 TEST_CASE("SomaReportReader limits", "[base]") {
