@@ -487,6 +487,7 @@ class TestSimulationConfig(unittest.TestCase):
                           "ex_replay",
                           "ex_seclamp",
                           "ex_shotnoise",
+                          "ex_sinusoidal",
                           "ex_subthreshold"
                           })
 
@@ -513,6 +514,15 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_pulse').node_set, "Mosaic")
         self.assertEqual(self.config.input('ex_pulse').width, 1)
         self.assertEqual(self.config.input('ex_pulse').frequency, 80)
+
+        self.assertEqual(self.config.input('ex_sinusoidal').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_sinusoidal').module.name, 'sinusoidal')
+        self.assertEqual(self.config.input('ex_sinusoidal').delay, 10)
+        self.assertEqual(self.config.input('ex_sinusoidal').duration, 80)
+        self.assertEqual(self.config.input('ex_sinusoidal').node_set, "Mosaic")
+        self.assertEqual(self.config.input('ex_sinusoidal').frequency, 8)
+        self.assertEqual(self.config.input('ex_sinusoidal').amp_start, 0.2)
+        self.assertEqual(self.config.input('ex_sinusoidal').dt, 0.5)
 
         self.assertEqual(self.config.input('ex_noise_meanpercent').input_type.name, 'current_clamp')
         self.assertEqual(self.config.input('ex_noise_meanpercent').module.name, 'noise')
