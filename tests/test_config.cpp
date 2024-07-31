@@ -444,6 +444,18 @@ TEST_CASE("SimulationConfig") {
             CHECK(input.dt == 0.5);
         }
         {
+            const auto input = nonstd::get<SimulationConfig::InputSinusoidal>(config.getInput("ex_sinusoidal_default_dt"));
+            CHECK(input.inputType == InputType::current_clamp);
+            CHECK(input.module == Module::sinusoidal);
+            CHECK(input.delay == 10);
+            CHECK(input.duration == 80);
+            CHECK(input.nodeSet == "Mosaic");
+
+            CHECK(input.frequency == 80);
+            CHECK(input.ampStart == 2);
+            CHECK(input.dt == 0.025);
+        }
+        {
             const auto input = nonstd::get<SimulationConfig::InputSubthreshold>(config.getInput("ex_subthreshold"));
             CHECK(input.inputType == InputType::current_clamp);
             CHECK(input.module == Module::subthreshold);
@@ -580,6 +592,7 @@ TEST_CASE("SimulationConfig") {
                                                                "ex_seclamp",
                                                                "ex_shotnoise",
                                                                "ex_sinusoidal",
+                                                               "ex_sinusoidal_default_dt",
                                                                "ex_subthreshold"});
 
         auto overrides = config.getConnectionOverrides();
