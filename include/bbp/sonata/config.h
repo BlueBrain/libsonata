@@ -418,6 +418,7 @@ class SONATA_API SimulationConfig
             linear,
             relative_linear,
             pulse,
+            sinusoidal,
             subthreshold,
             hyperpolarizing,
             synapse_replay,
@@ -476,6 +477,17 @@ class SONATA_API SimulationConfig
         double width{};
         /// The frequency of pulse trains (Hz)
         double frequency{};
+        /// Whether this input represents a physical electrode. Default is false
+        bool representsPhysicalElectrode = false;
+    };
+
+    struct InputSinusoidal: public InputBase {
+        /// The peak amplitude of the sinusoid. Given in nA.
+        double ampStart{};
+        /// The frequency of the sinusoidal waveform. Given in Hz.
+        double frequency{};
+        /// Timestep of generated signal in ms. Default is 0.025 ms
+        double dt{};
         /// Whether this input represents a physical electrode. Default is false
         bool representsPhysicalElectrode = false;
     };
@@ -625,6 +637,7 @@ class SONATA_API SimulationConfig
     using Input = nonstd::variant<InputLinear,
                                   InputRelativeLinear,
                                   InputPulse,
+                                  InputSinusoidal,
                                   InputSubthreshold,
                                   InputHyperpolarizing,
                                   InputSynapseReplay,

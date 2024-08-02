@@ -487,6 +487,8 @@ class TestSimulationConfig(unittest.TestCase):
                           "ex_replay",
                           "ex_seclamp",
                           "ex_shotnoise",
+                          "ex_sinusoidal",
+                          "ex_sinusoidal_default_dt",
                           "ex_subthreshold"
                           })
 
@@ -513,6 +515,24 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.input('ex_pulse').node_set, "Mosaic")
         self.assertEqual(self.config.input('ex_pulse').width, 1)
         self.assertEqual(self.config.input('ex_pulse').frequency, 80)
+
+        self.assertEqual(self.config.input('ex_sinusoidal').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_sinusoidal').module.name, 'sinusoidal')
+        self.assertEqual(self.config.input('ex_sinusoidal').delay, 10)
+        self.assertEqual(self.config.input('ex_sinusoidal').duration, 80)
+        self.assertEqual(self.config.input('ex_sinusoidal').node_set, "Mosaic")
+        self.assertEqual(self.config.input('ex_sinusoidal').frequency, 8)
+        self.assertEqual(self.config.input('ex_sinusoidal').amp_start, 0.2)
+        self.assertEqual(self.config.input('ex_sinusoidal').dt, 0.5)
+
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').input_type.name, 'current_clamp')
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').module.name, 'sinusoidal')
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').delay, 10)
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').duration, 80)
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').node_set, "Mosaic")
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').frequency, 80)
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').amp_start, 2)
+        self.assertEqual(self.config.input('ex_sinusoidal_default_dt').dt, 0.025)
 
         self.assertEqual(self.config.input('ex_noise_meanpercent').input_type.name, 'current_clamp')
         self.assertEqual(self.config.input('ex_noise_meanpercent').module.name, 'noise')

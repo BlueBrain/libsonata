@@ -833,6 +833,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_ornstein_u
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_pulse = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_sinusoidal = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_linear = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_ornstein_uhlenbeck = R"doc()doc";
@@ -910,6 +912,16 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_frequency = R"do
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_width = R"doc(The length of time each pulse lasts (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_ampStart = R"doc(The amount of current initially injected (nA))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_frequency = R"doc(The frequency of the waveform (Hz))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_dt = R"doc(Timestep of generated signal in ms. Default is 0.025 ms)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear = R"doc()doc";
 

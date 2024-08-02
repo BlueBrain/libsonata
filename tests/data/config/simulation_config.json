@@ -90,6 +90,25 @@
             "duration": 80,
             "node_set": "Mosaic"
         },
+        "ex_sinusoidal": {
+            "input_type": "current_clamp",
+            "module": "sinusoidal",
+            "frequency": 8,
+            "amp_start": 0.2,
+            "dt": 0.5,
+            "delay": 10,
+            "duration": 80,
+            "node_set": "Mosaic"
+        },
+        "ex_sinusoidal_default_dt": {
+            "input_type": "current_clamp",
+            "module": "sinusoidal",
+            "frequency": 80,
+            "amp_start": 2,
+            "delay": 10,
+            "duration": 80,
+            "node_set": "Mosaic"
+        },
         "ex_subthreshold": {
             "input_type": "current_clamp",
             "module": "subthreshold",

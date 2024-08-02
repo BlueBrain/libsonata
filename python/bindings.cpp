@@ -853,6 +853,21 @@ PYBIND11_MODULE(_libsonata, m) {
                       &SimulationConfig::InputPulse::representsPhysicalElectrode,
                       DOC_SIMULATIONCONFIG(InputPulse, representsPhysicalElectrode));
 
+    py::class_<SimulationConfig::InputSinusoidal, SimulationConfig::InputBase>(simConf,
+                                                                               "Sinusoidal")
+        .def_readonly("amp_start",
+                      &SimulationConfig::InputSinusoidal::ampStart,
+                      DOC_SIMULATIONCONFIG(InputSinusoidal, ampStart))
+        .def_readonly("frequency",
+                      &SimulationConfig::InputSinusoidal::frequency,
+                      DOC_SIMULATIONCONFIG(InputSinusoidal, frequency))
+        .def_readonly("dt",
+                      &SimulationConfig::InputSinusoidal::dt,
+                      DOC_SIMULATIONCONFIG(InputSinusoidal, dt))
+        .def_readonly("represents_physical_electrode",
+                      &SimulationConfig::InputSinusoidal::representsPhysicalElectrode,
+                      DOC_SIMULATIONCONFIG(InputSinusoidal, representsPhysicalElectrode));
+
     py::class_<SimulationConfig::InputSubthreshold, SimulationConfig::InputBase>(simConf,
                                                                                  "Subthreshold")
         .def_readonly("percent_less",
@@ -1039,6 +1054,7 @@ PYBIND11_MODULE(_libsonata, m) {
         .value("linear", SimulationConfig::InputBase::Module::linear)
         .value("relative_linear", SimulationConfig::InputBase::Module::relative_linear)
         .value("pulse", SimulationConfig::InputBase::Module::pulse)
+        .value("sinusoidal", SimulationConfig::InputBase::Module::sinusoidal)
         .value("subthreshold", SimulationConfig::InputBase::Module::subthreshold)
         .value("hyperpolarizing", SimulationConfig::InputBase::Module::hyperpolarizing)
         .value("synapse_replay", SimulationConfig::InputBase::Module::synapse_replay)

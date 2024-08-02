@@ -98,6 +98,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
      {SimulationConfig::InputBase::Module::linear, "linear"},
      {SimulationConfig::InputBase::Module::relative_linear, "relative_linear"},
      {SimulationConfig::InputBase::Module::pulse, "pulse"},
+     {SimulationConfig::InputBase::Module::sinusoidal, "sinusoidal"},
      {SimulationConfig::InputBase::Module::subthreshold, "subthreshold"},
      {SimulationConfig::InputBase::Module::hyperpolarizing, "hyperpolarizing"},
      {SimulationConfig::InputBase::Module::synapse_replay, "synapse_replay"},
@@ -432,6 +433,18 @@ SimulationConfig::Input parseInputModule(const nlohmann::json& valueIt,
         parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
         parseMandatory(valueIt, "width", debugStr, ret.width);
         parseMandatory(valueIt, "frequency", debugStr, ret.frequency);
+        parseOptional(valueIt,
+                      "represents_physical_electrode",
+                      ret.representsPhysicalElectrode,
+                      {false});
+        return ret;
+    }
+    case Module::sinusoidal: {
+        SimulationConfig::InputSinusoidal ret;
+        parseCommon(ret);
+        parseMandatory(valueIt, "amp_start", debugStr, ret.ampStart);
+        parseMandatory(valueIt, "frequency", debugStr, ret.frequency);
+        parseOptional(valueIt, "dt", ret.dt, {0.025});
         parseOptional(valueIt,
                       "represents_physical_electrode",
                       ret.representsPhysicalElectrode,
@@ -1234,6 +1247,7 @@ class SimulationConfig::Parser
                 if (!(nonstd::holds_alternative<SimulationConfig::InputLinear>(input) ||
                       nonstd::holds_alternative<SimulationConfig::InputRelativeLinear>(input) ||
                       nonstd::holds_alternative<SimulationConfig::InputPulse>(input) ||
+                      nonstd::holds_alternative<SimulationConfig::InputSinusoidal>(input) ||
                       nonstd::holds_alternative<SimulationConfig::InputSubthreshold>(input) ||
                       nonstd::holds_alternative<SimulationConfig::InputNoise>(input) ||
                       nonstd::holds_alternative<SimulationConfig::InputShotNoise>(input) ||
