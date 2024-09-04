@@ -95,9 +95,9 @@ jobs:
           python -m cibuildwheel --output-dir dist
 
       - name: Store wheel as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-wheels-${{ matrix.os }}
           path: dist/*.whl
 
   build_sdist:
@@ -125,9 +125,9 @@ jobs:
           ./ci/python_build_sdist.sh
 
       - name: Store sdist as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-sdist
           path: dist/*.tar.gz
 
   upload_artifacts:
@@ -139,10 +139,11 @@ jobs:
 
     steps:
       - name: Download artifacts produced during the build_wheels and build_sdist jobs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: dist-*
           path: dist/
+          merge-multiple: true
 
       - name: Display structure of downloaded files
         run: ls -R
