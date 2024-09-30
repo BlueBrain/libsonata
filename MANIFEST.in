@@ -13,6 +13,7 @@ recursive-include extlib/fmt/src *
 recursive-include extlib/fmt/support/cmake *
 include extlib/fmt/CMakeLists.txt
 include extlib/fmt/*.rst
+include extlib/fmt/README.md
 
 # highfive
 recursive-include extlib/HighFive/include *
