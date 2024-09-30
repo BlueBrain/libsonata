@@ -8,7 +8,11 @@ include extlib/CMakeLists.txt
 include extlib/nlohmann/json.hpp
 
 # fmt
-recursive-include extlib/fmt *
+recursive-include extlib/fmt/include *
+recursive-include extlib/fmt/src *
+recursive-include extlib/fmt/support/cmake *
+include extlib/fmt/CMakeLists.txt
+include extlib/fmt/*.rst
 
 # highfive
 recursive-include extlib/HighFive/include *
