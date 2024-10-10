@@ -54,7 +54,7 @@ option(SONATA_CXX_WARNINGS "Compile C++ with warnings as errors, for glibcxx tur
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
 
-set(SONATA_CXX_MINIMUM_STANDARD 14)
+set(SONATA_CXX_MINIMUM_STANDARD 17)
 if(NOT "${CMAKE_CXX_STANDARD}")
   set(CMAKE_CXX_STANDARD ${SONATA_CXX_MINIMUM_STANDARD})
 elseif("${CMAKE_CXX_STANDARD}" LESS SONATA_CXX_MINIMUM_STANDARD)
@@ -78,7 +78,7 @@ if (EXTLIB_FROM_SUBMODULES)
     add_subdirectory(extlib EXCLUDE_FROM_ALL)
 else()
     if (SONATA_TESTS)
-        find_package(Catch2 REQUIRED)
+        find_package(Catch2 3.5 REQUIRED)
     endif()
     find_package(HighFive REQUIRED)
     find_package(fmt REQUIRED)
