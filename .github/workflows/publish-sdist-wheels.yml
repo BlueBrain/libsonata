@@ -141,7 +141,7 @@ jobs:
       - name: Download artifacts produced during the build_wheels and build_sdist jobs
         uses: actions/download-artifact@v4
         with:
-          name: dist-*
+          pattern: dist-*
           path: dist/
           merge-multiple: true
 
