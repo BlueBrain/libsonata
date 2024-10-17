@@ -181,6 +181,8 @@ static const char *__doc_bbp_sonata_EdgePopulationProperties_endfeetMeshesFile =
 
 static const char *__doc_bbp_sonata_EdgePopulationProperties_spatialSynapseIndexDir = R"doc(Path to spatial_synapse_index)doc";
 
+static const char *__doc_bbp_sonata_EdgePopulationProperties_spineMorphologiesDir = R"doc(Path to the directory containing the dendritic spine morphologies.)doc";
+
 static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation = R"doc()doc";
 
 static const char *__doc_bbp_sonata_EdgePopulation_EdgePopulation_2 = R"doc()doc";
@@ -301,8 +303,6 @@ R"doc(Path to the .h5 storing microdomain data. Only for astrocyte node
 populations where it is mandatory.)doc";
 
 static const char *__doc_bbp_sonata_NodePopulationProperties_spatialSegmentIndexDir = R"doc(Path to spatial_segment_index)doc";
-
-static const char *__doc_bbp_sonata_NodePopulationProperties_spineMorphologiesDir = R"doc(Path to the directory containing the dendritic spine morphologies.)doc";
 
 static const char *__doc_bbp_sonata_NodePopulationProperties_vasculatureFile =
 R"doc(Path to the .h5 file containing the vasculature morphology. Only for
@@ -833,8 +833,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_ornstein_u
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_pulse = R"doc()doc";
 
-static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_sinusoidal = R"doc()doc";
-
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_linear = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_ornstein_uhlenbeck = R"doc()doc";
@@ -844,6 +842,8 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_relative_s
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_seclamp = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_shot_noise = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_sinusoidal = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputBase_Module_subthreshold = R"doc()doc";
 
@@ -912,16 +912,6 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_frequency = R"do
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputPulse_width = R"doc(The length of time each pulse lasts (ms))doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_ampStart = R"doc(The amount of current initially injected (nA))doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_frequency = R"doc(The frequency of the waveform (Hz))doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_dt = R"doc(Timestep of generated signal in ms. Default is 0.025 ms)doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputRelativeLinear = R"doc()doc";
 
@@ -1013,6 +1003,16 @@ static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_representsPh
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_reversal = R"doc(Reversal potential for conductance injection in mV. Default is 0)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputShotNoise_riseTime = R"doc(The rise time of the bi-exponential shots (ms))doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_ampStart = R"doc(The peak amplitude of the sinusoid. Given in nA.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_dt = R"doc(Timestep of generated signal in ms. Default is 0.025 ms)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_frequency = R"doc(The frequency of the sinusoidal waveform. Given in Hz.)doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_InputSinusoidal_representsPhysicalElectrode = R"doc(Whether this input represents a physical electrode. Default is false)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_InputSubthreshold = R"doc()doc";
 
@@ -1334,13 +1334,15 @@ static const char *__doc_bbp_sonata_SpikeReader_Population_getRawArrays = R"doc(
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_getSorting = R"doc(Return the way data are sorted ('none', 'by_id', 'by_time'))doc";
 
-static const char *__doc_bbp_sonata_SpikeReader_Population_getTimes = R"doc(Return (tstart, tstop) of the population)doc";
-
 static const char *__doc_bbp_sonata_SpikeReader_Population_getTimeUnits = R"doc(Return the unit of time)doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_getTimes = R"doc(Return (tstart, tstop) of the population)doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_sorting = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_spike_times = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SpikeReader_Population_time_units = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SpikeReader_Population_tstart = R"doc()doc";
 

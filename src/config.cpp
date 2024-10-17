@@ -830,9 +830,6 @@ class CircuitConfig::Parser
             if (!component.microdomainsFile) {
                 component.microdomainsFile = defaultComponents.microdomainsFile;
             }
-            if (!component.spineMorphologiesDir) {
-                component.spineMorphologiesDir = defaultComponents.spineMorphologiesDir;
-            }
         }
     }
 
@@ -845,6 +842,9 @@ class CircuitConfig::Parser
 
             if (!component.endfeetMeshesFile) {
                 component.endfeetMeshesFile = defaultComponents.endfeetMeshesFile;
+            }
+            if (!component.spineMorphologiesDir) {
+                component.spineMorphologiesDir = defaultComponents.spineMorphologiesDir;
             }
         }
     }
@@ -926,8 +926,6 @@ class CircuitConfig::Parser
             popProperties.vasculatureFile = getOptionalJSONPath(popData, "vasculature_file");
             popProperties.vasculatureMesh = getOptionalJSONPath(popData, "vasculature_mesh");
             popProperties.microdomainsFile = getOptionalJSONPath(popData, "microdomains_file");
-            popProperties.spineMorphologiesDir = getOptionalJSONPath(popData,
-                                                                     "spine_morphologies_dir");
             });
     }
 
@@ -939,6 +937,8 @@ class CircuitConfig::Parser
             [&](EdgePopulationProperties& popProperties, const nlohmann::json& popData) {
             popProperties.spatialSynapseIndexDir = getJSONPath(popData, "spatial_synapse_index_dir");
             popProperties.endfeetMeshesFile = getOptionalJSONPath(popData, "endfeet_meshes_file");
+            popProperties.spineMorphologiesDir = getOptionalJSONPath(popData,
+                                                                     "spine_morphologies_dir");
             });
     }
 

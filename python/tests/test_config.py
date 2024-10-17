@@ -68,6 +68,10 @@ class TestCircuitConfig(unittest.TestCase):
 
         self.assertEqual(edge_prop.types_path, '')
         self.assertTrue(edge_prop.elements_path.endswith('tests/data/edges1.h5'))
+        self.assertTrue(edge_prop.spine_morphologies_dir.endswith('spine_morphologies_dir_edges-AC'))
+
+        edge_prop = self.config.edge_population_properties('edges-AB')
+        self.assertTrue(edge_prop.spine_morphologies_dir.endswith('spine_morphologies_dir_component'))
 
     def test_partial(self):
         contents = { "metadata": { "status": "NOT A TYPE" }, }
