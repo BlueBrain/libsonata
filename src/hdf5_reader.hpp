@@ -28,12 +28,7 @@ class Hdf5PluginRead1DDefault: virtual public Hdf5PluginRead1DInterface<T>
   public:
     std::vector<T> readSelection(const HighFive::DataSet& dset,
                                  const Selection& selection) const override {
-        if (selection.ranges().empty()) {
-            return {};
-        }
-
-        return dset.select(detail::_makeHyperslab(selection.ranges()))
-            .template read<std::vector<T>>();
+        return detail::readCanonicalSelection<T>(dset, selection);
     }
 };
 
