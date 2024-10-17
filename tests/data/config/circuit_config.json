@@ -9,7 +9,8 @@
     "morphologies_dir": "$COMPONENT_DIR/morphologies",
     "biophysical_neuron_models_dir": "$COMPONENT_DIR/biophysical_neuron_models",
     "vasculature_file": "$COMPONENT_DIR/some_file",
-    "vasculature_mesh": "$COMPONENT_DIR/some_file"
+    "vasculature_mesh": "$COMPONENT_DIR/some_file",
+    "spine_morphologies_dir": "$COMPONENT_DIR/spine_morphologies_dir_component"
   },
   "node_sets_file": "$BASE_DIR/node_sets.json",
   "networks": {
@@ -33,7 +34,8 @@
         "populations": {
             "edges-AB": {},
             "edges-AC": {
-                "spatial_synapse_index_dir": "$COMPONENT_DIR/spatial_synapse_index_dir"
+                "spatial_synapse_index_dir": "$COMPONENT_DIR/spatial_synapse_index_dir",
+                "spine_morphologies_dir": "$COMPONENT_DIR/spine_morphologies_dir_edges-AC"
             }
         }
       }

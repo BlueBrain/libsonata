@@ -570,10 +570,7 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_NODE_POPULATION_PROPERTIES(vasculatureMesh))
         .def_readonly("microdomains_file",
                       &NodePopulationProperties::microdomainsFile,
-                      DOC_NODE_POPULATION_PROPERTIES(microdomainsFile))
-        .def_readonly("spine_morphologies_dir",
-                      &NodePopulationProperties::spineMorphologiesDir,
-                      DOC_NODE_POPULATION_PROPERTIES(spineMorphologiesDir));
+                      DOC_NODE_POPULATION_PROPERTIES(microdomainsFile));
 
     py::class_<EdgePopulationProperties, CommonPopulationProperties>(
         m, "EdgePopulationProperties", "Stores edge population-specific network information")
@@ -582,7 +579,10 @@ PYBIND11_MODULE(_libsonata, m) {
                       DOC_EDGE_POPULATION_PROPERTIES(spatialSynapseIndexDir))
         .def_readonly("endfeet_meshes_file",
                       &EdgePopulationProperties::endfeetMeshesFile,
-                      DOC_EDGE_POPULATION_PROPERTIES(endfeetMeshesFile));
+                      DOC_EDGE_POPULATION_PROPERTIES(endfeetMeshesFile))
+        .def_readonly("spine_morphologies_dir",
+                      &EdgePopulationProperties::spineMorphologiesDir,
+                      DOC_EDGE_POPULATION_PROPERTIES(spineMorphologiesDir));
 
     py::enum_<CircuitConfig::ConfigStatus>(m, "CircuitConfigStatus")
         .value("invalid", CircuitConfig::ConfigStatus::invalid)

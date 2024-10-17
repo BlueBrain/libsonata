@@ -92,11 +92,6 @@ struct SONATA_API NodePopulationProperties: public CommonPopulationProperties {
      * mandatory.
      */
     nonstd::optional<std::string> microdomainsFile{nonstd::nullopt};
-
-    /**
-     * Path to the directory containing the dendritic spine morphologies.
-     */
-    nonstd::optional<std::string> spineMorphologiesDir{nonstd::nullopt};
 };
 
 /**
@@ -112,6 +107,11 @@ struct SONATA_API EdgePopulationProperties: public CommonPopulationProperties {
      * Path to spatial_segment_index
      */
     nonstd::optional<std::string> endfeetMeshesFile{nonstd::nullopt};
+
+    /**
+     * Path to the directory containing the dendritic spine morphologies.
+     */
+    nonstd::optional<std::string> spineMorphologiesDir{nonstd::nullopt};
 };
 
 /**
