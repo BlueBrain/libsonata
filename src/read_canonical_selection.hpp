@@ -9,25 +9,26 @@ namespace bbp {
 namespace sonata {
 namespace detail {
 
-template <class Range>
-HighFive::HyperSlab make_hyperslab(const std::vector<Range>& ranges) {
-    HighFive::HyperSlab slab;
-    for (const auto& range : ranges) {
-        size_t i_begin = std::get<0>(range);
-        size_t i_end = std::get<1>(range);
-        slab |= HighFive::RegularHyperSlab({i_begin}, {i_end - i_begin});
-    }
-
-    return slab;
-}
-
 template <class T>
 std::vector<T> readCanonicalSelection(const HighFive::DataSet& dset, const Selection& selection) {
     if (selection.empty()) {
         return {};
     }
 
-    return dset.select(make_hyperslab(selection.ranges())).template read<std::vector<T>>();
+    constexpr size_t min_gap_size = SONATA_PAGESIZE / sizeof(T);
+    constexpr size_t max_aggregated_block_size = 16 * min_gap_size;
+
+    auto readBlock = [&](auto& buffer, const auto& range) {
+        size_t i_begin = std::get<0>(range);
+        size_t i_end = std::get<1>(range);
+        dset.select({i_begin}, {i_end - i_begin}).read(buffer);
+    };
+
+    return bulk_read::bulkRead<T>([&readBlock](auto& buffer,
+                                               const auto& range) { readBlock(buffer, range); },
+                                  selection.ranges(),
+                                  min_gap_size,
+                                  max_aggregated_block_size);
 }
 
 template <class T>
