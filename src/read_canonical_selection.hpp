@@ -16,7 +16,7 @@ std::vector<T> readCanonicalSelection(const HighFive::DataSet& dset, const Selec
     }
 
     constexpr size_t min_gap_size = SONATA_PAGESIZE / sizeof(T);
-    constexpr size_t max_aggregated_block_size = 16 * min_gap_size;
+    constexpr size_t max_aggregated_block_size = 1 * min_gap_size;
 
     auto readBlock = [&](auto& buffer, const auto& range) {
         size_t i_begin = std::get<0>(range);
