@@ -25,7 +25,7 @@
          "ionchannel_seed": 222,
          "minis_seed": 333,
          "synapse_seed": 444,
-         "integration_method" : 2,
+         "integration_method" : "crank_nicolson_ion",
          "forward_skip": 500,
          "electrodes_file": "$ELECTRODES_DIR/electrode_weights.h5",
          "spike_threshold": -35.5

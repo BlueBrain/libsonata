@@ -310,7 +310,8 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().dt == 0.025);
         CHECK(config.getRun().randomSeed == 201506);
         CHECK(config.getRun().spikeThreshold == -35.5);
-        CHECK(config.getRun().integrationMethod == SimulationConfig::Run::IntegrationMethod::nicholson_ion);
+        CHECK(config.getRun().integrationMethod ==
+              SimulationConfig::Run::IntegrationMethod::crank_nicolson_ion);
         CHECK(config.getRun().stimulusSeed == 111);
         CHECK(config.getRun().ionchannelSeed == 222);
         CHECK(config.getRun().minisSeed == 333);
