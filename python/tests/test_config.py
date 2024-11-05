@@ -413,7 +413,7 @@ class TestSimulationConfig(unittest.TestCase):
         self.assertEqual(self.config.run.random_seed, 201506)
         self.assertEqual(self.config.run.spike_threshold, -35.5)
         self.assertEqual(self.config.run.integration_method,
-                         SimulationConfig.Run.IntegrationMethod.nicholson_ion)
+                         SimulationConfig.Run.IntegrationMethod.crank_nicolson_ion)
         self.assertEqual(self.config.run.stimulus_seed, 111)
         self.assertEqual(self.config.run.ionchannel_seed, 222)
         self.assertEqual(self.config.run.minis_seed, 333)

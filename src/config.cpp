@@ -58,11 +58,12 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Conditions::SpikeLocation,
                               {SimulationConfig::Conditions::SpikeLocation::soma, "soma"},
                               {SimulationConfig::Conditions::SpikeLocation::AIS, "AIS"}})
 
-NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Run::IntegrationMethod,
-                             {{SimulationConfig::Run::IntegrationMethod::invalid, nullptr},
-                              {SimulationConfig::Run::IntegrationMethod::euler, 0},
-                              {SimulationConfig::Run::IntegrationMethod::nicholson, 1},
-                              {SimulationConfig::Run::IntegrationMethod::nicholson_ion, 2}})
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    SimulationConfig::Run::IntegrationMethod,
+    {{SimulationConfig::Run::IntegrationMethod::invalid, nullptr},
+     {SimulationConfig::Run::IntegrationMethod::euler, "euler"},
+     {SimulationConfig::Run::IntegrationMethod::crank_nicolson, "crank_nicolson"},
+     {SimulationConfig::Run::IntegrationMethod::crank_nicolson_ion, "crank_nicolson_ion"}})
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SimulationConfig::Output::SpikesSortOrder,
                              {{SimulationConfig::Output::SpikesSortOrder::invalid, nullptr},
