@@ -1,14 +1,40 @@
 # Changelog
 
+
+## v0.1.29:
+### What's Changed
+ - Update upload/download action to v4. in #369
+ - Bump fmt to 11.0.2 to be equivalent to nrn in #370
+ - Ci maintenance in #373
+ - Use aggregated reading for 1D selections. in #374
+ - Move spine_morphologies_dir to edge population in #375
+
+## v0.1.28:
+### What's Changed
+ - SimulationConfig: remove amp_end from pulse input in #358
+ - SimulationConfig: modifications as a list to preserve the order in #359
+ - Absolute/RelativeShotNoise input: replace amp_cv with relative_skew in #361
+ - include fmt/ranges.h for using fmt::join() in #360
+ - Retrieve spike time units in SpikePopulation in #363
+ - update hdf5 download location in #366
+ - Update HighFive to 2.10.0. in #365
+ - Add support for sinusoidal inputs in sonata configs in #367
+
+## v0.1.27
+### What's Changed
+ - Improve report reader node filter performances. in #356
+ - upgrade to pybind v2.12.0 in #357;
+   WARNING: if you are using numpy >=2. you *need* this
+
 ## v0.1.26:
 ### Added:
-* Simulation config: synapse_replay input files must be .h5 (#351)
-* SimulationConfig: Adds "represents_physical_electrode" field in "inputs" section (#354)
+ - Simulation config: synapse_replay input files must be .h5 (#351)
+ - SimulationConfig: Adds "represents_physical_electrode" field in "inputs" section (#354)
 
 ### Fixed:
-* Update HighFive SHA to `2.9.0`. (#343)
-* Make documentation available for Python API (#345)
-* Build static macos and linux wheels (#355)
+ - Update HighFive SHA to `2.9.0`. (#343)
+ - Make documentation available for Python API (#345)
+ - Build static macos and linux wheels (#355)
 
 ## v0.1.25:
 
