@@ -1157,13 +1157,13 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run = R"doc(Parameters defi
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod = R"doc()doc";
 
+static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_crank_nicolson = R"doc()doc";
+
+static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_crank_nicolson_ion = R"doc()doc";
+
 static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_euler = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_invalid = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_nicholson = R"doc()doc";
-
-static const char *__doc_bbp_sonata_SimulationConfig_Run_IntegrationMethod_nicholson_ion = R"doc()doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_dt = R"doc(Integration step duration in milliseconds)doc";
 
@@ -1171,7 +1171,7 @@ static const char *__doc_bbp_sonata_SimulationConfig_Run_electrodesFile = R"doc(
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_integrationMethod =
 R"doc(Selects the NEURON/CoreNEURON integration method. This parameter sets
-the NEURON global variable h.secondorder. Default 0 ('euler'))doc";
+the NEURON global variable h.secondorder, default is "euler".)doc";
 
 static const char *__doc_bbp_sonata_SimulationConfig_Run_ionchannelSeed =
 R"doc(A non-negative integer used for seeding stochastic ion channels,

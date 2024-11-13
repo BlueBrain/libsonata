@@ -646,8 +646,8 @@ PYBIND11_MODULE(_libsonata, m) {
 
     py::enum_<SimulationConfig::Run::IntegrationMethod>(run, "IntegrationMethod")
         .value("euler", SimulationConfig::Run::IntegrationMethod::euler)
-        .value("nicholson", SimulationConfig::Run::IntegrationMethod::nicholson)
-        .value("nicholson_ion", SimulationConfig::Run::IntegrationMethod::nicholson_ion);
+        .value("crank_nicolson", SimulationConfig::Run::IntegrationMethod::crank_nicolson)
+        .value("crank_nicolson_ion", SimulationConfig::Run::IntegrationMethod::crank_nicolson_ion);
 
     py::class_<SimulationConfig::Output> output(simConf,
                                                 "Output",
