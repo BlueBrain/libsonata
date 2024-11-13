@@ -22,7 +22,6 @@ target_link_libraries(unittests
     Catch2::Catch2
     nlohmann_json::nlohmann_json
 )
-add_test(NAME unittests COMMAND unittests WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
 catch_discover_tests(unittests
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
