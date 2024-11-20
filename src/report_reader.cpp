@@ -565,7 +565,7 @@ DataFrame<T> ReportReader<T>::Population::get(
             const auto min = std::get<0>(node_ranges[first_index]);
             const auto max = std::get<1>(node_ranges[last_index]);
 
-            dataset.select({timer_index, min}, {1, max - min}).read(buffer);
+            dataset.select({timer_index, min}, {1, max - min}).squeezeMemSpace({0}).read(buffer);
 
             // Copy the values for each of the GIDs assigned into this block
             const auto buffer_start = buffer.begin();
