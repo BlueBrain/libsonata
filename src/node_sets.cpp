@@ -1,11 +1,10 @@
 #include <algorithm>  // std::find, std::transform
 #include <cassert>
 #include <cmath>
+#include <filesystem>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <fstream>
-
-#include "../extlib/filesystem.hpp"
 
 #include <nlohmann/json.hpp>
 #include <utility>
@@ -17,7 +16,7 @@
 namespace bbp {
 namespace sonata {
 
-namespace fs = ghc::filesystem;
+namespace fs = std::filesystem;
 
 namespace detail {
 

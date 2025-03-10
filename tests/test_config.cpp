@@ -2,11 +2,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include "../extlib/filesystem.hpp"
-
 #include <bbp/sonata/config.h>
 
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -317,7 +316,7 @@ TEST_CASE("SimulationConfig") {
         CHECK(config.getRun().minisSeed == 333);
         CHECK(config.getRun().synapseSeed == 444);
 
-        namespace fs = ghc::filesystem;
+        namespace fs = std::filesystem;
         const auto basePath = fs::absolute(
             fs::path("./data/config/simulation_config.json").parent_path());
 
@@ -652,7 +651,7 @@ TEST_CASE("SimulationConfig") {
             "tstop": 1000
           }
         })";
-        namespace fs = ghc::filesystem;
+        namespace fs = std::filesystem;
         const auto basePath = fs::absolute(fs::path("./").parent_path());
         const auto config = SimulationConfig(contents, basePath);
         const auto network = fs::absolute(basePath / "circuit" / fs::path("circuit_config.json"));
